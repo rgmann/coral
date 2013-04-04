@@ -1,0 +1,64 @@
+#ifndef RSYNC_ASSEMBLY_INSTR_H
+#define RSYNC_ASSEMBLY_INSTR_H
+
+struct RsyncAssemblyInstrHdr
+{
+   static const unsigned int marker;
+   unsigned char type;
+   
+   union {
+      unsigned int segmentId;
+      unsigned int chunkSizeBytes;
+      unsigned int generic;
+   } info;
+};
+
+class RsyncAssemblyInstr
+{
+public:
+   
+   enum RsynAssmbInstrType
+   {
+      RsyncTypeNotSet,
+      RsyncBeginMarker, // Payload is filename
+      RsyncChunkType,
+      RsyncSegmentType,
+      RsyncEndMarker    // No payload
+   };
+   
+   RsyncAssemblyInstr();
+   
+   /**
+    * If type = RsyncChunkType, then nParam is treated as the chunk size
+    * and used in allocating the data.
+    *
+    * If type = RsyncSegmentType, then nParam is treated as the segment ID
+    * and the data pointer is NULL.
+    */
+   RsyncAssemblyInstr(RsynAssmbInstrType type, unsigned int nParam);
+   
+   ~RsyncAssemblyInstr();
+   
+   bool  allocate();
+   void  destroy();
+   
+   RsynAssmbInstrType type() const;
+   
+   RsyncAssemblyInstrHdr* const headerPtr();
+   
+   void* const dataPtr();
+   
+   unsigned int dataSize() const;
+   
+   bool pack(void* pData, unsigned int &nPktSizeBytes) const;
+   
+   bool unpack(void* pData, unsigned int nPktSizeBytes);
+   
+private:
+   
+   unsigned char* m_pData;
+   
+   RsyncAssemblyInstrHdr m_Header;
+};
+
+#endif // RSYNC_ASSEMBLY_INSTR_H
