@@ -47,6 +47,8 @@ public:
    //RsyncAssemblyInstrHdr* const headerPtr();
    unsigned int info() const;
    
+   ui32  HeaderSize();
+   
    bool  unpack(void* pPkt, unsigned int nSizeBytes);
    
 private:

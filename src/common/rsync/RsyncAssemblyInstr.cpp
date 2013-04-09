@@ -19,8 +19,9 @@ RsyncAssemblyInstr::RsyncAssemblyInstr() : GenericPacket()
 //------------------------------------------------------------------------------
 RsyncAssemblyInstr::RsyncAssemblyInstr(RsyncAssmbInstrType type,
                                        unsigned int nParam)
+: GenericPacket();
 {
-   m_nHdrSizeBytes = sizeof(RsyncAssemblyInstrHdr);
+   m_nHdrSizeBytes = HeaderSize();//sizeof(RsyncAssemblyInstrHdr);
    
    if (type == RsyncChunkType)
    {
@@ -74,6 +75,12 @@ unsigned int RsyncAssemblyInstr::info() const
    }
    
    return l_nGeneric;
+}
+
+//------------------------------------------------------------------------------
+ui32  RsyncAssemblyInstr::HeaderSize()
+{
+   return sizeof(RsyncAssemblyInstrHdr);
 }
 
 //------------------------------------------------------------------------------

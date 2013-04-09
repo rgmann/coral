@@ -1,6 +1,8 @@
 #ifndef GENERIC_PACKET_H
 #define GENERIC_PACKET_H
 
+#include "BaseTypes.h"
+
 class GenericPacket
 {
 public:
@@ -20,6 +22,8 @@ public:
    unsigned int size() const;
    
    unsigned int hdrSize() const;
+   
+   virtual static ui32  HeaderSize() = 0;
    
    unsigned int dataSize() const;
    

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <queue>
-#include "BinarySem.h"
+#include "CountingSem.h"
 
 template <class T>
 class Queue
@@ -12,7 +12,11 @@ public:
    
    static const unsigned int InfiniteQueue = 0;
    
-   Queue(unsigned int nMaxElements = InfiniteQueue);
+   Queue();
+   
+   ~Queue();
+   
+   bool  initialize(unsigned int nMaxElements = InfiniteQueue);
    
    bool  push(const T &item, int nTimeoutMs = Sem::SemWaitForever);
    
@@ -34,61 +38,98 @@ private:
    
    std::queue<T>  m_queue;
    
-   BinarySem m_pushSem;
+   CountingSem* m_pPushSem;
    
-   BinarySem m_popSem;
+   CountingSem* m_pPopSem;
 };
 
 
 //------------------------------------------------------------------------------
 template <class T>
-Queue<T>::Queue(unsigned int nMaxElements)
+Queue<T>::Queue()
+{
+   m_nMaxSize = 0;
+   
+   m_pPushSem = NULL;
+   m_pPopSem = NULL;
+}
+
+//------------------------------------------------------------------------------
+template <class T>
+bool Queue<T>::initialize(unsigned int nMaxElements)
 {
    m_nMaxSize = nMaxElements;
+   
+   m_pPushSem = new CountingSem(0);
+   if (m_pPushSem == NULL)
+   {
+      return false;
+   }
+   
+   m_pPopSem = new CountingSem(m_nMaxSize);
+   if (m_pPopSem == NULL)
+   {
+      delete m_pPushSem;
+      return false;
+   }
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 bool Queue<T>::push(const T &item, int nTimeoutMs)
 {
-   bool l_bWaitForSpace =  (m_nMaxSize != InfiniteQueue) &&
-                           (m_queue.size() >= m_nMaxSize);
+   bool  l_bSuccess = false;
    
-   // If we need to wait for space (not an infinite queue), and we fail to
-   // acquire the semaphore, then we return with adding the item.
-   if (l_bWaitForSpace &&
-       (m_popSem.take(nTimeoutMs) != Sem::SemAcquired))
+   // Only one producer can push at a time.
+   if (!m_pPushMutex.lock(nTimeoutMs))
    {
-      return false;
+      return false
    }
    
-   // Otherwise, the item can pushed onto the end of the queue.
-   m_queue.push(item);
+   // The producer that acquires the push lock now needs to wait for room.
+   if (m_pPopSem->take(nTimeoutMs) == Sem::SemAcquired)
+   {
+      l_bSuccess = true;
+      
+      // Otherwise, the item can pushed onto the end of the queue.
+      m_queue.push(item);
+      
+      // Post the push semaphore
+      m_pPushSem->give();
+   }
    
-   // Post the push semaphore
-   m_pushSem.give();
+   m_pPushMutex.unlock();
    
-   return true;
+   return l_bSuccess;
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 bool Queue<T>::pop(T &item, int nTimeoutMs)
 {
-   if ((m_queue.size() == 0) &&
-       (m_pushSem.take(nTimeoutMs) != Sem::SemAcquired))
+   bool  l_bSuccess = false;
+   
+   // Only one producer can push at a time.
+   if (!m_pPopMutex.lock(nTimeoutMs))
    {
-      return false;
+      return false
    }
    
-   if (isEmpty()) return false;
+   if ((m_pPushSem.take(nTimeoutMs) != Sem::SemAcquired))
+   {
+      item = m_queue.front();
+      m_queue.pop();
+      
+      m_popSem.give();
+      
+      l_bSuccess = true;
+   }
    
-   item = m_queue.front();
-   m_queue.pop();
+   m_pPopMutex.unlock();
    
-   m_popSem.give();
-   
-   return true;
+   return l_bSuccess;
 }
 
 //------------------------------------------------------------------------------
