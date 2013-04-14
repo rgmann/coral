@@ -1,6 +1,8 @@
 BASE = ../../..
 CC = gcc
 INC =   -I$(BASE)/includes/base \
+	-I$(BASE)/includes/base/concurrency \
+	-I$(BASE)/includes/base/container \
 	-I$(BASE)/includes/base/cli \
         -I$(BASE)/includes/appserver
 AINC = $(INC) \

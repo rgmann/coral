@@ -33,7 +33,10 @@ ui32 ChatLog::read(ui32 callerId, ui32 sinceTs, std::vector<ChatMsg*> &msgVec)
    // Take extremely naive approach and assume ts = index
    for (l_nInd = sinceTs; l_nInd < m_vMsgs.size(); ++l_nInd)
    {
-      msgVec.push_back(&m_vMsgs[l_nInd]);
+      if (m_vMsgs[l_nInd].getUserId() != callerId)
+      {
+         msgVec.push_back(&m_vMsgs[l_nInd]);
+      }
    }
    
    if (!msgVec.empty())

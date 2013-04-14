@@ -3,31 +3,38 @@
 #include <iostream>
 #include <signal.h>
 #include "ArgParser.h"
+#include "TcpSocket.h"
 #include "TcpClient.h"
+#include "Thread.h"
+#include "Queue.h"
 #include "ChatMsg.h"
 #include "ChatMsgPacket.h"
 #include "UpdateRequestPacket.h"
 #include "UpdateResponsePacket.h"
 
 bool  g_bStopCommanded = false;
+Queue<ChatMsg> g_ChatMstQ;
+
+std::string g_sHostName;
+int         g_nPort = 5000;
+int         g_nUserId = 0;
 
 void sighandler(int s)
 {
    g_bStopCommanded = true;
 }
 
+void printChatMsg(const ChatMsg &msg);
+void rxThread(ThreadArg* pArg);
+void inputThread(ThreadArg* pArg);
+
 int main(int argc, char *argv[])
 {
    ArgParser args;
-   TcpSocket*  l_pSocket = NULL;
-   
-   std::string l_sHostName;
-   int         l_nPort = 5000;
-   
-   char buffer[256];
-   int l_nBytes = 0;
-   
-   printf("Client test\r\n");
+   Thread*  m_pRxThread = NULL;
+   Thread*  m_pInputThread = NULL;
+      
+   printf("Chat Client:\n\n");
    
    args.addArg("name: HostName, primary: h, alt: host, type: opt, \
                vtype: string, required, desc: Host name/address");
@@ -44,172 +51,166 @@ int main(int argc, char *argv[])
       return 1;
    }
    
-   args.getArgVal(l_sHostName, Argument::ArgName, "HostName");
-   args.getArgVal(l_nPort, Argument::ArgName, "Port");
+   args.getArgVal(g_sHostName, Argument::ArgName, "HostName");
+   args.getArgVal(g_nPort, Argument::ArgName, "Port");
+   args.getArgVal(g_nUserId, Argument::ArgName, "UID");
    
-   locpSocket = TcpClient::Connect(l_sHostName.c_str(), l_nPort, 2000);
+   m_pRxThread = Thread::Create(rxThread, NULL);
+   
+   if (m_pRxThread == NULL)
+   {
+      printf("Failed to start RX thread.\n");
+      return 1;
+   }
+   
+   m_pInputThread = Thread::Create(inputThread, NULL);
+   
+   if (m_pInputThread == NULL)
+   {
+      printf("Failed to start input thread.\n");
+      return 1;
+   }
    
    while (!g_bStopCommanded)
    {
-      
+      sleep(1);
+   }
+   
+   if (m_pRxThread)
+   {
+      m_pRxThread->stop();
+      m_pRxThread->join();
    }
    
    return 0;
 }
 
-void printChatPktHdr(const ChatPacketHdr* pHdr)
+void printChatMsg(const ChatMsg &msg)
 {
-   printf("Hdr: marker = %u\n", pHdr->marker);
-   printf("Hdr: type = %u\n", pHdr->type);
-   printf("Hdr: length = %u\n", pHdr->length);
+   char msgStr[170];
+   ui32 l_nMsgLen = 0;
+   ui32 l_nUserId = 0;
+   
+   msg.getMsg(msgStr, l_nMsgLen);
+   l_nUserId = msg.getUserId();
+   
+   printf("%d: %s\n", l_nUserId, msgStr);
 }
 
-void testChatMessagePkt()
+//------------------------------------------------------------------------------
+void rxThread(ThreadArg* pArg)
 {
-   ChatMsg   msg;
-   ChatMsgPacket* pMsgPacket = NULL;
-   ChatMsgData* pChatMsgData = NULL;
+   TcpSocket*  l_pSocket = NULL;
    
-   char*          pMsgData = NULL;
-   ui32           msgLen = 0;
+   ChatPacketHdr  header;
+   ui32           l_nDataLen     = 0;
+   ui32           l_nCurrentTs = 0;
+   ui32           l_nBytesRecvd = 0;
    
-   char  msgStr[] = "Test message";
-   
-   printf("testChatMessagePkt:\n");
-   
-   msg.setMsg(msgStr, strlen(msgStr));
-   msg.setTs(15);
-   msg.setUserId(13631);
-   
-   pMsgPacket = new ChatMsgPacket(msg);
-   pMsgPacket->pack((void**)&pMsgData, msgLen);
-   printf("pMsgPacket->pack: msgLen = %u\n", msgLen);
-   
-   ChatPacketHdr* pHdr = reinterpret_cast<ChatPacketHdr*>(pMsgData);
-   
-   printChatPktHdr(pHdr);
-   
-   pChatMsgData = reinterpret_cast<ChatMsgData*>(pMsgData +
-                                                sizeof(ChatPacketHdr));
-   
-   printf("Msg: user_id = %u\n", pChatMsgData->user_id);
-   printf("Msg: timestamp = %u\n", pChatMsgData->timestamp);
-   printf("Msg: msg_len = %u\n", pChatMsgData->msg_len);
-   printf("Msg: msg = %s\n", pChatMsgData->msg);
-   
-   printf("\n");
-   
-   delete pMsgPacket;
-   delete[] pMsgData;
-}
-
-void testUpdateRequestPkt()
-{
-   ui32  userId = 13631;
-   ui32  userIdRx = 0;
-   ui32  lastTs = 15;
-   ui32  lastTsRx = 0;
-   
-   UpdateRequestPacket* pReqTx = NULL;
-   UpdateRequestPacket* pReqRx = NULL;
-   UpdateRequestData*   pUpdReqData = NULL;
-   
-   char*          pUpdateReq = NULL;
-   ui32           msgLen = 0;
-   
-   printf("testUpdateRequestPkt:\n");
-   
-   pReqTx = new UpdateRequestPacket(userId, lastTs);
-   pReqRx = new UpdateRequestPacket();
-   
-   pReqTx->pack((void**)&pUpdateReq, msgLen);
-   
-   ChatPacketHdr* pHdr = reinterpret_cast<ChatPacketHdr*>(pUpdateReq);
-   
-   printChatPktHdr(pHdr);
-   
-   pUpdReqData = reinterpret_cast<UpdateRequestData*>(pUpdateReq +
-                                                 sizeof(ChatPacketHdr));
-   
-   printf("Req: user_id = %u\n", pUpdReqData->user_id);
-   printf("Req: timestamp = %u\n", pUpdReqData->timestamp);
-   
-   
-   pReqRx->unpack(pUpdateReq, msgLen);
-   
-   pReqRx->getId(userIdRx);
-   printf("pReqRx: user_id = %u\n", userIdRx);
-   
-   pReqRx->getTs(lastTsRx);
-   printf("pReqRx: timestamp = %u\n", lastTsRx);
-   
-   printf("\n");
-   
-   delete pReqRx;
-   delete pReqTx;
-   delete[] pUpdateReq;
-}
-
-void testUpdateResponsePkt()
-{
-   std::vector<ChatMsg*> msgVecTx;
+   ChatMsg  msg;
    
    std::vector<ChatMsg*> msgVecRx;
    std::vector<ChatMsg*>::iterator msgVecRxIt;
    
-   UpdateResponsePacket* pUpdRespTx = NULL;
-   UpdateResponsePacket* pUpdRespRx = NULL;
-
-   ui32  nBaseId = 12631;
-   ui32  nBaseTs = 15;
-   ui32  nNextTs = nBaseTs;
+   UpdateRequestPacket* l_pUpdateReq = NULL;
+   char*       l_pPackedUpdateReq    = NULL;
+   ui32        l_nPackedUpdateReqLen = 0;
    
-   char*          pUpdRespData = NULL;
-   ui32           msgLen = 0;
+   char*       l_pPkt = NULL;
    
-   printf("testUpdateResponsePkt:\n");
+   ChatPacket* l_pChatPkt = NULL;
    
-   while (msgVecTx.size() < 5)
+   // Connect to server
+   l_pSocket = TcpClient::Connect(g_sHostName.c_str(), g_nPort, 2000);
+   
+   if (l_pSocket == NULL)
    {
-      ChatMsg* pMsg = NULL;
-      char  msgStr[170];
-      
-      pMsg = new ChatMsg();
-      
-      snprintf(msgStr, 170, "Test string #%d", (int)msgVecTx.size());
-      
-      pMsg->setUserId(nBaseId++);
-      pMsg->setTs(nNextTs++);
-      pMsg->setMsg(msgStr, strlen(msgStr));
-      
-      msgVecTx.push_back(pMsg);
-   }
-
-   pUpdRespTx = new UpdateResponsePacket(nBaseTs, msgVecTx);
-   pUpdRespTx->pack((void**)&pUpdRespData, msgLen);
-   
-   pUpdRespRx = new UpdateResponsePacket();
-   pUpdRespRx->unpack(pUpdRespData, msgLen);
-   pUpdRespRx->getMsgList(msgVecRx);
-   
-   pUpdRespRx->getTs(nNextTs);
-   printf("Msg: ts = %u\n", nNextTs);
-   
-   msgVecRxIt = msgVecRx.begin();
-   for (; msgVecRxIt < msgVecRx.end(); ++msgVecRxIt)
-   {
-      char  msgStr[170];
-      ui32  msgLen = 0;
-      
-      printf("Msg: ts = %u\n", (*msgVecRxIt)->getTs());
-      printf("Msg: userId = %u\n", (*msgVecRxIt)->getUserId());
-      (*msgVecRxIt)->getMsg(msgStr, msgLen);
-      printf("Msg: len = %u, msg = %s\n", msgLen, msgStr);
+      printf("Failed to connect to server\n");
+      while (!pArg->stopSignalled()) sleep(1);
    }
    
-   printf("\n");
+   while (!pArg->stopSignalled())
+   {
+      l_pPkt = NULL;
+      l_pChatPkt = NULL;
+      
+      l_pUpdateReq = new UpdateRequestPacket(g_nUserId, l_nCurrentTs);
+      if (l_pUpdateReq)
+      {
+         l_pUpdateReq->pack((void**)&l_pPackedUpdateReq,
+                            l_nPackedUpdateReqLen);
+         l_pSocket->send(l_pPackedUpdateReq, l_nPackedUpdateReqLen);
+      }
+      
+      l_nBytesRecvd = l_pSocket->recv((char*)&header,
+                                      sizeof(ChatPacketHdr),
+                                      1000);
+      
+      if (header.marker != ChatPacketHdr::marker)
+      {
+         continue;
+      }
+
+      l_nDataLen = header.length;
+      l_pPkt = new char[sizeof(ChatPacketHdr) + l_nDataLen];
+      if (!l_pPkt) continue;
+      
+      memcpy(l_pPkt, &header, sizeof(ChatPacketHdr));
+      
+      l_nBytesRecvd = l_pSocket->recv(l_pPkt + sizeof(ChatPacketHdr),
+                                       l_nDataLen, 1000);
+      
+      if (l_nBytesRecvd != l_nDataLen)
+      {
+         delete l_pPkt;
+         continue;
+      }
+      
+      if (header.type != ChatPacket::UpdateResponseType)
+      {
+         delete l_pPkt;
+         continue;
+      }
+      
+      UpdateResponsePacket* l_pRespPkt = new UpdateResponsePacket();
+      
+      l_pRespPkt->unpack(l_pPkt, sizeof(ChatPacketHdr) + l_nDataLen);
+      
+      l_pRespPkt->getMsgList(msgVecRx);
+      l_pRespPkt->getTs(l_nCurrentTs);
+      
+      msgVecRxIt = msgVecRx.begin();
+      for (; msgVecRxIt < msgVecRx.end(); ++msgVecRxIt)
+      {
+         printChatMsg(*(*msgVecRxIt));
+      }
+      
+      // Check for a new msg in the tx queue
+      if (g_ChatMstQ.pop(msg, 0))
+      {
+         ChatMsgPacket* pMsgPacket = NULL;
+         char*          pMsgData = NULL;
+         ui32           msgLen = 0;
+         
+         pMsgPacket = new ChatMsgPacket(msg);
+         pMsgPacket->pack((void**)&pMsgData, msgLen);
+         
+         l_pSocket->send(pMsgData, msgLen);
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+void inputThread(ThreadArg* pArg)
+{
+   std::string msgString;
+   ChatMsg  msg;
    
-   delete pUpdRespTx;
-   delete pUpdRespRx;
-   delete[] pUpdRespData;
+   while (!pArg->stopSignalled())
+   {
+      std::cin >> msgString;
+      
+      msg.setUserId(g_nUserId);
+      msg.setMsg(msgString.c_str(), msgString.length());
+   }
 }
