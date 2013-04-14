@@ -22,9 +22,7 @@ public:
    unsigned int size() const;
    
    unsigned int hdrSize() const;
-   
-   virtual static ui32  HeaderSize() = 0;
-   
+      
    unsigned int dataSize() const;
    
    void* const hdrPtr() const;
@@ -33,7 +31,11 @@ public:
    
    virtual bool  pack(void** pData, unsigned int &nSizeBytes) const;
    
-   virtual bool  unpack(void* pData, unsigned int nSizeBytes);
+   virtual bool  unpack(const void* pData, unsigned int nSizeBytes);
+   
+protected:
+   
+   void* dataPtr();
    
 protected:
    

@@ -38,22 +38,22 @@ void  ServerNode::addWorker(ServerWorker* pWorker)
 }
 
 //------------------------------------------------------------------------------
-void  ServerNode::start()
+bool  ServerNode::start()
 {
    m_pTxThread = Thread::Create(txThreadFunc, this);
    
    if (m_pTxThread == NULL)
    {
       printf("Failed to create TX thread!\r\n");
-      return 1;
+      return false;
    }
    
-   m_pWorkerThread = Thread::Create(workerThreadFunc, this);
+   m_pWorkerThread = Thread::Create(workThreadFunc, this);
    
    if (m_pWorkerThread == NULL)
    {
       printf("Failed to create worker thread!\r\n");
-      return 1;
+      return false;
    }
    
    m_pRxThread = Thread::Create(rxThreadFunc, this);
@@ -61,12 +61,14 @@ void  ServerNode::start()
    if (m_pRxThread == NULL)
    {
       printf("Failed to create RX thread!\r\n");
-      return 1;
+      return false;
    }
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
-void  ServerNode::stop()
+bool  ServerNode::stop()
 {
    if (m_pRxThread)
    {
@@ -85,6 +87,8 @@ void  ServerNode::stop()
       m_pRxThread->stop();
       m_pRxThread->join();
    }
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -96,14 +100,13 @@ void ServerNode::rxThreadFunc(ThreadArg* pArg)
 //------------------------------------------------------------------------------
 void ServerNode::rxThread(ThreadArg* pArg)
 {
-   u32 l_nWorkerIdx = 0;
    TcpSocket*  l_pSocket = NULL;
    
-   u32         l_nHeaderLen   = 0;
-   u32         l_nDataLen     = 0;
-   u32         l_nPktLen      = 0;
-   u32         l_nBytesRecvd  = 0;
-   u32         l_nWorkerIdx   = 0;
+   ui32         l_nHeaderLen   = 0;
+   ui32         l_nDataLen     = 0;
+   ui32         l_nPktLen      = 0;
+   ui32         l_nBytesRecvd  = 0;
+   ui32         l_nWorkerIdx   = 0;
    
    char*       l_pHeader = NULL;
    char*       l_pPkt    = NULL;
@@ -121,8 +124,7 @@ void ServerNode::rxThread(ThreadArg* pArg)
             continue;
          }
          
-         l_pSocket = l_pWorker->getSocket();
-         
+         l_pSocket = l_pWorker->socket(500);
          if (l_pSocket == NULL)
          {
             continue;
@@ -146,7 +148,7 @@ void ServerNode::rxThread(ThreadArg* pArg)
          // expected payload length.
          l_nDataLen = l_pWorker->getExpPayloadSize(l_pHeader);
          
-         if (l_nBytesExp > 0)
+         if (l_nDataLen > 0)
          {
             l_nPktLen = l_nHeaderLen + l_nDataLen;
             l_pPkt = new char[l_nPktLen];
@@ -187,12 +189,14 @@ void ServerNode::txThreadFunc(ThreadArg* pArg)
 //------------------------------------------------------------------------------
 void ServerNode::txThread(ThreadArg* pArg)
 {
-   u32 l_nWorkerIdx = 0;
+   ui32 l_nWorkerIdx = 0;
    TcpSocket*  l_pSocket = NULL;
    
-   u32         l_nMsgLen   = 0;
+   ui32         l_nMsgLen   = 0;
    
    char*       l_pMsg    = NULL;
+   
+   bool  l_bMsgAvailable = false;
    
    while (!pArg->stopSignalled())
    {
@@ -207,8 +211,7 @@ void ServerNode::txThread(ThreadArg* pArg)
             continue;
          }
          
-         l_pSocket = l_pWorker->getSocket();
-         
+         l_pSocket = l_pWorker->socket(500);
          if (l_pSocket == NULL)
          {
             continue;
@@ -217,8 +220,7 @@ void ServerNode::txThread(ThreadArg* pArg)
          // Each worker has a standard application specific header.  Each
          // packet should be preceded by a header and the header should
          // indicate the length of the following data.
-         l_bMsgAvailable = l_pWorker->getMsg(l_pMsg, l_nMsgLen);
-         
+         l_bMsgAvailable = l_pWorker->getMsg(&l_pMsg, l_nMsgLen);
          if (!l_bMsgAvailable)
          {
             continue;
@@ -245,7 +247,6 @@ void ServerNode::workThreadFunc(ThreadArg* pArg)
 void ServerNode::workThread(ThreadArg* pArg)
 {
    ui32 l_nWorkerIdx = 0;
-   TcpSocket*  l_pSocket = NULL;
       
    while (!pArg->stopSignalled())
    {

@@ -81,7 +81,7 @@ void* const GenericPacket::hdrPtr() const
 }
 
 //------------------------------------------------------------------------------
-void* const GenericPacket::dataPtr() const
+void* GenericPacket::dataPtr()
 {
    if (m_nHdrSizeBytes < m_nSizeBytes)
    {
@@ -92,9 +92,20 @@ void* const GenericPacket::dataPtr() const
 }
 
 //------------------------------------------------------------------------------
+void* const GenericPacket::dataPtr() const
+{
+   if (m_nHdrSizeBytes < m_nSizeBytes)
+   {
+      return reinterpret_cast<void* const>(m_pPkt + m_nHdrSizeBytes);
+   }
+   
+   return NULL;
+}
+
+//------------------------------------------------------------------------------
 bool GenericPacket::pack(void** pPkt, unsigned int &nSizeBytes) const
 {
-   unsigned char* l_pPkt = (unsigned char*)(*pPkt);
+   //unsigned char* l_pPkt = (unsigned char*)(*pPkt);
    
    //if (l_pPkt != NULL)
    if (*pPkt != NULL)
@@ -123,7 +134,7 @@ bool GenericPacket::pack(void** pPkt, unsigned int &nSizeBytes) const
 }
 
 //------------------------------------------------------------------------------
-bool GenericPacket::unpack(void* pPkt, unsigned int nSizeBytes)
+bool GenericPacket::unpack(const void* pPkt, unsigned int nSizeBytes)
 {
    // Begin by destroying the packet if it is already allocated.
    destroy();

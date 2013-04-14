@@ -5,6 +5,9 @@
 #include "BaseTypes.h"
 #include "TcpServer.h"
 #include "Thread.h"
+#include "Queue.h"
+#include "ServerNode.h"
+#include "ServerWorker.h"
 
 class ServerListener
 {
@@ -26,9 +29,9 @@ protected:
    
    bool  distributeWorker(ServerWorker* pWorker);
    
-   static void listentThreadFunc(ThreadArg* pArg);
+   static void listenThreadFunc(ThreadArg* pArg);
    
-   void listentThread(ThreadArg* pArg);
+   void listenThread(ThreadArg* pArg);
    
    static void distribThreadFunc(ThreadArg* pArg);
    
@@ -39,6 +42,10 @@ protected:
    ui32        m_nServerPort;
    
    Thread*     m_pListenerThread;
+   
+   Thread*     m_pBalancerThread;
+   
+   Queue<ServerWorker*>     m_qWorkerQueue;
    
    ui32        m_nMinNodeCount;
    

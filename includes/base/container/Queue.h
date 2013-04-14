@@ -4,6 +4,7 @@
 #include <string>
 #include <queue>
 #include "CountingSem.h"
+#include "Mutex.h"
 
 template <class T>
 class Queue
@@ -41,6 +42,10 @@ private:
    CountingSem* m_pPushSem;
    
    CountingSem* m_pPopSem;
+   
+   Mutex        m_pushMutex;
+   
+   Mutex        m_popMutex;
 };
 
 
@@ -52,6 +57,23 @@ Queue<T>::Queue()
    
    m_pPushSem = NULL;
    m_pPopSem = NULL;
+}
+
+//------------------------------------------------------------------------------
+template <class T>
+Queue<T>::~Queue()
+{   
+   if (m_pPushSem)
+   {
+      delete m_pPushSem;
+      m_pPushSem = NULL;
+   }
+   
+   if (m_pPopSem)
+   {
+      delete m_pPopSem;
+      m_pPopSem = NULL;
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -83,9 +105,9 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
    bool  l_bSuccess = false;
    
    // Only one producer can push at a time.
-   if (!m_pPushMutex.lock(nTimeoutMs))
+   if (!m_pushMutex.lock(nTimeoutMs))
    {
-      return false
+      return false;
    }
    
    // The producer that acquires the push lock now needs to wait for room.
@@ -100,7 +122,7 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
       m_pPushSem->give();
    }
    
-   m_pPushMutex.unlock();
+   m_pushMutex.unlock();
    
    return l_bSuccess;
 }
@@ -112,22 +134,22 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
    bool  l_bSuccess = false;
    
    // Only one producer can push at a time.
-   if (!m_pPopMutex.lock(nTimeoutMs))
+   if (!m_popMutex.lock(nTimeoutMs))
    {
-      return false
+      return false;
    }
    
-   if ((m_pPushSem.take(nTimeoutMs) != Sem::SemAcquired))
+   if ((m_pPushSem->take(nTimeoutMs) != Sem::SemAcquired))
    {
       item = m_queue.front();
       m_queue.pop();
       
-      m_popSem.give();
+      m_pPopSem->give();
       
       l_bSuccess = true;
    }
    
-   m_pPopMutex.unlock();
+   m_popMutex.unlock();
    
    return l_bSuccess;
 }

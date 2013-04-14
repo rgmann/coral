@@ -48,10 +48,12 @@ bool  ServerListener::start()
       printf("ServerListener::start: Failed to create listener thread.\n");
       return false;
    }
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
-void  ServerListener::stop()
+bool  ServerListener::stop()
 {
    if (m_pListenerThread)
    {
@@ -64,6 +66,10 @@ void  ServerListener::stop()
       m_pBalancerThread->stop();
       m_pBalancerThread->join();
    }
+   
+   printf("ServerListener::stop: Stopped server.\n");
+   
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -81,12 +87,13 @@ void  ServerListener::listenThread(ThreadArg* pArg)
    ServerWorker*  l_pWorker = NULL;
    
    // Start the server on the specified port
+   printf("ServerListener: Starting server on port #%d\n", m_nServerPort);
    l_TcpServer.start(m_nServerPort);
    
    // Main thread loop
    while (!pArg->stopSignalled())
    {
-      l_pSocket = locServer.acceptClient(500);
+      l_pSocket = l_TcpServer.acceptClient(500);
       
       if (l_pSocket == NULL)
       {
@@ -95,6 +102,7 @@ void  ServerListener::listenThread(ThreadArg* pArg)
       
       // The inheriting class overrides the createWorker method to create
       // the appropiriate type of worker.
+      printf("ServerListener: Received connection. Creating worker.\n");
       l_pWorker = createWorker(l_pSocket);
       
       // If the worker was successfully created pass the worker to the
@@ -116,6 +124,7 @@ void  ServerListener::listenThread(ThreadArg* pArg)
 //------------------------------------------------------------------------------
 ServerWorker*  ServerListener::createWorker(TcpSocket* pSocket)
 {
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -134,6 +143,7 @@ void  ServerListener::distribThreadFunc(ThreadArg* pArg)
 void  ServerListener::distribThread(ThreadArg* pArg)
 {
    ui32  l_nCurrentNode = 0;
+   ServerWorker*  l_pWorker = NULL;
    
    // Add and start the minimum number of nodes
    while (m_vNodeList.size() < m_nMinNodeCount)
@@ -148,7 +158,7 @@ void  ServerListener::distribThread(ThreadArg* pArg)
       }
       
       // Start the node
-      l_pNode.start();
+      l_pNode->start();
       
       // Add the node to the node list
       m_vNodeList.push_back(l_pNode);

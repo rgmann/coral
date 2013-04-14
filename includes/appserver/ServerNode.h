@@ -1,6 +1,10 @@
 #ifndef SERVER_NODE_H
 #define SERVER_NODE_H
 
+#include <vector>
+#include "Thread.h"
+#include "ServerWorker.h"
+
 class ServerNode
 {
 public:
@@ -13,9 +17,9 @@ public:
    
    int   getWorkerCount();
    
-   void  start();
+   bool  start();
    
-   void  stop();
+   bool  stop();
    
    float getMeanWorkLat() const;
    

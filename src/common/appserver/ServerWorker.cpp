@@ -36,3 +36,29 @@ void ServerWorker::releaseSocket()
 {
    m_SocketLock.unlock();
 }
+
+
+//------------------------------------------------------------------------------
+void ServerWorker::pushRx(GenericPacket* pPkt)
+{
+   m_InQ.push(pPkt, 500);
+}
+
+//------------------------------------------------------------------------------
+bool ServerWorker::popRx(GenericPacket* pPkt)
+{
+   return m_InQ.push(pPkt, 0);
+}
+
+//------------------------------------------------------------------------------
+void ServerWorker::pushTx(GenericPacket* pPkt)
+{
+   m_OutQ.push(pPkt, 500);
+}
+
+//------------------------------------------------------------------------------
+bool ServerWorker::popTx(GenericPacket* pPkt)
+{
+   return m_OutQ.pop(pPkt, 0);
+}
+
