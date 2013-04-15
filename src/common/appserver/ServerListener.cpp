@@ -6,6 +6,7 @@
 ServerListener::ServerListener()
 {
    m_pListenerThread = NULL;
+   m_pBalancerThread = NULL;
    m_nMinNodeCount = 1;
 }
 
