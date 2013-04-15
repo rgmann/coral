@@ -138,7 +138,7 @@ bool ServerListener::distributeWorker(ServerWorker* pWorker)
 //------------------------------------------------------------------------------
 void  ServerListener::distribThreadFunc(ThreadArg* pArg)
 {
-   ((ServerListener*)pArg->pUserData)->listenThread(pArg);
+   ((ServerListener*)pArg->pUserData)->distribThread(pArg);
 }
 
 //------------------------------------------------------------------------------

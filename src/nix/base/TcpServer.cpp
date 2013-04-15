@@ -141,7 +141,7 @@ TcpSocket* TcpServer::acceptClient(int nTimeoutMs)
 	locNumReady = select(m_fdListenSocket+1, &m_ServerSet, NULL, NULL, &locTimeout);
 	if (locNumReady == 0)
 	{
-		printf("TcpServer::Accept - Select timeout\r\n");
+		//printf("TcpServer::Accept - Select timeout\r\n");
 		return NULL;
 	}
 	if (locNumReady < 0)
