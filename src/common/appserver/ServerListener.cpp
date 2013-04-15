@@ -35,6 +35,9 @@ void  ServerListener::setPort(ui32 port)
 //------------------------------------------------------------------------------
 bool  ServerListener::start()
 {
+   // Initialize the accepted worker queue
+   m_qWorkerQueue.initialize(10);
+   
    m_pListenerThread = Thread::Create(listenThreadFunc, this);
    
    if (m_pListenerThread == NULL)
