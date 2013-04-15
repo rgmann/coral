@@ -113,8 +113,6 @@ void rxThread(ThreadArg* pArg)
    std::vector<ChatMsg*>::iterator msgVecRxIt;
    
    UpdateRequestPacket* l_pUpdateReq = NULL;
-   char*       l_pPackedUpdateReq    = NULL;
-   ui32        l_nPackedUpdateReqLen = 0;
    
    char*       l_pPkt = NULL;
    
@@ -137,9 +135,15 @@ void rxThread(ThreadArg* pArg)
       l_pUpdateReq = new UpdateRequestPacket(g_nUserId, l_nCurrentTs);
       if (l_pUpdateReq)
       {
+         char*       l_pPackedUpdateReq    = NULL;
+         ui32        l_nPackedUpdateReqLen = 0;
+         
          l_pUpdateReq->pack((void**)&l_pPackedUpdateReq,
                             l_nPackedUpdateReqLen);
          l_pSocket->send(l_pPackedUpdateReq, l_nPackedUpdateReqLen);
+         
+         delete[] l_pPackedUpdateReq;
+         l_pPackedUpdateReq = NULL;
       }
       
       l_nBytesRecvd = l_pSocket->recv((char*)&header,
@@ -196,6 +200,9 @@ void rxThread(ThreadArg* pArg)
          pMsgPacket->pack((void**)&pMsgData, msgLen);
          
          l_pSocket->send(pMsgData, msgLen);
+         
+         delete[] pMsgData;
+         pMsgData = NULL;
       }
    }
 }

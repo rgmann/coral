@@ -113,6 +113,8 @@ void ServerNode::rxThread(ThreadArg* pArg)
    char*       l_pHeader = NULL;
    char*       l_pPkt    = NULL;
    
+   printf("ServerNode::rxThread: Started!\n");
+   
    while (!pArg->stopSignalled())
    {
       // Loop through the workers and 
@@ -137,6 +139,8 @@ void ServerNode::rxThread(ThreadArg* pArg)
          // indicate the length of the following data.
          l_nHeaderLen   = l_pWorker->headerSize();
          l_nBytesRecvd  = l_pSocket->recv(l_pHeader, l_nHeaderLen, 0);
+         printf("ServerNode::rxThread: exp = %u, recvd = %u\n",
+                l_nHeaderLen, l_nBytesRecvd);
          
          if (l_nHeaderLen != l_nBytesRecvd)
          {
@@ -199,6 +203,8 @@ void ServerNode::txThread(ThreadArg* pArg)
    char*       l_pMsg    = NULL;
    
    bool  l_bMsgAvailable = false;
+   
+   printf("ServerNode::txThread: Started!\n");
    
    while (!pArg->stopSignalled())
    {
