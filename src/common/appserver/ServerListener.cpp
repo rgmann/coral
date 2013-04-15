@@ -37,7 +37,7 @@ bool  ServerListener::start()
 {
    m_pListenerThread = Thread::Create(listenThreadFunc, this);
    
-   if (m_pListenerThread)
+   if (m_pListenerThread == NULL)
    {
       printf("ServerListener::start: Failed to create listener thread.\n");
       return false;
@@ -45,7 +45,7 @@ bool  ServerListener::start()
    
    m_pBalancerThread = Thread::Create(distribThreadFunc, this);
    
-   if (m_pBalancerThread)
+   if (m_pBalancerThread == NULL)
    {
       printf("ServerListener::start: Failed to create listener thread.\n");
       return false;
