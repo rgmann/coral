@@ -36,7 +36,11 @@ void  ServerListener::setPort(ui32 port)
 bool  ServerListener::start()
 {
    // Initialize the accepted worker queue
-   m_qWorkerQueue.initialize(10);
+   if (!m_qWorkerQueue.initialize(10))
+   {
+      printf("ServerListener::start: Failed to create worker queue.\n");
+      return false;
+   }
    
    m_pListenerThread = Thread::Create(listenThreadFunc, this);
    
