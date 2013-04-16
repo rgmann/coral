@@ -154,7 +154,6 @@ TcpSocket* TcpServer::acceptClient(int nTimeoutMs)
 	
 	if(FD_ISSET(m_fdListenSocket, &m_ServerSet)) // new client connection
 	{
-		locpTcpSocket = new TcpSocket();
 		socklen_t nAddrLen = sizeof(clientAddr);
 		
 		locClientSocketFd = accept(m_fdListenSocket, 
@@ -168,6 +167,7 @@ TcpSocket* TcpServer::acceptClient(int nTimeoutMs)
 		
 		FD_SET(locClientSocketFd, &locClientSet); /* add to master set */
 		
+      locpTcpSocket              = new TcpSocket();
 		locpTcpSocket->m_nSocket	= locClientSocketFd;
 		locpTcpSocket->mFdSet      = locClientSet;
 		locpTcpSocket->m_nPort     = m_nPort;

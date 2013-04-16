@@ -128,6 +128,8 @@ void  ServerListener::listenThread(ThreadArg* pArg)
    
    // Stop the TCP server
    l_TcpServer.stop();
+   
+   printf("ServerListener::listenThread: Stopped!\n");
 }
 
 //------------------------------------------------------------------------------
@@ -154,6 +156,8 @@ void  ServerListener::distribThread(ThreadArg* pArg)
    ui32  l_nCurrentNode = 0;
    ServerWorker*  l_pWorker = NULL;
    
+   printf("ServerListener::distribThread: Started!\n");
+
    // Add and start the minimum number of nodes
    while (m_vNodeList.size() < m_nMinNodeCount)
    {
@@ -188,4 +192,6 @@ void  ServerListener::distribThread(ThreadArg* pArg)
          l_nCurrentNode++;
       }
    }
+   
+   printf("ServerListener::distribThread: Stopped!\n");
 }

@@ -55,6 +55,8 @@ int main(int argc, char *argv[])
    args.getArgVal(g_nPort, Argument::ArgName, "Port");
    args.getArgVal(g_nUserId, Argument::ArgName, "UID");
    
+   g_ChatMstQ.initialize(20);
+   
    m_pRxThread = Thread::Create(rxThread, NULL);
    
    if (m_pRxThread == NULL)
