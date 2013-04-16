@@ -31,6 +31,7 @@ TcpServer::~TcpServer()
 bool TcpServer::start(int port)
 {
    int yes = 1;
+   int ret = 0;
 	/* master file descriptor list */
     //fd_set master;
 	
@@ -44,19 +45,22 @@ bool TcpServer::start(int port)
     //struct sockaddr_in clientaddr;
 	
 	/* get the listener */
-	if((m_fdListenSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+   m_fdListenSocket = socket(AF_INET, SOCK_STREAM, 0);
+	if(m_fdListenSocket < 0)
 	{
-		
-		printf("Server-socket() error!\r\n");
+		perror("socket() failed");
 		return false;
 	}
 	
 	//printf("Server-socket() is OK...\n");
 	
 	/*"address already in use" error message */
-	if(setsockopt(m_fdListenSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
+   ret = setsockopt(m_fdListenSocket, SOL_SOCKET,SO_REUSEADDR,
+                    &yes, sizeof(int));
+	if(ret < 0)
 	{
-		printf("Server-setsockopt() error!\r\n");
+		perror("setsockopt() failed");
+      close(m_fdListenSocket);
 		return false;
 	}
 	
@@ -64,25 +68,31 @@ bool TcpServer::start(int port)
 	
 	/* bind */
 	m_nPort = port;
+   memset(&serveraddr, 0, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = INADDR_ANY;
+	serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	serveraddr.sin_port = htons(m_nPort);
 	
 	memset(&(serveraddr.sin_zero), '\0', 8);
 	
-	if(bind(m_fdListenSocket, (struct sockaddr *)&serveraddr, sizeof(serveraddr)) == -1)
+   ret = bind(m_fdListenSocket, (struct sockaddr *)&serveraddr,
+              sizeof(serveraddr));
+	if(ret < 0)
 	{
-		printf("Server-bind() error!\r\n");
+		perror("bind() failed");
+      close(m_fdListenSocket);
 		return false;
 	}
 	
 	printf("Server-bind() is OK...\n");
 	
 	/* listen */
-	if(listen(m_fdListenSocket, 10) == -1)
+   ret = listen(m_fdListenSocket, 10);
+	if(ret < 0)
 	{
-		printf("Server-listen() error!\r\n");
-		return false;
+      perror("listen() failed");
+      close(m_fdListenSocket);
+      return false;
 	}
 	
 	//printf("Server-listen() is OK...\n");
@@ -122,6 +132,8 @@ TcpSocket* TcpServer::acceptClient(int nTimeoutMs)
    int      locClientSocketFd = 0;
 	
 	struct	sockaddr_in clientAddr;
+   
+   fd_set l_WorkingSet;
 	
 	TcpSocket* locpTcpSocket = NULL;
 	
@@ -137,23 +149,28 @@ TcpSocket* TcpServer::acceptClient(int nTimeoutMs)
 	locTimeout.tv_usec = 1000 * (nTimeoutMs - locTimeout.tv_sec * 1000);
 	
 	
+   memcpy(&l_WorkingSet, &m_ServerSet, sizeof(fd_set));
+   
 	// pass max descriptor and wait indefinitely until data arrives
-	locNumReady = select(m_fdListenSocket+1, &m_ServerSet, NULL, NULL, &locTimeout);
-	if (locNumReady == 0)
-	{
-		//printf("TcpServer::Accept - Select timeout\r\n");
-		return NULL;
-	}
+	locNumReady = select(m_fdListenSocket+1, &l_WorkingSet,
+                        NULL, NULL, &locTimeout);
 	if (locNumReady < 0)
 	{
-		printf("TcpServer::Accept - Select error\r\n");
+		perror("  TcpServer::Accept - Select failed");
+		return NULL;
+	}
+   
+	if (locNumReady == 0)
+	{
+		printf("TcpServer::Accept - Select timed out\n");
 		return NULL;
 	}
 	
 	//printf("Waiting\n");
 	
-	if(FD_ISSET(m_fdListenSocket, &m_ServerSet)) // new client connection
+	if(FD_ISSET(m_fdListenSocket, &l_WorkingSet)) // new client connection
 	{
+      printf("New connection!\n");
 		socklen_t nAddrLen = sizeof(clientAddr);
 		
 		locClientSocketFd = accept(m_fdListenSocket, 

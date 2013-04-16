@@ -106,6 +106,7 @@ void  ServerListener::listenThread(ThreadArg* pArg)
       
       if (l_pSocket == NULL)
       {
+         printf("NULL socket\n");
          continue;
       }
       
