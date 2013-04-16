@@ -1,8 +1,9 @@
-#include "CountingSem.h"
 #include <pthread.h>
 #include <errno.h>
-#include <time.h>
-#include <sys/time.h>
+//#include <time.h>
+//#include <sys/time.h>
+#include <stdio.h>
+#include "CountingSem.h"
 
 // Based on: http://www.cse.wustl.edu/~schmidt/win32-cv-1.html
 
@@ -49,18 +50,18 @@ CountingSem::~CountingSem()
 Sem::SemStatus CountingSem::take(int nTimeoutMs)
 {
    int l_nStatus = 0;
-   struct timeval    tv;
    struct timespec   ts;
    
-   gettimeofday(&tv, NULL);
-   ts.tv_sec = tv.tv_sec + (nTimeoutMs / 1000);
-   ts.tv_nsec = tv.tv_usec * 1000 + 1000000 * (nTimeoutMs % 1000);
+   SetTimeoutTime(&ts, nTimeoutMs);
    
    // Acquire mutex to enter critical section.
    pthread_mutex_lock(&m_pSem->lock);
 
    // Keep track of the number of waiters so that <sema_post> works correctly.
    m_nConsumerCount++;
+   
+   printf("CountingSem::take: consumers = %d, count = %d\n",
+          m_nConsumerCount, m_nCount);
 
    // Wait until the semaphore count is > 0, then atomically release
    // <lock_> and wait for <count_nonzero_> to be signaled.
@@ -75,7 +76,8 @@ Sem::SemStatus CountingSem::take(int nTimeoutMs)
          l_nStatus = pthread_cond_timedwait(&m_pSem->cond,
                                             &m_pSem->lock, &ts);
          
-         if (l_nStatus == ETIMEDOUT)
+         if ((l_nStatus == 0 && errno != EINTR) ||
+             l_nStatus == ETIMEDOUT)
          {
             break;
          }
@@ -85,16 +87,22 @@ Sem::SemStatus CountingSem::take(int nTimeoutMs)
    // Decrement the waiters count.
    m_nConsumerCount--;
    
-   if (l_nStatus)
+   printf("CountingSem::take: consumers = %d, status = %d\n",
+          m_nConsumerCount, l_nStatus);
+   
+   if (l_nStatus == 0)
    {
       // <s->lock_> is now held.
 
       // Decrement the semaphore's count.
       m_nCount--;
+      
+      // Release mutex to leave critical section.
+      pthread_mutex_unlock(&m_pSem->lock);
    }
-
-   // Release mutex to leave critical section.
-   pthread_mutex_unlock(&m_pSem->lock);
+   
+   printf("CountingSem::take: TOOK consumers = %d, count = %d\n",
+          m_nConsumerCount, m_nCount);
    
    return (l_nStatus == 0) ? SemAcquired : SemTimeout;
 }
@@ -104,7 +112,10 @@ Sem::SemStatus CountingSem::give()
 {
    int l_nStatus = 0;
    
+   printf("CountingSem::give: entry\n");
    pthread_mutex_lock(&m_pSem->lock);
+   
+   printf("CountingSem::give: got lock - consumers = %d\n", m_nConsumerCount);
    
    // Always allow one thread to continue if it is waiting.
    if (m_nConsumerCount > 0)

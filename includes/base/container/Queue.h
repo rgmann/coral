@@ -3,6 +3,7 @@
 
 #include <string>
 #include <queue>
+#include <stdio.h>
 #include "CountingSem.h"
 #include "Mutex.h"
 
@@ -107,9 +108,11 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
    // Only one producer can push at a time.
    if (!m_pushMutex.lock(nTimeoutMs))
    {
+      printf("Failed to get mutex!\n");
       return false;
    }
-   
+   printf("Got mutex!\n");
+
    // The producer that acquires the push lock now needs to wait for room.
    if (m_pPopSem->take(nTimeoutMs) == Sem::SemAcquired)
    {
@@ -120,9 +123,13 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
       
       // Post the push semaphore
       m_pPushSem->give();
+      
+      printf("Pushed item!\n");
    }
    
    m_pushMutex.unlock();
+   
+   printf("Pushed\n");
    
    return l_bSuccess;
 }
