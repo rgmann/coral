@@ -207,6 +207,8 @@ void rxThread(ThreadArg* pArg)
          pMsgData = NULL;
       }
    }
+   
+   l_pSocket->closeSocket();
 }
 
 //------------------------------------------------------------------------------

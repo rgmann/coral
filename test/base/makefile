@@ -19,6 +19,9 @@ server:
 
 thread:
 	$(CC) -Wall -g -o thread threadtest.cpp $(INC) $(ABSLIB) $(LIBS)
+
+sem:
+	$(CC) -Wall -g -o sem semtest.cpp $(INC) $(ABSLIB) $(LIBS)
 	
 fs:
 	$(CC) -Wall -g -o fs fstest.cpp $(INC) $(ABSLIB) $(LIBS)
@@ -42,4 +45,4 @@ segm:
 	$(CC) -Wall -g -o segm segmentertest.cpp $(INC) $(ABSLIB) $(LIBS)
 
 clean:
-	rm -rf  *.o client server thread fs mon dsv rsync arg hashtab segm *.dSYM
+	rm -rf  *.o client server thread sem fs mon dsv rsync arg hashtab segm *.dSYM
