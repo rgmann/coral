@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 void  threadFunc(ThreadArg* pArg);
-CountingSem g_Sem(1);
+CountingSem g_Sem(0);
 
 int main(int argc, char *argv[])
 {
@@ -21,32 +21,33 @@ int main(int argc, char *argv[])
       return 1;
    }
    
-   locpThrB = Thread::Create(threadFunc, (void*)"Thread B");
-   
-   if (locpThrA == NULL)
-   {
-      printf("Failed to create thread!\r\n");
-      return 1;
-   }
+//   locpThrB = Thread::Create(threadFunc, (void*)"Thread B");
+//   
+//   if (locpThrA == NULL)
+//   {
+//      printf("Failed to create thread!\r\n");
+//      return 1;
+//   }
    
    sleep(2);
    
    printf("Posting sem\n");
-   g_Sem.give();
+   //g_Sem.give();
+   //g_Sem.give();
    
    sleep(6);
    
    locpThrA->stop();
    locpThrA->join();
    
-   locpThrB->stop();
-   locpThrB->join();
-      
+//   locpThrB->stop();
+//   locpThrB->join();
+   
    delete locpThrA;
    locpThrA = NULL;
    
-   delete locpThrB;
-   locpThrB = NULL;
+//   delete locpThrB;
+//   locpThrB = NULL;
    
    return 0;
 }
@@ -54,8 +55,12 @@ int main(int argc, char *argv[])
 void  threadFunc(ThreadArg* pArg)
 {
    printf("%s: Started!\n", (char*)pArg->pUserData);
+
+   g_Sem.take(500);
    
-   g_Sem.take(5000);
+   printf("%s: take2!\n", (char*)pArg->pUserData);
+   
+   g_Sem.take(500);
    
    printf("%s: Took sem!\n", (char*)pArg->pUserData);
    
