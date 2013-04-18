@@ -21,4 +21,4 @@ typedef  unsigned long  ui64;
 typedef  float          f32;
 typedef  double         f64;
 
-#endif BASE_TYPES_H
+#endif // BASE_TYPES_H
