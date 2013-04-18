@@ -1,7 +1,6 @@
 #include <pthread.h>
 #include <errno.h>
-//#include <time.h>
-//#include <sys/time.h>
+#include <string.h>
 #include <stdio.h>
 #include "CountingSem.h"
 
@@ -33,7 +32,7 @@ CountingSem::~CountingSem()
 {
    // Copy pointer and set m_pMutex to NULL so it can't be locked again.
    SemPriv* l_pSem = m_pSem;
-   l_pSem = NULL;
+   m_pSem = NULL;
    
    // Delete the mutex by way of the copied pointer.
    if (l_pSem)
@@ -78,6 +77,9 @@ Sem::SemStatus CountingSem::take(int nTimeoutMs)
          {
             break;
          }
+
+//         if (l_nStatus == 0 || l_nStatus == ETIMEDOUT)
+//            break;
       }
    }
 
@@ -103,11 +105,8 @@ Sem::SemStatus CountingSem::give()
 {
    int l_nStatus = 0;
    
-//   printf("CountingSem::give: entry\n");
    pthread_mutex_lock(&m_pSem->lock);
-   
-//   printf("CountingSem::give: got lock - consumers = %d\n", m_nConsumerCount);
-   
+      
    // Always allow one thread to continue if it is waiting.
    if (m_nConsumerCount > 0)
    {

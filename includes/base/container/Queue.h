@@ -43,10 +43,6 @@ private:
    CountingSem* m_pPushSem;
    
    CountingSem* m_pPopSem;
-   
-   Mutex        m_pushMutex;
-   
-   Mutex        m_popMutex;
 };
 
 
@@ -116,7 +112,7 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
       // Post the push semaphore
       m_pPushSem->give();
    }
-   
+      
    return l_bSuccess;
 }
 
@@ -130,12 +126,12 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
    {
       item = m_queue.front();
       m_queue.pop();
-            
+      
       m_pPopSem->give();
             
       l_bSuccess = true;
    }
-      
+   
    return l_bSuccess;
 }
 

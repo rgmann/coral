@@ -1,5 +1,5 @@
 
-CC = gcc
+CC = g++
 FLAG = -Wall -c -g
 LIBDIR = base
 CPP = ../../src/nix/$(LIBDIR)/*.cpp \

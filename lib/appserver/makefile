@@ -1,5 +1,5 @@
 
-CC = gcc
+CC = g++
 FLAG = -Wall -c -g
 LIBNAME = appserver
 CPP = ../../src/common/$(LIBNAME)/*.cpp
