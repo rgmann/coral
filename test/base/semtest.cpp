@@ -56,11 +56,17 @@ void  threadFunc(ThreadArg* pArg)
 {
    printf("%s: Started!\n", (char*)pArg->pUserData);
 
-   g_Sem.take(500);
+   if (g_Sem.take(500) != Sem::SemAcquired)
+   {
+      printf("Failed to acquire semaphore 1\n");
+   }
    
    printf("%s: take2!\n", (char*)pArg->pUserData);
    
-   g_Sem.take(500);
+   if (g_Sem.take(500) != Sem::SemAcquired)
+   {
+      printf("Failed to acquire semaphore 2\n");
+   }
    
    printf("%s: Took sem!\n", (char*)pArg->pUserData);
    

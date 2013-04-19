@@ -15,6 +15,8 @@ public:
    
    ~ServerWorker();
    
+   bool  initialize();
+   
    TcpSocket* socket(ui32 timeoutMs);
    
    void  releaseSocket();

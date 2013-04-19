@@ -181,10 +181,11 @@ void  ServerListener::distribThread(ThreadArg* pArg)
    while (!pArg->stopSignalled())
    {
       // Wait briefly for a new worker
-      m_qWorkerQueue.pop(l_pWorker, 500);
+      if (!m_qWorkerQueue.pop(l_pWorker, 500)) continue;
       
       // If the worker is not NULL then we can add it to a server node.
       // Currently, round-robin is the only assignment policy.
+      printf("ServerListener::distribThread: Adding worker\n");
       if (m_vNodeList[l_nCurrentNode] != NULL)
       {
          m_vNodeList[l_nCurrentNode]->addWorker(l_pWorker);

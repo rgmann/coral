@@ -18,6 +18,7 @@ ServerWorker* ChatServerListener::createWorker(TcpSocket* pSocket)
    
    if (l_pWorker)
    {
+      l_pWorker->initialize();
       l_pWorker->setChatLog(&m_ChatLog);
    }
    

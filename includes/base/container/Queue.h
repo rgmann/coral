@@ -100,7 +100,7 @@ template <class T>
 bool Queue<T>::push(const T &item, int nTimeoutMs)
 {
    bool  l_bSuccess = false;
-   
+      
    // The producer that acquires the push lock now needs to wait for room.
    if (m_pPopSem->take(nTimeoutMs) == Sem::SemAcquired)
    {
@@ -110,7 +110,7 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
       m_queue.push(item);
       
       // Post the push semaphore
-      m_pPushSem->give();
+      m_pPushSem->give();      
    }
       
    return l_bSuccess;
@@ -121,7 +121,7 @@ template <class T>
 bool Queue<T>::pop(T &item, int nTimeoutMs)
 {
    bool  l_bSuccess = false;
-   
+      
    if (m_pPushSem->take(nTimeoutMs) == Sem::SemAcquired)
    {
       item = m_queue.front();

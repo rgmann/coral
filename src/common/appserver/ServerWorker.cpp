@@ -17,6 +17,24 @@ ServerWorker::~ServerWorker()
 }
 
 //------------------------------------------------------------------------------
+bool ServerWorker::initialize()
+{
+   bool l_bSuccess = true;
+   
+   if (!m_InQ.initialize(10))
+   {
+      l_bSuccess = false;
+   }
+   
+   if (!m_OutQ.initialize(10))
+   {
+      l_bSuccess = false;
+   }
+   
+   return l_bSuccess;
+}
+
+//------------------------------------------------------------------------------
 TcpSocket*  ServerWorker::socket(ui32 nTimeoutMs)
 {
    TcpSocket*  pRetSocket = NULL;
@@ -47,7 +65,7 @@ void ServerWorker::pushRx(GenericPacket* pPkt)
 //------------------------------------------------------------------------------
 bool ServerWorker::popRx(GenericPacket* pPkt)
 {
-   return m_InQ.push(pPkt, 0);
+   return m_InQ.pop(pPkt, 0);
 }
 
 //------------------------------------------------------------------------------
