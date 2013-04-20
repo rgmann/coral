@@ -13,7 +13,7 @@ public:
    
    ~ServerNode();
    
-   void  addWorker(ServerWorker *pWorker);
+   bool  addWorker(ServerWorker *pWorker);
    
    int   getWorkerCount();
    
@@ -43,7 +43,10 @@ private:
    
 private:
    
-   std::vector<ServerWorker*> m_vWorkerList;
+   //std::vector<ServerWorker*> m_vWorkerList;
+   Queue<ServerWorker*> m_TxQueue;
+   Queue<ServerWorker*> m_WorkQueue;
+   Queue<ServerWorker*> m_RxQueue;
    
    Thread *m_pRxThread;
    

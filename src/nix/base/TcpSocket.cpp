@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -34,6 +35,7 @@ int TcpSocket::recv(char* pBuffer, int nBytes, int nTimeoutMs)
    
    if (m_nSocket <= 0)
    {
+      printf("TcpSocket::recv: invalid socket\n");
       return -1;
    }
 	
@@ -49,10 +51,16 @@ int TcpSocket::recv(char* pBuffer, int nBytes, int nTimeoutMs)
 		// Blocks for the specified timeout period.
 		if (select(m_nSocket + 1, &l_ReadSet, NULL, NULL, &l_tTimeout) <= 0)
 		{
+         printf("TcpSocket::recv: timeout\n");
 			return -1;
 		}
 		
 		l_nBytesRead = read(m_nSocket, pBuffer, nBytes);
+      
+      if (l_nBytesRead == -1)
+      {
+         perror("TcpSocket::recv: -");
+      }
 	}
 	
 	return l_nBytesRead;

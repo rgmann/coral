@@ -68,7 +68,7 @@ bool ChatServerWorker::work()
    std::vector<ChatMsg*> l_vChatMsgVec;
    
    // Attempt to receive a packet from the queue.
-   if (!popRx(l_pPacket))
+   if (!popRx((GenericPacket**)&l_pPacket))
    {
       return false;
    }
@@ -125,7 +125,7 @@ bool ChatServerWorker::getMsg(char** pMsg, ui32 &nMsgLenBytes)
    bool        l_bSuccess = false;
    ChatPacket* l_pChatPkt = NULL;
    
-   l_bSuccess = popTx(l_pChatPkt);
+   l_bSuccess = popTx((GenericPacket**)&l_pChatPkt);
    if (!l_bSuccess)
    {
       return false;

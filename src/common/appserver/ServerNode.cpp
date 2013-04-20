@@ -34,14 +34,33 @@ ServerNode::~ServerNode()
 }
 
 //------------------------------------------------------------------------------
-void  ServerNode::addWorker(ServerWorker* pWorker)
+bool  ServerNode::addWorker(ServerWorker* pWorker)
 {
-   m_vWorkerList.push_back(pWorker);
+   //m_vWorkerList.push_back(pWorker);
+   return m_RxQueue.push(pWorker, 500);
 }
 
 //------------------------------------------------------------------------------
 bool  ServerNode::start()
 {
+   if (!m_TxQueue.initialize(10))
+   {
+      printf("Failed to create TX queue!\r\n");
+      return false;
+   }
+   
+   if (!m_WorkQueue.initialize(10))
+   {
+      printf("Failed to create work queue!\r\n");
+      return false;
+   }
+   
+   if (!m_RxQueue.initialize(10))
+   {
+      printf("Failed to create RX queue!\r\n");
+      return false;
+   }
+   
    m_pTxThread = Thread::Create(txThreadFunc, this);
    
    if (m_pTxThread == NULL)
@@ -108,81 +127,85 @@ void ServerNode::rxThread(ThreadArg* pArg)
    ui32         l_nDataLen     = 0;
    ui32         l_nPktLen      = 0;
    ui32         l_nBytesRecvd  = 0;
-   ui32         l_nWorkerIdx   = 0;
    
-   char*       l_pHeader = NULL;
-   char*       l_pPkt    = NULL;
+   char* l_pHeader = NULL;
+   char* l_pPkt    = NULL;
+   
+   ServerWorker*  l_pWorker = NULL;
    
    printf("ServerNode::rxThread: Started!\n");
    
    while (!pArg->stopSignalled())
    {
-      // Loop through the workers and 
-      while (l_nWorkerIdx < m_vWorkerList.size())
+      if (!m_RxQueue.pop(l_pWorker, 500))
       {
-         ServerWorker*  l_pWorker = m_vWorkerList[l_nWorkerIdx];
-         
-         // Get the worker's socket
-         if (l_pWorker == NULL)
-         {
-            continue;
-         }
-         
-         l_pSocket = l_pWorker->socket(500);
-         if (l_pSocket == NULL)
-         {
-            continue;
-         }
-         
-         // Each worker has a standard application specific header.  Each
-         // packet should be preceded by a header and the header should
-         // indicate the length of the following data.
-         l_nHeaderLen   = l_pWorker->headerSize();
-         l_nBytesRecvd  = l_pSocket->recv(l_pHeader, l_nHeaderLen, 0);
-         printf("ServerNode::rxThread: exp = %u, recvd = %u\n",
-                l_nHeaderLen, l_nBytesRecvd);
-         
-         if (l_nHeaderLen != l_nBytesRecvd)
-         {
-            delete[] l_pHeader;
-            l_pWorker->releaseSocket();
-            
-            continue;
-         }
-         
-         // Pass the header to the worker so that it can parse the
-         // expected payload length.
-         l_nDataLen = l_pWorker->getExpPayloadSize(l_pHeader);
-         
-         if (l_nDataLen > 0)
-         {
-            l_nPktLen = l_nHeaderLen + l_nDataLen;
-            l_pPkt = new char[l_nPktLen];
-            
-            // Copy the header into the full packet
-            memcpy(l_pPkt, l_pHeader, l_nHeaderLen);
-            
-            l_nBytesRecvd  = l_pSocket->recv(l_pPkt + l_nHeaderLen,
-                                             l_nDataLen, 0);
-            
-            if (l_nBytesRecvd == l_nDataLen)
-            {
-               l_pWorker->processMsg(l_pPkt, l_nPktLen);
-            }
-            
-            delete[] l_pPkt;
-            l_pPkt = NULL;
-         }
-         
-         // Delete the header
-         delete[] l_pHeader;
-         l_pHeader = NULL;
-         
-         // Release the socket so that it can be used by the TX thread.
-         l_pWorker->releaseSocket();
-         
-         l_nWorkerIdx++;
+         continue;
       }
+      
+      // Get the worker's socket
+      if (l_pWorker == NULL)
+      {
+         continue;
+      }
+         
+      l_pSocket = l_pWorker->socket(500);
+      if (l_pSocket == NULL)
+      {
+         continue;
+      }
+         
+      // Each worker has a standard application specific header.  Each
+      // packet should be preceded by a header and the header should
+      // indicate the length of the following data.
+      l_nHeaderLen   = l_pWorker->headerSize();
+      
+      l_pHeader = new char[l_nHeaderLen];
+      
+      l_nBytesRecvd  = l_pSocket->recv(l_pHeader, l_nHeaderLen, 20);
+      printf("ServerNode::rxThread: exp = %u, recvd = %u\n",
+             l_nHeaderLen, l_nBytesRecvd);
+         
+      if (l_nHeaderLen != l_nBytesRecvd)
+      {
+         delete[] l_pHeader;
+         l_pWorker->releaseSocket();
+            
+         continue;
+      }
+         
+      // Pass the header to the worker so that it can parse the
+      // expected payload length.
+      l_nDataLen = l_pWorker->getExpPayloadSize(l_pHeader);
+         
+      if (l_nDataLen > 0)
+      {
+         l_nPktLen = l_nHeaderLen + l_nDataLen;
+         l_pPkt = new char[l_nPktLen];
+            
+         // Copy the header into the full packet
+         memcpy(l_pPkt, l_pHeader, l_nHeaderLen);
+            
+         l_nBytesRecvd  = l_pSocket->recv(l_pPkt + l_nHeaderLen,
+                                          l_nDataLen, 0);
+            
+         if (l_nBytesRecvd == l_nDataLen)
+         {
+            l_pWorker->processMsg(l_pPkt, l_nPktLen);
+         }
+            
+         delete[] l_pPkt;
+         l_pPkt = NULL;
+      }
+         
+      // Delete the header
+      delete[] l_pHeader;
+      l_pHeader = NULL;
+         
+      // Release the socket so that it can be used by the TX thread.
+      l_pWorker->releaseSocket();
+      
+      // Push the worker into the work queue
+      m_WorkQueue.push(l_pWorker, 500);
    }
 }
 
@@ -195,8 +218,8 @@ void ServerNode::txThreadFunc(ThreadArg* pArg)
 //------------------------------------------------------------------------------
 void ServerNode::txThread(ThreadArg* pArg)
 {
-   ui32 l_nWorkerIdx = 0;
    TcpSocket*  l_pSocket = NULL;
+   ServerWorker* l_pWorker = NULL;
    
    ui32         l_nMsgLen   = 0;
    
@@ -208,40 +231,40 @@ void ServerNode::txThread(ThreadArg* pArg)
    
    while (!pArg->stopSignalled())
    {
-      // Loop through the workers and
-      while (l_nWorkerIdx < m_vWorkerList.size())
+      if (!m_TxQueue.pop(l_pWorker, 500))
       {
-         ServerWorker*  l_pWorker = m_vWorkerList[l_nWorkerIdx];
-         
-         // Get the worker's socket
-         if (l_pWorker == NULL)
-         {
-            continue;
-         }
-         
-         l_pSocket = l_pWorker->socket(500);
-         if (l_pSocket == NULL)
-         {
-            continue;
-         }
-         
-         // Each worker has a standard application specific header.  Each
-         // packet should be preceded by a header and the header should
-         // indicate the length of the following data.
-         l_bMsgAvailable = l_pWorker->getMsg(&l_pMsg, l_nMsgLen);
-         if (!l_bMsgAvailable)
-         {
-            continue;
-         }
-         
-         // Send the message
-         l_pSocket->send(l_pMsg, l_nMsgLen);
-         
-         // Release the socket so that it can be used by the TX thread.
-         l_pWorker->releaseSocket();
-         
-         l_nWorkerIdx++;
+         continue;
       }
+         
+      // Get the worker's socket
+      if (l_pWorker == NULL)
+      {
+         continue;
+      }
+         
+      l_pSocket = l_pWorker->socket(500);
+      if (l_pSocket == NULL)
+      {
+         continue;
+      }
+         
+      // Each worker has a standard application specific header.  Each
+      // packet should be preceded by a header and the header should
+      // indicate the length of the following data.
+      l_bMsgAvailable = l_pWorker->getMsg(&l_pMsg, l_nMsgLen);
+      if (!l_bMsgAvailable)
+      {
+         continue;
+      }
+         
+      // Send the message
+      l_pSocket->send(l_pMsg, l_nMsgLen);
+      
+      // Release the socket so that it can be used by the TX thread.
+      l_pWorker->releaseSocket();
+
+      // Push the worker back into the Rx queue
+      m_RxQueue.push(l_pWorker, 500);
    }
 }
 
@@ -253,25 +276,25 @@ void ServerNode::workThreadFunc(ThreadArg* pArg)
 
 //------------------------------------------------------------------------------
 void ServerNode::workThread(ThreadArg* pArg)
-{
-   ui32 l_nWorkerIdx = 0;
+{   
+   ServerWorker* l_pWorker = NULL;
       
    while (!pArg->stopSignalled())
    {
-      // Loop through the workers and
-      while (l_nWorkerIdx < m_vWorkerList.size())
+      if (!m_WorkQueue.pop(l_pWorker, 500))
       {
-         ServerWorker*  l_pWorker = m_vWorkerList[l_nWorkerIdx];
-         
-         // Get the worker's socket
-         if (l_pWorker == NULL)
-         {
-            continue;
-         }
-         
-         l_pWorker->work();
-         
-         l_nWorkerIdx++;
+         continue;
       }
+         
+      // Get the worker's socket
+      if (l_pWorker == NULL)
+      {
+         continue;
+      }
+         
+      l_pWorker->work();
+
+      // Push the worker back into the Rx queue
+      m_TxQueue.push(l_pWorker, 500);
    }
 }

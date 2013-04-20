@@ -63,9 +63,9 @@ void ServerWorker::pushRx(GenericPacket* pPkt)
 }
 
 //------------------------------------------------------------------------------
-bool ServerWorker::popRx(GenericPacket* pPkt)
+bool ServerWorker::popRx(GenericPacket** pPkt)
 {
-   return m_InQ.pop(pPkt, 0);
+   return m_InQ.pop(*pPkt, 0);
 }
 
 //------------------------------------------------------------------------------
@@ -75,8 +75,8 @@ void ServerWorker::pushTx(GenericPacket* pPkt)
 }
 
 //------------------------------------------------------------------------------
-bool ServerWorker::popTx(GenericPacket* pPkt)
+bool ServerWorker::popTx(GenericPacket** pPkt)
 {
-   return m_OutQ.pop(pPkt, 0);
+   return m_OutQ.pop(*pPkt, 0);
 }
 

@@ -34,10 +34,10 @@ public:
 protected:
    
    void pushRx(GenericPacket*);
-   bool popRx(GenericPacket*);
+   bool popRx(GenericPacket**);
    
    void pushTx(GenericPacket*);
-   bool popTx(GenericPacket*);
+   bool popTx(GenericPacket**);
    
 protected:
    
