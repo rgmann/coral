@@ -34,10 +34,14 @@ public:
 protected:
    
    void pushRx(GenericPacket*);
+   //void pushRx(const GenericPacket &pkt);
    bool popRx(GenericPacket**);
+   //bool popRx(GenericPacket &pkt);
    
    void pushTx(GenericPacket*);
    bool popTx(GenericPacket**);
+//   void pushTx(const GenericPacket &pkt);
+//   bool popTx(GenericPacket &pkt);
    
 protected:
    
@@ -48,9 +52,11 @@ protected:
    // ProcessMsg parses and validates the received packet.
    // If the packet is valid it adds it to the IN queue;
    Queue<GenericPacket*> m_InQ;
+   //Queue<GenericPacket> m_InQ;
    
    // The work method adds packed messages to the output queue.
    Queue<GenericPacket*> m_OutQ;
+   //Queue<GenericPacket> m_OutQ;
 };
 
 #endif // SERVER_WORKER_H

@@ -39,11 +39,11 @@ TcpSocket*  ServerWorker::socket(ui32 nTimeoutMs)
 {
    TcpSocket*  pRetSocket = NULL;
    
-   if (m_SocketLock.lock())
+   //if (m_SocketLock.lock(nTimeoutMs))
    {
       pRetSocket = m_pSocket;
       
-      m_SocketLock.unlock();
+      //m_SocketLock.unlock();
    }
    
    return pRetSocket;
@@ -52,7 +52,7 @@ TcpSocket*  ServerWorker::socket(ui32 nTimeoutMs)
 //------------------------------------------------------------------------------
 void ServerWorker::releaseSocket()
 {
-   m_SocketLock.unlock();
+   //m_SocketLock.unlock();
 }
 
 
@@ -61,22 +61,38 @@ void ServerWorker::pushRx(GenericPacket* pPkt)
 {
    m_InQ.push(pPkt, 500);
 }
+//void ServerWorker::pushRx(const GenericPacket& pkt)
+//{
+//   m_InQ.push(pkt, 500);
+//}
 
 //------------------------------------------------------------------------------
 bool ServerWorker::popRx(GenericPacket** pPkt)
 {
    return m_InQ.pop(*pPkt, 0);
 }
+//bool ServerWorker::popRx(GenericPacket &pkt)
+//{
+//   return m_InQ.pop(pkt, 0);
+//}
 
 //------------------------------------------------------------------------------
 void ServerWorker::pushTx(GenericPacket* pPkt)
 {
    m_OutQ.push(pPkt, 500);
 }
+//void ServerWorker::pushTx(const GenericPacket &pkt)
+//{
+//   m_OutQ.push(pkt, 500);
+//}
 
 //------------------------------------------------------------------------------
 bool ServerWorker::popTx(GenericPacket** pPkt)
 {
    return m_OutQ.pop(*pPkt, 0);
 }
+//bool ServerWorker::popTx(GenericPacket &pkt)
+//{
+//   return m_OutQ.pop(pkt, 0);
+//}
 

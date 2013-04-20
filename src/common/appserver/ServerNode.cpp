@@ -36,7 +36,6 @@ ServerNode::~ServerNode()
 //------------------------------------------------------------------------------
 bool  ServerNode::addWorker(ServerWorker* pWorker)
 {
-   //m_vWorkerList.push_back(pWorker);
    return m_RxQueue.push(pWorker, 500);
 }
 
@@ -151,6 +150,9 @@ void ServerNode::rxThread(ThreadArg* pArg)
       l_pSocket = l_pWorker->socket(500);
       if (l_pSocket == NULL)
       {
+         // Put the worker back into the receive queue.
+         m_RxQueue.push(l_pWorker, 500);
+         
          continue;
       }
          
@@ -169,6 +171,9 @@ void ServerNode::rxThread(ThreadArg* pArg)
       {
          delete[] l_pHeader;
          l_pWorker->releaseSocket();
+         
+         // Put the worker back into the receive queue.
+         m_WorkQueue.push(l_pWorker, 500);
             
          continue;
       }
@@ -235,18 +240,26 @@ void ServerNode::txThread(ThreadArg* pArg)
       {
          continue;
       }
+      printf("ServerNode::txThread: got worker\n");
          
       // Get the worker's socket
       if (l_pWorker == NULL)
       {
+         printf("ServerNode::txThread: null\n");
          continue;
       }
          
       l_pSocket = l_pWorker->socket(500);
       if (l_pSocket == NULL)
       {
+         printf("ServerNode::txThread: Failed to get socket\n");
+         
+         // Put the worker back into the receive queue.
+         m_TxQueue.push(l_pWorker, 500);
+         
          continue;
       }
+      printf("ServerNode::txThread: got socket\n");
          
       // Each worker has a standard application specific header.  Each
       // packet should be preceded by a header and the header should
@@ -254,14 +267,23 @@ void ServerNode::txThread(ThreadArg* pArg)
       l_bMsgAvailable = l_pWorker->getMsg(&l_pMsg, l_nMsgLen);
       if (!l_bMsgAvailable)
       {
+         printf("ServerNode::txThread: Failed to get message\n");
+         
+         // Push the worker back into the Rx queue
+         m_RxQueue.push(l_pWorker, 500);
+         
          continue;
       }
          
       // Send the message
+      printf("ServerNode::txThread: sending message - len = %u\n", l_nMsgLen);
       l_pSocket->send(l_pMsg, l_nMsgLen);
       
       // Release the socket so that it can be used by the TX thread.
       l_pWorker->releaseSocket();
+      
+      delete[] l_pMsg;
+      l_pMsg = NULL;
 
       // Push the worker back into the Rx queue
       m_RxQueue.push(l_pWorker, 500);

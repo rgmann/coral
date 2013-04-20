@@ -12,6 +12,12 @@ GenericPacket::GenericPacket()
 }
 
 //------------------------------------------------------------------------------
+GenericPacket::GenericPacket(const GenericPacket &other)
+{
+   *this = other;
+}
+
+//------------------------------------------------------------------------------
 GenericPacket::GenericPacket(unsigned int nSizeBytes)
    : m_pPkt(NULL)
    , m_nHdrSizeBytes(0)
@@ -26,6 +32,12 @@ GenericPacket::GenericPacket(unsigned int nHdrSizeBytes,
    , m_nHdrSizeBytes(nHdrSizeBytes)
    , m_nSizeBytes(nHdrSizeBytes + nDataSizeBytes)
 {
+}
+
+//------------------------------------------------------------------------------
+GenericPacket::~GenericPacket()
+{
+   deallocate();
 }
 
 //------------------------------------------------------------------------------
@@ -44,6 +56,19 @@ bool GenericPacket::allocate()
    m_pPkt = new unsigned char[m_nSizeBytes];
    
    return (m_pPkt != NULL);
+}
+
+//------------------------------------------------------------------------------
+void GenericPacket::deallocate()
+{
+   if (m_pPkt)
+   {
+      delete[] m_pPkt;
+      m_pPkt = NULL;
+   }
+   
+   m_nHdrSizeBytes = 0;
+   m_nSizeBytes = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -155,4 +180,24 @@ bool GenericPacket::unpack(const void* pPkt, unsigned int nSizeBytes)
    // copy the packet since derived classes may want to perform more validation.
    
    return true;
+}
+
+//------------------------------------------------------------------------------
+GenericPacket& GenericPacket::operator= (const GenericPacket &other)
+{
+   // Check for self-assignment!
+   if (this == &other)
+      return *this;
+   
+   deallocate();
+   
+   m_nHdrSizeBytes   = other.m_nHdrSizeBytes;
+   m_nSizeBytes      = other.m_nSizeBytes;
+   
+   if (allocate())
+   {
+      memcpy(m_pPkt, other.m_pPkt, m_nHdrSizeBytes);
+   }
+   
+   return *this;
 }

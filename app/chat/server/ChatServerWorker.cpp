@@ -41,13 +41,16 @@ bool ChatServerWorker::processMsg(const char* pMsg, ui32 nMsgLenBytes)
    l_bSuccess = l_pPacket->unpack(pMsg, nMsgLenBytes);
    if (!l_bSuccess)
    {
+      printf("ChatServerWorker: Failed to unpack\n");
       return false;
    }
    
    switch (l_pPacket->type())
    {
       case ChatPacket::ChatMsgType:
+         printf("ChatServerWorker: ChatMsgType\n");
       case ChatPacket::UpdateRequestType:
+         printf("ChatServerWorker: UpdateRequestType\n");
          pushRx(l_pPacket);
          break;
             
@@ -106,6 +109,8 @@ bool ChatServerWorker::work()
             
             l_pUpdateResp = new UpdateResponsePacket(l_nCurrentTs,
                                                      l_vChatMsgVec);
+            
+            printf("ChatServerWorker::work: got update req. sending resp\n");
             pushTx(l_pUpdateResp);
          }
          break;

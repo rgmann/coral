@@ -82,7 +82,7 @@ bool ChatPacket::unpack(const void* pPkt, unsigned int nSizeBytes)
    // Validate the size of the packet against the indicated payload size.
    if ((nSizeBytes - sizeof(ChatPacketHdr)) != l_pHeader->length)
    {
-      printf("::unpack: size mismatch - size = %lu, exp = %u\n",
+      printf("::unpack: size mismatch - size = %u, exp = %u\n",
              (nSizeBytes - sizeof(ChatPacketHdr)),
              l_pHeader->length);
       return false;

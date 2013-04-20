@@ -9,11 +9,17 @@ public:
    
    GenericPacket();
    
+   GenericPacket(const GenericPacket &other);
+   
    GenericPacket(unsigned int nSizeBytes);
    
    GenericPacket(unsigned int nHdrSizeBytes, unsigned int nDataSizeBytes);
    
+   virtual ~GenericPacket();
+   
    bool  allocate();
+   
+   void  deallocate();
    
    bool  isAllocated() const;
    
@@ -32,6 +38,8 @@ public:
    virtual bool  pack(void** pData, unsigned int &nSizeBytes) const;
    
    virtual bool  unpack(const void* pData, unsigned int nSizeBytes);
+   
+   GenericPacket& operator= (const GenericPacket& other);
    
 protected:
    
