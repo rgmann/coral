@@ -166,29 +166,27 @@ void rxThread(ThreadArg* pArg)
       l_nBytesRecvd = l_pSocket->recv(l_pPkt + sizeof(ChatPacketHdr),
                                        l_nDataLen, 1000);
       
-      if (l_nBytesRecvd != l_nDataLen)
+      if ((l_nBytesRecvd == l_nDataLen) &&
+          (header.type == ChatPacket::UpdateResponseType))
       {
-         delete l_pPkt;
-         continue;
+         printf("Got update response\n");
+         UpdateResponsePacket* l_pRespPkt = new UpdateResponsePacket();
+         
+         l_pRespPkt->unpack(l_pPkt, sizeof(ChatPacketHdr) + l_nDataLen);
+         
+         l_pRespPkt->getMsgList(msgVecRx);
+         l_pRespPkt->getTs(l_nCurrentTs);
+         
+         msgVecRxIt = msgVecRx.begin();
+         for (; msgVecRxIt < msgVecRx.end(); ++msgVecRxIt)
+         {
+            printChatMsg(*(*msgVecRxIt));
+         }
       }
       
-      if (header.type != ChatPacket::UpdateResponseType)
+      if (l_pPkt)
       {
          delete l_pPkt;
-         continue;
-      }
-      
-      UpdateResponsePacket* l_pRespPkt = new UpdateResponsePacket();
-      
-      l_pRespPkt->unpack(l_pPkt, sizeof(ChatPacketHdr) + l_nDataLen);
-      
-      l_pRespPkt->getMsgList(msgVecRx);
-      l_pRespPkt->getTs(l_nCurrentTs);
-      
-      msgVecRxIt = msgVecRx.begin();
-      for (; msgVecRxIt < msgVecRx.end(); ++msgVecRxIt)
-      {
-         printChatMsg(*(*msgVecRxIt));
       }
       
       // Check for a new msg in the tx queue
