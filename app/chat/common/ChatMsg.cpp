@@ -5,9 +5,7 @@
 //------------------------------------------------------------------------------
 ChatMsg::ChatMsg()
 {
-   m_nUserId = 0;
-   m_nTs     = 0;
-   memset(m_sMsg, 0, MaxMsgLen);
+   reset();
 }
 
 //------------------------------------------------------------------------------
@@ -16,6 +14,14 @@ ChatMsg::ChatMsg(const ChatMsg &other)
    m_nUserId = other.m_nUserId;
    m_nTs = other.m_nTs;
    memcpy(m_sMsg, other.m_sMsg, MaxMsgLen);
+}
+
+//------------------------------------------------------------------------------
+void ChatMsg::reset()
+{
+   m_nUserId = 0;
+   m_nTs     = 0;
+   memset(m_sMsg, 0, MaxMsgLen);
 }
 
 //------------------------------------------------------------------------------

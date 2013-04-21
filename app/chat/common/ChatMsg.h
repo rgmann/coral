@@ -21,6 +21,8 @@ public:
    
    ChatMsg(const ChatMsg &other);
    
+   void reset();
+   
    void  setUserId(ui32 userId);
    
    ui32  getUserId() const;
