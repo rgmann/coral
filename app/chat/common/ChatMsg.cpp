@@ -27,7 +27,7 @@ ui32  ChatMsg::getUserId() const { return m_nUserId; }
 //------------------------------------------------------------------------------
 void  ChatMsg::setMsg(const char* pMsg, ui32 nMsgLen)
 {
-   printf("ChatMsg::setMsg: str = %s, len = %u\n", pMsg, nMsgLen);
+   //printf("ChatMsg::setMsg: str = %s, len = %u\n", pMsg, nMsgLen);
    strncpy(m_sMsg, pMsg, (nMsgLen < MaxMsgLen) ? nMsgLen : MaxMsgLen);
 }
 
@@ -50,8 +50,8 @@ void ChatMsg::pack(ChatMsgData* pMsg) const
 {
    if (!pMsg) return;
    
-   printf("ChatMsg::pack: str = %s, uid = %u, ts=%u\n",
-          m_sMsg, m_nUserId, m_nTs);
+//   printf("ChatMsg::pack: str = %s, uid = %u, ts=%u\n",
+//          m_sMsg, m_nUserId, m_nTs);
    pMsg->user_id = m_nUserId;
    pMsg->timestamp = m_nTs;
    pMsg->msg_len = 0; // Messages are always the same size for now.
@@ -63,8 +63,8 @@ void ChatMsg::unpack(const ChatMsgData* pMsg)
 {
    if (!pMsg) return;
    
-   printf("ChatMsg::unpack: str = %s, uid = %u, ts=%u\n",
-          pMsg->msg, pMsg->user_id, pMsg->timestamp);
+//   printf("ChatMsg::unpack: str = %s, uid = %u, ts=%u\n",
+//          pMsg->msg, pMsg->user_id, pMsg->timestamp);
    m_nUserId = pMsg->user_id;
    m_nTs = pMsg->timestamp;
    strncpy(m_sMsg, pMsg->msg, MaxMsgLen);

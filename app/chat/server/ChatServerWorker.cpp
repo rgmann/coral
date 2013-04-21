@@ -30,12 +30,13 @@ bool ChatServerWorker::processMsg(const char* pMsg, ui32 nMsgLenBytes)
    bool        l_bSuccess = false;
    ChatPacket* l_pPacket = NULL;
    
-   printf("ChatServerWorker::processMsg: bytes = %u\n", nMsgLenBytes);
+//   printf("ChatServerWorker::processMsg: bytes = %u\n", nMsgLenBytes);
    
    l_pPacket = new ChatPacket();
    if (l_pPacket == NULL)
    {
       printf("ChatServerWorker::processMsg: Failed to allocate packet\n");
+      return false;
    }
    
    l_bSuccess = l_pPacket->unpack(pMsg, nMsgLenBytes);
@@ -50,7 +51,7 @@ bool ChatServerWorker::processMsg(const char* pMsg, ui32 nMsgLenBytes)
       case ChatPacket::ChatMsgType:
          printf("ChatServerWorker: ChatMsgType\n");
       case ChatPacket::UpdateRequestType:
-         printf("ChatServerWorker: UpdateRequestType\n");
+         //printf("ChatServerWorker: UpdateRequestType\n");
          pushRx(l_pPacket);
          break;
             
@@ -90,6 +91,7 @@ bool ChatServerWorker::work()
             l_pUpdateResp = new UpdateResponsePacket(l_nCurrentTs,
                                                      l_vChatMsgVec);
             //l_pUpdateResp->setTs(l_nCurrentTs);
+            printf("ChatServerWorker::work: send ts = %u\n", l_nCurrentTs);
             pushTx(l_pUpdateResp);
          }
          break;
@@ -109,8 +111,10 @@ bool ChatServerWorker::work()
             
             l_pUpdateResp = new UpdateResponsePacket(l_nCurrentTs,
                                                      l_vChatMsgVec);
+//            printf("ChatServerWorker::work: last = %u, ts = %u\n",
+//                   lastTs, l_nCurrentTs);
             
-            printf("ChatServerWorker::work: got update req. sending resp\n");
+//            printf("ChatServerWorker::work: got update req. sending resp\n");
             pushTx(l_pUpdateResp);
          }
          break;

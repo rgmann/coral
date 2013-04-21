@@ -51,7 +51,7 @@ int TcpSocket::recv(char* pBuffer, int nBytes, int nTimeoutMs)
 		// Blocks for the specified timeout period.
 		if (select(m_nSocket + 1, &l_ReadSet, NULL, NULL, &l_tTimeout) <= 0)
 		{
-         printf("TcpSocket::recv: timeout\n");
+         //printf("TcpSocket::recv: timeout\n");
 			return -1;
 		}
 		

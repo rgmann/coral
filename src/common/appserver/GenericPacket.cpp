@@ -153,7 +153,7 @@ bool GenericPacket::pack(void** pPkt, unsigned int &nSizeBytes) const
    memcpy(*pPkt, m_pPkt, size());
    nSizeBytes = size();
    
-   printf("GenericPacket::pack: Allocated and copied %d\n", size());
+   //printf("GenericPacket::pack: Allocated and copied %d\n", size());
    
    return true;
 }

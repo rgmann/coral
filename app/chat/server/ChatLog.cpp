@@ -39,10 +39,7 @@ ui32 ChatLog::read(ui32 callerId, ui32 sinceTs, std::vector<ChatMsg*> &msgVec)
       }
    }
    
-   if (!msgVec.empty())
-   {
-      l_nLastTs = m_vMsgs[m_vMsgs.size() - 1].getTs();
-   }
+   l_nLastTs = m_vMsgs[m_vMsgs.size() - 1].getTs();
    
    return l_nLastTs;
 }

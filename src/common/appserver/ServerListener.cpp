@@ -185,12 +185,12 @@ void  ServerListener::distribThread(ThreadArg* pArg)
       
       // If the worker is not NULL then we can add it to a server node.
       // Currently, round-robin is the only assignment policy.
-      printf("ServerListener::distribThread: Adding worker\n");
       if (m_vNodeList[l_nCurrentNode] != NULL)
       {
+         printf("ServerListener::distribThread: Adding worker\n");
          m_vNodeList[l_nCurrentNode]->addWorker(l_pWorker);
          
-         l_nCurrentNode++;
+         l_nCurrentNode = (l_nCurrentNode + 1) % m_vNodeList.size();
       }
    }
    
