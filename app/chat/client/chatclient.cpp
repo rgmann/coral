@@ -142,7 +142,6 @@ void rxThread(ThreadArg* pArg)
          pMsgPacket->pack((void**)&pMsgData, msgLen);
          
          l_pSocket->send(pMsgData, msgLen);
-         //         printf("rxThread: sent %u bytes\n", msgLen);
          
          delete[] pMsgData;
          pMsgData = NULL;
@@ -181,9 +180,7 @@ void rxThread(ThreadArg* pArg)
       {
          char*       l_pPackedUpdateReq    = NULL;
          ui32        l_nPackedUpdateReqLen = 0;
-         
-//         printf("currentTs = %d\n", l_nCurrentTs);
-         
+                  
          l_pUpdateReq->pack((void**)&l_pPackedUpdateReq,
                             l_nPackedUpdateReqLen);
          l_pSocket->send(l_pPackedUpdateReq, l_nPackedUpdateReqLen);
@@ -230,7 +227,6 @@ void inputThread(ThreadArg* pArg)
    
    while (!pArg->stopSignalled())
    {
-      //std::cin >> msgString;
       msgString = "";
       std::getline(std::cin, msgString);
       

@@ -9,7 +9,7 @@ AINC = $(INC) \
        -I../common
 ABSLIB = -L$(BASE)/lib/base -lbase -L$(BASE)/lib/appserver -lappserver
 LIBS = -lstdc++ -lpthread
-FLAGS = -Wall -g
+FLAGS = -Wall -g -mmacosx-version-min=10.6
 OBJ = *.o
 SRC = *.cpp ../common/*.cpp
 
