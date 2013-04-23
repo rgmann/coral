@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
-#include <sys/socket.h>
-#include <sys/types.h>
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +9,7 @@
 
 #define MAX_SIZE 50
 
+#include "SocketHelper.h"
 #include "TcpSocket.h"
 
 //-----------------------------------------------------------------------------
@@ -55,7 +54,8 @@ int TcpSocket::recv(char* pBuffer, int nBytes, int nTimeoutMs)
 			return -1;
 		}
 		
-		l_nBytesRead = read(m_nSocket, pBuffer, nBytes);
+		//l_nBytesRead = read(m_nSocket, pBuffer, nBytes);
+      l_nBytesRead = SocketHelper::read(m_nSocket, pBuffer, nBytes);
       
       if (l_nBytesRead == -1)
       {
@@ -78,7 +78,9 @@ int TcpSocket::send(const char* pBuffer, int nBytes)
    
 	//if (FD_ISSET(m_nSocket, &mFdSet))
 	//{
-		l_nBytesSent = write(m_nSocket, pBuffer, nBytes);
+		//l_nBytesSent = write(m_nSocket, pBuffer, nBytes);
+   //l_nBytesSent = send(m_nSocket, pBuffer, nBytes, MSG_NOSIGNAL);
+   l_nBytesSent = SocketHelper::write(m_nSocket, pBuffer, nBytes);
 	//}
 	
 	return l_nBytesSent;
@@ -89,7 +91,12 @@ void TcpSocket::closeSocket()
 {
 	if (m_nSocket > 0)
 	{
+      printf("TcpSocket::closeSocket\n");
+      
+      shutdown(m_nSocket, SHUT_RDWR);
+      
 		close(m_nSocket);
+      
 		FD_CLR(m_nSocket, &mFdSet);
 		m_nSocket = -1;
 	}

@@ -11,7 +11,10 @@ ServerWorker::~ServerWorker()
 {
    if (m_pSocket)
    {
-      delete[] m_pSocket;
+      printf("ServerWorker closing socket\n");
+      m_pSocket->closeSocket();
+      
+      delete m_pSocket;
       m_pSocket = NULL;
    }
 }

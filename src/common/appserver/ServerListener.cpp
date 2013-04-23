@@ -64,16 +64,16 @@ bool  ServerListener::start()
 //------------------------------------------------------------------------------
 bool  ServerListener::stop()
 {
-   if (m_pListenerThread)
-   {
-      m_pListenerThread->stop();
-      m_pListenerThread->join();
-   }
-   
    if (m_pBalancerThread)
    {
       m_pBalancerThread->stop();
       m_pBalancerThread->join();
+   }
+   
+   if (m_pListenerThread)
+   {
+      m_pListenerThread->stop();
+      m_pListenerThread->join();
    }
    
    printf("ServerListener::stop: Stopped server.\n");
@@ -155,6 +155,7 @@ void  ServerListener::distribThread(ThreadArg* pArg)
 {
    ui32  l_nCurrentNode = 0;
    ServerWorker*  l_pWorker = NULL;
+   std::vector<ServerNode*>::iterator l_VecIt;
    
    printf("ServerListener::distribThread: Started!\n");
 
@@ -193,6 +194,21 @@ void  ServerListener::distribThread(ThreadArg* pArg)
          l_nCurrentNode = (l_nCurrentNode + 1) % m_vNodeList.size();
       }
    }
+   
+   // Delete all nodes
+   l_VecIt = m_vNodeList.begin();
+   for (; l_VecIt < m_vNodeList.end(); ++l_VecIt)
+   {
+      if (*l_VecIt)
+      {
+         (*l_VecIt)->stop();
+         
+         delete *l_VecIt;
+         *l_VecIt = NULL;
+      }
+   }
+   
+   m_vNodeList.clear();
    
    printf("ServerListener::distribThread: Stopped!\n");
 }

@@ -90,6 +90,8 @@ bool  ServerNode::start()
 //------------------------------------------------------------------------------
 bool  ServerNode::stop()
 {
+   printf("ServerNode::stop: Stopping node\n");
+   
    if (m_pRxThread)
    {
       m_pRxThread->stop();
@@ -98,15 +100,17 @@ bool  ServerNode::stop()
    
    if (m_pWorkerThread)
    {
-      m_pRxThread->stop();
-      m_pRxThread->join();
+      m_pWorkerThread->stop();
+      m_pWorkerThread->join();
    }
    
    if (m_pTxThread)
    {
-      m_pRxThread->stop();
-      m_pRxThread->join();
+      m_pTxThread->stop();
+      m_pTxThread->join();
    }
+   
+   cleanup();
    
    return true;
 }
@@ -151,7 +155,7 @@ void ServerNode::rxThread(ThreadArg* pArg)
       if (l_pSocket == NULL)
       {
          // Put the worker back into the receive queue.
-         m_RxQueue.push(l_pWorker, 500);
+         m_WorkQueue.push(l_pWorker, 500);
          
          continue;
       }
@@ -319,5 +323,41 @@ void ServerNode::workThread(ThreadArg* pArg)
 
       // Push the worker back into the Rx queue
       m_TxQueue.push(l_pWorker, 500);
+   }
+}
+
+//------------------------------------------------------------------------------
+void ServerNode::cleanup()
+{
+   ServerWorker* l_pWorker = NULL;
+   
+   while (m_WorkQueue.pop(l_pWorker,20))
+   {
+      if (l_pWorker)
+      {
+         printf("ServerNode::m_WorkQueue\n");
+         delete l_pWorker;
+         l_pWorker = NULL;
+      }
+   }
+   
+   while (m_RxQueue.pop(l_pWorker,20))
+   {
+      if (l_pWorker)
+      {
+         printf("ServerNode::m_RxQueue\n");
+         delete l_pWorker;
+         l_pWorker = NULL;
+      }
+   }
+   
+   while (m_TxQueue.pop(l_pWorker,20))
+   {
+      if (l_pWorker)
+      {
+         printf("ServerNode::m_TxQueue\n");
+         delete l_pWorker;
+         l_pWorker = NULL;
+      }
    }
 }

@@ -113,6 +113,10 @@ bool ChatServerWorker::work()
                                                      l_vChatMsgVec);
 //            printf("ChatServerWorker::work: last = %u, ts = %u\n",
 //                   lastTs, l_nCurrentTs);
+            if (l_vChatMsgVec.size() > 0) {
+               printf("ChatServerWorker::work: last = %u, ts = %u, veclen = %d\n",
+                      lastTs, l_nCurrentTs, l_vChatMsgVec.size());
+            }
             
 //            printf("ChatServerWorker::work: got update req. sending resp\n");
             pushTx(l_pUpdateResp);

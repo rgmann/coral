@@ -41,6 +41,8 @@ private:
    
    void        workThread(ThreadArg* pArg);
    
+   void        cleanup();
+   
 private:
    
    //std::vector<ServerWorker*> m_vWorkerList;
