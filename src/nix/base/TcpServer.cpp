@@ -55,8 +55,14 @@ bool TcpServer::start(int port)
 	//printf("Server-socket() is OK...\n");
 	
 	/*"address already in use" error message */
+
    ret = setsockopt(m_fdListenSocket, SOL_SOCKET,SO_REUSEADDR,
                     &yes, sizeof(int));
+#if defined(__APPLE__) && defined(__MACH__)
+   ret = setsockopt(m_fdListenSocket, SOL_SOCKET, SO_NOSIGPIPE,
+                    &yes, sizeof(int));
+#endif
+   
 	if(ret < 0)
 	{
 		perror("setsockopt() failed");
