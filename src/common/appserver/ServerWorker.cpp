@@ -38,18 +38,15 @@ bool ServerWorker::initialize()
 }
 
 //------------------------------------------------------------------------------
-TcpSocket*  ServerWorker::socket(ui32 nTimeoutMs)
+TcpSocket*  ServerWorker::socket()
 {
-   TcpSocket*  pRetSocket = NULL;
-   
-   //if (m_SocketLock.lock(nTimeoutMs))
-   {
-      pRetSocket = m_pSocket;
-      
-      //m_SocketLock.unlock();
-   }
-   
-   return pRetSocket;
+   return m_pSocket;
+}
+
+//------------------------------------------------------------------------------
+bool ServerWorker::lockSocket(ui32 timeoutMs)
+{
+   return m_SocketLock.lock(timeoutMs);
 }
 
 //------------------------------------------------------------------------------
@@ -58,6 +55,21 @@ void ServerWorker::releaseSocket()
    //m_SocketLock.unlock();
 }
 
+//------------------------------------------------------------------------------
+void ServerWorker::sampleRecvTime()
+{
+   m_RecvTs.sample();
+}
+
+//------------------------------------------------------------------------------
+i64  ServerWorker::lastRecvTime()
+{
+   Timestamp l_Ts;
+   
+   l_Ts.sample();
+   
+   return m_RecvTs.diffInMs(l_Ts);
+}
 
 //------------------------------------------------------------------------------
 void ServerWorker::pushRx(GenericPacket* pPkt)

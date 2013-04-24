@@ -8,6 +8,7 @@ ServerNode::ServerNode()
    m_pRxThread = NULL;
    m_pWorkerThread = NULL;
    m_pTxThread = NULL;
+   m_nTimeoutMs = MaxRecvTimeoutMs;
 }
 
 //------------------------------------------------------------------------------
@@ -36,6 +37,8 @@ ServerNode::~ServerNode()
 //------------------------------------------------------------------------------
 bool  ServerNode::addWorker(ServerWorker* pWorker)
 {
+   pWorker->sampleRecvTime();
+   
    return m_RxQueue.push(pWorker, 500);
 }
 
@@ -116,25 +119,85 @@ bool  ServerNode::stop()
 }
 
 //------------------------------------------------------------------------------
+void  ServerNode::setRecvTimeout(ui32 timeouMs)
+{
+   m_nTimeoutMs = timeouMs;
+}
+
+//------------------------------------------------------------------------------
 void ServerNode::rxThreadFunc(ThreadArg* pArg)
 {
    ((ServerNode*)pArg->pUserData)->rxThread(pArg);
 }
 
 //------------------------------------------------------------------------------
+bool ServerNode::recvPacket(ServerWorker* pWorker)
+{
+   bool  l_bSuccess  = true;
+   char* l_pHeader   = NULL;
+   char* l_pPkt      = NULL;
+   
+   ui32  l_nHeaderLen   = 0;
+   ui32  l_nDataLen     = 0;
+   ui32  l_nPktLen      = 0;
+   ui32  l_nBytesRecvd  = 0;
+   
+   TcpSocket* l_pSocket = pWorker->socket();
+   
+   // Each worker has a standard application specific header.  Each
+   // packet should be preceded by a header and the header should
+   // indicate the length of the following data.
+   l_nHeaderLen   = pWorker->headerSize();
+   
+   l_pHeader = new char[l_nHeaderLen];
+   
+   l_nBytesRecvd  = l_pSocket->recv(l_pHeader, l_nHeaderLen, 20);
+   
+   if (l_nHeaderLen != l_nBytesRecvd)
+   {
+      delete[] l_pHeader;
+      l_pHeader = NULL;
+      
+      return false;
+   }
+   
+   // Pass the header to the worker so that it can parse the
+   // expected payload length.
+   l_nDataLen = pWorker->getExpPayloadSize(l_pHeader);
+   
+   l_nPktLen = l_nHeaderLen + l_nDataLen;
+   l_pPkt = new char[l_nPktLen];
+   
+   // Copy the header into the full packet
+   memcpy(l_pPkt, l_pHeader, l_nHeaderLen);
+   
+   if (l_nDataLen > 0)
+   {
+      l_nBytesRecvd  = l_pSocket->recv(l_pPkt + l_nHeaderLen,
+                                       l_nDataLen, 0);
+      
+      if (l_nBytesRecvd != l_nDataLen)
+      {
+         l_bSuccess = false;
+      }
+   }
+   
+   if (l_bSuccess)
+   {
+      pWorker->processMsg(l_pPkt, l_nPktLen);
+   }
+   
+   delete[] l_pPkt;
+   l_pPkt = NULL;
+   
+   return l_bSuccess;
+}
+
+//------------------------------------------------------------------------------
 void ServerNode::rxThread(ThreadArg* pArg)
 {
-   TcpSocket*  l_pSocket = NULL;
-   
-   ui32         l_nHeaderLen   = 0;
-   ui32         l_nDataLen     = 0;
-   ui32         l_nPktLen      = 0;
-   ui32         l_nBytesRecvd  = 0;
-   
-   char* l_pHeader = NULL;
-   char* l_pPkt    = NULL;
-   
-   ServerWorker*  l_pWorker = NULL;
+   bool           l_bSuccess  = false;
+   ServerWorker*  l_pWorker   = NULL;
    
    printf("ServerNode::rxThread: Started!\n");
    
@@ -151,71 +214,29 @@ void ServerNode::rxThread(ThreadArg* pArg)
          continue;
       }
          
-      l_pSocket = l_pWorker->socket(500);
-      if (l_pSocket == NULL)
+      if (!l_pWorker->lockSocket(500))
       {
          // Put the worker back into the receive queue.
-         m_WorkQueue.push(l_pWorker, 500);
+         m_RxQueue.push(l_pWorker, 500);
          
          continue;
       }
-         
-      // Each worker has a standard application specific header.  Each
-      // packet should be preceded by a header and the header should
-      // indicate the length of the following data.
-      l_nHeaderLen   = l_pWorker->headerSize();
       
-      l_pHeader = new char[l_nHeaderLen];
-      
-      l_nBytesRecvd  = l_pSocket->recv(l_pHeader, l_nHeaderLen, 20);
-         
-      if (l_nHeaderLen != l_nBytesRecvd)
-      {
-//         printf("ServerNode::rxThread: exp = %u, recvd = %u\n",
-//                l_nHeaderLen, l_nBytesRecvd);
-         
-         delete[] l_pHeader;
-         l_pWorker->releaseSocket();
-         
-         // Put the worker back into the receive queue.
-         m_WorkQueue.push(l_pWorker, 500);
-            
-         continue;
-      }
-         
-      // Pass the header to the worker so that it can parse the
-      // expected payload length.
-      l_nDataLen = l_pWorker->getExpPayloadSize(l_pHeader);
-         
-      if (l_nDataLen > 0)
-      {
-         l_nPktLen = l_nHeaderLen + l_nDataLen;
-         l_pPkt = new char[l_nPktLen];
-            
-         // Copy the header into the full packet
-         memcpy(l_pPkt, l_pHeader, l_nHeaderLen);
-            
-         l_nBytesRecvd  = l_pSocket->recv(l_pPkt + l_nHeaderLen,
-                                          l_nDataLen, 0);
-            
-         if (l_nBytesRecvd == l_nDataLen)
-         {
-            l_pWorker->processMsg(l_pPkt, l_nPktLen);
-         }
-            
-         delete[] l_pPkt;
-         l_pPkt = NULL;
-      }
-         
-      // Delete the header
-      delete[] l_pHeader;
-      l_pHeader = NULL;
+      l_bSuccess = recvPacket(l_pWorker);
          
       // Release the socket so that it can be used by the TX thread.
       l_pWorker->releaseSocket();
       
-      // Push the worker into the work queue
-      m_WorkQueue.push(l_pWorker, 500);
+      if (l_bSuccess)
+      {
+         // Push the worker into the work queue
+         m_WorkQueue.push(l_pWorker, 500);
+      }
+      else
+      {
+         delete l_pWorker;
+         l_pWorker = NULL;
+      }
    }
 }
 
@@ -253,9 +274,8 @@ void ServerNode::txThread(ThreadArg* pArg)
          printf("ServerNode::txThread: null\n");
          continue;
       }
-         
-      l_pSocket = l_pWorker->socket(500);
-      if (l_pSocket == NULL)
+
+      if (!l_pWorker->lockSocket(500))
       {
          //printf("ServerNode::txThread: Failed to get socket\n");
          
@@ -264,6 +284,8 @@ void ServerNode::txThread(ThreadArg* pArg)
          
          continue;
       }
+      
+      l_pSocket = l_pWorker->socket();
 //      printf("ServerNode::txThread: got socket\n");
       
       // Each worker has a standard application specific header.  Each

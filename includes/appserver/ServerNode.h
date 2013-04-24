@@ -21,11 +21,15 @@ public:
    
    bool  stop();
    
+   void  setRecvTimeout(ui32 timeouMs);
+   
    float getMeanWorkLat() const;
    
    float getMeanRxLat() const;
    
    float getMeanTxLat() const;
+   
+   static const ui32 MaxRecvTimeoutMs = 5000;
    
 private:
    
@@ -43,6 +47,8 @@ private:
    
    void        cleanup();
    
+   bool        recvPacket(ServerWorker* pWorker);
+   
 private:
    
    //std::vector<ServerWorker*> m_vWorkerList;
@@ -55,6 +61,9 @@ private:
    Thread *m_pWorkerThread;
    
    Thread *m_pTxThread;
+   
+   // ServerWorker receive timeout in milliseconds
+   ui32  m_nTimeoutMs;
 };
 
 #endif // SERVER_NODE_H

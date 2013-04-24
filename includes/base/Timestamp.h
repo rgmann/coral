@@ -2,6 +2,7 @@
 #define TIME_H
 
 #include <sys/time.h>
+#include "BaseTypes.h"
 
 class Timestamp
 {
@@ -13,11 +14,11 @@ public:
    
    void  sample();
    
-   long  diffInMs(const Timestamp &start);
+   i64  diffInMs(const Timestamp &start);
    
-   long  diffInS(const Timestamp &start);
+   i64  diffInS(const Timestamp &start);
    
-   long  diffInUs(const Timestamp &start);
+   i64  diffInUs(const Timestamp &start);
    
 private:
    
