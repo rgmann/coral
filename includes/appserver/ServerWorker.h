@@ -24,11 +24,9 @@ public:
    
    void  releaseSocket();
    
-   void  sampleRecvTime();
+   ui32   elapseMsSinceRecv();
    
-   i64  lastRecvTime();
-   
-   virtual bool  processMsg(const char* pMsg, ui32 nMsgLenBytes) = 0;
+   virtual bool  processMsg(const char* pMsg, ui32 nMsgLenBytes);
    
    virtual bool  work() = 0;
    
@@ -40,11 +38,13 @@ public:
    
 protected:
    
-   void pushRx(GenericPacket*);
-   bool popRx(GenericPacket**);
+   void  sampleRecvTime();
    
-   void pushTx(GenericPacket*);
-   bool popTx(GenericPacket**);
+   void  pushRx(GenericPacket*);
+   bool  popRx(GenericPacket**);
+   
+   void  pushTx(GenericPacket*);
+   bool  popTx(GenericPacket**);
    
 protected:
    

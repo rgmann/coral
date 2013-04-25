@@ -56,7 +56,7 @@ bool TcpServer::start(int port)
 	
 	/*"address already in use" error message */
 
-   ret = setsockopt(m_fdListenSocket, SOL_SOCKET,SO_REUSEADDR,
+   ret = setsockopt(m_fdListenSocket, SOL_SOCKET, SO_REUSEADDR,
                     &yes, sizeof(int));
 #if defined(__APPLE__) && defined(__MACH__)
    ret = setsockopt(m_fdListenSocket, SOL_SOCKET, SO_NOSIGPIPE,
