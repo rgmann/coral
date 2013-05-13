@@ -4,6 +4,7 @@
 ServerWorker::ServerWorker(TcpSocket* pSocket)
 {
    m_pSocket = pSocket;
+   m_RecvTs.sample();
 }
 
 //------------------------------------------------------------------------------
@@ -46,7 +47,8 @@ TcpSocket*  ServerWorker::socket()
 //------------------------------------------------------------------------------
 bool ServerWorker::lockSocket(ui32 timeoutMs)
 {
-   return m_SocketLock.lock(timeoutMs);
+   //return m_SocketLock.lock(timeoutMs);
+   return true;
 }
 
 //------------------------------------------------------------------------------
@@ -56,19 +58,26 @@ void ServerWorker::releaseSocket()
 }
 
 //------------------------------------------------------------------------------
-void ServerWorker::sampleRecvTime()
-{
-   m_RecvTs.sample();
-}
-
-//------------------------------------------------------------------------------
-i64  ServerWorker::lastRecvTime()
+ui32  ServerWorker::elapseMsSinceRecv()
 {
    Timestamp l_Ts;
    
    l_Ts.sample();
    
-   return m_RecvTs.diffInMs(l_Ts);
+   return (ui32)l_Ts.diffInMs(m_RecvTs);
+}
+
+//------------------------------------------------------------------------------
+bool ServerWorker::processMsg(const char* pMsg, ui32 nMsgLenBytes)
+{
+   sampleRecvTime();
+   return true;
+}
+
+//------------------------------------------------------------------------------
+void ServerWorker::sampleRecvTime()
+{
+   m_RecvTs.sample();
 }
 
 //------------------------------------------------------------------------------
@@ -76,38 +85,22 @@ void ServerWorker::pushRx(GenericPacket* pPkt)
 {
    m_InQ.push(pPkt, 500);
 }
-//void ServerWorker::pushRx(const GenericPacket& pkt)
-//{
-//   m_InQ.push(pkt, 500);
-//}
 
 //------------------------------------------------------------------------------
 bool ServerWorker::popRx(GenericPacket** pPkt)
 {
    return m_InQ.pop(*pPkt, 0);
 }
-//bool ServerWorker::popRx(GenericPacket &pkt)
-//{
-//   return m_InQ.pop(pkt, 0);
-//}
 
 //------------------------------------------------------------------------------
 void ServerWorker::pushTx(GenericPacket* pPkt)
 {
    m_OutQ.push(pPkt, 500);
 }
-//void ServerWorker::pushTx(const GenericPacket &pkt)
-//{
-//   m_OutQ.push(pkt, 500);
-//}
 
 //------------------------------------------------------------------------------
 bool ServerWorker::popTx(GenericPacket** pPkt)
 {
    return m_OutQ.pop(*pPkt, 0);
 }
-//bool ServerWorker::popTx(GenericPacket &pkt)
-//{
-//   return m_OutQ.pop(pkt, 0);
-//}
 

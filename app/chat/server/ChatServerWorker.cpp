@@ -30,7 +30,7 @@ bool ChatServerWorker::processMsg(const char* pMsg, ui32 nMsgLenBytes)
    bool        l_bSuccess = false;
    ChatPacket* l_pPacket = NULL;
    
-//   printf("ChatServerWorker::processMsg: bytes = %u\n", nMsgLenBytes);
+   ServerWorker::processMsg(pMsg, nMsgLenBytes);
    
    l_pPacket = new ChatPacket();
    if (l_pPacket == NULL)
