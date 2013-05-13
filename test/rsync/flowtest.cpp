@@ -13,8 +13,10 @@ int main(int argc, char *argv[])
    
    RsyncSegmenter       segmenter;
    RsyncSegmentReport*  pReport = NULL;
-   RsyncReportHeader    reportHeader;
-   RsyncPackedSeg       packedSeg;
+   //RsyncReportHeader    reportHeader;
+   RsyncSegmentReportHdr*  pReportHdr = NULL;
+   //RsyncPackedSeg       packedSeg;
+   RsyncSegmentPacket*     pSegment = NULL;
    
    
    RsyncSegmentTable    table;
@@ -29,8 +31,8 @@ int main(int argc, char *argv[])
    printf("Flow Test:\n");
    
    //filename = "2Scan_120800003.jpg";
-   //filename = "file.dat";
-   filename = "firefox2005-icon.png";
+   filename = "file.dat";
+   //filename = "firefox2005-icon.png";
    
    // Begin by segmenting the clientfile
    segmenter.setRoot("flowtestdata/client_dir");
@@ -51,12 +53,14 @@ int main(int argc, char *argv[])
       return 1;
    }
    
-   if (!pReport->header(&reportHeader))
+//   if (!pReport->header(&reportHeader))
+   if (!pReport->header(&pReportHdr))
    {
       std::cout << "Failed to get Segmentation Report header" << std::endl;
       return 1;
    }
-   RsyncSegmentReport::PrintReportHeader(&reportHeader);
+//   RsyncSegmentReport::PrintReportHeader(&reportHeader);
+   RsyncSegmentReport::PrintReportHeader(pReportHdr);
    
    
    // Even though the assembler will not be doing anything for a while,
@@ -66,12 +70,29 @@ int main(int argc, char *argv[])
    
    // "Send" the report header and packed segments to the hash table on the
    // server.
-   table.setHeader(&reportHeader);
-   while (pReport->nextPackedSeg(&packedSeg))
+//   table.setHeader(&reportHeader);
+   table.addSegment(pReportHdr);
+   //while (pReport->nextPackedSeg(&packedSeg))
+   while (pReport->nextSegment(&pSegment))
    {
-      if (!table.addSegment(&packedSeg))
+      //if (!table.addSegment(&packedSeg))
+      RsyncSegmentReportPacket* l_pSegRprtPkt = NULL;
+      l_pSegRprtPkt = reinterpret_cast<RsyncSegmentReportPacket*>(pSegment);
+      if (l_pSegRprtPkt->type() == RsyncSegmentReportPacket::SegmentType) {
+         std::cout << "Next segment type = SegmentType" << std::endl;
+      }
+      else if (l_pSegRprtPkt->type() == RsyncSegmentReportPacket::HeaderType) {
+         std::cout << "Next segment type = HeaderType" << std::endl;
+      }
+      else {
+         std::cout << "Next segment type = " << l_pSegRprtPkt->type()
+                  << std::endl;
+      }
+      if (!table.addSegment(pSegment))
          std::cout << "Failed to add seg #" << l_nSegCount << std::endl;
       l_nSegCount++;
+      
+      pSegment = NULL;
    }
    std::cout << "Added " << l_nSegCount << " segments to the table."
             << std::endl;
@@ -83,6 +104,8 @@ int main(int argc, char *argv[])
                 << std::endl;
       return 1;
    }
+   
+   return 1;
    
    // Pass the hash to the Authority
    authority.setRoot("flowtestdata/server_dir");

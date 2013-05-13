@@ -202,24 +202,47 @@ RsyncSegId  RsyncSegment::getId()
 }
 
 //------------------------------------------------------------------------------
-bool RsyncSegment::pack(RsyncPackedSeg *pSeg)
+//bool RsyncSegment::pack(RsyncPackedSeg *pSeg)
+//{
+//   if (pSeg == NULL || !m_StrongChk.isValid())
+//   {
+//      return false;
+//   }
+//   
+//   //Md5Hash l_strongHash;
+//   
+//   // Copy header into destination
+//   pSeg->segmentId        = getId();
+//   pSeg->weakChecksum      = m_WeakChk.s;
+//   
+////   getStrong(l_strongHash);
+////   l_strongHash.get(&pSeg->strongChecksum);
+//   m_StrongChk.get(&pSeg->strongChecksum);
+//   
+//   pSeg->nSegSizeBytes = getBlockSize();
+//   
+//   return true;
+//}
+bool RsyncSegment::toPacket(RsyncSegmentPacket** pPacket)
 {
-   if (pSeg == NULL || !m_StrongChk.isValid())
+   Hash128 l_strongChecksum;
+   
+   if (*pPacket != NULL || !m_StrongChk.isValid())
    {
+      printf("RsyncSegment::toPacket: failed to packet segment\n");
       return false;
    }
    
-   //Md5Hash l_strongHash;
+   *pPacket = new RsyncSegmentPacket();
    
    // Copy header into destination
-   pSeg->segmentId        = getId();
-   pSeg->weakChecksum      = m_WeakChk.s;
+   (*pPacket)->setSegmentId(getId());
+   (*pPacket)->setWeak(m_WeakChk.s);
    
-//   getStrong(l_strongHash);
-//   l_strongHash.get(&pSeg->strongChecksum);
-   m_StrongChk.get(&pSeg->strongChecksum);
+   m_StrongChk.get(&l_strongChecksum);
+   (*pPacket)->setStrong(l_strongChecksum);
    
-   pSeg->nSegSizeBytes = getBlockSize();
+   (*pPacket)->setSegmentSize(getBlockSize());
    
    return true;
 }

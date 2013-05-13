@@ -42,7 +42,7 @@ Mutex::~Mutex()
 }
 
 //------------------------------------------------------------------------------
-bool  Mutex::lock(int nTimeoutMs)
+bool  Mutex::lock(i32 nTimeoutMs)
 {
    int locRetVal = 0;
    
@@ -51,7 +51,7 @@ bool  Mutex::lock(int nTimeoutMs)
       return false;
    }
    
-   if (nTimeoutMs == WAIT_FOREVER)
+   if (nTimeoutMs == WaitForever)
    {
       locRetVal = pthread_mutex_lock(&m_pMutex->m);
    }

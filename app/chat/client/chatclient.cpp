@@ -21,19 +21,22 @@ int         g_nUserId = 0;
 
 void sighandler(int s)
 {
+   printf("Got signal\n");
    g_bStopCommanded = true;
 }
 
 void printChatMsg(const ChatMsg &msg);
 void rxThread(ThreadArg* pArg);
 void inputThread(ThreadArg* pArg);
-bool receiveRespUpdate(UpdateResponsePacket** pResp, TcpSocket* pSocket);
+i32  receiveRespUpdate(UpdateResponsePacket** pResp, TcpSocket* pSocket);
 
 int main(int argc, char *argv[])
 {
    ArgParser args;
    Thread*  m_pRxThread = NULL;
    Thread*  m_pInputThread = NULL;
+   
+   struct sigaction sigIntHandler;
       
    printf("Chat Client:\n\n");
    
@@ -55,6 +58,11 @@ int main(int argc, char *argv[])
    args.getArgVal(g_sHostName, Argument::ArgName, "HostName");
    args.getArgVal(g_nPort, Argument::ArgName, "Port");
    args.getArgVal(g_nUserId, Argument::ArgName, "UID");
+   
+   sigIntHandler.sa_handler = sighandler;
+   sigemptyset(&sigIntHandler.sa_mask);
+   sigIntHandler.sa_flags = 0;
+   sigaction(SIGINT, &sigIntHandler, NULL);
    
    g_ChatMstQ.initialize(20);
    
@@ -78,6 +86,8 @@ int main(int argc, char *argv[])
    {
       sleep(1);
    }
+   
+   printf("Stopping\n");
    
    if (m_pRxThread)
    {
@@ -146,7 +156,12 @@ void rxThread(ThreadArg* pArg)
          delete[] pMsgData;
          pMsgData = NULL;
          
-         receiveRespUpdate(&l_pUpdResp, l_pSocket);
+         if (receiveRespUpdate(&l_pUpdResp, l_pSocket) == -1)
+         {
+            printf("Socket closed by master\n");
+            g_bStopCommanded = true;
+            break;
+         }
          
          if (l_pUpdResp)
          {
@@ -188,7 +203,12 @@ void rxThread(ThreadArg* pArg)
          delete[] l_pPackedUpdateReq;
          l_pPackedUpdateReq = NULL;
          
-         receiveRespUpdate(&l_pUpdResp, l_pSocket);
+         if (receiveRespUpdate(&l_pUpdResp, l_pSocket) == -1)
+         {
+            printf("Socket closed by master\n");
+            g_bStopCommanded = true;
+            break;
+         }
          
          if (l_pUpdResp)
          {
@@ -239,11 +259,11 @@ void inputThread(ThreadArg* pArg)
 }
 
 //------------------------------------------------------------------------------
-bool receiveRespUpdate(UpdateResponsePacket** pResp, TcpSocket* pSocket)
+i32 receiveRespUpdate(UpdateResponsePacket** pResp, TcpSocket* pSocket)
 {
    ChatPacketHdr  header;
    bool           l_bSuccess = false;
-   ui32           l_nBytesRecvd = 0;
+   i32           l_nBytesRecvd = 0;
    char*          l_pPkt = NULL;
    ui32           l_nDataLen     = 0;
 
@@ -252,6 +272,11 @@ bool receiveRespUpdate(UpdateResponsePacket** pResp, TcpSocket* pSocket)
    l_nBytesRecvd = pSocket->recv((char*)&header,
                                  sizeof(ChatPacketHdr),
                                  1000);
+   
+   if (l_nBytesRecvd == -1)
+   {
+      return -1;
+   }
    
    if (header.marker != ChatPacketHdr::marker) return false;
    
@@ -273,8 +298,6 @@ bool receiveRespUpdate(UpdateResponsePacket** pResp, TcpSocket* pSocket)
    {
       *pResp = new UpdateResponsePacket();
       (*pResp)->unpack(l_pPkt, sizeof(ChatPacketHdr) + l_nDataLen);
-      
-      l_bSuccess = true;
    }
    
    if (l_pPkt)
@@ -282,5 +305,5 @@ bool receiveRespUpdate(UpdateResponsePacket** pResp, TcpSocket* pSocket)
       delete l_pPkt;
    }
    
-   return l_bSuccess;
+   return l_nBytesRecvd;
 }

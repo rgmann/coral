@@ -1,8 +1,9 @@
+#include <iostream>
+#include <fstream>
 #include "RsyncFileAuthority.h"
 #include "RsyncHelper.h"
 #include "FileSystemHelper.h"
-#include <iostream>
-#include <fstream>
+//#include "RsyncSegmentReportHdr.h"
 
 //------------------------------------------------------------------------------
 RsyncFileAuthority::RsyncFileAuthority()
@@ -37,7 +38,8 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
    //Hash128           stronghash;
    std::string       relFilePath;
    std::string       fullFilePath;
-   RsyncReportHeader reportHeader;
+   RsyncSegmentReportHdr* l_pReportHdr = NULL;
+   ui32              l_nSegmentSizeBytes = 0;
    
    std::ifstream l_fAuthFile;
    
@@ -48,21 +50,22 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
    }
    
    // First we must segment the local version of the file.
-   if (!pSegTable->getHeader(&reportHeader))
+   if (!pSegTable->getHeader(l_pReportHdr))
    {
       return false;
    }
    
-   relFilePath = std::string(reportHeader.fullFileName);
+   l_pReportHdr->getFilePath(relFilePath);
    fullFilePath = FileSystemHelper::Concat(m_sRootDir, relFilePath);
    
    std::cout << "RsyncFileAuthority::process: Full path " << fullFilePath
    << std::endl;
    
+   l_pReportHdr->getSegmentSize(l_nSegmentSizeBytes);
    l_bSuccess = RsyncHelper::SegmentFile(m_sRootDir,
                                          relFilePath,
                                          l_vSegVec,
-                                         reportHeader.segmentSizeBytes,
+                                         l_nSegmentSizeBytes,
                                          1,
                                          RsyncHelper::DoRoll,
                                          RsyncHelper::DeferStrongComp);
@@ -85,21 +88,21 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
    // Create the starting marker
    createBeginMarker(relFilePath);
    
-   printf("PROCESS: seg count = %d\n", l_vSegVec.size());
+   printf("PROCESS: seg count = %d\n", (i32)l_vSegVec.size());
    
    // Perform the segment search process.
    l_iCurrentSeg = l_vSegVec.begin();
    while (l_iCurrentSeg < l_vSegVec.end())
    {
-      RsyncPackedSeg l_PackedSeg;
+      //RsyncPackedSeg l_PackedSeg;
+      RsyncSegmentPacket* l_pSegPkt = NULL;
       bool           l_bFound = false;
       
       // Get the weak checksum for the current segment.
       (*l_iCurrentSeg)->getWeak(weaksum);
       
       // Attempt to retrieve the segment
-//      l_bFound = pSegTable->find(**l_iCurrentSeg, l_PackedSeg);
-      l_bFound = pSegTable->find(**l_iCurrentSeg, l_fAuthFile, l_PackedSeg);
+      l_bFound = pSegTable->find(**l_iCurrentSeg, l_fAuthFile, l_pSegPkt);
       
       if (l_bFound)
       {
@@ -112,12 +115,18 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
          
          // If a segment was found, then create an instruction to tell the
          // assembler which segment to use.
-         createSegmentInstruction(l_PackedSeg.segmentId);
-         l_nOffset += (l_nBytesSinceMatch + l_PackedSeg.nSegSizeBytes);
+         ui32 l_nSegId = 0;
+         ui16 l_nSegSizeBytes = 0;
+         
+         l_pSegPkt->getSegmentId(l_nSegId);
+         l_pSegPkt->getSegmentSize(l_nSegSizeBytes);
+         
+         createSegmentInstruction(l_nSegId);
+         l_nOffset += (l_nBytesSinceMatch + l_nSegSizeBytes);
          
          // We have to shift the iterator by the size of the segment.
          for (int l_nShifts = 0;
-              l_nShifts < l_PackedSeg.nSegSizeBytes &&
+              l_nShifts < l_nSegSizeBytes &&
               l_iCurrentSeg < l_vSegVec.end(); l_nShifts++)
          {
             l_iCurrentSeg++; l_nSegNum++;
@@ -210,7 +219,7 @@ bool RsyncFileAuthority::createBeginMarker(const std::string &relFilePath)
       return false;
    }
    
-   strncpy((char*)l_pSegment->dataPtr(),
+   strncpy((char*)l_pSegment->data(),
            relFilePath.c_str(),
            relFilePath.length() + 1);
    
@@ -284,7 +293,7 @@ bool RsyncFileAuthority::createChunkInstruction(std::ifstream &file,
       return false;
    }
    
-   file.read((char*)l_pSegment->dataPtr(), l_pSegment->dataSize());
+   file.read((char*)l_pSegment->data(), l_pSegment->dataSize());
    
    // Restore the original file position.
    file.seekg(l_fStreamPos);

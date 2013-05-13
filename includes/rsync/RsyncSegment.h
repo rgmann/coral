@@ -5,6 +5,7 @@
 #include <fstream>
 #include "Md5Hash.h"
 #include "RsyncCommon.h"
+#include "RsyncSegmentPacket.h"
 
 struct Adler32Checksum
 {
@@ -21,14 +22,14 @@ struct Adler32Checksum
 
 typedef unsigned int RsyncSegId;
 
-struct RsyncPackedSeg
-{
-   static const unsigned int marker = 0xA5A5A5A5;
-   RsyncSegId        segmentId;
-   int               weakChecksum;
-   Hash128           strongChecksum;
-   unsigned short    nSegSizeBytes;
-};
+//struct RsyncPackedSeg
+//{
+//   static const unsigned int marker = 0xA5A5A5A5;
+//   RsyncSegId        segmentId;
+//   int               weakChecksum;
+//   Hash128           strongChecksum;
+//   unsigned short    nSegSizeBytes;
+//};
 
 
 class RsyncSegment
@@ -66,7 +67,8 @@ public:
    
    RsyncSegId     getId();
    
-   bool           pack(RsyncPackedSeg *pSeg);
+   //bool           pack(RsyncPackedSeg *pSeg);
+   bool           toPacket(RsyncSegmentPacket** pPacket);
    
 private:
    

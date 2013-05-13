@@ -4,42 +4,47 @@
 #include <string.h>
 
 //------------------------------------------------------------------------------
-RsyncAssemblyInstr::RsyncAssemblyInstr() : GenericPacket()
+RsyncAssemblyInstr::RsyncAssemblyInstr() : RsyncPacket()
 {
    // If the default contructor is called, the packet is allocated to the size
    // of the header.  The packet can be resized later with a call to setType().
-   m_nHdrSizeBytes = m_nSizeBytes = sizeof(RsyncAssemblyInstrHdr);
+//   m_nHdrSizeBytes = m_nSizeBytes = sizeof(RsyncAssemblyInstrHdr);
+   m_nSizeBytes = sizeof(RsyncAssemblyInstr::Data);
    
    if (allocate())
    {
-      ((RsyncAssemblyInstrHdr*)m_pPkt)->type = RsyncTypeNotSet;
+//      ((RsyncAssemblyInstrHdr*)m_pPkt)->type = RsyncTypeNotSet;
+      data()->type = TypeNotSet;
    }
 }
 
 //------------------------------------------------------------------------------
 RsyncAssemblyInstr::RsyncAssemblyInstr(RsyncAssmbInstrType type,
-                                       unsigned int nParam)
-: GenericPacket();
+                                       ui32 nSizeBytes)
+: RsyncPacket(RsyncPacket::AssemblyInstType, nSizeBytes)
 {
-   m_nHdrSizeBytes = HeaderSize();//sizeof(RsyncAssemblyInstrHdr);
+   //m_nHdrSizeBytes = HeaderSize();//sizeof(RsyncAssemblyInstrHdr);
    
-   if (type == RsyncChunkType)
-   {
-      m_nSizeBytes = m_nHdrSizeBytes + nParam;
-   }
-   else if (type == RsyncBeginMarker)
-   {
-      m_nSizeBytes = m_nHdrSizeBytes + nParam;
-   }
-   else
-   {
-      m_nSizeBytes = m_nHdrSizeBytes;
-   }
+//   if (type == RsyncChunkType)
+//   {
+//      m_nSizeBytes = sizeof(Data) + nParam;
+//   }
+//   else if (type == RsyncBeginMarker)
+//   {
+//      m_nSizeBytes = m_nHdrSizeBytes + nParam;
+//   }
+//   else
+//   {
+//      m_nSizeBytes = m_nHdrSizeBytes;
+//   }
+   m_nSizeBytes = sizeof(Data) + nSizeBytes;
    
    if (allocate())
    {
-      ((RsyncAssemblyInstrHdr*)m_pPkt)->type = type;
-      ((RsyncAssemblyInstrHdr*)m_pPkt)->info.generic = nParam;
+//      ((RsyncAssemblyInstrHdr*)m_pPkt)->type = type;
+//      ((RsyncAssemblyInstrHdr*)m_pPkt)->info.generic = nParam;
+      data()->type   = type;
+      data()->length = nSizeBytes;
       printf("RsyncAssemblyInstr: ttl=%u, parm=%u\n",
              m_nSizeBytes, nParam);
    }
@@ -54,34 +59,40 @@ RsyncAssemblyInstr::~RsyncAssemblyInstr()
 //------------------------------------------------------------------------------
 RsyncAssemblyInstr::RsyncAssmbInstrType RsyncAssemblyInstr::type() const
 {
-   RsyncAssmbInstrType l_type = RsyncTypeNotSet;
+//   RsyncAssmbInstrType l_type = RsyncTypeNotSet;
+//   
+//   if (m_pPkt)
+//   {
+//      l_type = (RsyncAssmbInstrType)((RsyncAssemblyInstrHdr*)m_pPkt)->type;
+//   }
+   Type l_type = TypeNotSet;
    
-   if (m_pPkt)
+   if (data())
    {
-      l_type = (RsyncAssmbInstrType)((RsyncAssemblyInstrHdr*)m_pPkt)->type;
+      l_type = data()->type;
    }
    
    return l_type;
 }
 
 //------------------------------------------------------------------------------
-unsigned int RsyncAssemblyInstr::info() const
-{
-   unsigned int l_nGeneric = 0;
-   
-   if (m_pPkt)
-   {
-      l_nGeneric = ((RsyncAssemblyInstrHdr*)m_pPkt)->info.generic;
-   }
-   
-   return l_nGeneric;
-}
+//unsigned int RsyncAssemblyInstr::info() const
+//{
+//   unsigned int l_nGeneric = 0;
+//   
+//   if (m_pPkt)
+//   {
+//      l_nGeneric = ((RsyncAssemblyInstrHdr*)m_pPkt)->info.generic;
+//   }
+//   
+//   return l_nGeneric;
+//}
 
 //------------------------------------------------------------------------------
-ui32  RsyncAssemblyInstr::HeaderSize()
-{
-   return sizeof(RsyncAssemblyInstrHdr);
-}
+//ui32  RsyncAssemblyInstr::HeaderSize()
+//{
+//   return sizeof(RsyncAssemblyInstrHdr);
+//}
 
 //------------------------------------------------------------------------------
 bool RsyncAssemblyInstr::unpack(void* pPkt, unsigned int nSizeBytes)
@@ -114,7 +125,7 @@ bool RsyncAssemblyInstr::unpack(void* pPkt, unsigned int nSizeBytes)
       if ((nSizeBytes - sizeof(RsyncAssemblyInstrHdr)) !=
           l_pHeader->info.chunkSizeBytes)
       {
-         printf("::unpack: size mismatch - size = %d, exp = %d\n",
+         printf("::unpack: size mismatch - size = %lu, exp = %d\n",
                 (nSizeBytes - sizeof(RsyncAssemblyInstrHdr)),
                 l_pHeader->info.chunkSizeBytes);
          return false;
@@ -126,7 +137,7 @@ bool RsyncAssemblyInstr::unpack(void* pPkt, unsigned int nSizeBytes)
       if ((nSizeBytes - sizeof(RsyncAssemblyInstrHdr)) !=
           l_pHeader->info.relPathLen)
       {
-         printf("::unpack: size mismatch - size = %d, expected = %d\n",
+         printf("::unpack: size mismatch - size = %lu, expected = %d\n",
                 (nSizeBytes - sizeof(RsyncAssemblyInstrHdr)),
                 l_pHeader->info.relPathLen);
          return false;

@@ -94,7 +94,7 @@ RsyncAssembler::AddStatus RsyncAssembler::addInstruction(void* pInstr,
       RsyncSegmentReport* l_pSegReport = NULL;
       std::string l_sFilename;
       
-      l_sFilename = std::string((char*)l_pInstr->dataPtr());
+      l_sFilename = std::string((char*)l_pInstr->data());
 
       l_pSegReport = m_pSegmenter->getReport(l_sFilename);
       m_vSegments = l_pSegReport->segments();
@@ -180,7 +180,7 @@ bool RsyncAssembler::execAssemblyInstr(RsyncAssemblyInstr* pInstr)
    
    if (pInstr->type() == RsyncAssemblyInstr::RsyncChunkType)
    {
-      l_bExecSuccess = m_pStage->add((unsigned char*)pInstr->dataPtr(),
+      l_bExecSuccess = m_pStage->add((unsigned char*)pInstr->data(),
                                      pInstr->dataSize());
    }
    else if (pInstr->type() == RsyncAssemblyInstr::RsyncSegmentType)

@@ -78,21 +78,36 @@ RsyncSegVec& RsyncSegmentReport::segments()
 }
 
 //------------------------------------------------------------------------------
-bool RsyncSegmentReport::header(RsyncReportHeader* pHeader) const
+//bool RsyncSegmentReport::header(RsyncReportHeader* pHeader) const
+//{
+//   if (pHeader == NULL)
+//   {
+//      return false;
+//   }
+//   
+//   if (m_sFilename.length() > RsyncMaxPathLength)
+//   {
+//      return false;
+//   }
+//   
+//   pHeader->segmentCount = m_vSegVec.size();
+//   pHeader->segmentSizeBytes = m_nBlockSizeBytes;
+//   strncpy(pHeader->fullFileName, m_sFilename.c_str(), m_sFilename.length());
+//   
+//   return true;
+//}
+bool RsyncSegmentReport::header(RsyncSegmentReportHdr** pHeader) const
 {
-   if (pHeader == NULL)
-   {
-      return false;
-   }
-   
    if (m_sFilename.length() > RsyncMaxPathLength)
    {
       return false;
    }
    
-   pHeader->segmentCount = m_vSegVec.size();
-   pHeader->segmentSizeBytes = m_nBlockSizeBytes;
-   strncpy(pHeader->fullFileName, m_sFilename.c_str(), m_sFilename.length());
+   *pHeader = new RsyncSegmentReportHdr();
+   
+   (*pHeader)->setSegmentCount(m_vSegVec.size());
+   (*pHeader)->setSegmentSize(m_nBlockSizeBytes);
+   (*pHeader)->setFilePath(m_sFilename.c_str());
    
    return true;
 }
@@ -104,13 +119,13 @@ void RsyncSegmentReport::resetSegIndex()
 }
 
 //------------------------------------------------------------------------------
-bool RsyncSegmentReport::nextPackedSeg(RsyncPackedSeg* pSegment)
+bool RsyncSegmentReport::nextSegment(RsyncSegmentPacket** pSegment)
 {
    bool l_bSuccess = false;
    
    if (m_iSegIt < m_vSegVec.end())
    {
-      (*m_iSegIt)->pack(pSegment);
+      (*m_iSegIt)->toPacket(pSegment);
       m_iSegIt++;
       
       l_bSuccess = true;
@@ -134,11 +149,26 @@ void RsyncSegmentReport::destroy()
 }
 
 //------------------------------------------------------------------------------
-void RsyncSegmentReport::PrintReportHeader(const RsyncReportHeader* pHdr)
+//void RsyncSegmentReport::PrintReportHeader(const RsyncReportHeader* pHdr)
+//{
+//   printf("RsyncReportHeader:\n");
+//   printf("  marker           = 0x%08X\n", pHdr->marker);
+//   printf("  fullFileName     = %s\n", pHdr->fullFileName);
+//   printf("  segmentCount     = %u\n", pHdr->segmentCount);
+//   printf("  segmentSizeBytes = %u\n", pHdr->segmentSizeBytes);
+//}
+void RsyncSegmentReport::PrintReportHeader(const RsyncSegmentReportHdr* pHdr)
 {
+   ui32        l_nSegmentCount = 0;
+   ui32        l_nSegmentSize = 0;
+   std::string l_sFilePath;
+   
+   pHdr->getFilePath(l_sFilePath);
+   pHdr->getSegmentCount(l_nSegmentCount);
+   pHdr->getSegmentSize(l_nSegmentSize);
+   
    printf("RsyncReportHeader:\n");
-   printf("  marker           = 0x%08X\n", pHdr->marker);
-   printf("  fullFileName     = %s\n", pHdr->fullFileName);
-   printf("  segmentCount     = %u\n", pHdr->segmentCount);
-   printf("  segmentSizeBytes = %u\n", pHdr->segmentSizeBytes);
+   printf("  fullFileName     = %s\n", l_sFilePath.c_str());
+   printf("  segmentCount     = %u\n", l_nSegmentCount);
+   printf("  segmentSizeBytes = %u\n", l_nSegmentSize);
 }

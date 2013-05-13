@@ -6,7 +6,7 @@
 //------------------------------------------------------------------------------
 GenericPacket::GenericPacket()
    : m_pPkt(NULL)
-   , m_nHdrSizeBytes(0)
+   //, m_nHdrSizeBytes(0)
    , m_nSizeBytes(0)
 {
 }
@@ -18,21 +18,20 @@ GenericPacket::GenericPacket(const GenericPacket &other)
 }
 
 //------------------------------------------------------------------------------
-GenericPacket::GenericPacket(unsigned int nSizeBytes)
+GenericPacket::GenericPacket(ui32 nSizeBytes)
    : m_pPkt(NULL)
-   , m_nHdrSizeBytes(0)
+   //, m_nHdrSizeBytes(0)
    , m_nSizeBytes(nSizeBytes)
 {
 }
 
 //------------------------------------------------------------------------------
-GenericPacket::GenericPacket(unsigned int nHdrSizeBytes,
-                             unsigned int nDataSizeBytes)
-   : m_pPkt(NULL)
-   , m_nHdrSizeBytes(nHdrSizeBytes)
-   , m_nSizeBytes(nHdrSizeBytes + nDataSizeBytes)
-{
-}
+//GenericPacket::GenericPacket(ui32 nHdrSizeBytes, ui32 nDataSizeBytes)
+//   : m_pPkt(NULL)
+//   , m_nHdrSizeBytes(nHdrSizeBytes)
+//   , m_nSizeBytes(nHdrSizeBytes + nDataSizeBytes)
+//{
+//}
 
 //------------------------------------------------------------------------------
 GenericPacket::~GenericPacket()
@@ -48,10 +47,10 @@ bool GenericPacket::allocate()
       return false;
    }
    
-   if (m_nHdrSizeBytes > m_nSizeBytes)
-   {
-      return false;
-   }
+//   if (m_nHdrSizeBytes > m_nSizeBytes)
+//   {
+//      return false;
+//   }
    
    m_pPkt = new unsigned char[m_nSizeBytes];
    
@@ -67,7 +66,7 @@ void GenericPacket::deallocate()
       m_pPkt = NULL;
    }
    
-   m_nHdrSizeBytes = 0;
+   //m_nHdrSizeBytes = 0;
    m_nSizeBytes = 0;
 }
 
@@ -82,35 +81,46 @@ void GenericPacket::destroy()
 }
 
 //------------------------------------------------------------------------------
-unsigned int GenericPacket::size() const
+ui32 GenericPacket::size() const
 {
    return m_nSizeBytes;
 }
 
 //------------------------------------------------------------------------------
-unsigned int GenericPacket::hdrSize() const
+ui32 GenericPacket::headerSize() const
 {
-   return m_nHdrSizeBytes;
+   return 0;
 }
 
 //------------------------------------------------------------------------------
-unsigned int GenericPacket::dataSize() const
+ui32 GenericPacket::dataSize() const
 {
-   return size() - hdrSize();
+//   return size() - hdrSize();
+   return size();
 }
 
 //------------------------------------------------------------------------------
-void* const GenericPacket::hdrPtr() const
-{
-   return (void*)m_pPkt;
-}
+//void* GenericPacket::hdrPtr()
+//{
+//   return (void*)m_pPkt;
+//}
+
+//------------------------------------------------------------------------------
+//void* const GenericPacket::header() const
+//{
+//   return reinterpret_cast<void* const>(m_pPkt);
+//}
 
 //------------------------------------------------------------------------------
 void* GenericPacket::dataPtr()
 {
-   if (m_nHdrSizeBytes < m_nSizeBytes)
+//   if (m_nHdrSizeBytes < m_nSizeBytes)
+//   {
+//      return (void*)(m_pPkt + m_nHdrSizeBytes);
+//   }
+   if (m_pPkt)
    {
-      return (void*)(m_pPkt + m_nHdrSizeBytes);
+      return reinterpret_cast<void*>(m_pPkt);
    }
    
    return NULL;
@@ -119,16 +129,59 @@ void* GenericPacket::dataPtr()
 //------------------------------------------------------------------------------
 void* const GenericPacket::dataPtr() const
 {
-   if (m_nHdrSizeBytes < m_nSizeBytes)
+   //   if (m_nHdrSizeBytes < m_nSizeBytes)
+   //   {
+   //      return (void*)(m_pPkt + m_nHdrSizeBytes);
+   //   }
+   if (m_pPkt)
    {
-      return reinterpret_cast<void* const>(m_pPkt + m_nHdrSizeBytes);
+      return reinterpret_cast<void* const>(m_pPkt);
    }
    
    return NULL;
 }
 
 //------------------------------------------------------------------------------
-bool GenericPacket::pack(void** pPkt, unsigned int &nSizeBytes) const
+//void* GenericPacket::dataEndPtr()
+//{
+//   if (m_pPkt)
+//   {
+//      return reinterpret_cast<void*>(m_pPkt + size());
+//   }
+//   
+//   return NULL;
+//}
+
+//------------------------------------------------------------------------------
+//void* const GenericPacket::dataEndPtr() const
+//{
+//   if (m_pPkt)
+//   {
+//      return reinterpret_cast<void* const>(m_pPkt + size());
+//   }
+//   
+//   return NULL;
+//}
+
+//------------------------------------------------------------------------------
+void* const GenericPacket::data() const
+{
+//   if (m_nHdrSizeBytes < m_nSizeBytes)
+//   {
+//      return reinterpret_cast<void* const>(m_pPkt + m_nHdrSizeBytes);
+//   }
+   
+//   if (m_pPkt)
+//   {
+//      return reinterpret_cast<void* const>(m_pPkt);
+//   }
+//   
+//   return NULL;
+   return dataPtr();
+}
+
+//------------------------------------------------------------------------------
+bool GenericPacket::pack(void** pPkt, ui32 &nSizeBytes) const
 {
    //unsigned char* l_pPkt = (unsigned char*)(*pPkt);
    
@@ -159,7 +212,7 @@ bool GenericPacket::pack(void** pPkt, unsigned int &nSizeBytes) const
 }
 
 //------------------------------------------------------------------------------
-bool GenericPacket::unpack(const void* pPkt, unsigned int nSizeBytes)
+bool GenericPacket::unpack(const void* pPkt, ui32 nSizeBytes)
 {
    // Begin by destroying the packet if it is already allocated.
    destroy();
@@ -169,7 +222,7 @@ bool GenericPacket::unpack(const void* pPkt, unsigned int nSizeBytes)
    
    // ...however we have no idea what the header or data sizes are for
    // a generic packet.  Therefore, set to zero.
-   m_nHdrSizeBytes = 0;
+   //m_nHdrSizeBytes = 0;
    
    if (!allocate())
    {
@@ -191,12 +244,13 @@ GenericPacket& GenericPacket::operator= (const GenericPacket &other)
    
    deallocate();
    
-   m_nHdrSizeBytes   = other.m_nHdrSizeBytes;
+   //m_nHdrSizeBytes   = other.m_nHdrSizeBytes;
    m_nSizeBytes      = other.m_nSizeBytes;
    
    if (allocate())
    {
-      memcpy(m_pPkt, other.m_pPkt, m_nHdrSizeBytes);
+//      memcpy(m_pPkt, other.m_pPkt, m_nHdrSizeBytes);
+      memcpy(m_pPkt, other.m_pPkt, size());
    }
    
    return *this;

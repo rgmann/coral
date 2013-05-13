@@ -1,7 +1,7 @@
 #ifndef MUTEX_H
 #define MUTEX_H
 
-#define WAIT_FOREVER    -1
+#include "BaseTypes.h"
 
 struct PlatformMutex;
 
@@ -9,11 +9,13 @@ class Mutex
 {
 public:
    
+   static const i32 WaitForever = -1;
+   
    Mutex();
    
    ~Mutex();
    
-   bool  lock(int nTimeoutMs = WAIT_FOREVER);
+   bool  lock(i32 nTimeoutMs = WaitForever);
    
    bool  unlock();
    

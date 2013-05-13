@@ -8,18 +8,21 @@ INC =	-I../../includes/base \
 	-I../../includes/base/helpers \
 	-I../../includes/base/container \
 	-I../../includes/base/concurrency \
+	-I../../includes/appserver \
 	-I../../includes/rsync
-ABSLIB = -L../../lib/base -lbase -L../../lib/rsync -lrsync
+ABSLIB = -L../../lib/base -lbase \
+         -L../../lib/rsync -lrsync \
+         -L../../lib/appserver -lappserver
 LIBS = -lstdc++ -lpthread
 
 rsync:
 	$(CC) -Wall -g -o rsync rsynctest.cpp $(INC) $(ABSLIB) $(LIBS)
 
-segm:
-	$(CC) -Wall -g -o segm segmentertest.cpp $(INC) $(ABSLIB) $(LIBS)
+packet:
+	$(CC) -Wall -g -o packet packettest.cpp $(INC) $(ABSLIB) $(LIBS)
 
 flow:
 	$(CC) -Wall -g -o flow flowtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
 clean:
-	rm -rf  *.o rsync segm flow *.dSYM
+	rm -rf  *.o rsync packet flow *.dSYM
