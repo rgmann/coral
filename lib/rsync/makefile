@@ -2,7 +2,7 @@
 CC = g++
 FLAG = -Wall -c -g
 LIBNAME = rsync
-CPP = ../../src/common/$(LIBNAME)/*.cpp
+CPP = ../../src/common/$(LIBNAME)/*.cpp ../../src/common/$(LIBNAME)/packets/*.cpp
 INC = -I../../includes/base \
       -I../../includes/base/crypto \
       -I../../includes/base/file_system \
@@ -10,8 +10,9 @@ INC = -I../../includes/base \
       -I../../includes/base/helpers \
       -I../../includes/base/container \
       -I../../includes/base/concurrency \
+      -I../../includes/appserver \
       -I../../includes/rsync \
-      -I../../includes/appserver
+      -I../../includes/rsync/packets
 
 all:
 	$(CC) $(FLAG) $(CPP) $(INC)

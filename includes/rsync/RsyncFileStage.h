@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include "BaseTypes.h"
 
 class RsyncFileStage
 {
@@ -14,7 +15,7 @@ public:
    
    bool open(const std::string &fullFilename);
    
-   bool add(unsigned char* pChunk, unsigned int nChunkSizeBytes);
+   bool add(ui8* pChunk, ui32 nChunkSizeBytes);
    
    bool swap();
    

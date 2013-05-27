@@ -2,9 +2,8 @@
 
 //------------------------------------------------------------------------------
 RsyncSegmentTable::RsyncSegmentTable()
+: m_pHeader(NULL)
 {
-   //memset(&m_Header, 0, sizeof(RsyncReportHeader));
-   m_pHeader = NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -53,15 +52,9 @@ void RsyncSegmentTable::setHeader(RsyncSegmentReportHdr* pHeader)
 //   
 //   return false;
 //}
-bool RsyncSegmentTable::getHeader(RsyncSegmentReportHdr* pHeader) const
+RsyncSegmentReportHdr* RsyncSegmentTable::getHeader() const
 {
-   if (m_pHeader)
-   {
-      pHeader = m_pHeader;
-      return true;
-   }
-
-   return false;
+   return m_pHeader;
 }
 
 //------------------------------------------------------------------------------
@@ -100,7 +93,8 @@ bool RsyncSegmentTable::addSegment(RsyncSegmentReportPacket* pPacket)
    
    if (pPacket->type() == RsyncSegmentReportPacket::SegmentType)
    {
-      l_pSegment = reinterpret_cast<RsyncSegmentPacket*>(pPacket);
+//      l_pSegment = reinterpret_cast<RsyncSegmentPacket*>(pPacket);
+      pPacket->to(&l_pSegment);
       
       m_vSegVec.push_back(l_pSegment);
       l_pSegment->getWeak(l_nWeakChecksum);
@@ -115,7 +109,10 @@ bool RsyncSegmentTable::addSegment(RsyncSegmentReportPacket* pPacket)
    }
    else if (pPacket->type() == RsyncSegmentReportPacket::HeaderType)
    {
-      m_pHeader = reinterpret_cast<RsyncSegmentReportHdr*>(pPacket);
+      // TODO: Figure out what to do if we receive a header when we do not
+      //       expect it.  At the very least, the previous header should be
+      //       deleted.
+      pPacket->to(&m_pHeader);
       
       printf("RsyncSegmentTable::addSegment: HeaderType\n");
       
@@ -203,8 +200,9 @@ bool RsyncSegmentTable::find(RsyncSegment &segment,
 //   
 //   return l_bFound;
 //}
-bool RsyncSegmentTable::find(RsyncSegment &segment, std::ifstream &ifs,
-                             RsyncSegmentPacket* pPacket)
+RsyncSegmentPacket* RsyncSegmentTable::
+find(RsyncSegment &segment, std::ifstream &ifs)//,
+//                             RsyncSegmentPacket* pPacket)
 {
    std::vector<RsyncSegmentPacket*> l_vSegVec;
    std::vector<RsyncSegmentPacket*>::iterator l_iSegIt;
@@ -212,32 +210,35 @@ bool RsyncSegmentTable::find(RsyncSegment &segment, std::ifstream &ifs,
    Md5Hash           strongChecksum;
    Hash128           strongHash;
    Hash128           l_itStrongHash;
-   bool              l_bFound = false;
+   //bool              l_bFound = false;
    
    segment.getWeak(weaksum);
    l_vSegVec = m_hHashTable.get(weaksum.s);
    
    if (l_vSegVec.empty())
    {
-      return false;
+      //return false;
+      return NULL;
    }
    
    segment.getStrong(ifs, strongChecksum);
    strongChecksum.get(&strongHash);
    
-   l_bFound = false;
+//   l_bFound = false;
    for (l_iSegIt = l_vSegVec.begin(); l_iSegIt < l_vSegVec.end(); ++l_iSegIt)
    {
       (*l_iSegIt)->getStrong(l_itStrongHash);
       if (CompareStrong(&strongHash, &l_itStrongHash))
       {
-         pPacket = *l_iSegIt;
-         l_bFound = true;
-         break;
+//         pPacket = *l_iSegIt;
+         //l_bFound = true;
+//         break;
+         return *l_iSegIt;
       }
    }
    
-   return l_bFound;
+   //return l_bFound;
+   return NULL;
 }
 
 //------------------------------------------------------------------------------
@@ -266,7 +267,7 @@ bool RsyncSegmentTable::CompareStrong(const Hash128* pStrongA,
       return false;
    }
    
-   for (unsigned int l_nIdx = 0; l_nIdx < sizeof(Hash128); l_nIdx++)
+   for (ui32 l_nIdx = 0; l_nIdx < sizeof(Hash128); l_nIdx++)
    {
       if (pStrongA->b[l_nIdx] != pStrongB->b[l_nIdx])
       {

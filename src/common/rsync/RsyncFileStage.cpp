@@ -40,7 +40,7 @@ bool RsyncFileStage::open(const std::string &fullFilename)
 }
 
 //------------------------------------------------------------------------------
-bool RsyncFileStage::add(unsigned char* pChunk, unsigned int nChunkSizeBytes)
+bool RsyncFileStage::add(ui8* pChunk, ui32 nChunkSizeBytes)
 {
    if (!m_ofsAssemblyStage.is_open())
    {

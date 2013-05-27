@@ -3,6 +3,10 @@
 #include "RsyncFileAuthority.h"
 #include "RsyncHelper.h"
 #include "FileSystemHelper.h"
+#include "AssemblyBeginMarker.h"
+#include "AssemblyEndMarker.h"
+#include "AssemblyChunkPacket.h"
+#include "AssemblySegmentPacket.h"
 //#include "RsyncSegmentReportHdr.h"
 
 //------------------------------------------------------------------------------
@@ -50,7 +54,7 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
    }
    
    // First we must segment the local version of the file.
-   if (!pSegTable->getHeader(l_pReportHdr))
+   if (!(l_pReportHdr = pSegTable->getHeader()))
    {
       return false;
    }
@@ -102,9 +106,11 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
       (*l_iCurrentSeg)->getWeak(weaksum);
       
       // Attempt to retrieve the segment
-      l_bFound = pSegTable->find(**l_iCurrentSeg, l_fAuthFile, l_pSegPkt);
+//      l_bFound = pSegTable->find(**l_iCurrentSeg, l_fAuthFile, l_pSegPkt);
+      l_pSegPkt = pSegTable->find(**l_iCurrentSeg, l_fAuthFile);
       
-      if (l_bFound)
+      //if (l_bFound)
+      if (l_pSegPkt)
       {
          // If we have a match and the l_nBytesSinceMatch count is > 0,
          // then we have to send a chunk instruction.
@@ -209,21 +215,14 @@ void RsyncFileAuthority::cleanup()
 //------------------------------------------------------------------------------
 bool RsyncFileAuthority::createBeginMarker(const std::string &relFilePath)
 {
-   RsyncAssemblyInstr* l_pSegment = NULL;
+   AssemblyBeginMarker* l_pSegment = NULL;
    
-   l_pSegment = new RsyncAssemblyInstr(RsyncAssemblyInstr::RsyncBeginMarker,
-                                       relFilePath.length() + 1);
+   l_pSegment = new AssemblyBeginMarker(relFilePath);
+   if (l_pSegment == NULL) return false;
+      
+   m_vInstrSeq.push_back(new RsyncAssemblyInstr(l_pSegment));
    
-   if (l_pSegment == NULL)
-   {
-      return false;
-   }
-   
-   strncpy((char*)l_pSegment->data(),
-           relFilePath.c_str(),
-           relFilePath.length() + 1);
-   
-   m_vInstrSeq.push_back(l_pSegment);
+   delete l_pSegment;
    
    return true;
 }
@@ -231,16 +230,14 @@ bool RsyncFileAuthority::createBeginMarker(const std::string &relFilePath)
 //------------------------------------------------------------------------------
 bool RsyncFileAuthority::createEndMarker()
 {
-   RsyncAssemblyInstr* l_pSegment = NULL;
+   AssemblyEndMarker* l_pSegment = NULL;
    
-   l_pSegment = new RsyncAssemblyInstr(RsyncAssemblyInstr::RsyncEndMarker);
+   l_pSegment = new AssemblyEndMarker();
+   if (l_pSegment == NULL) return false;
    
-   if (l_pSegment == NULL)
-   {
-      return false;
-   }
+   m_vInstrSeq.push_back(new RsyncAssemblyInstr(l_pSegment));
    
-   m_vInstrSeq.push_back(l_pSegment);
+   delete l_pSegment;
    
    return true;
 }
@@ -248,17 +245,14 @@ bool RsyncFileAuthority::createEndMarker()
 //------------------------------------------------------------------------------
 bool RsyncFileAuthority::createSegmentInstruction(RsyncSegId segmentId)
 {
-   RsyncAssemblyInstr* l_pSegment = NULL;
+   AssemblySegmentPacket* l_pSegment = NULL;
    
-   l_pSegment = new RsyncAssemblyInstr(RsyncAssemblyInstr::RsyncSegmentType,
-                                       segmentId);
-   
-   if (l_pSegment == NULL)
-   {
-      return false;
-   }
+   l_pSegment = new AssemblySegmentPacket(segmentId);
+   if (l_pSegment == NULL) return false;
 
-   m_vInstrSeq.push_back(l_pSegment);
+   m_vInstrSeq.push_back(new RsyncAssemblyInstr(l_pSegment));
+   
+   delete l_pSegment;
    
    return true;
 }
@@ -268,19 +262,15 @@ bool RsyncFileAuthority::createChunkInstruction(std::ifstream &file,
                                                  unsigned int nOffsetBytes,
                                                  unsigned int nSizeBytes)
 {
-   RsyncAssemblyInstr* l_pSegment = NULL;
-   //RsyncAssemblyInstrHdr* l_pInstrHdr;
+   bool l_bSuccess = false;
+   AssemblyChunkPacket* l_pSegment = NULL;
    
    // Save the current file position just in case so we can restore it later.
    std::streampos l_fStreamPos = file.tellg();
    
-   l_pSegment = new RsyncAssemblyInstr(RsyncAssemblyInstr::RsyncChunkType,
-                                       nSizeBytes);
+   l_pSegment = new AssemblyChunkPacket(nSizeBytes);
+   if (l_pSegment == NULL) return false;
    
-   if (l_pSegment == NULL)
-   {
-      return false;
-   }
 //   printf("createChunkInstruction: size=%u, offs=%u\n",
 //          nSizeBytes, nOffsetBytes);
    
@@ -301,11 +291,13 @@ bool RsyncFileAuthority::createChunkInstruction(std::ifstream &file,
    if (!file.fail())
    {
       // Add the instruction to the vector.
-      m_vInstrSeq.push_back(l_pSegment);
+      m_vInstrSeq.push_back(new RsyncAssemblyInstr(l_pSegment));
       
-      return true;
+      l_bSuccess = true;
    }
    printf("createChunkInstruction: failed to add instr\n");
    
-   return false;
+   delete l_pSegment;
+   
+   return l_bSuccess;
 }

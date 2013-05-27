@@ -1,5 +1,9 @@
-#include "RsyncAssembler.h"
 #include <iostream>
+#include "RsyncAssembler.h"
+#include "AssemblyBeginMarker.h"
+#include "AssemblyEndMarker.h"
+#include "AssemblyChunkPacket.h"
+#include "AssemblySegmentPacket.h"
 
 //------------------------------------------------------------------------------
 RsyncAssembler::RsyncAssembler()
@@ -54,10 +58,12 @@ void RsyncAssembler::start(RsyncAssemblyMode mode)
 
 
 //------------------------------------------------------------------------------
-RsyncAssembler::AddStatus RsyncAssembler::addInstruction(void* pInstr,
-                                 unsigned int nInstrLenBytes)
+//RsyncAssembler::AddStatus RsyncAssembler::addInstruction(void* pInstr,
+//                                 unsigned int nInstrLenBytes)
+RsyncAssembler::AddStatus
+RsyncAssembler::addInstruction(RsyncAssemblyInstr* pInstr)
 {
-   RsyncAssemblyInstr* l_pInstr = NULL;
+   //RsyncAssemblyInstr* l_pInstr = NULL;
    bool l_bSuccess = false;
    
    if (pInstr == NULL)
@@ -72,29 +78,31 @@ RsyncAssembler::AddStatus RsyncAssembler::addInstruction(void* pInstr,
       return Failure;
    }
    
-   l_pInstr = new RsyncAssemblyInstr();
-   if (l_pInstr == NULL)
-   {
-      std::cout << "addInstruction: Failed to create Instr" << std::endl;
-      return Failure;
-   }
+//   l_pInstr = new RsyncAssemblyInstr();
+//   if (l_pInstr == NULL)
+//   {
+//      std::cout << "addInstruction: Failed to create Instr" << std::endl;
+//      return Failure;
+//   }
+//   
+//   if (!l_pInstr->unpack(pInstr, nInstrLenBytes))
+//   {
+//      std::cout << "addInstruction: Failed to unpack" << std::endl;
+//      delete l_pInstr;
+//      l_pInstr = NULL;
+//      return Failure;
+//   }
    
-   if (!l_pInstr->unpack(pInstr, nInstrLenBytes))
-   {
-      std::cout << "addInstruction: Failed to unpack" << std::endl;
-      delete l_pInstr;
-      l_pInstr = NULL;
-      return Failure;
-   }
    
-   // TODO: Figure out automatic handling of 'Begin' and 'End' instructions.
-   
-   if (l_pInstr->type() == RsyncAssemblyInstr::RsyncBeginMarker)
+   if (pInstr->type() == RsyncAssemblyInstr::BeginMarkerType)
    {
       RsyncSegmentReport* l_pSegReport = NULL;
+      AssemblyBeginMarker* pBeginMarker = NULL;
       std::string l_sFilename;
       
-      l_sFilename = std::string((char*)l_pInstr->data());
+      //pBeginMarker = static_cast<AssemblyBeginMarker*>(pInstr);
+      if (!pInstr->to(&pBeginMarker)) printf("Failed ->to(BeginMarkerType)\n");
+      pBeginMarker->getPath(l_sFilename);
 
       l_pSegReport = m_pSegmenter->getReport(l_sFilename);
       m_vSegments = l_pSegReport->segments();
@@ -118,19 +126,19 @@ RsyncAssembler::AddStatus RsyncAssembler::addInstruction(void* pInstr,
       
       return BeginMarker;
    }
-   else if (l_pInstr->type() == RsyncAssemblyInstr::RsyncEndMarker)
+   else if (pInstr->type() == RsyncAssemblyInstr::EndMarkerType)
    {
       std::cout << "Got EndMarker" << std::endl;
       return EndMarker;
    }
    else if (m_eAssemblyMode == StageInstructions)
    {
-      m_vAssmbInstrs.push_back(l_pInstr);
+      m_vAssmbInstrs.push_back(pInstr);
    }
    else
    {
       printf("RsyncAssembler::add: exec instr\n");
-      if (!execAssemblyInstr(l_pInstr))
+      if (!execAssemblyInstr(pInstr))
       {
          printf("RsyncAssembler::add: Failed to execute instr\n");
       }
@@ -178,37 +186,58 @@ bool RsyncAssembler::execAssemblyInstr(RsyncAssemblyInstr* pInstr)
 {
    bool l_bExecSuccess = true;
    
-   if (pInstr->type() == RsyncAssemblyInstr::RsyncChunkType)
+   if (pInstr->type() == RsyncAssemblyInstr::ChunkType)
    {
-      l_bExecSuccess = m_pStage->add((unsigned char*)pInstr->data(),
-                                     pInstr->dataSize());
-   }
-   else if (pInstr->type() == RsyncAssemblyInstr::RsyncSegmentType)
-   {
-      RsyncSegId     l_nSegId = 0;
-      unsigned char* l_pData = NULL;
-      unsigned int   l_nDataSize = 0;
+      AssemblyChunkPacket* l_pChunkPkt = NULL;
       
-      l_nSegId = pInstr->info();
+      pInstr->to(&l_pChunkPkt);
+      
+      l_bExecSuccess = m_pStage->add(l_pChunkPkt->data(),
+                                     l_pChunkPkt->dataSize());
+   }
+   else if (pInstr->type() == RsyncAssemblyInstr::SegmentType)
+   {
+      AssemblySegmentPacket*  l_pSegPkt = NULL;
+      RsyncSegment*           l_pSegment = NULL;
+      
+      ui32           l_nSegId = 0;
+      unsigned char* l_pData = NULL;
+      ui32           l_nDataSize = 0;
+      
+//      l_pSegPkt = dynamic_cast<AssemblySegmentPacket*>(pInstr);
+      pInstr->to(&l_pSegPkt);
+      l_pSegPkt->getSegmentId(l_nSegId);
+      
       if (l_nSegId >= m_vSegments.size())
       {
          return false;
       }
       
-//      if (!m_vSegments[l_nSegId]->getData(&l_pData, l_nDataSize))
-      if (!m_vSegments[l_nSegId]->getData(m_pStage->stream(),
-                                           &l_pData, l_nDataSize))
+      // Get the segment structure with the specified segment ID.  The segment
+      // IDs are simply consecutive indices.
+      l_pSegment = m_vSegments[l_nSegId];
+      
+      // A segment indicates that the data is available from the local file.
+      // Therefore, read the data associated with the segment directly from
+      // the local file and send to the local data buffer (which is allocated
+      // by getData()).
+      if (!l_pSegment->getData(m_pStage->stream(), &l_pData, l_nDataSize))
       {
          return false;
       }
       
-      l_bExecSuccess = m_pStage->add(l_pData,
-                                     l_nDataSize);
+      // Add the new data chunk to the file stage.
+      l_bExecSuccess = m_pStage->add(l_pData, l_nDataSize);
       
       // Local allocated data can now be delete.
       delete[] l_pData;
       l_pData = NULL;
+      
+      delete l_pSegPkt;
+      l_pSegPkt = NULL;
    }
+   
+   // Unrecognized packet type.
    else
    {
       l_bExecSuccess = false;

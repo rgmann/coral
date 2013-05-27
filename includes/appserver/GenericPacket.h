@@ -18,11 +18,9 @@ public:
    
    GenericPacket();
    
-   GenericPacket(const GenericPacket &other);
+   explicit GenericPacket(const GenericPacket &other);
    
-   GenericPacket(ui32 nSizeBytes);
-   
-   //GenericPacket(unsigned int nHdrSizeBytes, unsigned int nDataSizeBytes);
+   explicit GenericPacket(ui32 nSizeBytes);
    
    virtual ~GenericPacket();
    
@@ -33,9 +31,7 @@ public:
    bool  isAllocated() const;
    
    void  destroy();
-   
-   //ui32 size() const;
-      
+         
    /**
     * Returns the the full number of bytes allocated to this packet.
     * As this is a property of the base packet, the method cannot be overriden.
@@ -46,42 +42,43 @@ public:
     * This size of the immediate packet's Data definition.
     * All Packet instances must override this method.
     */
-   virtual ui32 dataSize() const = 0;
+   virtual ui32 dataSize() const;
    
    /**
     * Returns the number of bytes that precede this packets Data field.
     */
-   virtual ui32 headerSize() const;
+   //virtual ui32 dataOffset() const;
    
    /**
-    * Returns the sume of the headerSize() and dataSize().
+    * Returns the sum of the dataOffset() and dataSize().
     */
-   virtual ui32 headerAndDataSize() const;
-   
-   //virtual void* const data() const;
-   
+   //virtual ui32 inclusiveSize() const = 0;
+      
    virtual bool  pack(void** pData, ui32 &nSizeBytes) const;
    
    virtual bool  unpack(const void* pData, ui32 nSizeBytes);
    
    GenericPacket& operator= (const GenericPacket& other);
    
-protected:
-   
-   //void* hdrPtr();
+   /**
+    * Returns a pointer to the very beginning of the packet.  Cannot be
+    * overriden.
+    */
+   void*       basePtr();
+   void* const basePtr() const;
    
    virtual void*        dataPtr();
    virtual void* const  dataPtr() const;
    
-   virtual void*        dataEndPtr() = 0;
-   virtual void* const  dataEndPtr() const = 0;
+protected:
+   
+//   virtual void*        dataEndPtr();
+//   virtual void* const  dataEndPtr() const;
    
 protected:
    
    unsigned char* m_pPkt;
-   
-   //unsigned int   m_nHdrSizeBytes;
-   
+      
    ui32   m_nSizeBytes;
 };
 

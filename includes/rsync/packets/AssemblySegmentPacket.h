@@ -1,9 +1,9 @@
 #ifndef ASSEMBLY_SEGMENT_PACKET_H
 #define ASSEMBLY_SEGMENT_PACKET_H
 
-#include "RsyncAssemblyInstr.h"
+#include "GenericPacket.h"
 
-class AssemblySegmentPacket : public RsyncAssemblyInstr
+class AssemblySegmentPacket : public GenericPacket
 {
 public:
    
@@ -26,19 +26,23 @@ public:
     * If type = RsyncSegmentType, then nParam is treated as the segment ID
     * and the data pointer is NULL.
     */
-   AssemblySegmentPacket(ui32 segmentid);
+   AssemblySegmentPacket(ui32 nSegmentId);
    
-   ui32  getSegmentId() const;
+   void  setSegmentId(ui32 nSegmentId);
    
-   void* const data() const;
+   bool  getSegmentId(ui32 &nSegmentId) const;
+   
+   bool  unpack(const void* pPkt, ui32 nSizeBytes);
    
 protected:
    
-   void* dataPtr();
-   
+   ui32  dataSize() const;
+      
+   Data* const data() const;
+      
 private:
    
-   typedef RsyncAssemblyInstr inherited;
+   typedef GenericPacket inherited;
 };
 
 #endif // ASSEMBLY_SEGMENT_PACKET_H

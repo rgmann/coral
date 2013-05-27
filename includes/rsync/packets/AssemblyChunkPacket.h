@@ -1,9 +1,9 @@
 #ifndef ASSEMBLY_CHUNK_PACKET_H
 #define ASSEMBLY_CHUNK_PACKET_H
 
-#include "RsyncAssemblyInstr.h"
+#include "GenericPacket.h"
 
-class AssemblyChunkPacket : public RsyncAssemblyInstr
+class AssemblyChunkPacket : public GenericPacket
 {
 public:
    
@@ -27,17 +27,15 @@ public:
     */
    AssemblyChunkPacket(ui32 nChunkSizeBytes);
    
-   ui32  dataSize() const;
+   virtual ui32 dataSize() const;
    
-   void* const data() const;
+   ui8* const data();
    
-protected:
-   
-   void* dataPtr();
+   bool  unpack(const void* pPkt, ui32 nSizeBytes);
    
 private:
    
-   typedef RsyncAssemblyInstr inherited;
+   typedef GenericPacket inherited;
 };
 
 #endif // ASSEMBLY_CHUNK_PACKET_H

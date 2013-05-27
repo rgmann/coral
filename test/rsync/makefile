@@ -9,7 +9,9 @@ INC =	-I../../includes/base \
 	-I../../includes/base/container \
 	-I../../includes/base/concurrency \
 	-I../../includes/appserver \
-	-I../../includes/rsync
+	-I../../includes/rsync \
+       -I../../includes/rsync/packets
+
 ABSLIB = -L../../lib/base -lbase \
          -L../../lib/rsync -lrsync \
          -L../../lib/appserver -lappserver
@@ -24,5 +26,8 @@ packet:
 flow:
 	$(CC) -Wall -g -o flow flowtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
+class:
+	$(CC) -Wall -g -o class classtest.cpp $(INC) $(ABSLIB) $(LIBS)
+
 clean:
-	rm -rf  *.o rsync packet flow *.dSYM
+	rm -rf  *.o rsync packet flow class *.dSYM

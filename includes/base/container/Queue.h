@@ -4,6 +4,7 @@
 #include <string>
 #include <queue>
 #include <stdio.h>
+#include "BaseTypes.h"
 #include "CountingSem.h"
 #include "Mutex.h"
 
@@ -12,21 +13,23 @@ class Queue
 {
 public:
    
-   static const unsigned int InfiniteQueue = 0;
+   static const ui32 InfiniteQueue = 0;
    
    Queue();
    
    ~Queue();
    
-   bool  initialize(unsigned int nMaxElements = InfiniteQueue);
+   bool  initialize(ui32 nMaxElements = InfiniteQueue);
    
    bool  push(const T &item, int nTimeoutMs = Sem::SemWaitForever);
    
    bool  pop(T &item, int nTimeoutMs = Sem::SemWaitForever);
    
+   bool  peek(T &item);
+   
    bool  isEmpty();
    
-   unsigned int size();
+   ui32 size();
    
 private:
    
@@ -36,7 +39,8 @@ private:
    
 private:
    
-   unsigned int   m_nMaxSize;
+   ui32  m_nMaxSize;
+   bool  m_bIsInfinite;
    
    std::queue<T>  m_queue;
    
@@ -51,6 +55,7 @@ template <class T>
 Queue<T>::Queue()
 {
    m_nMaxSize = 0;
+   m_bIsInfinite = false;
    
    m_pPushSem = NULL;
    m_pPopSem = NULL;
@@ -75,7 +80,7 @@ Queue<T>::~Queue()
 
 //------------------------------------------------------------------------------
 template <class T>
-bool Queue<T>::initialize(unsigned int nMaxElements)
+bool Queue<T>::initialize(ui32 nMaxElements)
 {
    m_nMaxSize = nMaxElements;
    
@@ -92,6 +97,9 @@ bool Queue<T>::initialize(unsigned int nMaxElements)
       return false;
    }
    
+   // If this is an "infinite" queue, we simply don't use the pop semaphore.
+   m_bIsInfinite = (nMaxElements == InfiniteQueue);
+   
    return true;
 }
 
@@ -102,8 +110,12 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
    bool  l_bSuccess = false;
       
    // The producer that acquires the push lock now needs to wait for room.
-   if (m_pPopSem->take(nTimeoutMs) == Sem::SemAcquired)
+   if (!m_bIsInfinite && (m_pPopSem->take(nTimeoutMs) != Sem::SemAcquired))
    {
+      return false;
+   }
+//   if (m_pPopSem->take(nTimeoutMs) == Sem::SemAcquired)
+//   {
       l_bSuccess = true;
       
       // Otherwise, the item can pushed onto the end of the queue.
@@ -111,8 +123,8 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
       
       // Post the push semaphore
       m_pPushSem->give();      
-   }
-      
+//   }
+   
    return l_bSuccess;
 }
 
@@ -127,8 +139,24 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
       item = m_queue.front();
       m_queue.pop();
       
-      m_pPopSem->give();
-            
+//      m_pPopSem->give();
+      if (!m_bIsInfinite) m_pPopSem->give();
+      
+      l_bSuccess = true;
+   }
+   
+   return l_bSuccess;
+}
+
+//------------------------------------------------------------------------------
+template <class T>
+bool Queue<T>::peek(T &item)
+{
+   bool l_bSuccess = false;
+   
+   if (!isEmpty())
+   {
+      item = m_queue.front();
       l_bSuccess = true;
    }
    
@@ -144,9 +172,9 @@ bool Queue<T>::isEmpty()
 
 //------------------------------------------------------------------------------
 template <class T>
-unsigned int Queue<T>::size()
+ui32 Queue<T>::size()
 {
-   return (unsigned int)m_queue.size();
+   return (ui32)m_queue.size();
 }
 
 #endif // QUEUE_H

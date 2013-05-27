@@ -3,498 +3,666 @@
 #include <sstream>
 #include <iostream>
 #include "RsyncPacket.h"
-#include "RsyncSegmentReportPacket.h"
+//#include "RsyncSegmentReportPacket.h"
 #include "RsyncSegmentReportHdr.h"
 
 //using namespace Rsync;
 
-bool testRsyncPacket();
-bool testRsyncSegmentReportPacket();
-bool testSegmentReportHeader();
-bool testSegmentPacket();
+bool testAssemblyBeginMarker();
+bool testAssemblyEndMarker();
+bool testAssemblyChunkPacket();
+bool testAssemblySegment();
+bool testRsyncSegmentReportHdr();
+bool testRsyncSegmentPacket();
 
 int main(int argc, char *argv[])
 {
    printf("Rsync Packet test\n");
    
-   if (!testRsyncPacket())
+   if (!testAssemblyBeginMarker())
    {
-      printf("testRsyncPacket [FAIL]\n");
+      printf("testAssemblyBeginMarker [FAIL]\n");
    }
    else
    {
-      printf("testRsyncPacket [PASS]\n");
+      printf("testAssemblyBeginMarker [PASS]\n");
    }
    
-   if (!testRsyncSegmentReportPacket())
+   if (!testAssemblyEndMarker())
    {
-      printf("testRsyncSegmentReportPacket [FAIL]\n");
+      printf("testAssemblyEndMarker [FAIL]\n");
    }
    else
    {
-      printf("testRsyncSegmentReportPacket [PASS]\n");
+      printf("testAssemblyEndMarker [PASS]\n");
    }
    
-   if (!testSegmentReportHeader())
+   if (!testAssemblyChunkPacket())
    {
-      printf("testSegmentReportHeader [FAIL]\n");
+      printf("testAssemblyChunkPacket [FAIL]\n");
    }
    else
    {
-      printf("testSegmentReportHeader [PASS]\n");
+      printf("testAssemblyChunkPacket [PASS]\n");
    }
    
-   if (!testSegmentPacket())
+   if (!testAssemblySegment())
    {
-      printf("testSegmentPacket [FAIL]\n");
+      printf("testAssemblySegment [FAIL]\n");
    }
    else
    {
-      printf("testSegmentPacket [PASS]\n");
+      printf("testAssemblySegment [PASS]\n");
+   }
+   
+   if (testRsyncSegmentReportHdr())
+   {
+      printf("testRsyncSegmentPacket [PASS]\n");
+   }
+   else
+   {
+      printf("testRsyncSegmentPacket [PASS]\n");
    }
    
    return 0;
 }
 
-bool testRsyncPacket()
+//------------------------------------------------------------------------------
+bool testAssemblyBeginMarker()
 {
-   RsyncPacket::Data* l_pPktHdr = NULL;
+   AssemblyBeginMarker* pBeginMarker = NULL;
+   RsyncAssemblyInstr* pInstr = NULL;
+   
    char* l_pPackedPkt = NULL;
    ui32  l_nPktSize = 0;
    
-   RsyncPacket*   l_pTxPacket = NULL;
-   RsyncPacket    l_RxPacket;
-   
-   l_pTxPacket = new RsyncPacket(RsyncPacket::SegmentReportType, 0);
-   if (l_pTxPacket == NULL)
+   std::string testString = "test string";
+   pBeginMarker = new AssemblyBeginMarker(testString);
+   pInstr = new RsyncAssemblyInstr(pBeginMarker);
+      
+   if (pInstr->type() != RsyncAssemblyInstr::BeginMarkerType)
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pTxPacket->type() != RsyncPacket::SegmentReportType)
+   if (!pInstr->pack((void**)&l_pPackedPkt, l_nPktSize))
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_pTxPacket->pack((void**)&l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
    if (l_pPackedPkt == NULL)
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_nPktSize != sizeof(RsyncPacket::Data))
+   if (l_nPktSize != (sizeof(RsyncAssemblyInstr::Data) + testString.length()))
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_pPktHdr = (RsyncPacket::Data*)l_pPackedPkt;
-   if (l_pPktHdr->marker != RsyncPacket::Data::marker)
+   delete pInstr; pInstr = NULL;
+   delete pBeginMarker; pBeginMarker = NULL;
+   
+   pInstr = new RsyncAssemblyInstr();
+   
+   if (!pInstr->unpack(l_pPackedPkt, l_nPktSize))
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pPktHdr->type != RsyncPacket::SegmentReportType)
+   if (!pInstr->to(&pBeginMarker))
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pPktHdr->length != 0)
+   if (pBeginMarker == NULL)
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (!l_RxPacket.unpack(l_pPackedPkt, l_nPktSize))
+   std::string rxFilePath = "";
+   if (!pBeginMarker->getPath(rxFilePath))
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_RxPacket.type() != RsyncPacket::SegmentReportType)
+   if (testString != rxFilePath)
    {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyBeginMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
    delete[] l_pPackedPkt; l_pPackedPkt = NULL;
-   delete l_pTxPacket; l_pTxPacket = NULL;
-   
-   
-   
-   l_pTxPacket = new RsyncPacket(RsyncPacket::AssemblyInstType, 0);
-   if (l_pTxPacket == NULL)
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_pTxPacket->type() != RsyncPacket::AssemblyInstType)
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_pTxPacket->pack((void**)&l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_pPackedPkt == NULL)
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_nPktSize != sizeof(RsyncPacket::Data))
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   l_pPktHdr = (RsyncPacket::Data*)l_pPackedPkt;
-   if (l_pPktHdr->marker != RsyncPacket::Data::marker)
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_pPktHdr->type != RsyncPacket::AssemblyInstType)
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_pPktHdr->length != 0)
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_RxPacket.unpack(l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_RxPacket.type() != RsyncPacket::AssemblyInstType)
-   {
-      printf("testRsyncPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   delete[] l_pPackedPkt; l_pPackedPkt = NULL;
-   delete l_pTxPacket; l_pTxPacket = NULL;
+   delete pBeginMarker; pBeginMarker = NULL;
+   delete pInstr; pInstr = NULL;
    
    return true;
 }
 
 //------------------------------------------------------------------------------
-bool testRsyncSegmentReportPacket()
+bool testAssemblyEndMarker()
 {
-   RsyncPacket::Data* l_pPktHdr = NULL;
-   RsyncSegmentReportPacket::Data* l_pSubPktHdr = NULL;
+   RsyncAssemblyInstr* pInstr = NULL;
+   AssemblyEndMarker* pEndMarker = NULL;
+   
    char* l_pPackedPkt = NULL;
    ui32  l_nPktSize = 0;
    
-   RsyncPacket*   l_pSuperPkt = NULL;
-   RsyncSegmentReportPacket* l_pTxPacket = NULL;
-   RsyncPacket    l_RxPacket;
-   RsyncSegmentReportPacket l_RxSubPkt;
+   pEndMarker = new AssemblyEndMarker();
+   pInstr = new RsyncAssemblyInstr(pEndMarker);
    
-   l_pTxPacket = new RsyncSegmentReportPacket(RsyncSegmentReportPacket::
-                                              HeaderType, 0);
-   if (l_pTxPacket == NULL)
+   if (pInstr->type() != RsyncAssemblyInstr::EndMarkerType)
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pTxPacket->type() != RsyncSegmentReportPacket::HeaderType)
+   if (!pInstr->pack((void**)&l_pPackedPkt, l_nPktSize))
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   l_pSuperPkt = dynamic_cast<RsyncPacket*>(l_pTxPacket);
-   if (l_pSuperPkt->type() != RsyncPacket::SegmentReportType)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_pTxPacket->pack((void**)&l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
    if (l_pPackedPkt == NULL)
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   ui32 l_nExpectedSize =  sizeof(RsyncPacket::Data) +
-                           sizeof(RsyncSegmentReportPacket::Data);
-   
-   if (l_nPktSize != l_nExpectedSize)
+   if (l_nPktSize != (sizeof(RsyncAssemblyInstr::Data)))
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_pPktHdr = (RsyncPacket::Data*)l_pPackedPkt;
-   if (l_pPktHdr->marker != RsyncPacket::Data::marker)
+   delete pInstr; pInstr = NULL;
+   delete pEndMarker; pEndMarker = NULL;
+   
+   pInstr = new RsyncAssemblyInstr();
+   
+   if (!pInstr->unpack(l_pPackedPkt, l_nPktSize))
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pPktHdr->type != RsyncPacket::SegmentReportType)
+   if (pInstr->type() != RsyncAssemblyInstr::EndMarkerType)
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pPktHdr->length != sizeof(RsyncSegmentReportPacket::Data))
+   if (!pInstr->to(&pEndMarker))
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_pSubPktHdr = (RsyncSegmentReportPacket::Data*)(l_pPackedPkt +
-                                                    sizeof(RsyncPacket::Data));
-   if (l_pSubPktHdr->type != RsyncSegmentReportPacket::HeaderType)
+   if (pEndMarker == NULL)
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_pSubPktHdr->length != 0)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_RxPacket.unpack(l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_RxPacket.type() != RsyncPacket::SegmentReportType)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_RxSubPkt.unpack(l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_RxSubPkt.type() != RsyncSegmentReportPacket::HeaderType)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyEndMarker: failure at line #%d\n", __LINE__);
       return false;
    }
    
    delete[] l_pPackedPkt; l_pPackedPkt = NULL;
-   delete l_pTxPacket; l_pTxPacket = NULL;
+   delete pEndMarker; pEndMarker = NULL;
+   delete pInstr; pInstr = NULL;
    
    return true;
 }
 
 //------------------------------------------------------------------------------
-bool testSegmentReportHeader()
+bool testAssemblyChunkPacket()
 {
-   RsyncPacket::Data* l_pPktHdr = NULL;
-   RsyncSegmentReportPacket::Data* l_pSubPktHdr = NULL;
-   RsyncSegmentReportHdr::Data* l_pPktData = NULL;
+   static const ui8 Pattern[] = { 0x0F, 0x1E, 0x2D, 0x3C, 0x4B, 0x5A, 0x69,
+                                  0x78, 0x87, 0x96, 0xA5, 0xB4, 0xC3, 0xD2,
+                                  0xE1, 0xF0 };
+   
+   RsyncAssemblyInstr* pInstr = NULL;
+   AssemblyChunkPacket* pChunkPkt = NULL;
+   
    char* l_pPackedPkt = NULL;
    ui32  l_nPktSize = 0;
    
-   std::string l_sFilename = "test_file.txt";
-   ui32  l_nSegmentCount = 100;
-   ui32  l_nSegmentSize = 128;
+   pChunkPkt = new AssemblyChunkPacket(sizeof(Pattern));
+   memcpy(pChunkPkt->data(), Pattern, sizeof(Pattern));
    
-   RsyncSegmentReportHdr*     l_pTxPacket = NULL;
-   RsyncSegmentReportPacket*  l_pTxPrntPkt = NULL;
-   RsyncPacket*               l_pTxBasePkt = NULL;
+   pInstr = new RsyncAssemblyInstr(pChunkPkt);
    
-   RsyncSegmentReportHdr      l_RxPkt;
-   RsyncSegmentReportPacket   l_RxPrntPkt;
-   RsyncPacket                l_RxBasePkt;
-   
-   l_pTxPacket = new RsyncSegmentReportHdr();
-   if (l_pTxPacket == NULL)
+   if (pInstr->type() != RsyncAssemblyInstr::ChunkType)
    {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pTxPacket->type() != RsyncSegmentReportPacket::HeaderType)
+   if (!pInstr->pack((void**)&l_pPackedPkt, l_nPktSize))
    {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_pTxPacket->setFilePath(l_sFilename))
-   {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_pTxPacket->setSegmentCount(l_nSegmentCount))
-   {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_pTxPacket->setSegmentSize(l_nSegmentSize))
-   {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   l_pTxPrntPkt = dynamic_cast<RsyncSegmentReportPacket*>(l_pTxPacket);
-   if (l_pTxPrntPkt->type() != RsyncSegmentReportPacket::HeaderType)
-   {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   l_pTxBasePkt = dynamic_cast<RsyncPacket*>(l_pTxPacket);
-   if (l_pTxBasePkt->type() != RsyncPacket::SegmentReportType)
-   {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_pTxPacket->pack((void**)&l_pPackedPkt, l_nPktSize))
-   {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
    if (l_pPackedPkt == NULL)
    {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   ui32 l_nExpectedSize = sizeof(RsyncPacket::Data) +
-                     sizeof(RsyncSegmentReportPacket::Data) +
-                     sizeof(RsyncSegmentReportHdr::Data);
-   if (l_nPktSize != l_nExpectedSize)
+   if (l_nPktSize != (sizeof(RsyncAssemblyInstr::Data) + sizeof(Pattern)))
    {
-      printf("testSegmentReportHeader: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_pPktHdr = (RsyncPacket::Data*)l_pPackedPkt;
-   if (l_pPktHdr->marker != RsyncPacket::Data::marker)
+   delete pInstr; pInstr = NULL;
+   delete pChunkPkt; pChunkPkt = NULL;
+   
+   pInstr = new RsyncAssemblyInstr();
+   
+   if (!pInstr->unpack(l_pPackedPkt, l_nPktSize))
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   if (l_pPktHdr->type != RsyncPacket::SegmentReportType)
+   if (pInstr->type() != RsyncAssemblyInstr::ChunkType)
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_nExpectedSize = sizeof(RsyncSegmentReportPacket::Data) +
-                     sizeof(RsyncSegmentReportHdr::Data);
-   if (l_pPktHdr->length != sizeof(RsyncSegmentReportPacket::Data))
+   if (!pInstr->to(&pChunkPkt))
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_pSubPktHdr = (RsyncSegmentReportPacket::Data*)(l_pPackedPkt +
-                                                    sizeof(RsyncPacket::Data));
-   if (l_pPktHdr->type != RsyncSegmentReportPacket::HeaderType)
+   if (pChunkPkt == NULL)
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_nExpectedSize = sizeof(RsyncSegmentReportHdr::Data);
-   if (l_pPktHdr->length != l_nExpectedSize)
+   if (pChunkPkt->dataSize() != sizeof(Pattern))
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
+      printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
       return false;
    }
    
-   l_pPktData = (RsyncSegmentReportPacket::Data*)(l_pPackedPkt +
-                                       sizeof(RsyncPacket::Data) +
-                                       sizeof(RsyncSegmentReportHdr::Data));
-   if (strncmp(l_pPktData->filePath, l_sFilename.c_str(),
-               RsyncMaxPathLength) != 0)
+   for (ui32 l_nInd = 0; l_nInd < sizeof(Pattern); l_nInd++)
    {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_pPktData->segmentCount != l_nSegmentCount)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_pPktData->segmentSizeBytes != l_nSegmentSize)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_RxPacket.unpack(l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_RxPacket.type() != RsyncPacket::SegmentReportType)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (!l_RxSubPkt.unpack(l_pPackedPkt, l_nPktSize))
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
-   }
-   
-   if (l_RxSubPkt.type() != RsyncSegmentReportPacket::HeaderType)
-   {
-      printf("testRsyncSegmentReportPacket: failure at line #%d\n", __LINE__);
-      return false;
+      if (pChunkPkt->data()[l_nInd] != Pattern[l_nInd])
+      {
+         printf("testAssemblyChunkPacket: failure at line #%d\n", __LINE__);
+         return false;
+      }
    }
    
    delete[] l_pPackedPkt; l_pPackedPkt = NULL;
-   delete l_pTxPacket; l_pTxPacket = NULL;
+   delete pChunkPkt; pChunkPkt = NULL;
+   delete pInstr; pInstr = NULL;
    
    return true;
 }
 
 //------------------------------------------------------------------------------
-bool testSegmentPacket()
+bool testAssemblySegment()
 {
+   RsyncAssemblyInstr* pInstr = NULL;
+   AssemblySegmentPacket* pSegment = NULL;
+   
+   char* l_pPackedPkt = NULL;
+   ui32  l_nPktSize = 0;
+   
+   ui32  txSegmentId = 32;
+   ui32  rxSegmentId = 0;
+   
+   pSegment = new AssemblySegmentPacket(txSegmentId);
+   pInstr = new RsyncAssemblyInstr(pSegment);
+   
+   if (pInstr->type() != RsyncAssemblyInstr::SegmentType)
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pInstr->pack((void**)&l_pPackedPkt, l_nPktSize))
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (l_pPackedPkt == NULL)
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (l_nPktSize != (sizeof(RsyncAssemblyInstr::Data) +
+                      sizeof(AssemblySegmentPacket::Data)))
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   delete pInstr; pInstr = NULL;
+   delete pSegment; pSegment = NULL;
+   
+   pInstr = new RsyncAssemblyInstr();
+   
+   if (!pInstr->unpack(l_pPackedPkt, l_nPktSize))
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (pInstr->type() != RsyncAssemblyInstr::SegmentType)
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pInstr->to(&pSegment))
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (pSegment == NULL)
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pSegment->getSegmentId(rxSegmentId))
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (rxSegmentId != txSegmentId)
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   delete[] l_pPackedPkt; l_pPackedPkt = NULL;
+   delete pSegment; pSegment = NULL;
+   delete pInstr; pInstr = NULL;
+   
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool testRsyncSegmentReportHdr()
+{
+   RsyncSegmentReportPacket* pPacket = NULL;
+   RsyncSegmentReportHdr* pHdr = NULL;
+   
+   char* l_pPackedPkt = NULL;
+   ui32  l_nPktSize = 0;
+   
+   std::string txFilePath = "/root/test/data.ifo";
+   ui32  txSegmentCount = 32;
+   ui32  txSegmentSize = 16;
+   
+   pHdr = new RsyncSegmentReportHdr();
+   
+   pHdr->setFilePath(txFilePath);
+   pHdr->setSegmentCount(txSegmentCount);
+   pHdr->setSegmentSize(txSegmentSize);
+   
+   pPacket = new RsyncSegmentReportPacket(pHdr);
+   
+   if (pPacket->type() != RsyncSegmentReportPacket::HeaderType)
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pPacket->pack((void**)&l_pPackedPkt, l_nPktSize))
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (l_pPackedPkt == NULL)
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (l_nPktSize != (sizeof(RsyncSegmentReportPacket::Data) +
+                      sizeof(RsyncSegmentReportHdr::Data)))
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   delete pHdr; pHdr = NULL;
+   delete pPacket; pPacket = NULL;
+   
+   pPacket = new RsyncSegmentReportPacket();
+   
+   if (!pPacket->unpack(l_pPackedPkt, l_nPktSize))
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (pPacket->type() != RsyncSegmentReportPacket::HeaderType)
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pPacket->to(&pHdr))
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (pHdr == NULL)
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   std::string rxFilePath = "";
+   ui32  rxSegmentCount = 0;
+   ui32  rxSegmentSize = 0;
+   if (!pHdr->getFilePath(rxFilePath))
+   {
+      printf("testAssemblySegment: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pHdr->getSegmentCount(rxSegmentCount))
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pHdr->getSegmentSize(rxSegmentSize))
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (rxFilePath != txFilePath)
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (rxSegmentCount != txSegmentCount)
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (rxSegmentSize != txSegmentSize)
+   {
+      printf("testRsyncSegmentReportHdr: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   delete[] l_pPackedPkt; l_pPackedPkt = NULL;
+   delete pHdr; pHdr = NULL;
+   delete pPacket; pPacket = NULL;
+   
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool testRsyncSegmentPacket()
+{
+   static const ui8 Pattern[] = { 0x0F, 0x1E, 0x2D, 0x3C, 0x4B, 0x5A, 0x69,
+                                 0x78, 0x87, 0x96, 0xA5, 0xB4, 0xC3, 0xD2,
+                                 0xE1, 0xF0 };
+   
+   RsyncSegmentReportPacket* pPacket = NULL;
+   RsyncSegmentPacket* pSegment = NULL;
+   
+   char* l_pPackedPkt = NULL;
+   ui32  l_nPktSize = 0;
+   
+   ui32    txSegmentId = 6;
+   i32     txWeakChk = 42583;
+   Hash128 txStrongChk; char* pTxStrongChk = (char*)&txStrongChk;
+   ui16    txSegSizeBytes = 16;
+   
+   memcpy(pTxStrongChk, Pattern, sizeof(Hash128));
+   
+   pSegment = new RsyncSegmentPacket();
+   
+   pSegment->setSegmentId(txSegmentId);
+   pSegment->setWeak(txWeakChk);
+   pSegment->setStrong(txStrongChk);
+   pSegment->setSegmentSize(txSegSizeBytes);
+   
+   pPacket = new RsyncSegmentReportPacket(pSegment);
+   
+   if (pPacket->type() != RsyncSegmentReportPacket::SegmentType)
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pPacket->pack((void**)&l_pPackedPkt, l_nPktSize))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (l_pPackedPkt == NULL)
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (l_nPktSize != (sizeof(RsyncSegmentReportPacket::Data) +
+                      sizeof(RsyncSegmentPacket::Data)))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   delete pSegment; pSegment = NULL;
+   delete pPacket; pPacket = NULL;
+   
+   pPacket = new RsyncSegmentReportPacket();
+   
+   if (!pPacket->unpack(l_pPackedPkt, l_nPktSize))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (pPacket->type() != RsyncSegmentReportPacket::SegmentType)
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pPacket->to(&pSegment))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (pSegment == NULL)
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   ui32    rxSegmentId;
+   i32     rxWeakChk;
+   Hash128 rxStrongChk; char* pRxStrongChk = (char*)&rxStrongChk;
+   ui16    rxSegSizeBytes;
+   
+   if (!pSegment->getSegmentId(rxSegmentId))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pSegment->getWeak(rxWeakChk))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pSegment->getStrong(rxStrongChk))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (!pSegment->getSegmentSize(rxSegSizeBytes))
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (rxSegmentId != txSegmentId)
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (rxWeakChk != txWeakChk)
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   if (rxSegSizeBytes != txSegSizeBytes)
+   {
+      printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+      return false;
+   }
+   
+   for (ui32 l_nOffs = 0; l_nOffs < sizeof(Pattern); l_nOffs++)
+   {
+      if (pTxStrongChk[l_nOffs] != pRxStrongChk[l_nOffs])
+      {
+         printf("testRsyncSegmentPacket: failure at line #%d\n", __LINE__);
+         return false;
+      }
+   }
+   
+   delete[] l_pPackedPkt; l_pPackedPkt = NULL;
+   delete pSegment; pSegment = NULL;
+   delete pPacket; pPacket = NULL;
+   
    return true;
 }

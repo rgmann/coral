@@ -1,10 +1,11 @@
 #ifndef RSYNC_ASSEMBLER_H
 #define RSYNC_ASSEMBLER_H
 
+#include <vector>
 #include "RsyncFileAuthority.h"
 #include "RsyncSegmenter.h"
 #include "RsyncFileStage.h"
-#include <vector>
+#include "RsyncAssemblyInstr.h"
 
 
 class RsyncAssembler
@@ -34,8 +35,9 @@ public:
    //bool  start(RsyncAssemblySeqMarker *pMarker, RsyncAssemblyMode mode);
    void start(RsyncAssemblyMode mode);
    
-   AddStatus  addInstruction(void* pInstr,
-                        unsigned int nInstrLenBytes);
+//   AddStatus  addInstruction(void* pInstr,
+//                        unsigned int nInstrLenBytes);
+   AddStatus  addInstruction(RsyncAssemblyInstr* pInstr);
    
    bool  assemble();
    

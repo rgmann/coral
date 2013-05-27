@@ -1,8 +1,9 @@
 #ifndef RSYNC_SEGMENT_TABLE_H
 #define RSYNC_SEGMENT_TABLE_H
 
-#include "RsyncSegmentPacket.h"
-#include "RsyncSegmentReportHdr.h"
+//#include "RsyncSegmentPacket.h"
+//#include "RsyncSegmentReportHdr.h"
+#include "RsyncSegmentReportPacket.h"
 #include "RsyncSegmentReport.h"
 #include "SimpleHashTable.h"
 #include "CryptoHashTypes.h"
@@ -19,7 +20,7 @@ public:
    void setHeader(RsyncSegmentReportHdr* pHeader);
    
 //   bool getHeader(RsyncReportHeader* pHeader) const;
-   bool getHeader(RsyncSegmentReportHdr* pHeader) const;
+   RsyncSegmentReportHdr* getHeader() const;
    
 //   bool addSegment(RsyncPackedSeg* pSegment);
    bool addSegment(RsyncSegmentReportPacket* pSegment);
@@ -29,8 +30,8 @@ public:
    
 //   bool find(RsyncSegment &segment, std::ifstream &ifs,
 //             RsyncPackedSeg &packedSegment);
-   bool find(RsyncSegment &segment, std::ifstream &ifs,
-             RsyncSegmentPacket* pPacket);
+   RsyncSegmentPacket* find(RsyncSegment &segment, std::ifstream &ifs);//,
+             //RsyncSegmentPacket* pPacket);
    
    /**
     * Returns true if the segment count indicated in the header

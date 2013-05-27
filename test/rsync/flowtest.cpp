@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
    RsyncSegmentReportHdr*  pReportHdr = NULL;
    //RsyncPackedSeg       packedSeg;
    RsyncSegmentPacket*     pSegment = NULL;
+   RsyncSegmentReportPacket* l_pSegRepPkt = NULL;
    
    
    RsyncSegmentTable    table;
@@ -31,8 +32,8 @@ int main(int argc, char *argv[])
    printf("Flow Test:\n");
    
    //filename = "2Scan_120800003.jpg";
-   filename = "file.dat";
-   //filename = "firefox2005-icon.png";
+   //filename = "file.dat";
+   filename = "firefox2005-icon.png";
    
    // Begin by segmenting the clientfile
    segmenter.setRoot("flowtestdata/client_dir");
@@ -43,7 +44,6 @@ int main(int argc, char *argv[])
       std::cout << "Failed to segment client file." << std::endl;
       return 1;
    }
-   //return 1;
    
    // Once processing is complete, we can retrieve the segmenation report.
    pReport = segmenter.getReport(filename);
@@ -53,13 +53,11 @@ int main(int argc, char *argv[])
       return 1;
    }
    
-//   if (!pReport->header(&reportHeader))
    if (!pReport->header(&pReportHdr))
    {
       std::cout << "Failed to get Segmentation Report header" << std::endl;
       return 1;
    }
-//   RsyncSegmentReport::PrintReportHeader(&reportHeader);
    RsyncSegmentReport::PrintReportHeader(pReportHdr);
    
    
@@ -70,25 +68,13 @@ int main(int argc, char *argv[])
    
    // "Send" the report header and packed segments to the hash table on the
    // server.
-//   table.setHeader(&reportHeader);
-   table.addSegment(pReportHdr);
+   l_pSegRepPkt = new RsyncSegmentReportPacket(pReportHdr);
+   table.addSegment(l_pSegRepPkt);
    //while (pReport->nextPackedSeg(&packedSeg))
    while (pReport->nextSegment(&pSegment))
    {
-      //if (!table.addSegment(&packedSeg))
-      RsyncSegmentReportPacket* l_pSegRprtPkt = NULL;
-      l_pSegRprtPkt = reinterpret_cast<RsyncSegmentReportPacket*>(pSegment);
-      if (l_pSegRprtPkt->type() == RsyncSegmentReportPacket::SegmentType) {
-         std::cout << "Next segment type = SegmentType" << std::endl;
-      }
-      else if (l_pSegRprtPkt->type() == RsyncSegmentReportPacket::HeaderType) {
-         std::cout << "Next segment type = HeaderType" << std::endl;
-      }
-      else {
-         std::cout << "Next segment type = " << l_pSegRprtPkt->type()
-                  << std::endl;
-      }
-      if (!table.addSegment(pSegment))
+      l_pSegRepPkt = new RsyncSegmentReportPacket(pSegment);
+      if (!table.addSegment(l_pSegRepPkt))
          std::cout << "Failed to add seg #" << l_nSegCount << std::endl;
       l_nSegCount++;
       
@@ -105,7 +91,7 @@ int main(int argc, char *argv[])
       return 1;
    }
    
-   return 1;
+   
    
    // Pass the hash to the Authority
    authority.setRoot("flowtestdata/server_dir");
@@ -116,14 +102,14 @@ int main(int argc, char *argv[])
       return 1;
    }
    
-   /*
-   if (!authority.getMarker(&marker))
-   {
-      std::cout << "Failed to get re-assembly marker."
-                << std::endl;
-      return 1;
-   }
-    */
+   
+   
+//   if (!authority.getMarker(&marker))
+//   {
+//      std::cout << "Failed to get re-assembly marker."
+//                << std::endl;
+//      return 1;
+//   }
    
    // The the file marker and re-assembly instructions back to the client.
    RsyncAssembler::AddStatus status = RsyncAssembler::Failure;
@@ -138,15 +124,16 @@ int main(int argc, char *argv[])
          return 1;
       }
       
-      pInstr->pack((void**)&l_pPackedInstr, l_nPackedInstrLen);
+//      pInstr->pack((void**)&l_pPackedInstr, l_nPackedInstrLen);
+//      
+//      if (l_pPackedInstr == NULL)
+//      {
+//         std::cout << "Null packed instruction pointer" << std::endl;
+//         return 1;
+//      }
       
-      if (l_pPackedInstr == NULL)
-      {
-         std::cout << "Null packed instruction pointer" << std::endl;
-         return 1;
-      }
-      
-      status = assembler.addInstruction(l_pPackedInstr, l_nPackedInstrLen);
+//      status = assembler.addInstruction(l_pPackedInstr, l_nPackedInstrLen);
+      status = assembler.addInstruction(pInstr);
       if (status == RsyncAssembler::Failure)
       {
          std::cout << "Failed to add instruction" << std::endl;
