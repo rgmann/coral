@@ -25,7 +25,9 @@ bool AssemblyBeginMarker::setPath(const std::string &filepath)
    
    deallocate();
    
-   m_nSizeBytes = filepath.length();
+   // Packet is exactly large enough to hold the string including the NULL
+   // terminator (reason for + 1).
+   m_nSizeBytes = filepath.length() + 1;
    
    if (l_bSuccess = allocate())
    {

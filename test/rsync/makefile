@@ -29,5 +29,9 @@ flow:
 class:
 	$(CC) -Wall -g -o class classtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
+unit:
+	$(CC) -Wall -g -o unit unitflow.cpp $(INC) $(ABSLIB) $(LIBS)
+
+
 clean:
-	rm -rf  *.o rsync packet flow class *.dSYM
+	rm -rf  *.o rsync packet flow class unit *.dSYM

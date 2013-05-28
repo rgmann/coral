@@ -68,6 +68,11 @@ bool AuthorityUnit::work()
    // end marker).
    if (m_pSegmentTable->isComplete())
    {
+      // TODO for server: Check if file exists.  If it does not, create an 
+      // empty local file and send an empty segment report to the client.  The
+      // client behaves as the authority for the new file and sends back an
+      // assembly instruction list entirely composed of chunks.  The empty
+      // local file is required because the Assembler expects the file to exist.
       if (!m_authority.process(m_pSegmentTable))
       {
          printf("AuthorityUnit::work: Failed to process segment hash.\n");

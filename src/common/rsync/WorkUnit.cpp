@@ -4,12 +4,20 @@ WorkUnit* WorkUnit::RegistrationTable[RsyncPacket::NumTypes];
 Mutex     WorkUnit::RegTableLock;
 
 //------------------------------------------------------------------------------
-WorkUnit::WorkUnit(Queue<RsyncPacket*>& outQueue,
-                   ui32 nInDepth)//, ui32 nOutDepth)
-: m_outQueue(outQueue)
+WorkUnit::WorkUnit(Queue<RsyncPacket*>& outQueue)
+: m_type(RsyncPacket::TypeNotSet)
+, m_outQueue(outQueue)
 {
-   m_inQueue.initialize(nInDepth);
-//   m_outQueue.initialize(nOutDepth);
+}
+
+//------------------------------------------------------------------------------
+WorkUnit::~WorkUnit()
+{
+   // Nothing to deallocate.
+   if (m_type != RsyncPacket::TypeNotSet)
+   {
+      Unregister(m_type);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -86,6 +94,23 @@ bool WorkUnit::Route(RsyncPacket* pPacket)
    
    // Send the packet to the appropriate work unit.
    return l_pWorkUnit->pushPacket(pPacket);
+}
+
+//------------------------------------------------------------------------------
+bool WorkUnit::initialize(RsyncPacket::Type type, ui32 nInDepth)
+{
+   bool l_bSuccess = true;
+   
+   // WorkUnits specify TypeNotSet if they are not registering for a packet
+   // type.
+   if (type != RsyncPacket::TypeNotSet)
+   {
+      l_bSuccess = Register(type, this);
+      
+      if (l_bSuccess) m_type = type;
+   }
+   
+   return (l_bSuccess && m_inQueue.initialize(nInDepth));
 }
 
 //------------------------------------------------------------------------------

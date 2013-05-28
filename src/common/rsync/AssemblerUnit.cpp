@@ -22,7 +22,8 @@ void AssemblerUnit::setSegmenter(RsyncSegmenter* pSegmenter)
 {
    if (pSegmenter)
    {
-      m_pSegmenter = pSegmenter;
+//      m_pSegmenter = pSegmenter;
+      m_assembler.setSegmenter(pSegmenter);
    }
 }
 

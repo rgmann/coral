@@ -8,9 +8,33 @@ SegmenterUnit::SegmenterUnit(Queue<RsyncPacket*>& outQueue)
 }
 
 //------------------------------------------------------------------------------
+SegmenterUnit::~SegmenterUnit()
+{
+   
+}
+
+//------------------------------------------------------------------------------
 void SegmenterUnit::setRoot(const std::string& root)
 {
    m_segmenter.setRoot(root);
+}
+
+//------------------------------------------------------------------------------
+void SegmenterUnit::setSegmentSize(ui32 nSegmentSizeBytes)
+{
+   m_segmenter.setSegmentSize(nSegmentSizeBytes);
+}
+
+//------------------------------------------------------------------------------
+void SegmenterUnit::addFilename(const std::string& filename)
+{
+   m_filenameQueue.push(filename);
+}
+
+//------------------------------------------------------------------------------
+RsyncSegmenter* SegmenterUnit::getSegmenter()
+{
+   return &m_segmenter;
 }
 
 //------------------------------------------------------------------------------

@@ -14,9 +14,7 @@ public:
                  RsyncSegmenter* pSegmenter = NULL);
    
    ~AssemblerUnit();
-   
-   void  setRoot(const std::string& root);
-   
+      
    void  setSegmenter(RsyncSegmenter* pSegmenter);
    
    virtual bool work();

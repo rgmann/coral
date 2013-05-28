@@ -48,6 +48,69 @@ RsyncPacket::Type RsyncPacket::type() const
 }
 
 //------------------------------------------------------------------------------
+bool RsyncPacket::to(RsyncAssemblyInstr** pPacket) const
+{
+   if (*pPacket != NULL) return false;
+   
+   *pPacket = static_cast<RsyncAssemblyInstr*>(create(AssemblyInstType));
+   
+   return (*pPacket != NULL);
+}
+
+//------------------------------------------------------------------------------
+bool RsyncPacket::to(RsyncSegmentReportPacket** pPacket) const
+{
+   if (*pPacket != NULL) return false;
+   
+   *pPacket = static_cast<RsyncSegmentReportPacket*>(create(SegmentReportType));
+   
+   return (*pPacket != NULL);
+}
+
+//------------------------------------------------------------------------------
+GenericPacket* RsyncPacket::create(Type type) const
+{
+   bool l_bSuccess = false;
+   GenericPacket* l_pPacket = NULL;
+   
+   if (isAllocated() && ((Type)data()->type == type))
+   {
+      ui8* l_pPayload = reinterpret_cast<ui8*>(basePtr());
+      
+      l_pPayload += dataSize();
+      
+      switch (type) {
+         case SegmentReportType:
+            l_pPacket = new RsyncAssemblyInstr();
+            break;
+            
+         case AssemblyInstType:
+            l_pPacket = new RsyncSegmentReportPacket();
+            break;
+            
+         default:
+            // Bad type. Don't allocate anything.
+            break;
+      }
+      
+      if (l_pPacket)
+      {
+         l_bSuccess = l_pPacket->unpack(l_pPayload,
+                                        allocatedSize() - dataSize());
+         
+         if (!l_bSuccess)
+         {
+            printf("RsyncAssemblyInstr::create: failed to allocate packet\n");
+            delete l_pPacket;
+            l_pPacket = NULL;
+         }
+      }
+   }
+   
+   return l_pPacket;
+}
+
+//------------------------------------------------------------------------------
 bool RsyncPacket::from(Type type, const GenericPacket* pPacket)
 {
    if (!pPacket) return false;

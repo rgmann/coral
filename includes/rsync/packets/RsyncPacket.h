@@ -42,12 +42,14 @@ public:
    
    virtual ui32 dataSize() const;
    
-   bool to(RsyncAssemblyInstr** pPacket);
-   bool to(RsyncSegmentReportPacket** pPacket);
+   bool to(RsyncAssemblyInstr** pPacket) const;
+   bool to(RsyncSegmentReportPacket** pPacket) const;
 
    virtual bool unpack(const void* pPkt, ui32 nSizeBytes);
 
 protected:
+   
+   GenericPacket* create(Type type) const;
    
    bool from(Type type, const GenericPacket* pPacket);
    

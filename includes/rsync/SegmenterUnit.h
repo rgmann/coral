@@ -15,6 +15,8 @@ public:
    
    void setRoot(const std::string& root);
    
+   void setSegmentSize(ui32 nSegmentSizeBytes);
+   
    void addFilename(const std::string& filename);
    
    RsyncSegmenter* getSegmenter();

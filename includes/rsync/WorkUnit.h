@@ -8,9 +8,7 @@ class WorkUnit
 {
 public:
    
-   WorkUnit(Queue<RsyncPacket*>& outQueue,
-            ui32 nInDepth = Queue<RsyncPacket*>::InfiniteQueue);//,
-//            ui32 nOutDepth = Queue::InfiniteQueue);
+   WorkUnit(Queue<RsyncPacket*>& outQueue);
    
    virtual ~WorkUnit();
    
@@ -19,6 +17,8 @@ public:
    static bool Unregister(RsyncPacket::Type type);
    static bool Route(RsyncPacket* pPacket);
    
+   virtual bool initialize(RsyncPacket::Type type,
+                           ui32 nInDepth = Queue<RsyncPacket*>::InfiniteQueue);
    
    virtual bool work() = 0;
    
@@ -38,6 +38,8 @@ private:
    
    static WorkUnit*  RegistrationTable[RsyncPacket::NumTypes];
    static Mutex      RegTableLock;
+   
+   RsyncPacket::Type m_type;
    
    Queue<RsyncPacket*> m_inQueue;
 //   Queue<RsyncPacket*> m_OutQ;

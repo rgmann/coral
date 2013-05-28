@@ -101,10 +101,24 @@ RsyncAssembler::addInstruction(RsyncAssemblyInstr* pInstr)
       std::string l_sFilename;
       
       //pBeginMarker = static_cast<AssemblyBeginMarker*>(pInstr);
-      if (!pInstr->to(&pBeginMarker)) printf("Failed ->to(BeginMarkerType)\n");
+      if (!pInstr->to(&pBeginMarker))
+      {
+         printf("Failed ->to(BeginMarkerType)\n");
+         return Failure;
+      }
       pBeginMarker->getPath(l_sFilename);
 
+      // Use the filename to retreive the segment report from the Segmenter.
       l_pSegReport = m_pSegmenter->getReport(l_sFilename);
+      if (l_pSegReport == NULL)
+      {
+         printf("Assembler::AddInstruction: Failed to get segment report for "
+                " %s.\n", l_sFilename.c_str());
+         delete pBeginMarker;
+         return Failure;
+      }
+      
+      // Get the segment list from the segment report.
       m_vSegments = l_pSegReport->segments();
       
       // Open the stage file.
