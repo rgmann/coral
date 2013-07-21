@@ -1,5 +1,6 @@
 #include <sys/time.h>
 #include <sstream>
+#include <string.h>
 #include "Date.h"
 
 //------------------------------------------------------------------------------

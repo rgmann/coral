@@ -5,7 +5,8 @@ INC =   -I$(BASE)/src \
 	-I$(BASE)/src/mongo/client \
 	-I../models/includes \
 	-I../../../../includes/base \
-	-I../../../../includes/base/file_system
+	-I../../../../includes/base/file_system \
+	-I../../../../includes/base/time
 LIBDIR = -L$(BASE)
 ABSLIB = -L../../lib/base -lbase
 LIBS =  -lmongoclient \
