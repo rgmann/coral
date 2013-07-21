@@ -8,7 +8,8 @@ CPP = ../../src/nix/$(LIBDIR)/*.cpp \
 		../../src/common/$(LIBDIR)/helpers/*.cpp \
 		../../src/nix/$(LIBDIR)/crypto/*.cpp \
 		../../src/nix/$(LIBDIR)/concurrency/*.cpp \
-		../../src/common/$(LIBDIR)/container/*.cpp
+		../../src/common/$(LIBDIR)/container/*.cpp \
+		../../src/common/$(LIBDIR)/file_system/*.cpp
 INC = -I../../includes/$(LIBDIR) \
 		-I../../includes/$(LIBDIR)/crypto \
 		-I../../includes/$(LIBDIR)/file_system \
