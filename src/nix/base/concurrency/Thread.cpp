@@ -1,7 +1,10 @@
-
-#include "Thread.h"
-#include <string.h>
+#include <pthread.h>
 #include <stdio.h>
+#include <string.h>
+#include "Thread.h"
+
+Mutex Thread::ourIdMutex;
+ui32  Thread::ournCurrentTid = 0;
 
 struct ThreadPriv
 {
@@ -48,6 +51,11 @@ Thread* Thread::Create(UserThreadFunc func, void* pArg)
       printf("Thread::Create: Failed to allocate thread.\n");
       return NULL;
    }
+   
+   // Assign a thread ID.
+   ourIdMutex.lock();
+   l_pThread->m_nId = ++ournCurrentTid;
+   ourIdMutex.unlock();
    
    l_pThread->m_pUserFunc = func;
    l_pThread->m_pThreadArg = new ThreadArg();
@@ -111,6 +119,12 @@ bool Thread::stop()
 }
 
 //------------------------------------------------------------------------------
+ui32 Thread::getId() const
+{
+   return m_nId;
+}
+
+//------------------------------------------------------------------------------
 void* Thread::ThreadFunc(void* pArg)
 {
    Thread* l_pThread = NULL;
@@ -155,7 +169,7 @@ void Thread::CleanupHandler(void* pArg)
 }
 
 //------------------------------------------------------------------------------
-bool Thread::isActive()
+bool Thread::isActive() const
 {
    return (!m_bDone && m_bStarted);
 }

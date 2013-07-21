@@ -14,6 +14,8 @@ void sighandler(int s)
    g_bStopCommanded = true;  
 }
 
+const char* deltaTypeToString(FileNodeMonitor::DeltaType type);
+
 int main(int argc, char *argv[])
 {
    std::string dir(".");
@@ -49,19 +51,35 @@ int main(int argc, char *argv[])
    
    while (!g_bStopCommanded)
    {
+      FileNodeMonitor::FileSysDelta delta;
       std::vector<FileNode>::iterator it;
       sleep(1);
       
       monitor.refresh();
-      addedFiles = monitor.getAddedNodes();
-      
-      it = addedFiles.begin();
-      for (; it < addedFiles.end(); ++it) {
-         FileNode::Print(*it);
+      //addedFiles = monitor.getAddedNodes();
+//      
+//      it = addedFiles.begin();
+//      for (; it < addedFiles.end(); ++it) {
+//         FileNode::Print(*it);
+//      }
+      while (monitor.getDelta(delta, 100)) {
+         std::cout << deltaTypeToString(delta.type) << " ";
+         FileNode::Print(delta.node);
       }
    }
    
    printf("\n");
    
    return 0;
+}
+
+const char* deltaTypeToString(FileNodeMonitor::DeltaType type)
+{
+   switch (type) {
+      case FileNodeMonitor::Added: return "ADDED";
+      case FileNodeMonitor::Removed: return "REMOVED";
+      case FileNodeMonitor::Modified: return "MODIFIED";
+      case FileNodeMonitor::Updated: return "UPDATED";
+      default: return "OTHER";
+   }
 }
