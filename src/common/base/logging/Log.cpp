@@ -117,6 +117,7 @@ Log::Log(LogLevel level)
 , mbPrintToConsole(false)
 , mbSeperateLevels(false)
 {
+   memset(&mnCurrentFileSize, 0, sizeof(mnCurrentFileSize));
 }
 
 //------------------------------------------------------------------------------
@@ -216,7 +217,7 @@ void Log::PrintToConsole(bool bEnable)
 //------------------------------------------------------------------------------
 void Log::SetLogSizeLimit(ui32 nMaxSize)
 {
-   mynSizeLimitBytes = nMaxSize;
+   ourInstance.mynSizeLimitBytes = nMaxSize;
 }
 
 //------------------------------------------------------------------------------
@@ -299,12 +300,15 @@ void Log::log(const LogLine &line, LogLevel level)
    int lnStreamInd = ourInstance.mbSeperateLevels ? lLevel : 0;
    if (lLevel != Trace)
    {
-      if (mnCurrentFileSize >= mynSizeLimitBytes)
+      if (ourInstance.mnCurrentFileSize[lnStreamInd] >= 
+          ourInstance.mynSizeLimitBytes)
       {
-         createNewFile(lnStreamInd);
+         ourInstance.createNewFile(lnStreamInd);
+         ourInstance.mnCurrentFileSize[lnStreamInd] = 0;
       }
       
       ourInstance.mTraceQueue.push(lLogSs.str(), 0);
+      ourInstance.mnCurrentFileSize[lnStreamInd] += lLogSs.str().length();
    }
    else
    {
@@ -321,11 +325,11 @@ bool Log::createNewFile(int nStreamInd)
    ourInstance.mStream[nStreamInd].close();
    
    lNameSs  << ourInstance.mBaseName
-            << LevelToLogSuffix(nStreamInd)
+            << LevelToLogSuffix((LogLevel)nStreamInd)
             << lDate.getString(Date::LOCAL, "MMDDYYYY_S")
             << ".llog";
    
-   ourInstance.mStream[nStreamInd].open(lNameSs.str());
+   ourInstance.mStream[nStreamInd].open(lNameSs.str().c_str());
    
    return (ourInstance.mStream[nStreamInd].is_open());
 }

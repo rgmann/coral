@@ -68,6 +68,8 @@ public:
    
    static std::string LevelToString(LogLevel level);
    
+   static std::string LevelToLogSuffix(LogLevel level);
+   
 private:
    
    Log(LogLevel level = Info);
@@ -78,7 +80,7 @@ private:
    
    bool close();
    
-   bool createNewFile(LogLevel level);
+   bool createNewFile(int nStreamInd);
    
 private:
    
@@ -97,8 +99,9 @@ private:
    Queue<std::string> mTraceQueue;
    
    std::ofstream mStream[NumLogLevels];
+   ui32          mnCurrentFileSize[NumLogLevels];
    
-   ui32 mynSizeLimitBytes;
+   ui32 mynSizeLimitBytes;   
 };
 
 #define ERROR(line) \
