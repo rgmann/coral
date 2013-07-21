@@ -1,11 +1,15 @@
-
+#include <iostream>
 #include "FileNodeMonitor.h"
+
 
 //------------------------------------------------------------------------------
 FileNodeMonitor::FileNodeMonitor()
 {
    m_IgnoreList.push_back(".");
    m_IgnoreList.push_back("..");
+   
+   // Initialize the queue.
+   m_deltaQueue.initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -41,77 +45,38 @@ void FileNodeMonitor::refresh()
       
       // If the node is a directory and it was modified or updated,
       // then sync its contents.
-      if (node.type == FileNode::Directory)
-      {
+      //if (node.type == FileNode::Directory)
+      //{
          //printf("Name: %d %s\n", locIterCount++, it->first.c_str());
-         sync(node);
-      }
+      //   sync(node);
+      //}
+      
+      // Map only contains directories.
+      syncDirectory(it->second);
    }
    
-   //diff(m_BaseNode);
+   // Add/remove directories. We cannot do this while iterating.
+   FileNodeList::iterator lDirIt = mAddedDirList.begin();
+   for (; lDirIt != mAddedDirList.end(); lDirIt++)
+   {
+      std::cout << "ADDING " << lDirIt->fullPath() << std::endl;
+      m_NodeLut[lDirIt->fullPath()] = *lDirIt;
+   }
+   mAddedDirList.clear();
+   
+   lDirIt = mRemovedDirList.begin();
+   for (; lDirIt != mRemovedDirList.end(); lDirIt++)
+   {
+      std::cout << "REMOVING " << lDirIt->fullPath() << std::endl;
+      m_NodeLut.erase(lDirIt->fullPath());
+   }
+   mRemovedDirList.clear();
 }
 
 //------------------------------------------------------------------------------
-FileNodeList FileNodeMonitor::getAddedNodes(bool fresh)
+bool FileNodeMonitor::getDelta(FileSysDelta &delta, int nTimeoutMs)
 {
-   FileNodeList addedList;
-   std::vector<FileNode>::iterator it;
-   
-   it = m_AddedNodes.begin();
-   for (; it < m_AddedNodes.end(); ++it)
-   {
-      addedList.push_back(*it);
-   }
-   
-   // Clear the local list.
-   m_AddedNodes.clear();
-   
-   return addedList;
-}
-
-//------------------------------------------------------------------------------
-FileNodeList FileNodeMonitor::getRemovedNodes(bool fresh)
-{
-   FileNodeList removedList;
-   std::vector<FileNode>::iterator it;
-   
-   it = m_RemovedNodes.begin();
-   for (; it < m_RemovedNodes.end(); ++it)
-   {
-      removedList.push_back(*it);
-   }
-   
-   return removedList;
-}
-
-//------------------------------------------------------------------------------
-FileNodeList FileNodeMonitor::getModifiedNodes(bool fresh)
-{
-   FileNodeList modifiedList;
-   std::vector<FileNode*>::iterator it;
-   
-   it = m_ModifiedNodes.begin();
-   for (; it < m_ModifiedNodes.end(); ++it)
-   {
-      modifiedList.push_back(*(*it));
-   }
-   
-   return modifiedList;
-}
-
-//------------------------------------------------------------------------------
-FileNodeList FileNodeMonitor::getChangedNodes(bool fresh)
-{
-   FileNodeList changedList;
-   std::vector<FileNode*>::iterator it;
-   
-   it = m_ChangedNodes.begin();
-   for (; it < m_ChangedNodes.end(); ++it)
-   {
-      changedList.push_back(*(*it));
-   }
-   
-   return changedList;
+   return m_deltaQueue.pop(delta, nTimeoutMs);
 }
 
 //------------------------------------------------------------------------------
@@ -151,6 +116,7 @@ void FileNodeMonitor::sync(FileNode &base)
          {
             //printf("New: %s\n", it->fullPath().c_str());
             addNewNode(base, *it);
+            pushDelta(Added, *it);
          }
       }
       
@@ -158,13 +124,13 @@ void FileNodeMonitor::sync(FileNode &base)
       it = base.children.begin();
       for (; it < base.children.end(); ++it)
       {
-         //printf("base: %s, ov: %s\n", base.fullPath().c_str(), it->fullPath().c_str());
+         printf("base: %s, ov: %s\n", base.fullPath().c_str(), it->fullPath().c_str());
          // If the node does not exist any longer, remove
          // it and add it to the removed node list.
          if (!it->exists())
          {
-            m_RemovedNodes.push_back(*it);
             it = base.children.erase(it);
+            pushDelta(Removed, *it);
          }
          // Otherwise recurse...
          else if (!it->inIgnoreList(m_IgnoreList))
@@ -177,26 +143,92 @@ void FileNodeMonitor::sync(FileNode &base)
    {
       if (base.modified())
       {
-         m_ModifiedNodes.push_back(&base);
+         pushDelta(Modified, base);
       }
       if (base.updated())
       {
-         m_ChangedNodes.push_back(&base);
+         pushDelta(Updated, base);
       }
    }
+}
 
+//------------------------------------------------------------------------------
+void FileNodeMonitor::syncDirectory(FileNode &oldDir)
+{
+   FileNode lCurrentDir;
+   FileNodeList lAddedNodes;
+   FileNodeList lRemovedNodes;
+   
+   if (!oldDir.exists())
+   {
+      mRemovedDirList.push_back(oldDir);
+   }
+   
+   // Get the new state of the directory so that we can find out what has been
+   // added or removed to the directory.  To eliminate overlapping updates
+   // don't recurse.  For example, if this directory is tranversed recursively
+   // and then this directories parent is traversed recursively, we are doing
+   // unnecessary work.
+   FileNode::Traverse(oldDir.fullPath(), lCurrentDir, m_IgnoreList, false);
+   
+   if (FileNode::Diff(lAddedNodes, lRemovedNodes, 
+                      oldDir, lCurrentDir, m_IgnoreList))
+   {
+      // Find removed nodes
+      FileNodeList::iterator it = lRemovedNodes.begin();
+      for (; it != lRemovedNodes.end(); it++)
+      {
+         pushDelta(Removed, *it);
+         
+         // Removed by test at beginning.
+         //if (it->type == FileNode::Directory) mRemovedDirQueue.push_back(*it);
+      }
+      oldDir.removeChildren(lRemovedNodes);
+      
+      // Out of nodes that have not been removed, find modified/updated nodes.
+      it = oldDir.children.begin();
+      for (; it != oldDir.children.end(); it++)
+      {
+         if (it->type == FileNode::Directory) continue;
+         
+         if (it->modified())
+         {
+            pushDelta(Modified, *it);
+         }
+         if (it->updated())
+         {
+            pushDelta(Updated, *it);
+         }
+      }
+      
+      // Add new nodes.
+      it = lAddedNodes.begin();
+      oldDir.addChildren(lAddedNodes);
+      for (; it != lAddedNodes.end(); it++)
+      {
+         //m_AddedNodes.push_back(*it);
+         pushDelta(Added, *it);
+         
+         if (it->type == FileNode::Directory) mAddedDirList.push_back(*it);
+      }
+   }
 }
 
 //------------------------------------------------------------------------------
 void FileNodeMonitor::registerNodes(FileNode &node, bool recurse)
 {
-   if (m_NodeLut.count(node.fullPath()) == 0)
-   {
-      m_NodeLut[node.fullPath()] = node;
-   }
+   //if (m_NodeLut.count(node.fullPath()) == 0)
+//   {
+//      m_NodeLut[node.fullPath()] = node;
+//   }
    
    if (node.type == FileNode::Directory && recurse)
    {
+      if (m_NodeLut.count(node.fullPath()) == 0)
+      {
+         m_NodeLut[node.fullPath()] = node;
+      }
+      
       std::vector<FileNode>::iterator it = node.children.begin();
       
       for (; it < node.children.end(); ++it)
@@ -209,12 +241,7 @@ void FileNodeMonitor::registerNodes(FileNode &node, bool recurse)
 //------------------------------------------------------------------------------
 bool FileNodeMonitor::nodeExistsForPath(const std::string &fullPath)
 {
-   if (m_NodeLut.count(fullPath) > 0)
-   {
-      return true;
-   }
-   
-   return false;
+   return (m_NodeLut.count(fullPath) > 0);
 }
 
 //------------------------------------------------------------------------------
@@ -233,7 +260,15 @@ void FileNodeMonitor::addNewNode(FileNode &parent, FileNode &newNode)
    
    // Add the node to the map.
    m_NodeLut[newNode.fullPath()] = newNode;//pNode;
+}
+
+//------------------------------------------------------------------------------
+void FileNodeMonitor::pushDelta(DeltaType type, FileNode &node)
+{
+   FileSysDelta l_delta;
    
-   // Add the node to the new node list
-   m_AddedNodes.push_back(newNode);
+   l_delta.type = type;
+   l_delta.node = node;
+   
+   m_deltaQueue.push(l_delta);
 }

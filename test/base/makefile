@@ -7,7 +7,9 @@ INC =	-I../../includes/base \
 	-I../../includes/base/file_system \
 	-I../../includes/base/helpers \
 	-I../../includes/base/container \
-	-I../../includes/base/concurrency
+	-I../../includes/base/concurrency \
+	-I../../includes/base/logging \
+	-I../../includes/base/time
 ABSLIB = -L../../lib/base -lbase
 LIBS = -lstdc++ -lpthread
 	
@@ -47,5 +49,8 @@ hashtab:
 segm:
 	$(CC) -Wall -g -o segm segmentertest.cpp $(INC) $(ABSLIB) $(LIBS)
 
+log:
+	$(CC) -Wall -g -o log logtest.cpp $(INC) $(ABSLIB) $(LIBS)
+
 clean:
-	rm -rf  *.o client server thread sem queue fs mon dsv rsync arg hashtab segm *.dSYM
+	rm -rf  *.o log client server thread sem queue fs mon dsv rsync arg hashtab segm *.dSYM

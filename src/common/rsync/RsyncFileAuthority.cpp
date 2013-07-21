@@ -98,9 +98,7 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
    l_iCurrentSeg = l_vSegVec.begin();
    while (l_iCurrentSeg < l_vSegVec.end())
    {
-      //RsyncPackedSeg l_PackedSeg;
       RsyncSegmentPacket* l_pSegPkt = NULL;
-      bool           l_bFound = false;
       
       // Get the weak checksum for the current segment.
       (*l_iCurrentSeg)->getWeak(weaksum);
@@ -109,7 +107,6 @@ bool RsyncFileAuthority::process(RsyncSegmentTable* pSegTable)
 //      l_bFound = pSegTable->find(**l_iCurrentSeg, l_fAuthFile, l_pSegPkt);
       l_pSegPkt = pSegTable->find(**l_iCurrentSeg, l_fAuthFile);
       
-      //if (l_bFound)
       if (l_pSegPkt)
       {
          // If we have a match and the l_nBytesSinceMatch count is > 0,

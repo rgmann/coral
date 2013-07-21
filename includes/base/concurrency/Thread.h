@@ -1,8 +1,10 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#include <pthread.h>
-//#include "ThreadTypes.h"
+#include <string>
+#include "BaseTypes.h"
+#include "Mutex.h"
+
 
 class ThreadArg
 {
@@ -13,9 +15,7 @@ public:
    bool  stopSignalled() const { return m_bStopSignal; };
    
    void* pUserData;
-   
-private:
-   
+      
    bool  m_bStopSignal;
    
    friend class Thread;
@@ -46,6 +46,10 @@ public:
    
    bool  stop();
    
+   bool  isActive() const;
+   
+   ui32 getId() const;
+   
 private:
    
    /**
@@ -57,9 +61,11 @@ private:
    
    static void CleanupHandler(void* pArg);
    
-   bool  isActive();
-   
 private:
+   
+   static Mutex   ourIdMutex;
+   
+   static ui32    ournCurrentTid;
    
    struct ThreadPriv* m_pThread;
    
@@ -70,6 +76,8 @@ private:
    UserThreadFunc m_pUserFunc;
    
    ThreadArg*     m_pThreadArg;
+   
+   ui32           m_nId;
 };
 
 #endif // THREAD_H

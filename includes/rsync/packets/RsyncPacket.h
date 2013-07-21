@@ -33,7 +33,7 @@ public:
    RsyncPacket(const RsyncAssemblyInstr* pPacket);
    
    RsyncPacket(const RsyncSegmentReportPacket* pPacket);
-   
+      
    Type type() const;
    
    bool length(ui32 &length) const;

@@ -22,7 +22,7 @@ public:
    
    bool operator!=(const FileNode &other) const;
    
-   bool inIgnoreList(const FileNameList &names);
+   bool inIgnoreList(const FileNameList &names) const;
    
    bool inHideList(const FileNameList &names);
    
@@ -64,10 +64,13 @@ public:
    bool  exists();
    
    void        setName(std::string name);
-   std::string getName();
+   std::string getName() const;
    
    void        setBasePath(std::string path);
-   std::string getBasePath();
+   std::string getBasePath() const;
+   
+   void removeChildren(std::vector<FileNode> &list);
+   void addChildren(std::vector<FileNode> &list);
    
    // Ownership
    std::string user;
@@ -103,6 +106,18 @@ public:
    std::string          fullPath()  const;
    static std::string   FullPath(const std::string &path, 
                                  const std::string &name);
+   
+   /**
+    * For two directory nodes, Diff finds the files that have been added from
+    * old to current, and the files that have been removed.  Returns false
+    * if the compared nodes are not directories or they do not have the same
+    * path.
+    */
+   static bool Diff(std::vector<FileNode> &added,
+                    std::vector<FileNode> &removed,
+                    const FileNode &old,
+                    const FileNode &current,
+                    const FileNameList &ignoreNames);
    
    static void Print(const FileNode &node, bool recurse = true);
    

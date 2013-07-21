@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
+#include <map>
 
 const perm_t FileNode::Read = 0x04;
 const perm_t FileNode::Write = 0x02;
@@ -153,7 +154,7 @@ void FileNode::Print(const FileNode &node, bool recurse)
 }
 
 //------------------------------------------------------------------------------
-bool FileNode::inIgnoreList(const FileNameList &names)
+bool FileNode::inIgnoreList(const FileNameList &names) const
 {
    std::vector<std::string>::const_iterator it = names.begin();
    
@@ -263,7 +264,7 @@ void FileNode::setName(std::string name)
 }
 
 //------------------------------------------------------------------------------
-std::string FileNode::getName()
+std::string FileNode::getName() const
 {
    return name;
 }
@@ -275,7 +276,7 @@ void FileNode::setBasePath(std::string basePath)
 }
 
 //------------------------------------------------------------------------------
-std::string FileNode::getBasePath()
+std::string FileNode::getBasePath() const
 {
    return basePath;
 }
@@ -338,6 +339,41 @@ std::string FileNode::FullPath(const std::string &path,
    }
 
    return locPath + name;
+}
+
+//------------------------------------------------------------------------------
+void FileNode::removeChildren(std::vector<FileNode> &list)
+{
+   std::map<std::string, FileNode> lNodeMap;
+   
+   std::vector<FileNode>::iterator lIt = list.begin();
+   for (; lIt != list.end(); lIt++)
+   {
+      lNodeMap[lIt->fullPath()] = *lIt;
+   }
+   
+   lIt = children.begin();
+   while (lIt != children.end())
+   {
+      if (lNodeMap.count(lIt->fullPath()))
+      {
+         lIt = children.erase(lIt);
+      }
+      else
+      {
+         lIt++;
+      }
+   }
+}
+
+//------------------------------------------------------------------------------
+void FileNode::addChildren(std::vector<FileNode> &list)
+{
+   std::vector<FileNode>::iterator lIt = list.begin();
+   for (; lIt != list.end(); lIt++)
+   {
+      children.push_back(*lIt);
+   }
 }
 
 //------------------------------------------------------------------------------
@@ -508,6 +544,68 @@ bool FileNode::Stat(std::string path, FileNode &node)
    node.m_pFileTimes->lastAccess = locStat.st_atime;
    node.m_pFileTimes->lastModification = locStat.st_mtime;
    node.m_pFileTimes->lastUpdate = locStat.st_ctime;
+   
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool FileNode::Diff(std::vector<FileNode> &added,
+                    std::vector<FileNode> &removed,
+                    const FileNode &old,
+                    const FileNode &current,
+                    const FileNameList &ignoreNames)
+{
+   std::map<std::string, const FileNode*> lOldMap;
+   std::map<std::string, const FileNode*>::iterator lOldMapIt;
+   
+   std::map<std::string, const FileNode*> lCurrentMap;
+   std::map<std::string, const FileNode*>::iterator lCurrentMapIt;
+   
+   if (old.type != FileNode::Directory || current.type != FileNode::Directory)
+   {
+      return false;
+   }
+   
+   if (old.fullPath() != current.fullPath())
+   {
+      return false;
+   }
+   
+   std::vector<FileNode>::const_iterator lOldIt = old.children.begin();
+   for (; lOldIt != old.children.end(); lOldIt++)
+   {
+      if (!lOldIt->inIgnoreList(ignoreNames))
+      {
+         lOldMap[lOldIt->getName()] = &(*lOldIt);
+      }
+   }
+   
+   std::vector<FileNode>::const_iterator lCurrentIt = current.children.begin();
+   for (; lCurrentIt != current.children.end(); lCurrentIt++)
+   {
+      if (!lCurrentIt->inIgnoreList(ignoreNames))
+      {
+         lCurrentMap[lCurrentIt->getName()] = &(*lCurrentIt);
+      }
+   }
+   
+   lOldMapIt = lOldMap.begin();
+   for (; lOldMapIt != lOldMap.end(); lOldMapIt++)
+   {
+      if (lCurrentMap.count(lOldMapIt->first) == 0)
+      {
+         removed.push_back(*lOldMapIt->second);
+      }
+   }
+   
+   lCurrentMapIt = lCurrentMap.begin();
+   for (; lCurrentMapIt != lCurrentMap.end(); lCurrentMapIt++)
+   {
+      if (lOldMap.count(lCurrentMapIt->first) == 0)
+      {
+         added.push_back(*lCurrentMapIt->second);
+      }
+   }
    
    return true;
 }
