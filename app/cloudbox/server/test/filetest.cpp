@@ -56,5 +56,7 @@ bool createTestFiles(MongoConnection &connection)
                              user);
    if (!lbSuccess) return false;
    
-   collection.createFile(user, lFilePath, file);
+   files.createFile(user, lFilePath, File::Regular, file);
+   
+   return true;
 }

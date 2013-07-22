@@ -4,6 +4,9 @@
 #include "Collection.h"
 #include "User.h"
 
+class Group;
+class File;
+
 class UserCollection : public Collection
 {
 public:
@@ -13,9 +16,9 @@ public:
    /**
     * Returns full list of groups that this user is a member of.
     */
-   bool groups(const User &user, std::vector<Group*> &groups);
+   bool getGroups(const User &user, std::vector<Group*> &groups);
    
-   bool files(const User &user, std::vector<File*> &files);
+   bool getFiles(const User &user, std::vector<File*> &files);
    
 protected:
    

@@ -15,7 +15,9 @@ public:
    
    ~Group();
    
-   bool owner(User &owner);
+   //bool setOwner(User &owner);
+   
+   
 
    ui32 revision();
    
@@ -27,7 +29,6 @@ public:
    //File& root() const;
 protected:
    
-   GenericModel* create(MongoConnection* pConnection) const;
 };
 
 #endif // GROUP_H

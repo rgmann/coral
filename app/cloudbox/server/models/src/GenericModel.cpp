@@ -79,3 +79,16 @@ bool GenericModel::isValid() const
 {
    return m_bsonObject.hasField("_id");
 }
+
+//------------------------------------------------------------------------------
+mongo::BSONElement GenericModel::getObjectId()
+{
+   mongo::BSONElement lObjectId;
+   
+   if (!object().getObjectID(lObjectId))
+   {
+      lObjectId = mongo::BSONElement();
+   }
+   
+   return lObjectId;
+}

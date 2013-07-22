@@ -41,7 +41,7 @@ public:
    
    void object(const mongo::BSONObj &obj);
    
-   mongo::BSONElement objectId();
+   mongo::BSONElement getObjectId();
    
 protected:
    

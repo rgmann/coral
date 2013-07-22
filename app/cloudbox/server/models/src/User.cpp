@@ -2,8 +2,8 @@
 #include "Group.h"
 
 //------------------------------------------------------------------------------
-User::User(MongoConnection* pConnection)
-: GenericModel("users", pConnection)
+User::User()
+: GenericModel("users")
 {
 }
 

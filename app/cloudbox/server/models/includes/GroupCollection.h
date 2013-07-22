@@ -2,7 +2,10 @@
 #define GROUP_COLLECTION_H
 
 #include "Collection.h"
-#include "User.h"
+#include "Group.h"
+
+class User;
+class File;
 
 class GroupCollection : public Collection
 {

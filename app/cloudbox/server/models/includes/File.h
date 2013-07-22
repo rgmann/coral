@@ -6,20 +6,27 @@
 
 class User;
 class Group;
-class Lock;
 
-class File : GenericModel
+class File : public GenericModel
 {
+public:
+   
    File();
    
    enum Type {
-      UnknownType,
-      FileType,
-      DirectoryType,
-      LinkType
+      Unknown,
+      Regular,
+      Directory,
+      Link
    };
    
+   void type(Type type);
+   
    Type type() const;
+   
+   static std::string TypeToString(Type type);
+   
+   static File::Type StringToType(const std::string &type);
    
    /**
     * File extension.
@@ -27,11 +34,13 @@ class File : GenericModel
    std::string ext();
    
    ui64 size();
+   
+   void setDefaults();
 
    /**
     * All files are stored in one directory as "fileobjectid.file"
     */
-   bool getPath(FilePath);
+   FilePath getPath();
    
    void setPath(const FilePath &path);
 
