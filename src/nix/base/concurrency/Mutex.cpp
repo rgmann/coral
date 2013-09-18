@@ -90,7 +90,7 @@ bool  Mutex::unlock()
       return false;
    }
    
-   locRetVal = pthread_mutex_lock(&m_pMutex->m);
+   locRetVal = pthread_mutex_unlock(&m_pMutex->m);
    
    return (locRetVal == 0);
 }
