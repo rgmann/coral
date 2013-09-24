@@ -75,10 +75,21 @@ bool FileCollection::createFile(User &user, const FilePath &path,
    
    FilePath baseDir(path - path.getLastSegment());
    
-   if (!connection().isConnected()) return false;
-   if (!user.isValid()) return false;
+   if (!connection().isConnected())
+   {
+      std::cout << "Not connected" << std::endl;
+      return false;
+   }
    
-   // Find the base directory. Not very efficient since we have to since we have
+   if (!user.isValid())
+   {
+      std::cout << "User not valid!" << std::endl;
+      return false;
+   }
+   
+   // Parse path to get path of parent file
+   
+   // Find the base directory. Not very efficient since we have
    // to index all files in all groups that this user belongs to.
    if (!groups.find(BSON("members" << user.getObjectId()),
                         lvGroups))

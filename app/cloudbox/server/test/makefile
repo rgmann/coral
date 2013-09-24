@@ -14,21 +14,26 @@ LIBS =  -lmongoclient \
 	-lboost_filesystem \
 	-lboost_program_options \
 	-lboost_system
-PERSONSRC = ../models/src/Collection.cpp \
+COMMON = ../models/src/Collection.cpp \
 	../models/src/MongoConnection.cpp \
-	../models/src/GenericModel.cpp \
+	../models/src/GenericModel.cpp 
+PERSONSRC = $(COMMON) \
 	../models/src/Person.cpp \
         ../models/src/PersonCollection.cpp
 
-FILESRC = ../models/src/Collection.cpp \
-	../models/src/MongoConnection.cpp \
-        ../models/src/GenericModel.cpp \
+FILESRC = $(COMMON) \
 	../models/src/File.cpp \
         ../models/src/FileCollection.cpp \
         ../models/src/User.cpp \
         ../models/src/UserCollection.cpp \
         ../models/src/Group.cpp \
         ../models/src/GroupCollection.cpp
+
+GRPSRC = $(COMMON) \
+	../models/src/Group.cpp \
+	../models/src/GroupCollection.cpp \
+	../models/src/User.cpp \
+	../models/src/UserCollection.cpp
 
 person:
 	$(CC) -Wall -g -o person persontest.cpp $(PERSONSRC) $(INC) -pthread $(LIBDIR) $(LIBS)
@@ -41,7 +46,10 @@ ugtest:
 
 file:
 	$(CC) -Wall -g -o filetest filetest.cpp $(FILESRC) $(INC) -pthread $(LIBDIR) $(LIBS) $(ABSLIB)
+	
+group:
+	$(CC) -Wall -g -o grouptest grouptest.cpp $(GRPSRC) $(INC) -pthread $(LIBDIR) $(LIBS) $(ABSLIB)
 
 clean:
-	rm -rf *.o person tutorial ugtest filetest
+	rm -rf *.o person tutorial ugtest filetest grouptest
 

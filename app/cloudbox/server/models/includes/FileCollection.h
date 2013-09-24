@@ -13,6 +13,16 @@ public:
    
    FileCollection(MongoConnection &connection);
    
+   bool getFile(const User &user, const std::string &path, File &file);
+   
+   bool getReadStream(const User &user,
+                      const std::string &path,
+                      std::ifstream &readStream);
+   
+   bool getWriteStream(const User &user,
+                       const std::string &path,
+                       std::ofstream &writeStream);
+   
    /**
     * Lock a file for reading.  Atomically compares the user clock against the
     * the requested file's clock.  If the users clock "happened before" the

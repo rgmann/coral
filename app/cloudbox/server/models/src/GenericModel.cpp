@@ -54,25 +54,10 @@ void GenericModel::object(const mongo::BSONObj &obj)
 }
 
 //------------------------------------------------------------------------------
-//bool GenericModel::reload()
-//{
-//   bool l_bSuccess = false;
-//   mongo::BSONElement l_element;
-//   
-//   if (m_pConnection == NULL) return false;
-//   if (!m_pConnection->isConnected()) return false;
-//   
-//   if (m_bsonObject.getObjectID(l_element))
-//   {
-//      m_bsonObject = m_pConnection->mongo().findOne(
-//                                 collectionName().c_str(),
-//                                 BSON("_id" << l_element));
-//      
-//      l_bSuccess = true;
-//   }
-//   
-//   return l_bSuccess;
-//}
+void GenericModel::clear()
+{
+   object(mongo::BSONObj());
+}
 
 //------------------------------------------------------------------------------
 bool GenericModel::isValid() const
@@ -81,14 +66,19 @@ bool GenericModel::isValid() const
 }
 
 //------------------------------------------------------------------------------
-mongo::BSONElement GenericModel::getObjectId()
+bool GenericModel::getObjectId(ObjectId &objectId) const
 {
-   mongo::BSONElement lObjectId;
+   bool lbSuccess = false;
+   mongo::BSONElement lIdElement;
    
-   if (!object().getObjectID(lObjectId))
+   objectId.clear();
+   
+   if (object().getObjectID(lIdElement) && 
+       lIdElement.type() == mongo::jstOID)
    {
-      lObjectId = mongo::BSONElement();
+      objectId = lIdElement.OID();
+      lbSuccess = true;
    }
    
-   return lObjectId;
+   return lbSuccess;
 }

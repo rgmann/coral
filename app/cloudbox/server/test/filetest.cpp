@@ -56,7 +56,14 @@ bool createTestFiles(MongoConnection &connection)
                              user);
    if (!lbSuccess) return false;
    
-   files.createFile(user, lFilePath, File::Regular, file);
+   if (files.createFile(user, lFilePath, File::Regular, file))
+   {
+      std::cout << "File: " << file.object() << std::endl;
+   }
+   else {
+      std::cout << "Failed to create file!" << std::endl;
+   }
+
    
    return true;
 }

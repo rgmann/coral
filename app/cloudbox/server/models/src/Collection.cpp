@@ -44,9 +44,17 @@ bool Collection::remove(const GenericModel &model)
 {
    if (!connection().isConnected()) return false;
       
-   connection().mongo().remove(fullName().c_str(), 
-                               model.object(),
-                               model.isValid());
+   remove(model.object(), model.isValid());
+   
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool Collection::remove(const mongo::BSONObj &obj, bool bJustOne)
+{
+   if (!connection().isConnected()) return false;
+   
+   connection().mongo().remove(fullName().c_str(), obj, bJustOne);
    
    return true;
 }
@@ -109,6 +117,27 @@ bool Collection::find(const mongo::BSONObj &query, ModelList &matches)
 }
 
 //------------------------------------------------------------------------------
+bool Collection::find(const mongo::BSONObj &query, IdList &matches)
+{
+   mongo::auto_ptr<mongo::DBClientCursor> cursor;
+   
+   if (!connection().isConnected()) return false;
+   
+   cursor = connection().mongo().query(fullName().c_str(), query);
+   while (cursor->more())
+   {
+      mongo::BSONElement lObjectId;
+      if (cursor->next().getObjectID(lObjectId) && 
+          lObjectId.type() == mongo::jstOID)
+      {
+         matches.push_back(lObjectId.OID());
+      }
+   }
+   
+   return true;
+}
+
+//------------------------------------------------------------------------------
 MongoConnection* Collection::connectionPtr()
 {
    return &m_rConnection;
@@ -127,15 +156,14 @@ bool Collection::findOne(const mongo::BSONObj &query, GenericModel &result)
    
    if (!connection().isConnected()) return false;
    
-   lResultObj = connection().mongo().findOne(fullName().c_str(),
-                                             query);
+   lResultObj = connection().mongo().findOne(fullName().c_str(), query);
    
    if (!lResultObj.isEmpty())
    {
       result.object(lResultObj);
    }
    
-   return (lResultObj.isEmpty() != true);
+   return (!lResultObj.isEmpty());
 }
 
 //------------------------------------------------------------------------------
@@ -177,6 +205,40 @@ bool Collection::increment(GenericModel &model,
                                BSON("$inc" << BSON(counter << 1)));
       lbSuccess = true;
    }
+   
+   return lbSuccess;
+}
+
+//------------------------------------------------------------------------------
+bool Collection::add(const mongo::BSONObj &query, 
+                     const std::string &array,
+                     const ObjectId &item,
+                     bool bUnique)
+{
+   bool lbSuccess = false;
+   
+   if (!connection().isConnected()) return false;
+   
+   connection().mongo().update(fullName().c_str(),
+                               query,
+                               BSON("$push" << BSON(array << item)));
+   
+   return lbSuccess;
+}
+
+//------------------------------------------------------------------------------
+bool Collection::remove(const mongo::BSONObj &query, 
+                        const std::string &array,
+                        const ObjectId &item,
+                        bool bFirst)
+{
+   bool lbSuccess = false;
+   
+   if (!connection().isConnected()) return false;
+   
+   connection().mongo().update(fullName().c_str(),
+                               query,
+                               BSON("$pull" << BSON(array << item)));
    
    return lbSuccess;
 }

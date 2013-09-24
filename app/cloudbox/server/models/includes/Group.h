@@ -10,23 +10,35 @@ class File;
 class Group : public GenericModel
 {
 public:
+   
+   static const char* GroupMembersField;
+   static const char* GroupOwnerField;
+   static const char* GroupRevField;
+   static const char* GroupRootField;
       
    Group();
    
    ~Group();
    
-   //bool setOwner(User &owner);
-   
-   
-
-   ui32 revision();
+   bool setOwner(const ObjectId &owner);
    
    /**
-    * Atomic increment of group revision number.
+    * Creates an incomplete user with the user ID populated.
+    * The caller must then query on the user.
     */
-   //bool  addRevision();
+   bool getOwner(ObjectId &owner) const;
+   
+   /**
+    * @note Members are added via the collection.
+    */
+   bool getMembers(std::vector<ObjectId> &members);
 
-   //File& root() const;
+   bool getRevision(ui32 &revision);
+   
+   bool setRoot(const ObjectId &root);
+   
+   bool getRoot(ObjectId &root);
+
 protected:
    
 };
