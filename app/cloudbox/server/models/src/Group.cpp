@@ -1,9 +1,14 @@
 #include "Group.h"
 #include "User.h"
 
+const char* Group::GroupOwnerField = "owner";
+const char* Group::GroupMembersField = "members";
+const char* Group::GroupRevField = "revision";
+const char* Group::GroupRootField = "root";
+
 //------------------------------------------------------------------------------
-Group::Group(MongoConnection* pConnection)
-: GenericModel("groups", pConnection)
+Group::Group()
+: GenericModel("groups")
 {
 }
 
@@ -13,56 +18,107 @@ Group::~Group()
 }
 
 //------------------------------------------------------------------------------
-bool Group::owner(User& owner)
+bool Group::setOwner(const ObjectId& owner)
 {
-   bool l_bSuccess = false;
-   mongo::BSONElement l_userId;
-   std::vector<User> l_vUsers;
-   User l_user(m_pDbConn);
+   mongo::BSONObjBuilder lObjBuilder;
+      
+   lObjBuilder.appendElementsUnique(object());   
+   lObjBuilder.append(GroupOwnerField, owner);
    
-   if (reload())
-   {
-      l_userId = m_bsonObject.getField("owner");
-      l_bSuccess = l_user.findOne(BSON("_id" << l_userId), owner);
-   }
+   object(lObjBuilder.obj());
    
-   return l_bSuccess;
+   return true;
 }
 
 //------------------------------------------------------------------------------
-bool Group::members(std::vector<User> &members)
+bool Group::getOwner(ObjectId& owner) const
 {
-   bool l_bSuccess = false;
-   std::vector<mongo::OID> l_vUserIds;
-   std::vector<mongo::OID>::iterator l_vUserIdsIt;
-   User l_queryUser(m_pDbConn);
-   
-   if (reload())
+   mongo::BSONElement lOidContainer;
+   bool lbSuccess = false;
+
+   if (object().isValid() && object().hasField(GroupOwnerField))
    {
-      m_bsonObject.getObjectField("members").Vals(l_vUserIds);
+      lOidContainer = object().getField(GroupOwnerField);
       
-      l_vUserIdsIt = l_vUserIds.begin();
-      for (; l_vUserIdsIt < l_vUserIds.end(); l_vUserIdsIt++)
+      if (lOidContainer.type() == mongo::jstOID)
       {
-         User l_user;
-         
-         l_bSuccess = l_queryUser.findOne(BSON("_id" << *l_vUserIdsIt),
-                              l_user);
-         
-         if (l_bSuccess)
+         owner = lOidContainer.OID();
+         lbSuccess = true;
+      }
+   }
+   
+   return lbSuccess;
+}
+
+//------------------------------------------------------------------------------
+bool Group::getMembers(std::vector<ObjectId> &members)
+{
+   bool lbSuccess = false;
+   
+   if (object().isValid() && object().hasField(GroupMembersField))
+   {
+      std::vector<mongo::BSONElement> lvOidContainers;
+      std::vector<mongo::BSONElement>::iterator liContainer;
+      
+      lvOidContainers = object().getField(GroupMembersField).Array();
+      
+      liContainer = lvOidContainers.begin();
+      for (; liContainer != lvOidContainers.end(); liContainer++)
+      {
+         if (liContainer->type() == mongo::jstOID)
          {
-            members.push_back(l_user);
+            members.push_back(liContainer->OID());
          }
       }
       
-      l_bSuccess = true;
+      lbSuccess = true;
    }
    
-   return l_bSuccess;
+   return lbSuccess;
 }
 
 //------------------------------------------------------------------------------
-GenericModel* Group::create(MongoConnection* pConnection) const
+bool Group::getRevision(ui32 &revision)
 {
-   return new Group(pConnection);
+   bool lbSuccess = false;
+   
+   lbSuccess = object().isValid() && object().hasField(GroupRevField);
+   
+   if (lbSuccess) revision = object().getIntField(GroupRevField);
+   
+   return lbSuccess;
+}
+
+//------------------------------------------------------------------------------
+bool Group::setRoot(const ObjectId &root)
+{
+   mongo::BSONObjBuilder lObjBuilder;
+      
+   lObjBuilder.appendElementsUnique(object());
+   lObjBuilder.append(GroupRootField, root);
+   
+   object(lObjBuilder.obj());
+   
+   return true;
+}
+
+//------------------------------------------------------------------------------
+bool Group::getRoot(ObjectId &root)
+{
+   bool lbSuccess = false;
+      
+   if (object().isValid() && object().hasField(GroupRootField))
+   {
+      mongo::BSONElement lOidContainer;
+      
+      lOidContainer = object().getField(GroupRootField);
+      
+      if (lOidContainer.type() == mongo::jstOID)
+      {
+         root = lOidContainer.OID();
+         lbSuccess = true;
+      }
+   }
+   
+   return lbSuccess;
 }

@@ -11,7 +11,8 @@ CPP =	../../src/nix/$(LIBDIR)/*.cpp \
 	../../src/nix/$(LIBDIR)/time/*.cpp \
 	../../src/common/$(LIBDIR)/concurrency/*.cpp \
 	../../src/common/$(LIBDIR)/container/*.cpp \
-	../../src/common/$(LIBDIR)/logging/*.cpp
+	../../src/common/$(LIBDIR)/logging/*.cpp \
+	../../src/common/$(LIBDIR)/file_system/*.cpp
 INC =	-I../../includes/$(LIBDIR) \
 	-I../../includes/$(LIBDIR)/crypto \
 	-I../../includes/$(LIBDIR)/file_system \

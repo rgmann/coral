@@ -54,28 +54,31 @@ void GenericModel::object(const mongo::BSONObj &obj)
 }
 
 //------------------------------------------------------------------------------
-//bool GenericModel::reload()
-//{
-//   bool l_bSuccess = false;
-//   mongo::BSONElement l_element;
-//   
-//   if (m_pConnection == NULL) return false;
-//   if (!m_pConnection->isConnected()) return false;
-//   
-//   if (m_bsonObject.getObjectID(l_element))
-//   {
-//      m_bsonObject = m_pConnection->mongo().findOne(
-//                                 collectionName().c_str(),
-//                                 BSON("_id" << l_element));
-//      
-//      l_bSuccess = true;
-//   }
-//   
-//   return l_bSuccess;
-//}
+void GenericModel::clear()
+{
+   object(mongo::BSONObj());
+}
 
 //------------------------------------------------------------------------------
 bool GenericModel::isValid() const
 {
    return m_bsonObject.hasField("_id");
+}
+
+//------------------------------------------------------------------------------
+bool GenericModel::getObjectId(ObjectId &objectId) const
+{
+   bool lbSuccess = false;
+   mongo::BSONElement lIdElement;
+   
+   objectId.clear();
+   
+   if (object().getObjectID(lIdElement) && 
+       lIdElement.type() == mongo::jstOID)
+   {
+      objectId = lIdElement.OID();
+      lbSuccess = true;
+   }
+   
+   return lbSuccess;
 }

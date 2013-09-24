@@ -13,6 +13,16 @@ public:
    
    FileCollection(MongoConnection &connection);
    
+   bool getFile(const User &user, const std::string &path, File &file);
+   
+   bool getReadStream(const User &user,
+                      const std::string &path,
+                      std::ifstream &readStream);
+   
+   bool getWriteStream(const User &user,
+                       const std::string &path,
+                       std::ofstream &writeStream);
+   
    /**
     * Lock a file for reading.  Atomically compares the user clock against the
     * the requested file's clock.  If the users clock "happened before" the
@@ -49,7 +59,8 @@ public:
     *
     * @return  LockStatus - Indicates the status of the file lock attempt
     */
-   bool lockForUpdate(File &file, const User &user, const FilePath &path);
+   //bool lockForUpdate(File &file, const User &user, const FilePath &path);
+   bool lockForWrite(File &file, User &user);
    
    /**
     * Create a new file.  If the file exists already.  A file is created with
@@ -60,7 +71,8 @@ public:
     *
     * If there is no conflict, a new file entry is created and locked.
     */
-   bool create(User &user, const FilePath &path, File &file);
+   bool createFile(User &user, const FilePath &path, 
+                   File::Type type, File &file);
    
    /**
     * Unlock a currently locked file, regardless of whether it was locked for
@@ -68,6 +80,10 @@ public:
     * It also verifies that the file is closed.
     */
    bool unlock(File &file, User &user);
+   
+   bool unlockWrite(File &file, User &user);
+   
+   bool unlockRead(File &file, User &user);
    
    bool getReadRef(User &user, std::ifstream &rstream);
    

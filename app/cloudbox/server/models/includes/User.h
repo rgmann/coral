@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 #include "GenericModel.h"
+#include "Date.h"
 
 class Group;
 

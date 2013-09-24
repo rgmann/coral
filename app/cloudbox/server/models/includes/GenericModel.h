@@ -14,6 +14,8 @@
  *
  */
 
+typedef mongo::OID ObjectId;
+
 class GenericModel
 {
 public:
@@ -41,7 +43,14 @@ public:
    
    void object(const mongo::BSONObj &obj);
    
-   mongo::BSONElement objectId();
+   bool getObjectId(ObjectId &objectId) const;
+   
+   /**
+    * Resets the BSONObj.  The base class simply resets to an empty object,
+    * but derived models may override so that clear resets fields while keeping
+    * field names.
+    */
+   virtual void clear();
    
 protected:
    
