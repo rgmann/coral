@@ -1,0 +1,22 @@
+#ifndef $$COMP_GUARD$$_WRAPPER_H
+#define $$COMP_GUARD$$_WRAPPER_H
+
+#include "InstanceWrapper.h"
+#include "$$WRAPPED_CLASS$$.h"
+
+class $$WRAPPED_CLASS$$Wrapper : public InstanceWrapper {
+public:
+
+$$tab$$$$WRAPPED_CLASS$$Wrapper();
+$$tab$$~$$WRAPPED_CLASS$$Wrapper();
+
+$$tab$$bool initialize(const Structure& params);
+$$tab$$bool destroy(const Structure& params);
+
+$$tab$$static void $$ACTIONS$$(InstanceWrapper *pInst, Structure &params, RpcReturnValue &retobj);
+
+private:
+
+$$tab$$$$WRAPPED_CLASS$$* mpInst;
+};
+#endif // $$COMP_GUARD$$_WRAPPER_H

@@ -1,0 +1,18 @@
+//------------------------------------------------------------------------------
+bool &&WRAPPED_CLASS$$ClientStub::$$ACTION$$($$PARAMS$$)
+{
+$$tab$$$$ACTION_STRUCT$$ lParams($$STRUCT_PARAMS$$);
+$$tab$$RpcReturnValue lCallRetVal;
+
+$$tab$$if (lbSuccess = call("$$ACTION$$", lParams, lCallRetVal))
+$$tab$${
+$$tab$$$$tab$$lCallRetVal.get(result));
+$$tab$$}
+$$tab$$else
+$$tab$${
+$$tab$$$$tab$$throw getLastError();
+$$tab$$}
+
+$$tab$$return lbSuccess;
+}
+

@@ -180,7 +180,7 @@ bool RsyncPacket::unpack(const void* pPkt, ui32 nSizeBytes)
          break;
          
       default:
-         l_bRecognized = true;
+         l_bRecognized = false;
          break;
    }
    

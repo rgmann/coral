@@ -1,0 +1,35 @@
+#include "$$WRAPPED_CLASS_ACTION$$ParamList.h"
+
+//-----------------------------------------------------------------------------
+$$WRAPPED_CLASS_ACTION$$ParamList::
+$$WRAPPED_CLASS_ACTION$$ParamList($$PARAMS$$)
+{
+$$tab$$set("$$PARAM_NAME$$", $$PARAM_NAME$$);
+}
+
+//-----------------------------------------------------------------------------
+$$WRAPPED_CLASS_ACTION$$ParamList::
+~$$WRAPPED_CLASS_ACTION$$ParamList()
+{
+}
+
+//-----------------------------------------------------------------------------
+bool $$WRAPPED_CLASS_ACTION$$ParamList::valid() const
+{
+$$tab$$bool lbIsValid = true;
+
+$$tab$$lbIsValid &= hasField($$PARAM_NAME$$);
+
+$$tab$$return lbIsValid;
+}
+
+//-----------------------------------------------------------------------------
+bool $$WRAPPED_CLASS_ACTION$$ParamList::get($$REF_PARAMS$$)
+{
+$$tab$$bool lbIsValid = true;
+
+$$tab$$lbIsValid &= get("$$PARAM_NAME$$", $$PARAM_NAME$$);
+
+$$tab$$return lbIsValid;
+}
+

@@ -1,0 +1,27 @@
+#include "$$WRAPPED_CLASS$$Wrapper.h"
+
+//-----------------------------------------------------------------------------
+$$WRAPPED_CLASS$$Wrapper::$$WRAPPED_CLASS$$Wrapper()
+:  InstanceWrapper(),
+   mpInst(NULL)
+{
+}
+
+//-----------------------------------------------------------------------------
+$$WRAPPED_CLASS$$Wrapper::~$$WRAPPED_CLASS$$Wrapper()
+{
+$$tab$$if (mpInst)
+$$tab$${
+$$tab$$$$tab$$delete mpInst;
+$$tab$$$$tab$$mpInst = NULL;
+$$tab$$}
+}
+
+//-----------------------------------------------------------------------------
+bool $$WRAPPED_CLASS$$Wrapper::initialize(const Structure &params)
+{
+$$tab$$mpInst = new $$WRAPPED_CLASS$$(/* TODO: Pass correct parameters*/);
+};
+
+$$ACTIONS$$
+

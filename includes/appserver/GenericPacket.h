@@ -25,6 +25,7 @@ public:
    virtual ~GenericPacket();
    
    bool  allocate();
+   bool  allocate(ui32 sizeBytes);
    
    void  deallocate();
    

@@ -1,0 +1,17 @@
+#ifndef $$COMP_GUARD_ACTION$$_PARAM_LIST_H
+#define $$COMP_GUARD_ACTION$$_PARAM_LIST_H
+
+#include "Structure.h"
+
+class $$WRAPPED_CLASS_ACTION$$ParamList : public Structure {
+public:
+
+$$tab$$$$WRAPPED_CLASS_ACTION$$ParamList($$PARAMS$$);
+$$tab$$~$$WRAPPED_CLASS_ACTION$$ParamList();
+
+$$tab$$bool valid() const;
+
+$$tab$$bool get($$REF_PARAMS$$);
+};
+
+#endif // $$COMP_GUARD_ACTION$$_PARAM_LIST_H

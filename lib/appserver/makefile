@@ -8,6 +8,7 @@ INC = -I../../includes/base \
       -I../../includes/base/file_system \
       -I../../includes/base/cli \
       -I../../includes/base/helpers \
+      -I../../includes/base/time \
       -I../../includes/base/container \
       -I../../includes/base/concurrency \
       -I../../includes/appserver

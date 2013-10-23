@@ -1,0 +1,34 @@
+#ifndef $$COMP_GUARD$$_SERVER_STUB_H
+#define $$COMP_GUARD$$_SERVER_STUB_H
+
+#include "RpcServerResource.h"
+#include "$$WRAPPED_CLASS$$Wrapper.h"
+
+class $$WRAPPED_CLASS$$ServerStub : public RpcServerResource
+{
+public:
+
+$$tab$$$$WRAPPED_CLASS$$ServerStub() : RpcServerResource("$$WRAPPED_CLASS$$")
+$$tab$${
+$$tab$$};
+   
+$$tab$$virtual void registerActions()
+$$tab$${
+$$ACTIONS$$
+$$tab$$};
+
+protected:
+   
+$$tab$$bool isValidInstance(int instId)
+$$tab$${
+$$tab$$$$tab$$return (getInstance(instId) != NULL);
+$$tab$$}
+   
+$$tab$$InstanceWrapper* createInstance(const Structure &params)
+$$tab$${
+$$tab$$$$tab$$return new $$WRAPPED_CLASS$$Wrapper(params);
+$$tab$$};
+};
+
+#endif // $$COMP_GUARD$$_SERVER_STUB_H
+

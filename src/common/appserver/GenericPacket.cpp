@@ -46,6 +46,13 @@ bool GenericPacket::allocate()
 }
 
 //------------------------------------------------------------------------------
+bool GenericPacket::allocate(ui32 sizeBytes)
+{
+   m_nSizeBytes = sizeBytes;
+   return allocate();
+}
+
+//------------------------------------------------------------------------------
 bool GenericPacket::isAllocated() const
 {
    return (basePtr() != NULL);

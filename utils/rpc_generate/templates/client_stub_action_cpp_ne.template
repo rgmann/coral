@@ -1,0 +1,10 @@
+//------------------------------------------------------------------------------
+bool $$WRAPPED_CLASS$$ClientStub::$$ACTION$$($$PARAMS$$)
+{
+$$tab$$$$ACTION_STRUCT$$ParamList lParams$$STRUCT_PARAMS$$;
+$$tab$$RpcReturnValue lCallRetVal;
+
+$$tab$$return (call("$$ACTION$$", lParams, lCallRetVal) &&
+               lCallRetVal.get(result));
+}
+

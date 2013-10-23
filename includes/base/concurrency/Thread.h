@@ -66,7 +66,7 @@ private:
    static Mutex   ourIdMutex;
    
    static ui32    ournCurrentTid;
-   
+      
    struct ThreadPriv* m_pThread;
    
    bool           m_bStarted;
@@ -76,7 +76,7 @@ private:
    UserThreadFunc m_pUserFunc;
    
    ThreadArg*     m_pThreadArg;
-   
+      
    ui32           m_nId;
 };
 
