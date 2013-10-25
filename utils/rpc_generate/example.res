@@ -16,6 +16,6 @@ resource Database {
   bool create(string lastname, UserAttributes attrs),
   bool read(string lastname, UserAttributes& attrs),
   bool update(string lastname, UserAttributes attrs),
-  bool delete(string lastname)
+  bool destroy(string lastname)
 }
 

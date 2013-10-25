@@ -1,21 +1,21 @@
-#include "CalculatorSubParamList.h"
+#include "CalculatorsubParamList.h"
 
 //-----------------------------------------------------------------------------
-CalculatorSubParamList::
-CalculatorSubParamList(i32 a, i32 b)
+CalculatorsubParamList::
+CalculatorsubParamListParamList(i32 a, i32 b)
 {
    Structure::set("a", a);
    Structure::set("b", b);
 }
 
 //-----------------------------------------------------------------------------
-CalculatorSubParamList::
-~CalculatorSubParamList()
+CalculatorsubParamList::
+~CalculatorsubParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorSubParamList::valid() const
+bool CalculatorsubParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -26,7 +26,7 @@ bool CalculatorSubParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorSubParamList::get(i32& a, i32& b)
+bool CalculatorsubParamListParamList::get(i32& a, i32& b)
 {
    bool lbIsValid = true;
 

@@ -44,7 +44,7 @@ void CalculatorWrapper::add(InstanceWrapper *pInst,
    i32 a;
    i32 b;
 
-   reinterpret_cast<CalculatoraddParamListParamList&>(params).get(a, b);
+   reinterpret_cast<CalculatoraddParamList&>(params).get(a, b);
 
    /* TODO: Perform action. */
 
@@ -60,7 +60,7 @@ void CalculatorWrapper::sub(InstanceWrapper *pInst,
    i32 a;
    i32 b;
 
-   reinterpret_cast<CalculatorsubParamListParamList&>(params).get(a, b);
+   reinterpret_cast<CalculatorsubParamList&>(params).get(a, b);
 
    /* TODO: Perform action. */
 
@@ -76,7 +76,7 @@ void CalculatorWrapper::mul(InstanceWrapper *pInst,
    i32 a;
    i32 b;
 
-   reinterpret_cast<CalculatormulParamListParamList&>(params).get(a, b);
+   reinterpret_cast<CalculatormulParamList&>(params).get(a, b);
 
    /* TODO: Perform action. */
 
@@ -92,7 +92,7 @@ void CalculatorWrapper::div(InstanceWrapper *pInst,
    i32 a;
    i32 b;
 
-   reinterpret_cast<CalculatordivParamListParamList&>(params).get(a, b);
+   reinterpret_cast<CalculatordivParamList&>(params).get(a, b);
 
    /* TODO: Perform action. */
 
@@ -106,7 +106,7 @@ void CalculatorWrapper::getNumOps(InstanceWrapper *pInst,
 {
    i32 lRetval /* = TODO: If applicable, set default */;
 
-   reinterpret_cast<CalculatorgetNumOpsParamListParamList&>(params).get();
+   reinterpret_cast<CalculatorgetNumOpsParamList&>(params).get();
 
    /* TODO: Perform action. */
 

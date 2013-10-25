@@ -1,19 +1,19 @@
-#include "DatabaseDeleteParamList.h"
+#include "DatabasedeleteParamList.h"
 
 //-----------------------------------------------------------------------------
-DatabaseDeleteParamList::
-DatabaseDeleteParamList()
+DatabasedeleteParamList::
+DatabasedeleteParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-DatabaseDeleteParamList::
-~DatabaseDeleteParamList()
+DatabasedeleteParamList::
+~DatabasedeleteParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool DatabaseDeleteParamList::valid() const
+bool DatabasedeleteParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -22,7 +22,7 @@ bool DatabaseDeleteParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool DatabaseDeleteParamList::get()
+bool DatabasedeleteParamListParamList::get()
 {
    bool lbIsValid = true;
 

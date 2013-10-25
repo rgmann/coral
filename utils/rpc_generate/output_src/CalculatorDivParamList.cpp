@@ -1,21 +1,21 @@
-#include "CalculatorDivParamList.h"
+#include "CalculatordivParamList.h"
 
 //-----------------------------------------------------------------------------
-CalculatorDivParamList::
-CalculatorDivParamList(i32 a, i32 b)
+CalculatordivParamList::
+CalculatordivParamListParamList(i32 a, i32 b)
 {
    Structure::set("a", a);
    Structure::set("b", b);
 }
 
 //-----------------------------------------------------------------------------
-CalculatorDivParamList::
-~CalculatorDivParamList()
+CalculatordivParamList::
+~CalculatordivParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorDivParamList::valid() const
+bool CalculatordivParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -26,7 +26,7 @@ bool CalculatorDivParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorDivParamList::get(i32& a, i32& b)
+bool CalculatordivParamListParamList::get(i32& a, i32& b)
 {
    bool lbIsValid = true;
 

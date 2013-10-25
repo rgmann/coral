@@ -1,19 +1,19 @@
-#include "DatabaseUpdateParamList.h"
+#include "DatabaseupdateParamList.h"
 
 //-----------------------------------------------------------------------------
-DatabaseUpdateParamList::
-DatabaseUpdateParamList()
+DatabaseupdateParamList::
+DatabaseupdateParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-DatabaseUpdateParamList::
-~DatabaseUpdateParamList()
+DatabaseupdateParamList::
+~DatabaseupdateParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool DatabaseUpdateParamList::valid() const
+bool DatabaseupdateParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -22,7 +22,7 @@ bool DatabaseUpdateParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool DatabaseUpdateParamList::get()
+bool DatabaseupdateParamListParamList::get()
 {
    bool lbIsValid = true;
 

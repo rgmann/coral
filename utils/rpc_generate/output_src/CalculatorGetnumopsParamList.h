@@ -1,17 +1,17 @@
-#ifndef CALCULATOR_GETNUMOPS_PARAM_LIST_H
-#define CALCULATOR_GETNUMOPS_PARAM_LIST_H
+#ifndef CALCULATORGET_NUM_OPS_PARAM_LIST_H
+#define CALCULATORGET_NUM_OPS_PARAM_LIST_H
 
 #include "Structure.h"
 
-class CalculatorGetnumopsParamList : public Structure {
+class CalculatorgetNumOpsParamList : public Structure {
 public:
 
-   CalculatorGetnumopsParamList();
-   ~CalculatorGetnumopsParamList();
+   CalculatorgetNumOpsParamList();
+   ~CalculatorgetNumOpsParamList();
 
    bool valid() const;
 
    bool get();
 };
 
-#endif // CALCULATOR_GETNUMOPS_PARAM_LIST_H
+#endif // CALCULATORGET_NUM_OPS_PARAM_LIST_H

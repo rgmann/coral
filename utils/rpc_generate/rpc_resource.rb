@@ -134,19 +134,36 @@ class RpcResource
     includes << to_client_stub_decl
     source << to_client_stub_def
 
-    @actions.each {|action| includes << action.to_action_param_list_decl(@name) }
-    @actions.each {|action| source << action.to_action_param_list_def(@name) }
+    @actions.each {|action| includes << action.to_action_param_list_decl }
+    @actions.each {|action| source << action.to_action_param_list_def }
 
     includes.each do |file|
       File.open(File.join(inc_path, file[:name]), 'w') do |io|
-        io.write(file[:text])
+        io.write(file[:text].join)
       end
     end
 
     source.each do |file|
       File.open(File.join(src_path, file[:name]), 'w') do |io|
-        io.write(file[:text])
+        io.write(file[:text].join)
       end
     end
+  end
+
+  def declarations
+    includes = Array.new
+    includes << to_wrapper_decl
+    includes << to_server_stub_decl
+    includes << to_client_stub_decl
+    @actions.each {|action| includes << action.to_action_param_list_decl }
+    includes
+  end
+
+  def definitions
+    source = Array.new
+    source << to_wrapper_def
+    source << to_client_stub_def
+    @actions.each {|action| source << action.to_action_param_list_def }
+    source
   end
 end

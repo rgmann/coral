@@ -1,11 +1,14 @@
 
-class RpcStruct
+class Structure
 
   attr_accessor :name
   attr_accessor :fields
 
   STRUCTURE = 'structure'
   REGEX = /\b#{STRUCTURE}\s+\w+\s*\{[\s\w\(\),]*\}/m
+
+  @@templates = {:declaration_template => TextTemplate.new('templates/object_h.template'),
+                 :definition_template => TextTemplate.new('templates/object_cpp.template')}
 
   def initialize(params = {})
     @name = params[:name]
@@ -33,11 +36,6 @@ class RpcStruct
     @nextParamPos += 1
   end
 
-  def to_s
-    puts "struct #{@name}"
-    @fields.each { |field| puts "  #{field.to_s}" }
-  end
-
   def names
     name_list = Array.new
     @fields.each { |field| name_list << field.name }
@@ -50,6 +48,20 @@ class RpcStruct
     decl_list
   end
 
+  def declaration_refs
+    decl_list = Array.new
+    @fields.each { |field| decl_list << field.to_decl(Field::REFERENCE) }
+    decl_list
+  end
+
+  def unresolved_fields
+    unresolved = Array.new
+    @fields.each do |field|
+      unresolved << field unless field.valid_type
+    end
+    unresolved
+  end
+
   def parse(definition)
     @name = definition.match(/\b#{STRUCTURE}\s+\w+\s*\{/m).to_s.split(/[\s\{]/)[1].to_s
     fields = definition.to_s.match(/\{.*\}/m).to_s
@@ -60,6 +72,33 @@ class RpcStruct
       puts "field = #{field}"
       @fields << Field.new(:declaration => field)
     end
+  end
+
+  def declaration
+    fields = Hash.new
+    fields['STRUCTURE_NAME'] = @name
+
+    compiler_guard = Array.new
+    @name.scan(/[A-Z][a-z0-9]+/).each {|token| compiler_guard << token.upcase }
+    fields['COMPILER_GUARD'] = compiler_guard.join('_')
+
+    fields['PARAMS'] = declarations.join(', ')
+    fields['REF_PARAMS'] = declaration_refs.join(', ')
+
+    {:name => "#{@name}.h",
+     :text => @@templates[:declaration_template].build(fields)}
+  end
+
+  def definition
+    fields = Hash.new
+    fields['STRUCTURE_NAME'] = @name
+
+    fields['PARAMS'] = declarations.join(', ')
+    fields['REF_PARAMS'] = declaration_refs.join(', ')
+    fields['PARAM_NAME'] = names
+
+    {:name => "#{@name}.cpp",
+     :text => @@templates[:definition_template].build(fields)}
   end
 end
 

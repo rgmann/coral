@@ -6,7 +6,7 @@ void $$WRAPPED_CLASS$$Wrapper::$$ACTION_NAME$$(InstanceWrapper *pInst,
 $$tab$$$$RETURN_TYPE$$ lRetval /* = TODO: If applicable, set default */;
 $$tab$$$$PARAM_DECLS$$
 
-$$tab$$reinterpret_cast<$$ACTION_STRUCT$$ParamList&>(params).get($$GET_PARAMS$$);
+$$tab$$reinterpret_cast<$$ACTION_STRUCT$$&>(params).get($$GET_PARAMS$$);
 
 $$tab$$/* TODO: Perform action. */
 

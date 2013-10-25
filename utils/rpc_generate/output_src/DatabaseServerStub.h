@@ -17,7 +17,7 @@ public:
       addAction("create", DatabaseWrapper::create);
       addAction("read", DatabaseWrapper::read);
       addAction("update", DatabaseWrapper::update);
-      addAction("delete", DatabaseWrapper::delete);
+      addAction("destroy", DatabaseWrapper::destroy);
    };
 
 protected:

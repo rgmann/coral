@@ -1,23 +1,22 @@
-#require File.join(File.expand_path('./'), 'text_template.rb')
-#require File.join(File.expand_path('./'), 'rpc_struct.rb')
 
 class RpcResourceAction
 
+  attr_accessor :class_name
   attr_accessor :name
   attr_accessor :parameters
   attr_accessor :return_type
 
   @@templates = {:inst_wrapper_action => TextTemplate.new('templates/instance_wrapper_action_cpp.template'),
-                 :client_stub_action_ne => TextTemplate.new('templates/client_stub_action_cpp_ne.template'),
-                 :action_paramlist_decl => TextTemplate.new('templates/object_h.template'),
-                 :action_paramlist_def => TextTemplate.new('templates/object_cpp.template')}
+                 :client_stub_action_ne => TextTemplate.new('templates/client_stub_action_cpp_ne.template')}
 
   def initialize(wrapped_class, name, parameters, return_type)
     @name = name
     @return_type = return_type
 
+    @class_name = wrapped_class
+
     object_name = "#{wrapped_class.capitalize}#{@name}ParamList"
-    @parameters = RpcStruct.new(:name => object_name)
+    @parameters = Structure.new(:name => object_name)
     param_list = Array.new
     param_list = parameters if parameters
     param_list.each do |param|
@@ -87,43 +86,12 @@ class RpcResourceAction
     @@templates[:client_stub_action_ne].build(fields)
   end
 
-  def to_action_param_list_decl(wrapped_class)
-    fields = Hash.new
-    fields['WRAPPED_CLASS_ACTION'] = @parameters.name
-    fields['COMP_GUARD_ACTION'] = "#{wrapped_class.upcase}_#{@name.upcase}"
-
-    param_list = Array.new
-    param_ref_list = Array.new
-    @parameters.fields.each do |parameter|
-      param_list << parameter.to_decl
-      param_ref_list << "#{parameter.type}& #{parameter.name}"
-    end
-    fields['PARAMS'] = param_list.join(', ')
-    fields['REF_PARAMS'] = param_ref_list.join(', ')
-
-    {:name => "#{fields['WRAPPED_CLASS_ACTION']}ParamList.h",
-     :text => @@templates[:action_paramlist_decl].build(fields)}
+  def to_action_param_list_decl
+    @parameters.declaration
   end
 
-  def to_action_param_list_def(wrapped_class)
-    fields = Hash.new
-    fields['WRAPPED_CLASS_ACTION'] = "#{wrapped_class}#{@name.capitalize}"
-
-    param_list = Array.new
-    param_ref_list = Array.new
-    param_names = Array.new
-    @parameters.fields.each do |parameter|
-      param_list << parameter.to_decl
-      param_ref_list << "#{parameter.type}& #{parameter.name}"
-      param_names << parameter.name
-    end
-    fields['PARAMS'] = param_list.join(', ')
-    fields['REF_PARAMS'] = param_ref_list.join(', ')
-    fields['PARAM_NAME'] = param_names
-
-    puts "apl = #{fields['WRAPPED_CLASS_ACTION']}"
-
-    {:name => "#{fields['WRAPPED_CLASS_ACTION']}ParamList.cpp",
-     :text => @@templates[:action_paramlist_def].build(fields)}
+  def to_action_param_list_def
+    @parameters.definition
   end
 end
+

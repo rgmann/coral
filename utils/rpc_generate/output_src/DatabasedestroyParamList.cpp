@@ -1,19 +1,19 @@
-#include "DatabasecreateParamList.h"
+#include "DatabasedestroyParamList.h"
 
 //-----------------------------------------------------------------------------
-DatabasecreateParamList::
-DatabasecreateParamListParamList()
+DatabasedestroyParamList::
+DatabasedestroyParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-DatabasecreateParamList::
-~DatabasecreateParamListParamList()
+DatabasedestroyParamList::
+~DatabasedestroyParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool DatabasecreateParamListParamList::valid() const
+bool DatabasedestroyParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -22,7 +22,7 @@ bool DatabasecreateParamListParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool DatabasecreateParamListParamList::get()
+bool DatabasedestroyParamListParamList::get()
 {
    bool lbIsValid = true;
 

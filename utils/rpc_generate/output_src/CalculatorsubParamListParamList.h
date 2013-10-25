@@ -1,17 +1,1 @@
-#ifndef CALCULATOR_SUB_PARAM_LIST_H
-#define CALCULATOR_SUB_PARAM_LIST_H
-
-#include "Structure.h"
-
-class CalculatorsubParamListParamList : public Structure {
-public:
-
-   CalculatorsubParamListParamList(i32 a, i32 b);
-   ~CalculatorsubParamListParamList();
-
-   bool valid() const;
-
-   bool get(i32& a, i32& b);
-};
-
-#endif // CALCULATOR_SUB_PARAM_LIST_H
+["#ifndef CALCULATOR_SUB_PARAM_LIST_H\n", "#define CALCULATOR_SUB_PARAM_LIST_H\n", "\n", "#include \"Structure.h\"\n", "\n", "class CalculatorsubParamListParamList : public Structure {\n", "public:\n", "\n", "   CalculatorsubParamListParamList(i32 a, i32 b);\n", "   ~CalculatorsubParamListParamList();\n", "\n", "   bool valid() const;\n", "\n", "   bool get(i32& a, i32& b);\n", "};\n", "\n", "#endif // CALCULATOR_SUB_PARAM_LIST_H\n"]

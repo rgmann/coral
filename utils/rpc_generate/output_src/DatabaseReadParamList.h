@@ -1,17 +1,17 @@
-#ifndef DATABASE_READ_PARAM_LIST_H
-#define DATABASE_READ_PARAM_LIST_H
+#ifndef DATABASEREAD_PARAM_LIST_H
+#define DATABASEREAD_PARAM_LIST_H
 
 #include "Structure.h"
 
-class DatabaseReadParamList : public Structure {
+class DatabasereadParamList : public Structure {
 public:
 
-   DatabaseReadParamList();
-   ~DatabaseReadParamList();
+   DatabasereadParamList();
+   ~DatabasereadParamList();
 
    bool valid() const;
 
    bool get();
 };
 
-#endif // DATABASE_READ_PARAM_LIST_H
+#endif // DATABASEREAD_PARAM_LIST_H

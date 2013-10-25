@@ -1,17 +1,17 @@
-#ifndef DATABASE_UPDATE_PARAM_LIST_H
-#define DATABASE_UPDATE_PARAM_LIST_H
+#ifndef DATABASEUPDATE_PARAM_LIST_H
+#define DATABASEUPDATE_PARAM_LIST_H
 
 #include "Structure.h"
 
-class DatabaseUpdateParamList : public Structure {
+class DatabaseupdateParamList : public Structure {
 public:
 
-   DatabaseUpdateParamList();
-   ~DatabaseUpdateParamList();
+   DatabaseupdateParamList();
+   ~DatabaseupdateParamList();
 
    bool valid() const;
 
    bool get();
 };
 
-#endif // DATABASE_UPDATE_PARAM_LIST_H
+#endif // DATABASEUPDATE_PARAM_LIST_H

@@ -1,17 +1,17 @@
-#ifndef CALCULATOR_SUB_PARAM_LIST_H
-#define CALCULATOR_SUB_PARAM_LIST_H
+#ifndef CALCULATORSUB_PARAM_LIST_H
+#define CALCULATORSUB_PARAM_LIST_H
 
 #include "Structure.h"
 
-class CalculatorSubParamList : public Structure {
+class CalculatorsubParamList : public Structure {
 public:
 
-   CalculatorSubParamList(i32 a, i32 b);
-   ~CalculatorSubParamList();
+   CalculatorsubParamList(i32 a, i32 b);
+   ~CalculatorsubParamList();
 
    bool valid() const;
 
    bool get(i32& a, i32& b);
 };
 
-#endif // CALCULATOR_SUB_PARAM_LIST_H
+#endif // CALCULATORSUB_PARAM_LIST_H

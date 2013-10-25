@@ -2,7 +2,7 @@
 #include "DatabasecreateParamListParamList.h"
 #include "DatabasereadParamListParamList.h"
 #include "DatabaseupdateParamListParamList.h"
-#include "DatabasedeleteParamListParamList.h"
+#include "DatabasedestroyParamListParamList.h"
 
 //------------------------------------------------------------------------------
 DatabaseClientStub::DatabaseClientStub(RpcClient &client)
@@ -49,12 +49,12 @@ bool DatabaseClientStub::update(bool& result)
 
 
 //------------------------------------------------------------------------------
-bool DatabaseClientStub::delete(bool& result)
+bool DatabaseClientStub::destroy(bool& result)
 {
-   DatabasedeleteParamListParamList lParams;
+   DatabasedestroyParamListParamList lParams;
    RpcReturnValue lCallRetVal;
 
-   return (call("delete", lParams, lCallRetVal) &&
+   return (call("destroy", lParams, lCallRetVal) &&
                lCallRetVal.get(result));
 }
 

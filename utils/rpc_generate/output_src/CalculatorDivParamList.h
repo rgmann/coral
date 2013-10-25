@@ -1,17 +1,17 @@
-#ifndef CALCULATOR_DIV_PARAM_LIST_H
-#define CALCULATOR_DIV_PARAM_LIST_H
+#ifndef CALCULATORDIV_PARAM_LIST_H
+#define CALCULATORDIV_PARAM_LIST_H
 
 #include "Structure.h"
 
-class CalculatorDivParamList : public Structure {
+class CalculatordivParamList : public Structure {
 public:
 
-   CalculatorDivParamList(i32 a, i32 b);
-   ~CalculatorDivParamList();
+   CalculatordivParamList(i32 a, i32 b);
+   ~CalculatordivParamList();
 
    bool valid() const;
 
    bool get(i32& a, i32& b);
 };
 
-#endif // CALCULATOR_DIV_PARAM_LIST_H
+#endif // CALCULATORDIV_PARAM_LIST_H

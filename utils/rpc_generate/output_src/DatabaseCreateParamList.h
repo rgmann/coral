@@ -1,17 +1,17 @@
-#ifndef DATABASE_CREATE_PARAM_LIST_H
-#define DATABASE_CREATE_PARAM_LIST_H
+#ifndef DATABASECREATE_PARAM_LIST_H
+#define DATABASECREATE_PARAM_LIST_H
 
 #include "Structure.h"
 
-class DatabaseCreateParamList : public Structure {
+class DatabasecreateParamList : public Structure {
 public:
 
-   DatabaseCreateParamList();
-   ~DatabaseCreateParamList();
+   DatabasecreateParamList();
+   ~DatabasecreateParamList();
 
    bool valid() const;
 
    bool get();
 };
 
-#endif // DATABASE_CREATE_PARAM_LIST_H
+#endif // DATABASECREATE_PARAM_LIST_H

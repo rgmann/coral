@@ -1,21 +1,21 @@
-#include "CalculatorMulParamList.h"
+#include "CalculatormulParamList.h"
 
 //-----------------------------------------------------------------------------
-CalculatorMulParamList::
-CalculatorMulParamList(i32 a, i32 b)
+CalculatormulParamList::
+CalculatormulParamListParamList(i32 a, i32 b)
 {
    Structure::set("a", a);
    Structure::set("b", b);
 }
 
 //-----------------------------------------------------------------------------
-CalculatorMulParamList::
-~CalculatorMulParamList()
+CalculatormulParamList::
+~CalculatormulParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorMulParamList::valid() const
+bool CalculatormulParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -26,7 +26,7 @@ bool CalculatorMulParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorMulParamList::get(i32& a, i32& b)
+bool CalculatormulParamListParamList::get(i32& a, i32& b)
 {
    bool lbIsValid = true;
 

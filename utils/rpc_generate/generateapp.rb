@@ -2,7 +2,7 @@
 
 require File.join(File.expand_path('./'), 'text_template.rb')
 require File.join(File.expand_path('./'), 'field.rb')
-require File.join(File.expand_path('./'), 'rpc_struct.rb')
+require File.join(File.expand_path('./'), 'structure.rb')
 require File.join(File.expand_path('./'), 'rpc_resource_action.rb')
 require File.join(File.expand_path('./'), 'rpc_resource.rb')
 
@@ -10,11 +10,11 @@ require File.join(File.expand_path('./'), 'rpc_resource.rb')
 class RpcGenerator
 
   attr_accessor :resources
-  attr_accessor :actions
+  attr_accessor :structures
 
   def initialize
     @resources = Array.new
-    @actions = Array.new
+    @structures = Array.new
   end
 
   def self.run(args)
@@ -27,6 +27,8 @@ class RpcGenerator
     def_out_path = args[2]
 
     generator = RpcGenerator.new
+    declarations = Array.new
+    definitions = Array.new
 
     begin
       File.open(def_path, 'r') { |io| def_text = io.read }
@@ -39,29 +41,33 @@ class RpcGenerator
       generator.resources << RpcResource.new(match)
     end
 
-    def_text.scan(RpcStruct::REGEX) do |match|
-      puts "action: #{match.inspect}"
-      generator.actions << RpcStruct.new(:text => match)
+    def_text.scan(Structure::REGEX) do |match|
+      generator.structures << Structure.new(:text => match)
     end
 
     generator.resources.each do |resource|
-      resource.generate(decl_out_path, def_out_path)
+      resource.declarations.each {|decl| declarations << decl }
+      resource.definitions.each {|defn| definitions << defn }
     end
 
-    generator.actions.each do |action|
-      action.generate(decl_out_path, def_out_path)
+    generator.structures.each do |structure|
+      declarations << structure.declaration
+      definitions << structure.definition
+    end
+
+    declarations.each do |file|
+      File.open(File.join(decl_out_path, file[:name]), 'w') do |io|
+        io.write(file[:text].join)
+      end
+    end
+
+    definitions.each do |file|
+      File.open(File.join(def_out_path, file[:name]), 'w') do |io|
+        io.write(file[:text].join)
+      end
     end
   end
 end
 
-# Parse resource definitions
-#service_text.scan(RpcResource::RESOURCE_REGEX) do |match|
-#  service = RpcResource.new
-#  service.parse(match)
-#  service.generate(ARGV[1], ARGV[2])
-#end
-
 RpcGenerator.run(ARGV)
-
-# Parse structure definitions
 

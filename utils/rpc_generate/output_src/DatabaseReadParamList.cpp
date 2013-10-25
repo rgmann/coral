@@ -1,19 +1,19 @@
-#include "DatabaseReadParamList.h"
+#include "DatabasereadParamList.h"
 
 //-----------------------------------------------------------------------------
-DatabaseReadParamList::
-DatabaseReadParamList()
+DatabasereadParamList::
+DatabasereadParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-DatabaseReadParamList::
-~DatabaseReadParamList()
+DatabasereadParamList::
+~DatabasereadParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool DatabaseReadParamList::valid() const
+bool DatabasereadParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -22,7 +22,7 @@ bool DatabaseReadParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool DatabaseReadParamList::get()
+bool DatabasereadParamListParamList::get()
 {
    bool lbIsValid = true;
 

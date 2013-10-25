@@ -1,19 +1,19 @@
-#include "CalculatorGetnumopsParamList.h"
+#include "CalculatorgetNumOpsParamList.h"
 
 //-----------------------------------------------------------------------------
-CalculatorGetnumopsParamList::
-CalculatorGetnumopsParamList()
+CalculatorgetNumOpsParamList::
+CalculatorgetNumOpsParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-CalculatorGetnumopsParamList::
-~CalculatorGetnumopsParamList()
+CalculatorgetNumOpsParamList::
+~CalculatorgetNumOpsParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorGetnumopsParamList::valid() const
+bool CalculatorgetNumOpsParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -22,7 +22,7 @@ bool CalculatorGetnumopsParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorGetnumopsParamList::get()
+bool CalculatorgetNumOpsParamListParamList::get()
 {
    bool lbIsValid = true;
 

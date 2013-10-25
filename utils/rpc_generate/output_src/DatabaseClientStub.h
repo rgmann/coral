@@ -13,7 +13,7 @@ public:
    bool create(bool& result);
    bool read(bool& result);
    bool update(bool& result);
-   bool delete(bool& result);
+   bool destroy(bool& result);
 };
 
 #endif // DATABASE_CLIENT_STUB_H

@@ -1,21 +1,21 @@
-#include "CalculatorAddParamList.h"
+#include "CalculatoraddParamList.h"
 
 //-----------------------------------------------------------------------------
-CalculatorAddParamList::
-CalculatorAddParamList(i32 a, i32 b)
+CalculatoraddParamList::
+CalculatoraddParamListParamList(i32 a, i32 b)
 {
    Structure::set("a", a);
    Structure::set("b", b);
 }
 
 //-----------------------------------------------------------------------------
-CalculatorAddParamList::
-~CalculatorAddParamList()
+CalculatoraddParamList::
+~CalculatoraddParamListParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorAddParamList::valid() const
+bool CalculatoraddParamListParamList::valid() const
 {
    bool lbIsValid = true;
 
@@ -26,7 +26,7 @@ bool CalculatorAddParamList::valid() const
 }
 
 //-----------------------------------------------------------------------------
-bool CalculatorAddParamList::get(i32& a, i32& b)
+bool CalculatoraddParamListParamList::get(i32& a, i32& b)
 {
    bool lbIsValid = true;
 

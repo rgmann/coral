@@ -1,17 +1,1 @@
-#ifndef CALCULATOR_ADD_PARAM_LIST_H
-#define CALCULATOR_ADD_PARAM_LIST_H
-
-#include "Structure.h"
-
-class CalculatoraddParamListParamList : public Structure {
-public:
-
-   CalculatoraddParamListParamList(i32 a, i32 b);
-   ~CalculatoraddParamListParamList();
-
-   bool valid() const;
-
-   bool get(i32& a, i32& b);
-};
-
-#endif // CALCULATOR_ADD_PARAM_LIST_H
+["#ifndef CALCULATOR_ADD_PARAM_LIST_H\n", "#define CALCULATOR_ADD_PARAM_LIST_H\n", "\n", "#include \"Structure.h\"\n", "\n", "class CalculatoraddParamListParamList : public Structure {\n", "public:\n", "\n", "   CalculatoraddParamListParamList(i32 a, i32 b);\n", "   ~CalculatoraddParamListParamList();\n", "\n", "   bool valid() const;\n", "\n", "   bool get(i32& a, i32& b);\n", "};\n", "\n", "#endif // CALCULATOR_ADD_PARAM_LIST_H\n"]

@@ -2,7 +2,7 @@
 #include "DatabasecreateParamListParamList.h"
 #include "DatabasereadParamListParamList.h"
 #include "DatabaseupdateParamListParamList.h"
-#include "DatabasedeleteParamListParamList.h"
+#include "DatabasedestroyParamListParamList.h"
 
 //-----------------------------------------------------------------------------
 DatabaseWrapper::DatabaseWrapper()
@@ -41,7 +41,7 @@ void DatabaseWrapper::create(InstanceWrapper *pInst,
 {
    bool lRetval /* = TODO: If applicable, set default */;
 
-   reinterpret_cast<DatabasecreateParamListParamList&>(params).get();
+   reinterpret_cast<DatabasecreateParamList&>(params).get();
 
    /* TODO: Perform action. */
 
@@ -55,7 +55,7 @@ void DatabaseWrapper::read(InstanceWrapper *pInst,
 {
    bool lRetval /* = TODO: If applicable, set default */;
 
-   reinterpret_cast<DatabasereadParamListParamList&>(params).get();
+   reinterpret_cast<DatabasereadParamList&>(params).get();
 
    /* TODO: Perform action. */
 
@@ -69,7 +69,7 @@ void DatabaseWrapper::update(InstanceWrapper *pInst,
 {
    bool lRetval /* = TODO: If applicable, set default */;
 
-   reinterpret_cast<DatabaseupdateParamListParamList&>(params).get();
+   reinterpret_cast<DatabaseupdateParamList&>(params).get();
 
    /* TODO: Perform action. */
 
@@ -77,13 +77,13 @@ void DatabaseWrapper::update(InstanceWrapper *pInst,
 }
 
 //-----------------------------------------------------------------------------
-void DatabaseWrapper::delete(InstanceWrapper *pInst,
+void DatabaseWrapper::destroy(InstanceWrapper *pInst,
                                                Structure       &params, 
                                                RpcReturnValue  &retobj)
 {
    bool lRetval /* = TODO: If applicable, set default */;
 
-   reinterpret_cast<DatabasedeleteParamListParamList&>(params).get();
+   reinterpret_cast<DatabasedestroyParamList&>(params).get();
 
    /* TODO: Perform action. */
 

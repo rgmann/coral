@@ -3,13 +3,13 @@ class Field
 
   TYPES = ['i32',
            'i64',
-           'Bool',
-           'Double',
-           'String',
-           'Struct']
+           'bool',
+           'double',
+           'string',
+           'structure']
 
-  PBTYPE = { :pass_by_reference => "pass_by_reference",
-             :pass_by_value => "pass_by_value"}
+  VALUE = ''
+  REFERENCE = '&'
 
   attr_accessor :type
   attr_accessor :index
@@ -33,12 +33,8 @@ class Field
     TYPES.include?(type)
   end
 
-  def to_s
-    "name: #{@name}, type: #{@type}, index: #{@index}, p_type: #{PBTYPE[@pbtype]}"
-  end
-
-  def to_decl
-    "#{@type} #{@name}"
+  def to_decl(param_type = VALUE)
+    "#{@type}#{param_type} #{@name}"
   end
 end
 

@@ -16,7 +16,7 @@ public:
    static void create(InstanceWrapper *pInst, Structure &params, RpcReturnValue &retobj);
    static void read(InstanceWrapper *pInst, Structure &params, RpcReturnValue &retobj);
    static void update(InstanceWrapper *pInst, Structure &params, RpcReturnValue &retobj);
-   static void delete(InstanceWrapper *pInst, Structure &params, RpcReturnValue &retobj);
+   static void destroy(InstanceWrapper *pInst, Structure &params, RpcReturnValue &retobj);
 
 private:
 

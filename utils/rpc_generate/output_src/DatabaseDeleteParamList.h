@@ -1,17 +1,17 @@
-#ifndef DATABASE_DELETE_PARAM_LIST_H
-#define DATABASE_DELETE_PARAM_LIST_H
+#ifndef DATABASEDELETE_PARAM_LIST_H
+#define DATABASEDELETE_PARAM_LIST_H
 
 #include "Structure.h"
 
-class DatabaseDeleteParamList : public Structure {
+class DatabasedeleteParamList : public Structure {
 public:
 
-   DatabaseDeleteParamList();
-   ~DatabaseDeleteParamList();
+   DatabasedeleteParamList();
+   ~DatabasedeleteParamList();
 
    bool valid() const;
 
    bool get();
 };
 
-#endif // DATABASE_DELETE_PARAM_LIST_H
+#endif // DATABASEDELETE_PARAM_LIST_H

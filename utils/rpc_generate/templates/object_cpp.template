@@ -1,20 +1,20 @@
-#include "$$WRAPPED_CLASS_ACTION$$ParamList.h"
+#include "$$STRUCTURE_NAME$$.h"
 
 //-----------------------------------------------------------------------------
-$$WRAPPED_CLASS_ACTION$$ParamList::
-$$WRAPPED_CLASS_ACTION$$ParamList($$PARAMS$$)
+$$STRUCTURE_NAME$$::
+$$STRUCTURE_NAME$$ParamList($$PARAMS$$)
 {
 $$tab$$Structure::set("$$PARAM_NAME$$", $$PARAM_NAME$$);
 }
 
 //-----------------------------------------------------------------------------
-$$WRAPPED_CLASS_ACTION$$ParamList::
-~$$WRAPPED_CLASS_ACTION$$ParamList()
+$$STRUCTURE_NAME$$::
+~$$STRUCTURE_NAME$$ParamList()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool $$WRAPPED_CLASS_ACTION$$ParamList::valid() const
+bool $$STRUCTURE_NAME$$ParamList::valid() const
 {
 $$tab$$bool lbIsValid = true;
 
@@ -24,7 +24,7 @@ $$tab$$return lbIsValid;
 }
 
 //-----------------------------------------------------------------------------
-bool $$WRAPPED_CLASS_ACTION$$ParamList::get($$REF_PARAMS$$)
+bool $$STRUCTURE_NAME$$ParamList::get($$REF_PARAMS$$)
 {
 $$tab$$bool lbIsValid = true;
 

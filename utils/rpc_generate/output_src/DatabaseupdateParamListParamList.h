@@ -1,17 +1,1 @@
-#ifndef DATABASE_UPDATE_PARAM_LIST_H
-#define DATABASE_UPDATE_PARAM_LIST_H
-
-#include "Structure.h"
-
-class DatabaseupdateParamListParamList : public Structure {
-public:
-
-   DatabaseupdateParamListParamList();
-   ~DatabaseupdateParamListParamList();
-
-   bool valid() const;
-
-   bool get();
-};
-
-#endif // DATABASE_UPDATE_PARAM_LIST_H
+["#ifndef DATABASE_UPDATE_PARAM_LIST_H\n", "#define DATABASE_UPDATE_PARAM_LIST_H\n", "\n", "#include \"Structure.h\"\n", "\n", "class DatabaseupdateParamListParamList : public Structure {\n", "public:\n", "\n", "   DatabaseupdateParamListParamList();\n", "   ~DatabaseupdateParamListParamList();\n", "\n", "   bool valid() const;\n", "\n", "   bool get();\n", "};\n", "\n", "#endif // DATABASE_UPDATE_PARAM_LIST_H\n"]
