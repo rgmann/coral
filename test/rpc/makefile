@@ -8,7 +8,8 @@ INC = -I$(BASE) \
       -I../../includes/base/time \
       -I../../includes/appserver \
       -I../../includes/rpc \
-		-I./includes
+		-I./includes \
+		-I./rpc_includes
 
 LIBDIR = -L$(BASE)
 ABSLIB = -L../../lib/base -lbase \
@@ -16,7 +17,8 @@ ABSLIB = -L../../lib/base -lbase \
          -L../../lib/rpc -lrpc
 LIBS = -ljson
 
-SRC = ./src/*.cpp
+SRC = ./source/*.cpp \
+		./rpc_source/*.cpp
 
 $(EXE):
 	$(CC) -Wall -g -o $(EXE) $(EXE).cpp $(SRC) $(INC) -pthread $(LIBDIR) $(LIBS) $(ABSLIB)

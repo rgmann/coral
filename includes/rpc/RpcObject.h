@@ -35,12 +35,9 @@ public:
    RpcException getException() const;
    RpcError getError() const;
    
-   void setReturnValue(const RpcReturnValue &value);
-   bool getReturnValue(RpcReturnValue &value) const;
-   
    bool getResponse(RpcObject &response) const;
-   bool getResponse(RpcObject &response, const RpcReturnValue &value) const;
-   bool getResponse(RpcObject &response, RpcException) const;
+   bool getResponse(RpcObject &response, const Structure &value) const;
+   bool getResponse(RpcObject &response, RpcException e) const;
 };
 
 #endif // RPC_OBJECT_H

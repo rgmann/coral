@@ -2,6 +2,11 @@
 #include <pthread.h>
 
 //------------------------------------------------------------------------------
+Sem::~Sem()
+{
+}
+
+//------------------------------------------------------------------------------
 void  Sem::SetTimeoutTime(struct timespec *ts, int nTimeoutMs)
 {
    struct timeval    tv;

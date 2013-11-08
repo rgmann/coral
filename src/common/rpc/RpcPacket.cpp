@@ -40,7 +40,7 @@ bool RpcPacket::getObject(TransportObject &object) const
 {
    bool lbSuccess = false;
    
-   if (lbSuccess = isAllocated())
+   if ((lbSuccess = isAllocated()) == true)
    {
       const ui8* lpPayload = reinterpret_cast<const ui8*>(basePtr());
       lpPayload += dataSize();
@@ -59,7 +59,7 @@ RpcPacket::Data* const RpcPacket::data() const
 }
 
 //------------------------------------------------------------------------------
-bool RpcPacket::unpack(void* pPkt, ui32 nSizeBytes)
+bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
 {   
    if (!inherited::unpack(pPkt, nSizeBytes))
    {

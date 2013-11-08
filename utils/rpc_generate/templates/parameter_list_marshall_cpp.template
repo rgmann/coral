@@ -1,0 +1,16 @@
+//-----------------------------------------------------------------------------
+void <%PARAMETER_LIST_NAME%>::marshall(<%PARAMS%>)
+{
+<%tab%>myParameters.set(<%PARAM_NAME_VALUES%>);
+}
+
+//-----------------------------------------------------------------------------
+bool <%PARAMETER_LIST_NAME%>::unmarshall(<%REF_PARAMS%>)
+{
+<%tab%>bool lbSuccess = true;
+
+<%tab%>lbSuccess &= myParameters.get(<%PARAM_NAME_VALUES%>);
+
+<%tab%>return lbSuccess;
+}
+

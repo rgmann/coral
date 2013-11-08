@@ -11,13 +11,13 @@ RpcReturnValue::RpcReturnValue(type value) \
 }
 
 #define SET(type) \
-void RpcReturnValue::set(type value) \
+void RpcReturnValue::setReturnValue(type value) \
 { \
    inherited::set(FieldName, value); \
 }
 
 #define GET(type) \
-bool RpcReturnValue::get(type &value) const \
+bool RpcReturnValue::getReturnValue(type &value) const \
 { \
    return inherited::get(FieldName, value); \
 }

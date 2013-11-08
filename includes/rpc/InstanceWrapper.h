@@ -1,13 +1,14 @@
 #ifndef INSTANCE_WRAPPER_H
 #define INSTANCE_WRAPPER_H
 
-#include "RpcReturnValue.h"
+#include "Structure.h"
+#include "RpcCommon.h"
 
 class InstanceWrapper
 {
 public:
 
-   typedef void (*Method)(InstanceWrapper*, Structure&, RpcReturnValue&);
+   typedef RpcException (*Method)(InstanceWrapper*, const Structure&, Structure&);
    
    InstanceWrapper(){};
    virtual ~InstanceWrapper(){};

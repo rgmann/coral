@@ -1,3 +1,4 @@
+#include <utility>
 #include <iostream>
 #include "RpcServerResource.h"
 
@@ -66,11 +67,13 @@ bool RpcServerResource::construct(const RpcObject &input, RpcObject &output)
    }
    
    input.getParams(lParamList);
-   mInstances[lInstanceId] = createInstance();
+   mInstances.insert(std::make_pair(lInstanceId, createInstance()));
    
-   lbSuccess = mInstances[lInstanceId]->initialize(lParamList);
+   lbSuccess = mInstances.find(lInstanceId)->second->initialize(lParamList);
    
-   input.getResponse(output, RpcReturnValue(lInstanceId));
+   Structure lReturnParams;
+   lReturnParams.set(RpcReturnValue, lInstanceId);
+   input.getResponse(output, lReturnParams);
    
    return lbSuccess;
 }
@@ -84,20 +87,21 @@ bool RpcServerResource::invoke(int instId,
    
    if (lbSuccess)
    {
-      Structure lParamList;
-      RpcReturnValue lRetVal;
+      Structure lInParams;
+      Structure lOutParams;
 
-      try
+      InstanceWrapper::Method wrapper = NULL;
+      input.getParams(lInParams);
+
+      wrapper = mMethodMap.find(input.getMethod())->second;
+      if (wrapper)
       {
-         InstanceWrapper::Method wrapper;
-         input.getParams(lParamList);
-         wrapper = mMethodMap[input.getMethod()];
-         wrapper(getInstance(instId), lParamList, lRetVal);
-         input.getResponse(output, lRetVal);
+         wrapper(getInstance(instId), lInParams, lOutParams);
+         input.getResponse(output, lOutParams);
       }
-      catch (RpcException e)
+      else
       {
-         exception(e, input, output);
+         exception(NullInstance, input, output);
          lbSuccess = false;
       }
    }
@@ -118,8 +122,8 @@ bool RpcServerResource::destroy(const RpcObject &input, RpcObject &output)
       return false;
    }
    
-   mInstances[input.getInstanceId()]->destroy(input);
-   delete mInstances[input.getInstanceId()];
+   mInstances.find(input.getInstanceId())->second->destroy(input);
+   delete mInstances.find(input.getInstanceId())->second;
    mInstances.erase(input.getInstanceId());
    
    input.getResponse(output);
@@ -134,7 +138,7 @@ InstanceWrapper* RpcServerResource::getInstance(int instId)
    
    if (mInstances.count(instId) != 0)
    {
-      lpInstance = mInstances[instId];
+      lpInstance = mInstances.find(instId)->second;
    }
    
    return lpInstance;
@@ -148,7 +152,7 @@ bool RpcServerResource::addAction(const std::string &actionName,
    
    if (!lbMethodExists)
    {
-      mMethodMap[actionName] = method;
+      mMethodMap.insert(std::make_pair(actionName, method));
    }
    
    return lbMethodExists;

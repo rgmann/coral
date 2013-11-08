@@ -16,9 +16,6 @@ RpcMarshalledCall::RpcMarshalledCall(const RpcObject &object)
 void RpcMarshalledCall::getRpcPacket(RpcPacket** pPacket) const
 {
    JsonTransportObject lTransportObject(mParamObj);
-   /*std::cout << "RpcMarshalledCall::getRpcPacket:" << std::endl
-             << lTransportObject.getString()
-             << std::endl;*/
    *pPacket = new RpcPacket(lTransportObject);
 }
 
@@ -33,11 +30,6 @@ i64 RpcMarshalledCall::getRpcId() const
 {
    return mParamObj.getRpcId();
 }
-
-//-----------------------------------------------------------------------------
-/*bool RpcMarshalledCall::compareRpcId(const RpcId &id)
-{
-}*/
 
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::dispose()

@@ -1,16 +1,17 @@
-#ifndef $$COMP_GUARD$$_CLIENT_STUB_H
-#define $$COMP_GUARD$$_CLIENT_STUB_H
+#ifndef <%COMP_GUARD%>_CLIENT_STUB_H
+#define <%COMP_GUARD%>_CLIENT_STUB_H
 
 #include "RpcClientResource.h"
+<%INCLUDES%>
 
-class $$WRAPPED_CLASS$$ClientStub : public RpcClientResource {
+class <%WRAPPED_CLASS%>ClientStub : public RpcClientResource {
 public:
 
-$$tab$$$$WRAPPED_CLASS$$ClientStub(RpcClient &client);
+<%tab%><%WRAPPED_CLASS%>ClientStub(RpcClient &client);
 
-$$tab$$~$$WRAPPED_CLASS$$ClientStub();
+<%tab%>~<%WRAPPED_CLASS%>ClientStub();
 
-$$tab$$$$ACTIONS$$
+<%tab%><%ACTIONS%>
 };
 
-#endif // $$COMP_GUARD$$_CLIENT_STUB_H
+#endif // <%COMP_GUARD%>_CLIENT_STUB_H

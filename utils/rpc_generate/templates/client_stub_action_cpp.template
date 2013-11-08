@@ -1,18 +1,24 @@
 //------------------------------------------------------------------------------
-bool &&WRAPPED_CLASS$$ClientStub::$$ACTION$$($$PARAMS$$)
+<%RETURN_TYPE%> <%WRAPPED_CLASS%>ClientStub::<%ACTION%>(<%PARAMS%>) throw (RpcError)
 {
-$$tab$$$$ACTION_STRUCT$$ lParams($$STRUCT_PARAMS$$);
-$$tab$$RpcReturnValue lCallRetVal;
+<%tab%><%ACTION_PARAM_LIST_IN%> lInParams;
+<%tab%>Structure lOutStructure;
+<%tab%><%RETURN_TYPE%> lReturnValue;
 
-$$tab$$if (lbSuccess = call("$$ACTION$$", lParams, lCallRetVal))
-$$tab$${
-$$tab$$$$tab$$lCallRetVal.get(result));
-$$tab$$}
-$$tab$$else
-$$tab$${
-$$tab$$$$tab$$throw getLastError();
-$$tab$$}
+<%tab%>// Marshall the parameters.
+<%tab%>lInParams.marshall(<%IN_PARAMS%>);
 
-$$tab$$return lbSuccess;
+<%tab%>if (call("<%ACTION%>", lInParams.getParameters(), lOutStructure))
+<%tab%>{
+<%tab%><%tab%><%ACTION_PARAM_LIST_OUT%> lOutParams(lOutStructure);
+<%tab%><%tab%>lOutParams.unmarshall(<%OUT_PARAMS%>);
+<%tab%><%tab%>lOutParams.getReturnValue(lReturnValue);
+<%tab%>}
+<%tab%>else
+<%tab%>{
+<%tab%><%tab%>throw getLastError();
+<%tab%>}
+
+<%tab%>return lReturnValue;
 }
 

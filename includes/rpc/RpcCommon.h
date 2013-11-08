@@ -16,6 +16,9 @@ enum RpcException
    InstIdAssignmentErr,
    InvalidInstanceId,
    MissingParameters,
+
+   // Instance ID was found byte the pointer is NULL
+   NullInstance,
    UnknownMethod
 };
 
@@ -29,11 +32,14 @@ inline std::string ToRpcExceptionString(RpcException exception)
       case MissingInstanceId: lsException = "MissingInstanceId"; break;
       case InvalidInstanceId: lsException = "InvalidInstanceId"; break;
       case MissingParameters: lsException = "MissingParameters"; break;
+      case NullInstance: lsException = "NullInstance"; break;
       case UnknownMethod: lsException = "UnknownMethod"; break;
       default: lsException = "Unknown"; break;
    }
    
    return lsException;
 };
+
+static const std::string RpcReturnValue("retval");
 
 #endif // RPC_COMMON_H

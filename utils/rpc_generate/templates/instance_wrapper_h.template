@@ -1,22 +1,27 @@
-#ifndef $$COMP_GUARD$$_WRAPPER_H
-#define $$COMP_GUARD$$_WRAPPER_H
+#ifndef <%COMP_GUARD%>_WRAPPER_H
+#define <%COMP_GUARD%>_WRAPPER_H
 
 #include "InstanceWrapper.h"
-#include "$$WRAPPED_CLASS$$.h"
+#include "<%WRAPPED_CLASS%>.h"
 
-class $$WRAPPED_CLASS$$Wrapper : public InstanceWrapper {
+class <%WRAPPED_CLASS%>Wrapper : public InstanceWrapper {
 public:
 
-$$tab$$$$WRAPPED_CLASS$$Wrapper();
-$$tab$$~$$WRAPPED_CLASS$$Wrapper();
+<%tab%><%WRAPPED_CLASS%>Wrapper();
+<%tab%>~<%WRAPPED_CLASS%>Wrapper();
 
-$$tab$$bool initialize(const Structure& params);
-$$tab$$bool destroy(const Structure& params);
+<%tab%>bool initialize(const Structure& params);
+<%tab%>bool destroy(const Structure& params);
 
-$$tab$$static void $$ACTIONS$$(InstanceWrapper *pInst, Structure &params, RpcReturnValue &retobj);
+<%tab%>static RpcException <%ACTIONS%>Delegate(InstanceWrapper *pInst, const Structure& input, Structure& output);
 
 private:
 
-$$tab$$$$WRAPPED_CLASS$$* mpInst;
+<%tab%><%ACTION_WRAPPERS%>
+
+private:
+
+<%tab%><%WRAPPED_CLASS%>* mpInst;
 };
-#endif // $$COMP_GUARD$$_WRAPPER_H
+
+#endif // <%COMP_GUARD%>_WRAPPER_H

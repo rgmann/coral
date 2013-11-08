@@ -30,7 +30,7 @@ public:
    
    bool  getObject(TransportObject &object) const;
 
-   bool  unpack(void* pPkt, ui32 nSizeBytes);
+   bool  unpack(const void* pPkt, ui32 nSizeBytes);
    
    Data* const data() const;
 

@@ -1,0 +1,26 @@
+#include "<%PARAMETER_LIST_NAME%>.h"
+
+//-----------------------------------------------------------------------------
+<%PARAMETER_LIST_NAME%>::<%PARAMETER_LIST_NAME%>() {}
+
+//-----------------------------------------------------------------------------
+<%PARAMETER_LIST_NAME%>::<%PARAMETER_LIST_NAME%>(const Structure& params)
+: RpcParameterList(params)
+{
+}
+
+<%MARSHALL_ACCESSORS%>
+
+//-----------------------------------------------------------------------------
+bool <%PARAMETER_LIST_NAME%>::isValid() const
+{
+<%tab%>bool lbValid = true;
+
+<%tab%>lbValid &= myParameters.hasField("<%PARAM_NAMES%>");
+<%tab%>lbValid &= myParameters.hasField(<%RETURN_VALUE_NAME%>);
+
+<%tab%>return lbValid;
+}
+
+<%RETURN_VALUE_ACCESSORS%>
+

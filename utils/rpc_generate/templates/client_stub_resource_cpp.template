@@ -1,16 +1,16 @@
-#include "$$WRAPPED_CLASS$$ClientStub.h"
-#include "$$ACTION_STRUCT$$ParamList.h"
+#include "<%WRAPPED_CLASS%>ClientStub.h"
+#include "<%ACTION_STRUCT%>.h"
 
 //------------------------------------------------------------------------------
-$$WRAPPED_CLASS$$ClientStub::$$WRAPPED_CLASS$$ClientStub(RpcClient &client)
-: RpcClientResource(client, "$$WRAPPED_CLASS$$")
+<%WRAPPED_CLASS%>ClientStub::<%WRAPPED_CLASS%>ClientStub(RpcClient &client)
+: RpcClientResource(client, "<%WRAPPED_CLASS%>")
 {
 }
 
 //------------------------------------------------------------------------------
-$$WRAPPED_CLASS$$ClientStub::~$$WRAPPED_CLASS$$ClientStub()
+<%WRAPPED_CLASS%>ClientStub::~<%WRAPPED_CLASS%>ClientStub()
 {
 }
 
-$$ACTIONS$$
+<%ACTIONS%>
 

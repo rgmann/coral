@@ -1,35 +1,35 @@
-#include "$$WRAPPED_CLASS$$Wrapper.h"
-#include "$$ACTION_STRUCT$$ParamList.h"
+#include "<%WRAPPED_CLASS%>Wrapper.h"
+#include "<%ACTION_STRUCTS%>.h"
 
 //-----------------------------------------------------------------------------
-$$WRAPPED_CLASS$$Wrapper::$$WRAPPED_CLASS$$Wrapper()
+<%WRAPPED_CLASS%>Wrapper::<%WRAPPED_CLASS%>Wrapper()
 :  InstanceWrapper(),
    mpInst(NULL)
 {
 }
 
 //-----------------------------------------------------------------------------
-$$WRAPPED_CLASS$$Wrapper::~$$WRAPPED_CLASS$$Wrapper()
+<%WRAPPED_CLASS%>Wrapper::~<%WRAPPED_CLASS%>Wrapper()
 {
 }
 
 //-----------------------------------------------------------------------------
-bool $$WRAPPED_CLASS$$Wrapper::initialize(const Structure &params)
+bool <%WRAPPED_CLASS%>Wrapper::initialize(const Structure &params)
 {
-$$tab$$mpInst = new $$WRAPPED_CLASS$$(/* TODO: Pass correct parameters*/);
-$$tab$$return (mpInst != NULL);
+<%tab%>mpInst = new <%WRAPPED_CLASS%>(/* TODO: Pass correct parameters*/);
+<%tab%>return (mpInst != NULL);
 }
 
 //-----------------------------------------------------------------------------
-bool $$WRAPPED_CLASS$$Wrapper::destroy(const Structure &params)
+bool <%WRAPPED_CLASS%>Wrapper::destroy(const Structure &params)
 {
-$$tab$$if (mpInst)
-$$tab$${
-$$tab$$$$tab$$delete mpInst;
-$$tab$$$$tab$$mpInst = NULL;
-$$tab$$}
-$$tab$$return true;
+<%tab%>if (mpInst)
+<%tab%>{
+<%tab%><%tab%>delete mpInst;
+<%tab%><%tab%>mpInst = NULL;
+<%tab%>}
+<%tab%>return true;
 }
 
-$$ACTIONS$$
+<%ACTIONS%>
 

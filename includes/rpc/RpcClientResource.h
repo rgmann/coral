@@ -28,16 +28,16 @@ protected:
    
    bool destroy(const Structure &paramList = EmptyParamList);
    
-   bool call(const std::string   &methodName,
-             RpcReturnValue      &returnValue);
+   bool call(const std::string &methodName,
+             Structure         &returnValue);
    
-   bool call(const std::string   &methodName,
-             const Structure  &paramList,
-             RpcReturnValue      &returnValue);
+   bool call(const std::string &methodName,
+             const Structure   &paramList,
+             Structure         &returnValue);
 
-   void marshall(RpcObject &object, 
+   void marshall(RpcObject         &object, 
                  const std::string &methodName, 
-                 const Structure &paramList);
+                 const Structure   &paramList);
    
 private:
    
@@ -52,6 +52,8 @@ protected:
    std::string mClassname;
    
    int mnInstanceId;
+
+   RpcError mLastError;
 };
 
 #endif // RPC_CLIENT_RESOURCE_H

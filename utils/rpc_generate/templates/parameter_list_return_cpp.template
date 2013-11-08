@@ -1,0 +1,16 @@
+//-----------------------------------------------------------------------------
+void <%PARAMETER_LIST_NAME%>::setReturnValue(<%RETURN_TYPE%> returnValue)
+{
+   myParameters.set(RpcReturnValue, returnValue);
+}
+
+//-----------------------------------------------------------------------------
+bool <%PARAMETER_LIST_NAME%>::getReturnValue(<%RETURN_TYPE%>& returnValue) const
+{
+<%tab%>bool lbSuccess = true;
+
+<%tab%>lbSuccess = myParameters.get(RpcReturnValue, returnValue);
+
+<%tab%>return lbSuccess;
+}
+

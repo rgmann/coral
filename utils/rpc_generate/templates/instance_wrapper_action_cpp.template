@@ -1,14 +1,25 @@
 //-----------------------------------------------------------------------------
-void $$WRAPPED_CLASS$$Wrapper::$$ACTION_NAME$$(InstanceWrapper *pInst,
-                                               Structure       &params, 
-                                               RpcReturnValue  &retobj)
+RpcException <%WRAPPED_CLASS%>Wrapper::
+<%ACTION_NAME%>Delegate
+(InstanceWrapper* pInst, const Structure& input, Structure& output)
 {
-$$tab$$$$RETURN_TYPE$$ lRetval /* = TODO: If applicable, set default */;
-$$tab$$$$PARAM_DECLS$$
+<%tab%><%WRAPPED_CLASS%>Wrapper* lpInst = dynamic_cast<<%WRAPPED_CLASS%>Wrapper*>(pInst);
+<%tab%><%RETURN_TYPE%> lReturnValue /* = TODO: If applicable, set default */;
+<%tab%><%PARAM_DECLS%>
 
-$$tab$$reinterpret_cast<$$ACTION_STRUCT$$&>(params).get($$GET_PARAMS$$);
+<%tab%><%ACTION_STRUCT_IN%> inParams(input);
+<%tab%>if (!inParams.unmarshall(<%GET_IN_PARAMS%>))
+<%tab%>{
+<%tab%><%tab%>return MissingParameters;
+<%tab%>}
 
-$$tab$$/* TODO: Perform action. */
+<%tab%>lReturnValue = lpInst-><%ACTION_NAME%>(<%GET_IN_PARAMS%>);
 
-$$tab$$retobj.set(lRetval);
+<%tab%><%ACTION_STRUCT_OUT%> outParams;
+<%tab%>outParams.marshall(<%SET_OUT_PARAMS%>);
+<%tab%>outParams.setReturnValue(lReturnValue);
+<%tab%>output = outParams.getParameters();
+
+<%tab%>return NoException;
 }
+

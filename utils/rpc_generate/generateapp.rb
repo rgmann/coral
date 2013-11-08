@@ -3,6 +3,7 @@
 require File.join(File.expand_path('./'), 'text_template.rb')
 require File.join(File.expand_path('./'), 'field.rb')
 require File.join(File.expand_path('./'), 'structure.rb')
+require File.join(File.expand_path('./'), 'rpc_parameter_list.rb')
 require File.join(File.expand_path('./'), 'rpc_resource_action.rb')
 require File.join(File.expand_path('./'), 'rpc_resource.rb')
 
@@ -14,7 +15,11 @@ class RpcGenerator
 
   def initialize
     @resources = Array.new
-    @structures = Array.new
+    @structures = Hash.new
+  end
+
+  def self.strip_comments(text)
+    text.gsub!(/#[^\n]*/, '')
   end
 
   def self.run(args)
@@ -37,12 +42,20 @@ class RpcGenerator
       return
     end
 
+    # Remove comments
+    strip_comments(def_text)
+
     def_text.scan(RpcResource::REGEX) do |match|
       generator.resources << RpcResource.new(match)
     end
 
     def_text.scan(Structure::REGEX) do |match|
-      generator.structures << Structure.new(:text => match)
+      structure = Structure.new(:text => match)
+      if generator.structures[structure.name]
+        raise "Duplicate definition for structure #{structure.name}"
+      else
+        generator.structures[structure.name] = structure
+      end
     end
 
     generator.resources.each do |resource|
@@ -50,7 +63,7 @@ class RpcGenerator
       resource.definitions.each {|defn| definitions << defn }
     end
 
-    generator.structures.each do |structure|
+    generator.structures.values.each do |structure|
       declarations << structure.declaration
       definitions << structure.definition
     end

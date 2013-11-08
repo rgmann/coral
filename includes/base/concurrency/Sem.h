@@ -22,6 +22,8 @@ public:
    {
       SemWaitForever = -1
    };
+
+   virtual ~Sem();
    
    virtual SemStatus take(int nTimeoutMs = SemWaitForever) = 0;
    

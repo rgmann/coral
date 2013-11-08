@@ -1,0 +1,25 @@
+#ifndef <%COMPILER_GUARD%>_H
+#define <%COMPILER_GUARD%>_H
+
+#include "RpcParameterList.h"
+<%INCLUDES%>
+
+class <%PARAMETER_LIST_NAME%> : public RpcParameterList {
+public:
+
+<%tab%><%PARAMETER_LIST_NAME%>();
+<%tab%><%PARAMETER_LIST_NAME%>(const Structure& params);
+
+<%tab%>using RpcParameterList::marshall;
+<%tab%>void marshall(<%PARAMS%>);
+
+<%tab%>using RpcParameterList::unmarshall;
+<%tab%>bool unmarshall(<%REF_PARAMS%>);
+
+<%tab%>bool isValid() const;
+
+<%tab%>void setReturnValue(<%RETURN_TYPE%> returnValue);
+<%tab%>bool getReturnValue(<%RETURN_TYPE%>& returnValue) const;
+};
+
+#endif // <%COMPILER_GUARD%>_H

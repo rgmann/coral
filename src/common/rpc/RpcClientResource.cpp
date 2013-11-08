@@ -21,19 +21,25 @@ RpcClientResource::~RpcClientResource()
 }
 
 //-----------------------------------------------------------------------------
+RpcError RpcClientResource::getLastError()
+{
+   return mLastError;
+}
+
+//-----------------------------------------------------------------------------
 bool RpcClientResource::construct(const Structure &params)
 {
    bool lbSuccess = false;
-   RpcObject lObject;
-   RpcObject lRetObject;
+   RpcObject lInObject;
+   RpcObject lOutObject;
    
-   marshall(lObject, "construct", params);
+   marshall(lInObject, "construct", params);
    
-   if (lbSuccess = invoke(lObject, lRetObject))
+   if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
    {
-      RpcReturnValue lReturnValue;
-      lRetObject.getReturnValue(lReturnValue);
-      lReturnValue.get(mnInstanceId);
+      Structure lReturnValue;
+      lOutObject.getParams(lReturnValue);
+      lReturnValue.get(RpcReturnValue, mnInstanceId);
    }
    
    return lbSuccess;   
@@ -43,12 +49,12 @@ bool RpcClientResource::construct(const Structure &params)
 bool RpcClientResource::destroy(const Structure &params)
 {
    bool lbSuccess = false;
-   RpcObject lObject;
-   RpcObject lRetObject;
+   RpcObject lInObject;
+   RpcObject lOutObject;
    
-   marshall(lObject, "destroy", params);
+   marshall(lInObject, "destroy", params);
       
-   if (lbSuccess = invoke(lObject, lRetObject))
+   if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
    {
       mnInstanceId = -1;
    }
@@ -58,19 +64,27 @@ bool RpcClientResource::destroy(const Structure &params)
 
 //-----------------------------------------------------------------------------
 bool RpcClientResource::call(const std::string  &methodName,
-                             const Structure &params,
-                             RpcReturnValue     &returnValue)
+                             const Structure    &params,
+                             Structure          &returnValue)
 {
    bool lbSuccess = false;
-   RpcObject lObject;
-   RpcObject lRetObject;
+   RpcObject lInObject;
+   RpcObject lOutObject;
    
-   marshall(lObject, methodName, params);
+   marshall(lInObject, methodName, params);
    
-   if (lbSuccess = invoke(lObject, lRetObject))
+   if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
    {
-      RpcReturnValue lReturnValue;
-      lRetObject.getReturnValue(returnValue);
+      lbSuccess = (lOutObject.getException() == NoException);
+      
+      if (lbSuccess)
+      {
+         lOutObject.getParams(returnValue);
+      }
+      else
+      {
+         mLastError = lOutObject.getError();
+      }
    }
    
    return lbSuccess;
@@ -78,15 +92,15 @@ bool RpcClientResource::call(const std::string  &methodName,
 
 //-----------------------------------------------------------------------------
 bool RpcClientResource::call(const std::string  &methodName,
-                             RpcReturnValue     &returnValue)
+                             Structure          &returnValue)
 {
    return call(methodName, EmptyParamList, returnValue);
 }
 
 //-----------------------------------------------------------------------------
-void RpcClientResource::marshall(RpcObject &object, 
+void RpcClientResource::marshall(RpcObject         &object, 
                                  const std::string &methodName, 
-                                 const Structure &paramList)
+                                 const Structure   &paramList)
 {
    object.setClass(mClassname);
    object.setInstanceId(mnInstanceId);
@@ -104,7 +118,7 @@ bool RpcClientResource::invoke(const RpcObject &object,
    // Send the marshalled RPC to the RpcClient.
    RpcMarshalledCall* lpCall = mrClient.invokeRpc(object);
 
-   if (lbSuccess = lpCall->wait(nTimeoutMs))
+   if ((lbSuccess = lpCall->wait(nTimeoutMs)) == true)
    {
       lpCall->getResult(result);
    }

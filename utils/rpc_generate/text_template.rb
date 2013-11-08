@@ -1,16 +1,19 @@
 class TextTemplate
 
   attr_reader :lines
+  attr_reader :name
 
   def initialize(template_filename, marker = '$$')
 
     @lines = Array.new
     @markers = Hash.new
     @values = Hash.new
-    @marker_regex = Regexp.new(Regexp.escape(marker))
+    @lmarker = Regexp.new(Regexp.escape('<%'))
+    @rmarker = Regexp.new(Regexp.escape('%>'))
+    @name = template_filename
 
     begin
-      File.open(template_filename, 'r') do |file|
+      File.open(@name, 'r') do |file|
         scan_template(file)
       end 
     rescue
@@ -23,9 +26,9 @@ class TextTemplate
     while not file.eof?
       line = file.readline
       @lines << line
-      markers = line.scan(/#{@marker_regex}[\w_]+#{@marker_regex}/)
+      markers = line.scan(/#{@lmarker}[\w_]+#{@rmarker}/)
       markers.each do |marker|
-        fields = marker.scan(/#{@marker_regex}([\w_]+)#{@marker_regex}/).first
+        fields = marker.scan(/#{@lmarker}([\w_]+)#{@rmarker}/).first
         fields.each do |field|
           @markers[field] = marker
         end
@@ -49,7 +52,7 @@ class TextTemplate
       rline = line.dup
       @markers.each do |field, marker|
         if line.match(/#{Regexp.escape(marker)}/) and values[field].nil?
-          raise "Failed to find value match for template field '#{field}'." 
+          raise "#{@name}: Failed to find value match for template field '#{field}'." 
         end
         next unless values[field] and values[field].class == String
         rline.gsub!(marker, values[field])

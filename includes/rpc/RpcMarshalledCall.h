@@ -20,8 +20,6 @@ public:
 
    i64 getRpcId() const;
 
-//   bool compareRpcId(const RpcId &id);
-
    void notify(const RpcObject &object);
 
    bool wait(ui32 nTimeoutMs, bool bCancelOnTimeout = true);

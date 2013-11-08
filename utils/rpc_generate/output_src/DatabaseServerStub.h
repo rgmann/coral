@@ -4,8 +4,7 @@
 #include "RpcServerResource.h"
 #include "DatabaseWrapper.h"
 
-class DatabaseServerStub : public RpcServerResource
-{
+class DatabaseServerStub : public RpcServerResource {
 public:
 
    DatabaseServerStub() : RpcServerResource("Database")
@@ -14,10 +13,10 @@ public:
    
    virtual void registerActions()
    {
-      addAction("create", DatabaseWrapper::create);
-      addAction("read", DatabaseWrapper::read);
-      addAction("update", DatabaseWrapper::update);
-      addAction("destroy", DatabaseWrapper::destroy);
+      addAction("create", DatabaseWrapper::createDelegate);
+      addAction("read", DatabaseWrapper::readDelegate);
+      addAction("update", DatabaseWrapper::updateDelegate);
+      addAction("destroy", DatabaseWrapper::destroyDelegate);
    };
 
 protected:

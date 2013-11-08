@@ -163,16 +163,16 @@ RpcError RpcObject::getError() const
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::setReturnValue(const RpcReturnValue &value)
+/*void RpcObject::setReturnValue(const RpcReturnValue &value)
 {
    set(RetvalNameField, value);
-}
+}*/
 
 //-----------------------------------------------------------------------------
-bool RpcObject::getReturnValue(RpcReturnValue &value) const
+/*bool RpcObject::getReturnValue(RpcReturnValue &value) const
 {
    return get(RetvalNameField, value);
-}
+}*/
 
 //-----------------------------------------------------------------------------
 void RpcObject::setParams(const Structure &value)
@@ -201,10 +201,10 @@ bool RpcObject::getResponse(RpcObject &response) const
 
 //-----------------------------------------------------------------------------
 bool RpcObject::getResponse(RpcObject &response,
-                            const RpcReturnValue &value) const
+                            const Structure &value) const
 {
    if (!getResponse(response)) return false;
-   response.setReturnValue(value);
+   response.setParams(value);
    return true;
 }
 

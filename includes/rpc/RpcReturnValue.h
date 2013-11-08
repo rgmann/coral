@@ -15,41 +15,41 @@ public:
    RpcReturnValue(const std::string& value);
    RpcReturnValue(const Structure& value);
    
-   void set(i32 value); 
-   bool get(i32 &value) const;
+   void setReturnValue(i32 value); 
+   bool getReturnValue(i32 &value) const;
    
-   void set(i64 value); 
-   bool get(i64 &value) const;
+   void setReturnValue(i64 value); 
+   bool getReturnValue(i64 &value) const;
    
-   void set(double value); 
-   bool get(double &value) const;
+   void setReturnValue(double value); 
+   bool getReturnValue(double &value) const;
    
-   void set(bool value); 
-   bool get(bool &value) const;
+   void setReturnValue(bool value); 
+   bool getReturnValue(bool &value) const;
    
-   void set(const std::string &value); 
-   bool get(std::string &value) const;
+   void setReturnValue(const std::string &value); 
+   bool getReturnValue(std::string &value) const;
    
-   void set(const Structure &value); 
-   bool get(Structure &value) const;
+   void setReturnValue(const Structure &value); 
+   bool getReturnValue(Structure &value) const;
    /*
-   void set(const std::vector<i32> &value); 
-   bool get(std::vector<i32> &value) const;
+   void setReturnValue(const std::vector<i32> &value); 
+   bool getReturnValue(std::vector<i32> &value) const;
    
-   void set(const std::vector<i64> &value); 
-   bool get(std::vector<i64> &value) const;
+   void setReturnValue(const std::vector<i64> &value); 
+   bool getReturnValue(std::vector<i64> &value) const;
    
-   void set(const std::vector<bool> &value); 
-   bool get(std::vector<bool> &value) const;
+   void setReturnValue(const std::vector<bool> &value); 
+   bool getReturnValue(std::vector<bool> &value) const;
    
-   void set(const std::vector<double> &value); 
-   bool get(std::vector<double> &value) const;
+   void setReturnValue(const std::vector<double> &value); 
+   bool getReturnValue(std::vector<double> &value) const;
    
-   void set(const std::vector<std::string> &value); 
-   bool get(std::vector<std::string> &value) const;
+   void setReturnValue(const std::vector<std::string> &value); 
+   bool getReturnValue(std::vector<std::string> &value) const;
    
-   void set(const std::vector<Structure> &value); 
-   bool get(std::vector<Structure> &value) const;
+   void setReturnValue(const std::vector<Structure> &value); 
+   bool getReturnValue(std::vector<Structure> &value) const;
    */
 private:
    

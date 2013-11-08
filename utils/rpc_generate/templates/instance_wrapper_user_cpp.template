@@ -1,0 +1,4 @@
+#include "<%WRAPPED_CLASS%>Wrapper.h"
+
+<%ACTIONS%>
+
