@@ -110,69 +110,43 @@ i64 RpcObject::getRpcId() const
 void RpcObject::
 setException(RpcException exception, const std::string& message)
 {
-   Structure lException;
+   RpcError lError;
 
-   lException.set("e", exception);
-   lException.set("m", message);
+   lError.exceptionId = exception;
+   lError.message     = message;
 
-   set(ExceptionFieldName, lException);
+   setError(lError);
+}
+
+//-----------------------------------------------------------------------------
+void RpcObject::setError(RpcError& error)
+{
+   error.resourceName = getClass();
+   error.actionName   = getMethod();
+   error.instanceId   = getInstanceId();
+   error.rpcId        = getRpcId();
+   set(ExceptionFieldName, error.toStructure());
 }
 
 //-----------------------------------------------------------------------------
 RpcException RpcObject::getException() const
 {
-   i32 lnExceptionId = NoException;
-   
-   if (hasField(ExceptionFieldName))
-   {
-      Structure lException;
-      get(ExceptionFieldName, lException);
-      lException.get("e", lnExceptionId);
-   }
-   
-   return static_cast<RpcException>(lnExceptionId);
+   return getError().exceptionId;
 }
 
 //-----------------------------------------------------------------------------
 RpcError RpcObject::getError() const
 {
    RpcError lError;
+   Structure lErrorStruct;
 
-   if (hasField(ExceptionFieldName))
+   if (get(ExceptionFieldName, lErrorStruct))
    {
-      Structure lException;
-      get(ExceptionFieldName, lException);
-
-      i32 lnEType = NoException;
-      lException.get("e", lnEType);
-      lError.exception(static_cast<RpcException>(lnEType));
-
-      std::string lErrorMsg = "";
-      if (lException.get("m", lErrorMsg))
-      {
-         lError.message(lErrorMsg);
-      }
-
-      lError.resource(getClass());
-      lError.action(getMethod());
-      lError.instance(getInstanceId());
-      lError.rpcId(getRpcId());
+      lError.fromStructure(lErrorStruct);
    }
 
    return lError;
 }
-
-//-----------------------------------------------------------------------------
-/*void RpcObject::setReturnValue(const RpcReturnValue &value)
-{
-   set(RetvalNameField, value);
-}*/
-
-//-----------------------------------------------------------------------------
-/*bool RpcObject::getReturnValue(RpcReturnValue &value) const
-{
-   return get(RetvalNameField, value);
-}*/
 
 //-----------------------------------------------------------------------------
 void RpcObject::setParams(const Structure &value)
@@ -209,9 +183,9 @@ bool RpcObject::getResponse(RpcObject &response,
 }
 
 //-----------------------------------------------------------------------------
-bool RpcObject::getResponse(RpcObject &response, RpcException exception) const
+bool RpcObject::getResponse(RpcObject &response, RpcError& error) const
 {
    if (!getResponse(response)) return false;
-   response.setException(exception);
+   response.setError(error);
    return true;
 }

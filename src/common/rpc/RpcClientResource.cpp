@@ -73,7 +73,7 @@ bool RpcClientResource::call(const std::string  &methodName,
    
    marshall(lInObject, methodName, params);
    
-   if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
+   if (invoke(lInObject, lOutObject))
    {
       lbSuccess = (lOutObject.getException() == NoException);
       

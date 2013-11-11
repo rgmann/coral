@@ -28,9 +28,10 @@ protected:
    
    bool invoke(int instId, const RpcObject &input, RpcObject &output);
       
-   void exception(RpcException exception,
-                  const RpcObject& input,
-                  RpcObject &object);
+   void exception(const RpcObject&   input,
+                  RpcObject&         output,
+                  RpcException       exception,
+                  const std::string& message = "");
    
    int getNextInstanceId();
    

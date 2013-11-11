@@ -24,7 +24,7 @@ bool RpcServerResource::unmarshall(const RpcObject &input, RpcObject &output)
    
    if (!input.isValid())
    {
-      exception(MissingParameters, input, output);
+      exception(input, output, MissingParameters);
       return false;
    }
    
@@ -44,7 +44,7 @@ bool RpcServerResource::unmarshall(const RpcObject &input, RpcObject &output)
       }
       else
       {
-         exception(InvalidInstanceId, input, output);
+         exception(input, output, InvalidInstanceId);
          lbSuccess = false;
       }
    }
@@ -62,7 +62,7 @@ bool RpcServerResource::construct(const RpcObject &input, RpcObject &output)
    
    if (mInstances.count(lInstanceId) != 0)
    {
-      exception(InstIdAssignmentErr, input, output);
+      exception(input, output, InstIdAssignmentErr);
       return false;
    }
    
@@ -101,13 +101,13 @@ bool RpcServerResource::invoke(int instId,
       }
       else
       {
-         exception(NullInstance, input, output);
+         exception(input, output, NullInstance);
          lbSuccess = false;
       }
    }
    else
    {
-      exception(UnknownMethod, input, output);
+      exception(input, output, UnknownMethod);
    }
    
    return lbSuccess;
@@ -118,7 +118,7 @@ bool RpcServerResource::destroy(const RpcObject &input, RpcObject &output)
 {
    if (mInstances.count(input.getInstanceId()) == 0)
    {
-      exception(InvalidInstanceId, input, output);
+      exception(input, output, InvalidInstanceId);
       return false;
    }
    
@@ -159,11 +159,18 @@ bool RpcServerResource::addAction(const std::string &actionName,
 }
 
 //------------------------------------------------------------------------------
-void RpcServerResource::exception(RpcException exception,
-                                  const RpcObject &input,
-                                  RpcObject &output)
+void RpcServerResource::exception(const RpcObject&   input,
+                                  RpcObject&         output,
+                                  RpcException       exception,
+                                  const std::string& message)
 {
-   input.getResponse(output, exception);
+   RpcError lError;
+
+   lError.reporter  = RpcError::Server;
+   lError.exceptionId = exception;
+   lError.message   = message;
+
+   input.getResponse(output, lError);
 }
 
 //------------------------------------------------------------------------------

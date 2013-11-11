@@ -3,7 +3,6 @@
 
 #include "Structure.h"
 #include "RpcError.h"
-#include "RpcReturnValue.h"
 
 class RpcObject : public Structure {
 public:
@@ -32,12 +31,13 @@ public:
    virtual bool isValid() const;
       
    void setException(RpcException exception, const std::string& message = "");
+   void setError(RpcError &error);
    RpcException getException() const;
    RpcError getError() const;
    
    bool getResponse(RpcObject &response) const;
    bool getResponse(RpcObject &response, const Structure &value) const;
-   bool getResponse(RpcObject &response, RpcException e) const;
+   bool getResponse(RpcObject &response, RpcError &error) const;
 };
 
 #endif // RPC_OBJECT_H

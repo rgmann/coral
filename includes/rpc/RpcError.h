@@ -5,30 +5,23 @@
 #include "RpcCommon.h"
 #include "Structure.h"
 
-class RpcError : public Structure
+class RpcError
 {
 public:
 
    RpcError();
-   ~RpcError();
 
-   void exception(RpcException etype);
-   RpcException exception() const;
+   RpcException exceptionId;
 
-   void resource(const std::string& resourceName);
-   std::string resource() const;
+   std::string resourceName;
 
-   void instance(i32 iid);
-   i32 instance() const;
+   i32 instanceId;
 
-   void action(const std::string& actionName);
-   std::string action() const;
+   std::string actionName;
 
-   void rpcId(i32 rid);
-   i32 rpcId() const;
+   i32 rpcId;
 
-   void message(const std::string& errorMessage);
-   std::string message() const;
+   std::string message;
 
    enum Reporter
    {
@@ -36,10 +29,15 @@ public:
       Server,
       Client
    };
-   void reporter(Reporter errorReporter);
-   Reporter reporter() const;
+   Reporter reporter;
 
    std::string toString() const;
+
+   Structure toStructure() const;
+   bool fromStructure(const Structure& error);
+
+   bool valid() const;
+
 };
 
 #endif // RPC_ERROR_H

@@ -24,12 +24,43 @@ class RpcGenerator
 
   def self.run(args)
 
-    raise "Too few args" if args.count < 3
+    raise "Too few args" if args.count < 2
 
     def_text = ''
     def_path = args[0]
-    decl_out_path = args[1]
-    def_out_path = args[2]
+    project_path = args[1]
+
+    # project_directory
+    #  |
+    #  -- server_directory
+    #  |   |
+    #  |   -- include
+    #  |   |
+    #  |   -- source
+    #  |   |
+    #  |   -- rpc_include
+    #  |   |
+    #  |   -- rpc_source
+    #  |
+    #  -- common_directory
+    #  |   |
+    #  |   -- include
+    #  |   |
+    #  |   -- source
+    #  |   |
+    #  |   -- rpc_include
+    #  |   |
+    #  |   -- rpc_source
+    #  |
+    #  -- client_directory
+    #      |
+    #      -- include
+    #      |
+    #      -- source
+    #      |
+    #      -- rpc_include
+    #      |
+    #      -- rpc_source
 
     generator = RpcGenerator.new
     declarations = Array.new
@@ -68,16 +99,25 @@ class RpcGenerator
       definitions << structure.definition
     end
 
-    declarations.each do |file|
-      File.open(File.join(decl_out_path, file[:name]), 'w') do |io|
-        io.write(file[:text].join)
+    # Create output directories if they do not already exist.
+    ['server', 'common', 'client'].each do |dirname|
+      dirpath = File.join(project_path, dirname)
+      Dir.mkdir(dirpath) unless Dir.exists?(dirpath)
+      
+      ['rpc_includes', 'includes', 'rpc_source', 'source'].each do |subdirname|
+        subdirpath = File.join(dirpath, subdirname)
+        Dir.mkdir(subdirpath) unless Dir.exists?(subdirpath)
       end
     end
 
+    declarations.each do |file|
+      path = File.join(project_path, file[:type].to_s, 'rpc_include', file[:name])
+      File.open(path, 'w') { |io| io.write(file[:text].join) }
+    end
+
     definitions.each do |file|
-      File.open(File.join(def_out_path, file[:name]), 'w') do |io|
-        io.write(file[:text].join)
-      end
+      path = File.join(project_path, file[:type].to_s, 'rpc_source', file[:name])
+      File.open(path, 'w') { |io| io.write(file[:text].join) }
     end
   end
 end

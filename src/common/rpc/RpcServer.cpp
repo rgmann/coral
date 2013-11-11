@@ -5,7 +5,6 @@
 //------------------------------------------------------------------------------
 RpcServer::RpcServer()
 {
-   //mCommandQueue.initialize();
    mResponseQueue.initialize();
 }
 
@@ -27,11 +26,6 @@ bool RpcServer::IsRpcCommand(const GenericPacket *pPacket)
    return true;
 }
 
-/*bool pushCommand(const RpcCommand* pCmd)
-{
-   return mCmdQueue.push(pCmd, 100);
-}*/
-
 //------------------------------------------------------------------------------
 bool RpcServer::processPacket(const RpcPacket* pPacket)
 {
@@ -52,7 +46,10 @@ bool RpcServer::processPacket(const RpcPacket* pPacket)
       }
       else
       {
-         lInput.getResponse(lOutput, InvalidInstanceId);
+         RpcError lError;
+         lError.reporter = RpcError::Server;
+         lError.exceptionId = InvalidInstanceId;
+         lInput.getResponse(lOutput, lError);
       }
                    
       sendObject(lOutput);
@@ -79,7 +76,6 @@ void RpcServer::sendObject(const RpcObject &object)
 {
    JsonTransportObject lTransportObj(object);
    mResponseQueue.push(new RpcPacket(lTransportObj));
-   //std::cout << "RpcServer::sendObject:" << std::endl << lTransportObj.getString() << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -87,3 +83,4 @@ bool RpcServer::popPacket(RpcPacket** pPacket)
 {
    return mResponseQueue.pop(*pPacket, 100);
 }
+

@@ -87,7 +87,8 @@ class RpcResource
     fields['ACTIONS'] = delegates
     fields['ACTION_WRAPPERS'] = wrappers
 
-    {:name => "#{@name}Wrapper.h",
+    {:type => :server,
+     :name => "#{@name}Wrapper.h",
      :text => @@templates[:inst_wrapper_decl].build(fields)}
   end
 
@@ -104,7 +105,8 @@ class RpcResource
     fields['ACTION_STRUCTS'] = action_plists
     fields['ACTIONS'] = actions
 
-    {:name => "#{@name}Wrapper.cpp",
+    {:type => :server,
+     :name => "#{@name}Wrapper.cpp",
      :text => @@templates[:inst_wrapper_def].build(fields)}
   end
 
@@ -119,7 +121,8 @@ class RpcResource
 
     fields['ACTIONS'] = actions
 
-    {:name => "#{@name}Wrapper_user.cpp",
+    {:type => :server,
+     :name => "user.#{@name}Wrapper.cpp",
      :text => @@templates[:inst_wrapper_user_def].build(fields)}
   end
 
@@ -134,7 +137,8 @@ class RpcResource
     end
     fields['ACTIONS'] = actions
 
-    {:name => "#{@name}ServerStub.h",
+    {:type => :server,
+     :name => "#{@name}ServerStub.h",
      :text => @@templates[:server_stub_decl].build(fields)}
   end
 
@@ -154,7 +158,8 @@ class RpcResource
     fields['ACTIONS'] = actions
     fields['INCLUDES'] = dependencies
 
-    {:name => "#{@name}ClientStub.h",
+    {:type => :client,
+     :name => "#{@name}ClientStub.h",
      :text => @@templates[:client_stub_decl].build(fields)}
   end
 
@@ -172,10 +177,11 @@ class RpcResource
     fields['ACTION_STRUCT'] = action_plists
     fields['ACTIONS'] = actions
 
-    {:name => "#{@name}ClientStub.cpp",
+    {:type => :client,
+     :name => "#{@name}ClientStub.cpp",
      :text => @@templates[:client_stub_def].build(fields)}
   end
-
+=begin
   def generate(inc_path, src_path)
     includes = Array.new
     source = Array.new
@@ -203,6 +209,7 @@ class RpcResource
       end
     end
   end
+=end
 
   def declarations
     includes = Array.new

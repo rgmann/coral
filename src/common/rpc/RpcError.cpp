@@ -10,110 +10,11 @@ static const std::string ErrorReporter("erep");
 
 //-----------------------------------------------------------------------------
 RpcError::RpcError()
+: exceptionId(NoException),
+  instanceId(-1),
+  rpcId(-1),
+  reporter(RpcError::Unknown)
 {
-}
-
-//-----------------------------------------------------------------------------
-RpcError::~RpcError()
-{
-}
-
-//-----------------------------------------------------------------------------
-void RpcError::exception(RpcException etype)
-{
-   set(ExceptionType, static_cast<i32>(etype));
-}
-
-//-----------------------------------------------------------------------------
-RpcException RpcError::exception() const
-{
-   i32 lExceptionType = NoException;
-   get(ExceptionType, lExceptionType);
-   return static_cast<RpcException>(lExceptionType);
-}
-
-//-----------------------------------------------------------------------------
-void RpcError::resource(const std::string& resourceName)
-{
-   set(ResourceName, resourceName);
-}
-
-//-----------------------------------------------------------------------------
-std::string RpcError::resource() const
-{
-   std::string lResourceName = "nil";
-   get(ResourceName, lResourceName);
-   return lResourceName;
-}
-
-//-----------------------------------------------------------------------------
-void RpcError::instance(i32 iid)
-{
-   set(InstanceId, iid);
-}
-
-//-----------------------------------------------------------------------------
-i32 RpcError::instance() const
-{
-   i32 lIid = -1;
-   get(InstanceId, lIid);
-   return lIid;
-}
-
-//-----------------------------------------------------------------------------
-void RpcError::action(const std::string& actionName)
-{
-   set(ActionName, actionName);
-}
-
-//-----------------------------------------------------------------------------
-std::string RpcError::action() const
-{
-   std::string lActionName = "nil";
-   get(ActionName, lActionName);
-   return lActionName;
-}
-
-//-----------------------------------------------------------------------------
-void RpcError::rpcId(i32 rid)
-{
-   set(RpcId, rid);
-}
-
-//-----------------------------------------------------------------------------
-i32 RpcError::rpcId() const
-{
-   i32 lRpcId = -1;
-   get(RpcId, lRpcId);
-   return lRpcId;
-}
-
-//-----------------------------------------------------------------------------
-void RpcError::message(const std::string& errorMessage)
-{
-   set(ErrorMessage, errorMessage);
-}
-
-//-----------------------------------------------------------------------------
-std::string RpcError::message() const
-{
-   std::string lMessage = "nil";
-   get(ErrorMessage, lMessage);
-   return lMessage;
-}
-
-//-----------------------------------------------------------------------------
-void RpcError::reporter(Reporter errorReporter)
-{
-   set(ErrorReporter, static_cast<i32>(errorReporter));
-}
-
-//-----------------------------------------------------------------------------
-RpcError::Reporter RpcError::reporter() const
-{
-   i32 lErrorReporter = Unknown;
-   get(ErrorReporter, lErrorReporter);
-   return static_cast<Reporter>(lErrorReporter);
 }
 
 //-----------------------------------------------------------------------------
@@ -121,18 +22,60 @@ std::string RpcError::toString() const
 {
    std::string lErrorString = "";
 
-   lErrorString += resource() + "(";
-   switch (reporter())
+   lErrorString += resourceName + "(";
+   switch (reporter)
    {
    case Server: lErrorString += "Server)"; break;
    case Client: lErrorString += "Client)"; break;
    default: lErrorString += "Unknown)"; break;
    }
 
-   lErrorString += "::" + action() + ": ";
-   lErrorString += ToRpcExceptionString(exception()) + " > ";
-   lErrorString += message();
+   lErrorString += "::" + actionName + ": ";
+   lErrorString += ToRpcExceptionString(exceptionId);
+
+   if (message.length() > 0)
+   {
+      lErrorString += " > " + message;
+   }
 
    return lErrorString;
+}
+
+//-----------------------------------------------------------------------------
+Structure RpcError::toStructure() const
+{
+   Structure lErrorStruct("RpcError");
+
+   lErrorStruct.set(ExceptionType, (i32)exceptionId);
+   lErrorStruct.set(ResourceName, resourceName);
+   lErrorStruct.set(InstanceId, instanceId);
+   lErrorStruct.set(ActionName, actionName);
+   lErrorStruct.set(RpcId, rpcId);
+   lErrorStruct.set(ErrorMessage, message);
+   lErrorStruct.set(ErrorReporter, (i32)reporter);
+
+   return lErrorStruct;
+}
+
+//-----------------------------------------------------------------------------
+bool RpcError::fromStructure(const Structure& error)
+{
+   bool lbSuccess = true;
+
+   i32 lExceptionId = -1;
+   lbSuccess &= error.get(ExceptionType, lExceptionId);
+   exceptionId = (RpcException)lExceptionId;
+
+   lbSuccess &= error.get(ResourceName, resourceName);
+   lbSuccess &= error.get(InstanceId, instanceId);
+   lbSuccess &= error.get(ActionName, actionName);
+   lbSuccess &= error.get(RpcId, rpcId);
+   lbSuccess &= error.get(ErrorMessage, message);
+
+   i32 lReporterType = Unknown;
+   lbSuccess &= error.get(ErrorReporter, lReporterType);
+   reporter = (Reporter)lReporterType;
+
+   return lbSuccess;
 }
 

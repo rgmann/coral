@@ -4,7 +4,6 @@
 #include <string>
 #include "RpcObject.h"
 #include "RpcError.h"
-#include "RpcReturnValue.h"
 #include "RpcClient.h"
 
 class RpcClientResource

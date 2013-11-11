@@ -94,7 +94,8 @@ class Structure
     fields['PARAMS'] = declarations.join(', ')
     fields['REF_PARAMS'] = declaration_refs.join(', ')
 
-    {:name => "#{@name}.h",
+    {:type => :common,
+     :name => "#{@name}.h",
      :text => @@templates[:declaration_template].build(fields)}
   end
 
@@ -106,7 +107,8 @@ class Structure
     fields['REF_PARAMS'] = declaration_refs.join(', ')
     fields['PARAM_NAME'] = names
 
-    {:name => "#{@name}.cpp",
+    {:type => :common,
+     :name => "#{@name}.cpp",
      :text => @@templates[:definition_template].build(fields)}
   end
 end

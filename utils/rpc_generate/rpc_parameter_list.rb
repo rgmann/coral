@@ -126,7 +126,8 @@ class RpcParameterList
     fields['RETURN_TYPE'] = [@return_type]
     fields['RETURN_TYPE'].compact!
 
-    {:name => "#{name}.h",
+    {:type => :common,
+     :name => "#{name}.h",
      :text => @@templates[:declaration_template].build(fields)}
   end
 
@@ -154,7 +155,8 @@ class RpcParameterList
       fields['RETURN_VALUE_ACCESSORS'] = @@templates[:return_template].build(fields).join
     end
 
-    {:name => "#{name}.cpp",
+    {:type => :common,
+     :name => "#{name}.cpp",
      :text => @@templates[:definition_template].build(fields)}
   end
 end
