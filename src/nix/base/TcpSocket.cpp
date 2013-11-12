@@ -28,8 +28,8 @@ TcpSocket::~TcpSocket()
 //-----------------------------------------------------------------------------
 int TcpSocket::recv(char* pBuffer, int nBytes, int nTimeoutMs)
 {
-	int            l_nBytesRead = -1;
-	struct timeval	l_tTimeout;
+   int            l_nBytesRead = -1;
+   struct timeval l_tTimeout;
    fd_set         l_ReadSet;
    
    if (m_nSocket <= 0)
@@ -38,21 +38,21 @@ int TcpSocket::recv(char* pBuffer, int nBytes, int nTimeoutMs)
       return -1;
    }
 	
-	l_tTimeout.tv_sec = nTimeoutMs / 1000;
-	l_tTimeout.tv_usec = 1000 * (nTimeoutMs - l_tTimeout.tv_sec * 1000);
+   l_tTimeout.tv_sec = nTimeoutMs / 1000;
+   l_tTimeout.tv_usec = 1000 * (nTimeoutMs - l_tTimeout.tv_sec * 1000);
    
    FD_ZERO(&l_ReadSet);
    FD_SET(m_nSocket, &l_ReadSet);
 	
 	//if (FD_ISSET(mSocket, &mFdSet))
-	{
+   {
 		// Check to see whether data is available.
 		// Blocks for the specified timeout period.
-		if (select(m_nSocket + 1, &l_ReadSet, NULL, NULL, &l_tTimeout) <= 0)
-		{
-         //printf("TcpSocket::recv: timeout\n");
-			return -1;
-		}
+      if (select(m_nSocket + 1, &l_ReadSet, NULL, NULL, &l_tTimeout) <= 0)
+      {
+         printf("TcpSocket::recv: timeout\n");
+         return -1;
+      }
 		
 		//l_nBytesRead = read(m_nSocket, pBuffer, nBytes);
       l_nBytesRead = SocketHelper::read(m_nSocket, pBuffer, nBytes);
@@ -61,9 +61,9 @@ int TcpSocket::recv(char* pBuffer, int nBytes, int nTimeoutMs)
       {
          perror("TcpSocket::recv: -");
       }
-	}
+   }
 	
-	return l_nBytesRead;
+   return l_nBytesRead;
 }
 
 //-----------------------------------------------------------------------------

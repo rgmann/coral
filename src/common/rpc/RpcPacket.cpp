@@ -28,7 +28,8 @@ RpcPacket::RpcPacket(const TransportObject &object,
       lpPayload += dataSize();
       
       memcpy(lpPayload, lpData, lnDataSize);
-      
+
+      memcpy(data()->marker, MarkerData, RpcMarkerSize);
       data()->length = lnDataSize;
       data()->encoding = encoding;
       data()->format = object.getFormat();

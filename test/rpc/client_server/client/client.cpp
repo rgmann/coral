@@ -56,9 +56,6 @@ int main(int argc, char *argv[])
    args.addArg("name: Port, primary: p, alt: port, type: opt, \
                vtype: int, required, desc: Set port number");
    
-   args.addArg("name: UID, primary: u, alt: uid, type: opt, \
-               vtype: int, required, desc: User ID");
-   
    if (!args.parse((const char**)argv, argc))
    {
       args.printArgErrors(true);
@@ -98,6 +95,8 @@ int main(int argc, char *argv[])
    
    return 0;
 }
+
+//-----------------------------------------------------------------------------
 void calculator_run(RpcClient &client)
 {
    CalculatorClientStub calculator(client);
@@ -151,6 +150,7 @@ void calculator_run(RpcClient &client)
    }
 }
 
+//-----------------------------------------------------------------------------
 void database_run(RpcClient& client)
 {
    DatabaseClientStub database(client);
@@ -224,6 +224,8 @@ void rxThread(ThreadArg* pArg)
       printf("Failed to connect to server\n");
       while (!pArg->stopSignalled()) sleep(1);
    }
+
+   lpRpcArgs->pStartSem->give();
    
    while (!pArg->stopSignalled())
    {
@@ -236,7 +238,8 @@ void rxThread(ThreadArg* pArg)
          ui32       msgLen = 0;
          
          lpRpcPacket->pack((void**)&pMsgData, msgLen);
-         
+     
+         printf("Sending packet!\n");    
          lpSocket->send(pMsgData, msgLen);
          
          delete[] pMsgData;
@@ -246,16 +249,14 @@ void rxThread(ThreadArg* pArg)
          lpRpcPacket = NULL;
       }
 
-      if (receiveRpcResponse(&lpRpcPacket, lpSocket) == -1)
+      if (receiveRpcResponse(&lpRpcPacket, lpSocket) > 0)
       {
-         printf("Socket closed by master\n");
-         break;
-      }
-      else if (lpRpcPacket)
-      {
-         lpRpcArgs->pClient->processPacket(lpRpcPacket);
-         delete lpRpcPacket;
-         lpRpcPacket = NULL;
+         if (lpRpcPacket)
+         {
+            lpRpcArgs->pClient->processPacket(lpRpcPacket);
+            delete lpRpcPacket;
+            lpRpcPacket = NULL;
+         }
       }
    }
    
