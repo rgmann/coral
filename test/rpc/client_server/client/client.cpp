@@ -239,7 +239,6 @@ void rxThread(ThreadArg* pArg)
          
          lpRpcPacket->pack((void**)&pMsgData, msgLen);
      
-         printf("Sending packet!\n");    
          lpSocket->send(pMsgData, msgLen);
          
          delete[] pMsgData;
