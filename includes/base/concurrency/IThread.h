@@ -15,15 +15,17 @@ public:
    
    bool stop();
    
-   virtual void run(bool &bShutdown) = 0;
-   
    i32 getId() const;
    
    const std::string& getName() const;
-   
+
+protected:
+ 
+   virtual void run(bool &bShutdown) = 0;
+
 private:
    
-   static void ThreadFunc(ThreadArg* pArg);
+   static void ThreadEntry(ThreadArg* pArg);
    
 private:
    

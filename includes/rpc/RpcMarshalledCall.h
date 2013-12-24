@@ -6,8 +6,10 @@
 #include "RpcObject.h"
 #include "RpcPacket.h"
 
-class RpcMarshalledCall
-{
+namespace liber {
+namespace rpc {
+
+class RpcMarshalledCall {
 public:
 
    RpcMarshalledCall();
@@ -42,5 +44,7 @@ private:
  
    bool mbIsDisposed;
 };
+
+}}
 
 #endif // RPC_MARSHALLED_CALL_H

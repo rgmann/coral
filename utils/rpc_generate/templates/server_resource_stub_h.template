@@ -1,33 +1,33 @@
-#ifndef <%COMP_GUARD%>_SERVER_STUB_H
-#define <%COMP_GUARD%>_SERVER_STUB_H
+#ifndef <%comp_guard%>_SERVER_STUB_H
+#define <%comp_guard%>_SERVER_STUB_H
 
 #include "RpcServerResource.h"
-#include "<%WRAPPED_CLASS%>Wrapper.h"
+#include "<%wrapped_class%>Wrapper.h"
 
-class <%WRAPPED_CLASS%>ServerStub : public RpcServerResource {
+struct <%wrapped_class%>HookCb;
+class <%wrapped_class%>ServerStub : public liber::rpc::RpcServerResource {
 public:
 
-<%tab%><%WRAPPED_CLASS%>ServerStub() : RpcServerResource("<%WRAPPED_CLASS%>")
-<%tab%>{
-<%tab%>};
-   
-<%tab%>virtual void registerActions()
-<%tab%>{
-<%ACTIONS%>
-<%tab%>};
+<%tab%><%wrapped_class%>ServerStub();
+<%tab%>~<%wrapped_class%>ServerStub();
+
+<%tab%>virtual void registerActions();
+
+<%tab%>typedef void (*<%wrapped_class%>Hook)(<%wrapped_class%>Wrapper*, void*);
+<%tab%>bool registerCtorHook(<%wrapped_class%>Hook pFunc, void* pUserData = NULL);
+<%tab%>bool registerDtorHook(<%wrapped_class%>Hook pFunc, void* pUserData = NULL);
 
 protected:
    
-<%tab%>bool isValidInstance(int instId)
-<%tab%>{
-<%tab%><%tab%>return (getInstance(instId) != NULL);
-<%tab%>}
-   
-<%tab%>InstanceWrapper* createInstance()
-<%tab%>{
-<%tab%><%tab%>return new <%WRAPPED_CLASS%>Wrapper();
-<%tab%>};
+<%tab%>liber::rpc::InstanceWrapper* createInstance();
+
+<%tab%>bool tugCtorHook(liber::rpc::InstanceWrapper* pInst);
+<%tab%>bool tugDtorHook(liber::rpc::InstanceWrapper* pInst);
+
+private:
+
+<%tab%>struct <%wrapped_class%>HookCb* mpCreateHook;
+<%tab%>struct <%wrapped_class%>HookCb* mpDestroyHook;
 };
 
-#endif // <%COMP_GUARD%>_SERVER_STUB_H
-
+#endif // <%comp_guard%>_SERVER_STUB_H

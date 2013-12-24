@@ -1,81 +1,77 @@
 #include <iostream>
-#include "JsonTransportObject.h"
 #include "RpcClientResource.h"
 
-const Structure RpcClientResource::EmptyParamList("empty");
+using namespace liber::rpc;
 
 //-----------------------------------------------------------------------------
-RpcClientResource::RpcClientResource(RpcClient         &client,
-                                     const std::string &classname)
+RpcClientResource::RpcClientResource(RpcClient&         client,
+                                     const std::string& classname)
 : mrClient(client),
-  mClassname(classname),
-  mnInstanceId(RpcClientResource::InvalidInstance)
+  mClassname(classname)
 {
-   construct();
+   construct(NULL);
 }
 
 //-----------------------------------------------------------------------------
 RpcClientResource::~RpcClientResource()
 {
-   destroy();
+   destroy(NULL);
 }
 
 //-----------------------------------------------------------------------------
-RpcError RpcClientResource::getLastError()
+RpcException RpcClientResource::getLastError()
 {
    return mLastError;
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::construct(const Structure &params)
+bool RpcClientResource::construct(const PbMessage* pParams)
 {
    bool lbSuccess = false;
    RpcObject lInObject;
    RpcObject lOutObject;
    
-   marshall(lInObject, "construct", params);
+   marshall(lInObject, "construct", pParams);
    
    if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
    {
-      Structure lReturnValue;
-      lOutObject.getParams(lReturnValue);
-      lReturnValue.get(RpcReturnValue, mnInstanceId);
+      mUiid = Md5Hash(lOutObject.callInfo().uiid);
    }
    
    return lbSuccess;   
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::destroy(const Structure &params)
+bool RpcClientResource::destroy(const PbMessage* pParams)
 {
    bool lbSuccess = false;
    RpcObject lInObject;
    RpcObject lOutObject;
    
-   marshall(lInObject, "destroy", params);
+   marshall(lInObject, "destroy", pParams);
       
    if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
    {
-      mnInstanceId = -1;
+      mUiid.invalidate();
    }
    
    return lbSuccess;
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::call(const std::string  &methodName,
-                             const Structure    &params,
-                             Structure          &returnValue)
+bool RpcClientResource::call(const std::string& methodName,
+                             const PbMessage&   params,
+                             PbMessage&         returnValue)
 {
    bool lbSuccess = false;
    RpcObject lInObject;
    RpcObject lOutObject;
    
-   marshall(lInObject, methodName, params);
+   marshall(lInObject, methodName, &params);
    
    if (invoke(lInObject, lOutObject))
    {
-      lbSuccess = (lOutObject.getException() == NoException);
+      lbSuccess = (lOutObject.exception().id == NoException);
       
       if (lbSuccess)
       {
@@ -83,7 +79,7 @@ bool RpcClientResource::call(const std::string  &methodName,
       }
       else
       {
-         mLastError = lOutObject.getError();
+         mLastError = lOutObject.exception();
       }
    }
    
@@ -91,27 +87,24 @@ bool RpcClientResource::call(const std::string  &methodName,
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::call(const std::string  &methodName,
-                             Structure          &returnValue)
+void RpcClientResource::marshall(RpcObject&         object, 
+                                 const std::string& action, 
+                                 const PbMessage*   pParamList)
 {
-   return call(methodName, EmptyParamList, returnValue);
+   object.callInfo().resource = mClassname;
+   mUiid.get(&object.callInfo().uiid);
+   object.callInfo().action   = action;
+
+   if (pParamList)
+   {
+      object.setParams(*pParamList);
+   }
 }
 
 //-----------------------------------------------------------------------------
-void RpcClientResource::marshall(RpcObject         &object, 
-                                 const std::string &methodName, 
-                                 const Structure   &paramList)
-{
-   object.setClass(mClassname);
-   object.setInstanceId(mnInstanceId);
-   object.setMethod(methodName);
-   object.setParams(paramList);
-}
-
-//-----------------------------------------------------------------------------
-bool RpcClientResource::invoke(const RpcObject &object,
-                               RpcObject       &result,
-                               ui32            nTimeoutMs)
+bool RpcClientResource::invoke(const RpcObject& object,
+                               RpcObject&       result,
+                               ui32             nTimeoutMs)
 {
    bool lbSuccess = false;
 

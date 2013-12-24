@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-bool <%WRAPPED_CLASS%>ClientStub::
+bool <%wrapped_class%>ClientStub::
 <%ACTION%>(<%PARAMS%>, <%RETURN_TYPE%>& result)
 {
 <%tab%><%ACTION_PARAM_LIST_IN%> lInParams;

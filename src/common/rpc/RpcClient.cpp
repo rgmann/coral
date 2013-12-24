@@ -1,96 +1,115 @@
+#include <iostream>
 #include "RpcClient.h"
-#include "JsonTransportObject.h"
+
+using namespace liber::rpc;
+using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 RpcClient::RpcClient()
 {
-   mOutQueue.initialize();
 }
 
 //-----------------------------------------------------------------------------
 RpcClient::~RpcClient()
 {
+   std::map<i64, RpcMarshalledCall*>::iterator lRpcIt;
+
+   mRpcMutex.lock();
+
+   lRpcIt = mRpcMap.begin();
+   while (lRpcIt != mRpcMap.end())
+   {
+      if (lRpcIt->second)
+      {
+         delete lRpcIt->second;
+      }
+
+      mRpcMap.erase(lRpcIt++);
+   }
+
+   mRpcMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------
 RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
 {
-   RpcMarshalledCall* lpCall = new RpcMarshalledCall(object);
-   
-   if (mRpcMap.count(lpCall->getRpcId()) == 0)
-   {
-      mRpcMutex.lock();
-      mRpcMap[lpCall->getRpcId()] = lpCall;
-      mRpcMutex.unlock();
-      
-      RpcPacket* lpPacket = NULL;
-      lpCall->getRpcPacket(&lpPacket);
-            
-      bool lbSuccess = mOutQueue.push(lpPacket);
-   }
+  RpcMarshalledCall* lpCall = new RpcMarshalledCall(object);
 
-   return lpCall;
+  if (mRpcMap.count(lpCall->getRpcId()) == 0)
+  {
+    mRpcMutex.lock();
+    mRpcMap[lpCall->getRpcId()] = lpCall;
+    mRpcMutex.unlock();
+      
+    RpcPacket* lpPacket = NULL;
+    lpCall->getRpcPacket(&lpPacket);
+
+    sendPacket(lpPacket);
+  }
+
+  return lpCall;
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClient::processPacket(const RpcPacket* pPacket)
+bool RpcClient::put(const char* pData, ui32 nLength)
 {
-   bool lbSuccess = false;
-   JsonTransportObject lTransportObject;
+  bool lbSuccess = false;
+  RpcPacket* lpPacket = new RpcPacket();
+  RpcObject lRxObject;
 
-   if (pPacket->getObject(lTransportObject))
-   {
-      RpcObject lRpcObject;
-      RpcMarshalledCall* lpCall = NULL;
+  lpPacket->unpack(pData, nLength);
+
+  if (lpPacket->getObject(lRxObject))
+  {
+    RpcMarshalledCall* lpCall = NULL;
       
-      lTransportObject.to(lRpcObject);
-      
-      if (mRpcMap.count(lRpcObject.getRpcId()) > 0)
-      {
-         lpCall = mRpcMap[lRpcObject.getRpcId()];
-      }
+    if (mRpcMap.count(lRxObject.callInfo().rpcId) > 0)
+    {
+      lpCall = mRpcMap[lRxObject.callInfo().rpcId];
+    }
 
-      if (lpCall)
-      {
-         lpCall->notify(lRpcObject);
-         lbSuccess = true;
-      }
-      else
-      {
-         std::cout << "Failed to find RPC" << std::endl;
-      }
-   }
+    if (lpCall)
+    {
+      lpCall->notify(lRxObject);
+      lbSuccess = true;
+    }
+    else
+    {
+      std::cout << "Failed to find RPC with ID = " 
+                << lRxObject.callInfo().rpcId 
+                << std::endl;
+    }
+  }
 
-   processCancellations();
+  processCancellations();
+  delete lpPacket;
 
-   return lbSuccess;
-}
-
-//-----------------------------------------------------------------------------
-bool RpcClient::popPacket(RpcPacket** pPacket)
-{
-   return mOutQueue.pop(*pPacket, 100);
+  return lbSuccess;
 }
 
 //-----------------------------------------------------------------------------
 void RpcClient::processCancellations()
 {
-   std::map<i64, RpcMarshalledCall*>::iterator lRpcIt;
+  std::map<i64, RpcMarshalledCall*>::iterator lRpcIt;
 
-   mRpcMutex.lock();
-   lRpcIt = mRpcMap.begin();
-   while (lRpcIt != mRpcMap.end())
-   {
-      if (lRpcIt->second->isDisposed())
+  mRpcMutex.lock();
+  lRpcIt = mRpcMap.begin();
+  while (lRpcIt != mRpcMap.end())
+  {
+    if (lRpcIt->second->isDisposed())
+    {
+      if (lRpcIt->second)
       {
-         if (lRpcIt->second) delete lRpcIt->second;
-         mRpcMap.erase(lRpcIt++);
+        delete lRpcIt->second;
       }
-      else
-      {
-         ++lRpcIt;
-      }
-   }
-   mRpcMutex.unlock();
+
+      mRpcMap.erase(lRpcIt++);
+    }
+    else
+    {
+      ++lRpcIt;
+    }
+  }
+  mRpcMutex.unlock();
 }
 

@@ -1,0 +1,27 @@
+//-----------------------------------------------------------------------------
+void <%wrapped_class%>Wrapper::
+<%action_name%>Delegate
+(InstanceWrapper* pInst, const std::string& request, std::string& response, RpcException& e)
+{
+<%tab%><%wrapped_class%>Wrapper* lpInst = dynamic_cast<<%wrapped_class%>Wrapper*>(pInst);
+<%tab%><%in_message%> lRequest;
+<%tab%><%out_message%> lResponse;
+
+<%tab%>e.pushFrame(TraceFrame("<%wrapped_class%>Wrapper", "<%action_name%>",
+                              __FILE__, __LINE__));
+
+<%tab%>lRequest.ParseFromString(request);
+
+<%tab%>if (!lRequest.IsInitialized())
+<%tab%>{
+<%tab%><%tab%>e.id = MissingParameters;
+<%tab%><%tab%>e.message = "Parameters not initialized";
+<%tab%><%tab%>return;
+<%tab%>}
+
+<%tab%>lpInst-><%action_name%>(lRequest, lResponse, e);
+<%tab%>lResponse.SerializeToString(&response);
+
+<%tab%>e.popFrame();
+}
+

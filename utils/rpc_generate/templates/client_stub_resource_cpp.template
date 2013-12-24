@@ -1,16 +1,19 @@
-#include "<%WRAPPED_CLASS%>ClientStub.h"
-#include "<%ACTION_STRUCT%>.h"
+#include "<%nspace%>.pb.h"
+#include "<%wrapped_class%>ClientStub.h"
+
+using namespace liber::rpc;
+using namespace <%nspace%>;
 
 //------------------------------------------------------------------------------
-<%WRAPPED_CLASS%>ClientStub::<%WRAPPED_CLASS%>ClientStub(RpcClient &client)
-: RpcClientResource(client, "<%WRAPPED_CLASS%>")
+<%wrapped_class%>ClientStub::<%wrapped_class%>ClientStub(RpcClient &client)
+: RpcClientResource(client, "<%wrapped_class%>")
 {
 }
 
 //------------------------------------------------------------------------------
-<%WRAPPED_CLASS%>ClientStub::~<%WRAPPED_CLASS%>ClientStub()
+<%wrapped_class%>ClientStub::~<%wrapped_class%>ClientStub()
 {
 }
 
-<%ACTIONS%>
+<%actions%>
 

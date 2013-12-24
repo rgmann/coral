@@ -1,11 +1,7 @@
 //-----------------------------------------------------------------------------
-<%RETURN_TYPE%> <%WRAPPED_CLASS%>Wrapper::
-<%ACTION_NAME%>(<%GET_IN_PARAM_LIST%>)
+void <%wrapped_class%>Wrapper::
+<%action_name%>(<%in_param%> request, <%out_param%> response, RpcException& e)
 {
-<%tab%><%RETURN_TYPE%> lReturnValue /* = TODO: Initialize return value. */;
-
 <%tab%>/* TODO: Implement action here. */
-
-<%tab%>return lReturnValue;
 }
 

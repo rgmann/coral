@@ -13,6 +13,14 @@ Timestamp::~Timestamp()
 }
 
 //------------------------------------------------------------------------------
+Timestamp Timestamp::Now()
+{
+   Timestamp now;
+   now.sample();
+   return now;
+}
+
+//------------------------------------------------------------------------------
 void Timestamp::sample()
 {
    gettimeofday(&mTV, NULL);

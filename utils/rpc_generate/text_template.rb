@@ -16,7 +16,8 @@ class TextTemplate
       File.open(@name, 'r') do |file|
         scan_template(file)
       end 
-    rescue
+    rescue Exception => e
+      raise e
     end
 
     @values['tab'] = '   '

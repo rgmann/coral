@@ -1,20 +1,24 @@
 #ifndef INSTANCE_WRAPPER_H
 #define INSTANCE_WRAPPER_H
 
-#include "Structure.h"
 #include "RpcCommon.h"
+#include "RpcException.h"
 
-class InstanceWrapper
-{
+namespace liber {
+namespace rpc {
+
+class InstanceWrapper {
 public:
 
-   typedef RpcException (*Method)(InstanceWrapper*, const Structure&, Structure&);
+   typedef void (*Method)(InstanceWrapper*, const std::string&, std::string&, RpcException&);
    
    InstanceWrapper(){};
    virtual ~InstanceWrapper(){};
    
-   virtual bool initialize(const Structure &params) = 0;
-   virtual bool destroy(const Structure &params) = 0;
+   virtual bool initialize(const std::string &params) = 0;
+   virtual bool destroy(const std::string &params) = 0;
 };
+
+}}
 
 #endif // INSTANCE_WRAPPER_H

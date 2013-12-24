@@ -1,11 +1,12 @@
 #include <iostream>
 #include "RpcServer.h"
-#include "JsonTransportObject.h"
+
+using namespace liber::rpc;
+using namespace liber::netapp;
 
 //------------------------------------------------------------------------------
 RpcServer::RpcServer()
 {
-   mResponseQueue.initialize();
 }
 
 //------------------------------------------------------------------------------
@@ -21,24 +22,18 @@ bool RpcServer::registerResource(RpcServerResource* pResource)
 }
 
 //------------------------------------------------------------------------------
-bool RpcServer::IsRpcCommand(const GenericPacket *pPacket)
-{
-   return true;
-}
-
-//------------------------------------------------------------------------------
 bool RpcServer::processPacket(const RpcPacket* pPacket)
 {
    bool lbSuccess = false;
-   JsonTransportObject lTransportObject;
+   RpcObject lInput;
 
-   if (pPacket && pPacket->getObject(lTransportObject))
+   if (pPacket && pPacket->getObject(lInput))
    {
-      RpcObject lInput;
       RpcObject lOutput;
-            
-      lTransportObject.to(lInput);
       RpcServerResource* lpResource = getResource(lInput);
+
+      lInput.exception().pushFrame(TraceFrame("RpcServer", "processPacket",
+                                              __FILE__, __LINE__));
 
       if (lpResource)
       {
@@ -46,11 +41,13 @@ bool RpcServer::processPacket(const RpcPacket* pPacket)
       }
       else
       {
-         RpcError lError;
-         lError.reporter = RpcError::Server;
-         lError.exceptionId = InvalidInstanceId;
-         lInput.getResponse(lOutput, lError);
+         lInput.exception().reporter = RpcException::Server;
+         lInput.exception().id = InvalidUIID;
+
+         lInput.getResponse(lOutput);
       }
+
+      lInput.exception().popFrame();
                    
       sendObject(lOutput);
    }
@@ -59,13 +56,31 @@ bool RpcServer::processPacket(const RpcPacket* pPacket)
 }
 
 //------------------------------------------------------------------------------
+bool RpcServer::put(const char* pData, ui32 nLength)
+{
+  bool lbSuccess = false;
+  RpcPacket* lpPacket = new RpcPacket();
+
+  if (pData)
+  {
+    lbSuccess = lpPacket->unpack(pData, nLength);
+    if (lbSuccess)
+    {
+      lbSuccess = processPacket(lpPacket);
+    }
+  }
+
+  return lbSuccess;
+}
+
+//------------------------------------------------------------------------------
 RpcServerResource* RpcServer::getResource(const RpcObject &object)
 {
    RpcServerResource* lpResource = NULL;
 
-   if (mResourceMap.count(object.getClass()) == 1)
+   if (mResourceMap.count(object.callInfo().resource) == 1)
    {
-      lpResource = mResourceMap[object.getClass()];
+      lpResource = mResourceMap[object.callInfo().resource];
    }
 
    return lpResource;
@@ -74,13 +89,7 @@ RpcServerResource* RpcServer::getResource(const RpcObject &object)
 //------------------------------------------------------------------------------
 void RpcServer::sendObject(const RpcObject &object)
 {
-   JsonTransportObject lTransportObj(object);
-   mResponseQueue.push(new RpcPacket(lTransportObj));
+  sendPacket(new RpcPacket(object));
 }
 
-//------------------------------------------------------------------------------
-bool RpcServer::popPacket(RpcPacket** pPacket)
-{
-   return mResponseQueue.pop(*pPacket, 100);
-}
 

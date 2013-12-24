@@ -6,9 +6,12 @@
 #include "Mutex.h"
 #include "RpcPacket.h"
 #include "RpcMarshalledCall.h"
+#include "PacketSubscriber.h"
 
-class RpcClient
-{
+namespace liber {
+namespace rpc {
+
+class RpcClient : public liber::netapp::PacketSubscriber {
 public:
 
    RpcClient();
@@ -18,11 +21,11 @@ public:
    RpcMarshalledCall* invokeRpc(const RpcObject &object);
    void dispose(RpcMarshalledCall& call);
 
-   static bool IsRpcPacket(const GenericPacket* pPacket);
+//   static bool IsRpcPacket(const GenericPacket* pPacket);
 
-   bool processPacket(const RpcPacket* pPacket);
-
-   bool popPacket(RpcPacket** pPacket);
+   //bool processPacket(const RpcPacket* pPacket);
+   bool put(const char* pData, ui32 nLength);
+   //bool popPacket(RpcPacket** pPacket);
 
 private:
 
@@ -32,7 +35,7 @@ private:
 
 private:
 
-   Queue<RpcPacket*> mOutQueue;
+   //Queue<RpcPacket*> mOutQueue;
 
    Mutex mRpcMutex;
    
@@ -40,5 +43,7 @@ private:
    // call when a response is received.
    std::map<i64, RpcMarshalledCall*> mRpcMap;
 };
+
+}}
 
 #endif // RPC_CLIENT_H

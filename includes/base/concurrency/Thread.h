@@ -42,8 +42,6 @@ public:
    
    //bool  cancel();
    
-   //bool  detach();
-   
    bool  stop();
    
    bool  isActive() const;

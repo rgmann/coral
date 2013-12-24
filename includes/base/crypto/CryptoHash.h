@@ -8,10 +8,15 @@ class CryptoHash
 public:
    
    CryptoHash(){ m_bValid = false; };
+   virtual ~CryptoHash() {};
    
+   virtual bool get(Hash128* pHash) = 0;
+
    virtual bool hashify(unsigned char *pData, unsigned int nBlockSizeBytes) = 0;
    
-   bool  isValid(){ return m_bValid; };
+   bool  isValid() { return m_bValid; };
+
+   virtual void invalidate() { m_bValid = false; };
    
 protected:
    

@@ -42,7 +42,7 @@ public:
     */
    
    enum DeltaType {
-      Added,   // Node was added since last refresh
+      Added = 0,   // Node was added since last refresh
       Removed, // Node was removed
       Modified, // ctime changed
       Updated

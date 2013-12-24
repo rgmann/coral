@@ -1,43 +1,60 @@
 #ifndef RPC_OBJECT_H
 #define RPC_OBJECT_H
 
-#include "Structure.h"
-#include "RpcError.h"
+#include <string>
+#include <google/protobuf/message.h>
+#include "RpcException.h"
 
-class RpcObject : public Structure {
+namespace liber {
+namespace rpc {
+
+typedef ::google::protobuf::Message PbMessage;
+
+
+class RpcObject {
 public:
 
    RpcObject();
-   RpcObject(const std::string &className, const std::string &methodName);
+   RpcObject(const std::string &resourceName, const std::string &actionName);
    virtual ~RpcObject();
 
-   void setClass(const std::string &className);
-   std::string getClass() const;
+   //--------------------------------------------------------------------------
+   //                            Public Fields
+   //--------------------------------------------------------------------------
+   RpcCallInfo&  callInfo();
+   const RpcCallInfo&  callInfo() const;
+   RpcException& exception();
+   const RpcException& exception() const;
 
-   void setMethod(const std::string &methodName);
-   std::string getMethod() const;
-   
-   void setInstanceId(int nId);
-   int getInstanceId() const;
 
-   bool methodEquals(const std::string &methodName) const;
-   
-   void setRpcId(i64 rpcId);
-   i64  getRpcId() const;
-   
-   void setParams(const Structure &paramList);
-   bool getParams(Structure &paramList) const;
+   //--------------------------------------------------------------------------
+   //                            Public Methods
+   //--------------------------------------------------------------------------
+   void setParams(const PbMessage& message);
+   void setParams(const std::string& message);
+   void getParams(PbMessage& message) const;
+   void getParams(std::string& message) const;
    
    virtual bool isValid() const;
       
-   void setException(RpcException exception, const std::string& message = "");
-   void setError(RpcError &error);
-   RpcException getException() const;
-   RpcError getError() const;
    
    bool getResponse(RpcObject &response) const;
-   bool getResponse(RpcObject &response, const Structure &value) const;
-   bool getResponse(RpcObject &response, RpcError &error) const;
+   bool getResponse(RpcObject &response, const PbMessage &value) const;
+   bool getResponse(RpcObject &response, const std::string &value) const;
+
+   std::string serialize() const;
+   bool deserialize(const std::string& data);
+
+
+   std::string  mMessage;
+private:
+
+   // Protobuf message serialized to a byte string.
+   //std::string  mMessage;
+   RpcCallInfo  mCallInfo;
+   RpcException mException;
 };
+
+}}
 
 #endif // RPC_OBJECT_H

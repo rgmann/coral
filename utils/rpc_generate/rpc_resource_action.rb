@@ -1,144 +1,162 @@
+require File.join(File.dirname(__FILE__), "template_collection")
 
 class RpcResourceAction
 
-  attr_accessor :class_name
+  attr_accessor :resource
   attr_accessor :name
-  attr_accessor :in_params
-  attr_accessor :out_params
-  attr_accessor :return_type
+  attr_accessor :request
+  attr_accessor :response
   attr_accessor :allow_exceptions
 
-  @@templates = {:inst_wrapper_action => TextTemplate.new('templates/instance_wrapper_action_cpp.template'),
-                 :inst_wrapper_user_action => TextTemplate.new('templates/instance_wrapper_user_action_cpp.template'),
-                 :client_stub_action_ne => TextTemplate.new('templates/client_stub_action_cpp_ne.template'),
-                 :client_stub_action => TextTemplate.new('templates/client_stub_action_cpp.template')}
+  @@namespace = nil
 
-  def initialize(wrapped_class, name, parameters, return_type)
+  def initialize(template_collection, resource, name, request, response)
     @name = name
-    @return_type = return_type
-    @class_name = wrapped_class
+    @resource = resource
+    @request = nil
+    @response = nil
     @allow_exceptions = false
 
-    param_list = Array.new
-    param_list = parameters if parameters
-    puts "param_list = #{param_list.inspect}"
-    create_params("#{wrapped_class.capitalize}#{@name.capitalize}", param_list)
+    validate_params(request, response)
+    initialize_templates(template_collection)
   end
 
-  def create_params(prefix, raw_params)
+  def self.set_namespace (namespace)
+    @@namespace = namespace
+  end
 
-    # Parse the list of fields.
-    fields = []
-    raw_params.each do |param|
-      field = Field.new
-      fields << field if field.parse(param)
+  def self.set_message_list (message_list)
+    @@message_list = message_list
+  end
+
+  def initialize_templates(template_collection)
+    @template_collection = template_collection
+    @template_collection.add_common_field('nspace', @@namespace)
+
+    @template_collection.add_template(:inst_wrapper_action,
+                                      "templates/instance_wrapper_generated_action_cpp.template")
+    @template_collection.add_template(:inst_wrapper_user_action,
+                                      "templates/instance_wrapper_user_action_cpp.template")
+    @template_collection.add_template(:client_stub_action_ne,
+                                      "templates/client_stub_action_cpp_ne.template")
+    @template_collection.add_template(:client_stub_action,
+                                      "templates/client_stub_action_cpp.template")
+  end
+
+  def validate_params(request, response)
+    @request = @@message_list[request]
+    unless @request
+      @request = PbMessage.new(request)
+
+      msg = "WARNING: "
+      msg << "Namespace not set for request message \"#{@request.type}\" "
+      msg << "(action: #{@resource}.#{@name})"
+      puts msg
     end
 
-    # Create the input and output param lists
-    @in_params = RpcParameterList.new(@class_name, @name)
+    @response = @@message_list[response]
+    unless @response
+      @response = PbMessage.new(response)
 
-    @out_params = RpcParameterList.new(@class_name, @name)
-    @out_params.return_type(@return_type)
-    
-    fields.each do |field|
-      @in_params << field.dup
-      @out_params << field.dup if field.ref_type.eql? :ref
+      msg = "WARNING: "
+      msg << "Namespace not set for response message \"#{@response.type}\" "
+      msg << "(action: #{@resource}.#{@name})"
+      puts msg
     end
+  end
+
+  def fill_template(name, fields)
+    @template_collection.add_common_field('action_name', @name)
+    @template_collection.add_common_field('wrapped_class', @resource)
+    @template_collection.add_common_field('return_type', @return_type)
+    @template_collection.add_common_field('in_message', @request.declaration)
+    @template_collection.add_common_field('in_param', @request.declaration(:format => :const_reference))
+    @template_collection.add_common_field('out_message', @response.declaration)
+    @template_collection.add_common_field('out_param', @response.declaration(:format => :reference))
+
+    return @template_collection.fill_template(name, fields)
   end
 
   def param_list_names
-    [@in_params.name, @out_params.name]
+    [@request.name, @response.name]
   end
 
   def to_wrapper_action_decl
-    "#{@return_type} #{@name}(#{@in_params.declarations.join(', ')});"
+    params = []
+    params << @request.declaration(:format => :const_reference, :name => 'request', :nspace => true)
+    params << @response.declaration(:format => :reference, :name => 'response', :nspace => true)
+    params << "liber::rpc::RpcException& e"
+    decl = "void #{@name}("
+    decl << params.join(', ')
+    decl << ");"
+    return decl
   end
 
-  def to_wrapper_action_def(inherited)
+  def to_wrapper_action_def (inherited)
     action_fields = Hash.new
-    action_fields['ACTION_NAME'] = @name
-    action_fields['RETURN_TYPE'] = @return_type
 
-    action_fields['PARAM_DECLS'] = Array.new
-    @in_params.fields.each do |field|
-      action_fields['PARAM_DECLS'] << "#{field.declaration(:type => :value, :init => true)};"
-    end
-
-    action_fields['GET_IN_PARAMS'] = @in_params.names.join(', ')
-    action_fields['ACTION_STRUCT_IN'] = @in_params.name
-
-    action_fields['SET_OUT_PARAMS'] = []
-    if @out_params.names.count > 0
-      action_fields['SET_OUT_PARAMS'] << @out_params.names.join(', ')
-    end
-
-    action_fields['ACTION_STRUCT_OUT'] = @out_params.name
-
-    action_fields['GET_IN_PARAM_LIST'] = @in_params.declarations.join(', ')
+#    action_fields['in_param_getters'] = []
+#    @request.fields.each do |field|
+#      action_fields['in_param_getters'] << "lInMessage.#{field.gpb_getter}"
+#    end
+#    if action_fields['in_param_getters'].empty?
+#      action_fields['in_param_getters'] = ''
+#    else
+#      action_fields['in_param_getters'] = action_fields['in_param_getters'].join ', '
+#    end
 
     fields = inherited.merge(action_fields)
-    @@templates[:inst_wrapper_action].build(fields)
+    fill_template(:inst_wrapper_action, fields)
   end
 
-  def to_wrapper_user_action_def(inherited)
+  def to_wrapper_user_action_def (inherited)
     action_fields = {}
-    action_fields['ACTION_NAME'] = @name
-    action_fields['RETURN_TYPE'] = @return_type
-    action_fields['GET_IN_PARAM_LIST'] = @in_params.declarations.join(', ')
+#    action_fields['in_param_list'] = @request.declarations.join(', ')
     fields = inherited.merge(action_fields)
-    @@templates[:inst_wrapper_user_action].build(fields)
+    fill_template(:inst_wrapper_user_action, fields)
   end
 
   def to_client_stub_action
-    return_type = "bool"
-    return_type = @return_type if @allow_exceptions
+#    return_type = "bool"
+#    return_type = @return_type if @allow_exceptions
 
-    param_list = @in_params.declarations
-    param_list << "#{@return_type}& result" if not @allow_exceptions
+    #param_list = @request.declarations
+    #param_list << "#{@return_type}& result" if not @allow_exceptions
 
-    decl = "#{return_type} #{@name}(#{param_list.join(', ')})"
-    decl = "#{decl} throw (RpcError)" if @allow_exceptions
+    #decl = "#{return_type} #{@name}(#{param_list.join(', ')})"
+    params = []
+    params << @request.declaration(:format => :const_reference, :name => 'request', :nspace => true)
+    params << @response.declaration(:format => :reference, :name => 'response', :nspace => true)
+    decl = "#{@name}(#{params.join(', ')})"
+    decl << " throw (liber::rpc::RpcException)" if @allow_exceptions
     "#{decl};"
   end
 
-  def to_client_stub_action_def(inherited)
+  def to_client_stub_action_def (inherited)
     action_fields = Hash.new
 
-    param_list = @in_params.declarations
-    #param_list << "#{@return_type}& result" if not @allow_exceptions
-    action_fields['PARAMS'] = param_list.join(', ')
-    action_fields['RETURN_TYPE'] = @return_type
+#    action_fields['in_param_setters'] = []
+#    @request.fields.each do |field|
+#      action_fields['in_param_setters'] << "lInMessage.#{field.gpb_setter}"
+#    end
+#    if action_fields['in_param_setters'].empty?
+#      action_fields['in_param_setters'] = ''
+#    end
 
-    action_fields['IN_PARAMS'] = ''
-    if @in_params.names.count > 0
-      action_fields['IN_PARAMS'] = "#{@in_params.names.join(', ')}"
-    end
-
-    action_fields['OUT_PARAMS'] = []
-    if @out_params.names.count > 0
-      action_fields['OUT_PARAMS'] << "#{@out_params.names.join(',')}"
-    end
-
-    action_fields['ACTION'] = @name
-    action_fields['ACTION_PARAM_LIST_IN'] = @in_params.name
-    action_fields['ACTION_PARAM_LIST_OUT'] = @out_params.name
     fields = action_fields.merge(inherited)
 
     lines = []
     if @allow_exceptions
-      lines = @@templates[:client_stub_action].build(fields)
+      lines = fill_template(:client_stub_action, fields)
     else
-      lines = @@templates[:client_stub_action_ne].build(fields)
+      lines = fill_template(:client_stub_action_ne, fields)
     end
+
     lines
   end
 
-  def to_action_param_list_decl
-    [@in_params.declaration, @out_params.declaration]
-  end
-
-  def to_action_param_list_def
-    [@in_params.definition, @out_params.definition]
-  end
+#  def messages
+#    [@request.to_gpb_message, @response.to_gpb_message]
+#  end
 end
 

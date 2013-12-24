@@ -1,0 +1,37 @@
+package rpc_getting_started;
+
+
+message Parameters {
+
+  repeated int32 values = 1;
+}
+
+message Result {
+
+  optional int32 op_count = 1;
+  optional int32 result   = 2;
+}
+
+message UserName {
+
+  optional string first = 1;
+  optional string last  = 2;
+}
+
+message UserAttributes {
+
+  optional UserName name      = 1;
+  optional sint32   age       = 2;
+  optional string   eye_color = 3;
+}
+
+message UserAttributesList {
+
+  repeated UserAttributes users = 1;
+}
+
+message DbStatus {
+
+  optional bool success = 1;
+}
+

@@ -1,24 +1,9 @@
 //------------------------------------------------------------------------------
-<%RETURN_TYPE%> <%WRAPPED_CLASS%>ClientStub::<%ACTION%>(<%PARAMS%>) throw (RpcError)
+void <%wrapped_class%>ClientStub::<%action_name%>(<%in_param%> request, <%out_param%> response) throw (RpcException)
 {
-<%tab%><%ACTION_PARAM_LIST_IN%> lInParams;
-<%tab%>Structure lOutStructure;
-<%tab%><%RETURN_TYPE%> lReturnValue;
-
-<%tab%>// Marshall the parameters.
-<%tab%>lInParams.marshall(<%IN_PARAMS%>);
-
-<%tab%>if (call("<%ACTION%>", lInParams.getParameters(), lOutStructure))
-<%tab%>{
-<%tab%><%tab%><%ACTION_PARAM_LIST_OUT%> lOutParams(lOutStructure);
-<%tab%><%tab%>lOutParams.unmarshall(<%OUT_PARAMS%>);
-<%tab%><%tab%>lOutParams.getReturnValue(lReturnValue);
-<%tab%>}
-<%tab%>else
+<%tab%>if (!call("<%action_name%>", request, response))
 <%tab%>{
 <%tab%><%tab%>throw getLastError();
 <%tab%>}
-
-<%tab%>return lReturnValue;
 }
 

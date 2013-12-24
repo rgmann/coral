@@ -1,0 +1,136 @@
+#include "<%wrapped_class%>ServerStub.h"
+
+using namespace liber::rpc;
+
+struct <%wrapped_class%>HookCb {
+<%tab%><%wrapped_class%>ServerStub::<%wrapped_class%>Hook pFunc;
+<%tab%>void* pUserData;
+};
+
+//-----------------------------------------------------------------------------
+<%wrapped_class%>ServerStub::<%wrapped_class%>ServerStub()
+: RpcServerResource("<%wrapped_class%>")
+,  mpCreateHook(NULL)
+,  mpDestroyHook(NULL)
+{
+<%tab%>mpCreateHook = new <%wrapped_class%>HookCb;
+<%tab%>mpCreateHook->pFunc = NULL;
+<%tab%>mpCreateHook->pUserData = NULL;
+
+<%tab%>mpDestroyHook = new <%wrapped_class%>HookCb;
+<%tab%>mpDestroyHook->pFunc = NULL;
+<%tab%>mpDestroyHook->pUserData = NULL;
+}
+
+//-----------------------------------------------------------------------------
+<%wrapped_class%>ServerStub::~<%wrapped_class%>ServerStub()
+{
+<%tab%>if (mpCreateHook)
+<%tab%>{
+<%tab%><%tab%>delete mpCreateHook;
+<%tab%><%tab%>mpCreateHook = NULL;
+<%tab%>}
+
+<%tab%>if (mpDestroyHook)
+<%tab%>{
+<%tab%><%tab%>delete mpDestroyHook;
+<%tab%><%tab%>mpDestroyHook = NULL;
+<%tab%>}
+}
+
+//-----------------------------------------------------------------------------
+void <%wrapped_class%>ServerStub::registerActions()
+{
+<%tab%>addAction(<%actions%>);
+}
+
+//-----------------------------------------------------------------------------
+bool <%wrapped_class%>ServerStub::
+registerCtorHook(<%wrapped_class%>Hook pFunc, void* pUserData)
+{
+   bool lbSuccess = mHookMutex.lock(RpcServerResource::HookRegTimeoutMs);
+
+   if (lbSuccess)
+   {
+      if (mpCreateHook)
+      {
+         mpCreateHook->pFunc = pFunc;
+         mpCreateHook->pUserData = pUserData;
+      }
+
+      mHookMutex.unlock();
+   }
+
+   return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
+bool <%wrapped_class%>ServerStub::
+registerDtorHook(<%wrapped_class%>Hook pFunc, void* pUserData)
+{
+   bool lbSuccess = mHookMutex.lock(RpcServerResource::HookRegTimeoutMs);
+
+   if (lbSuccess)
+   {
+      if (mpDestroyHook)
+      {
+         mpDestroyHook->pFunc = pFunc;
+         mpDestroyHook->pUserData = pUserData;
+      }
+
+      mHookMutex.unlock();
+   }
+
+   return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
+InstanceWrapper* <%wrapped_class%>ServerStub::createInstance()
+{
+<%tab%>return new <%wrapped_class%>Wrapper();
+}
+
+//-----------------------------------------------------------------------------
+bool <%wrapped_class%>ServerStub::tugCtorHook(InstanceWrapper* pInst)
+{
+<%tab%>bool lbSuccess = mHookMutex.lock(RpcServerResource::HookRegTimeoutMs);
+
+<%tab%>if (lbSuccess)
+<%tab%>{
+<%tab%><%tab%>if (pInst && mpCreateHook && mpCreateHook->pFunc)
+<%tab%><%tab%>{
+<%tab%><%tab%><%tab%><%wrapped_class%>Wrapper* lpInst = dynamic_cast<<%wrapped_class%>Wrapper*>(pInst);
+<%tab%><%tab%><%tab%>if (lpInst)
+<%tab%><%tab%><%tab%>{
+<%tab%><%tab%><%tab%><%tab%>mpCreateHook->pFunc(lpInst, mpCreateHook->pUserData);
+<%tab%><%tab%><%tab%>}
+<%tab%><%tab%>}
+
+<%tab%><%tab%>mHookMutex.unlock();
+<%tab%>}
+
+<%tab%>return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
+bool <%wrapped_class%>ServerStub::tugDtorHook(InstanceWrapper* pInst)
+{
+<%tab%>bool lbSuccess = mHookMutex.lock(RpcServerResource::HookRegTimeoutMs);
+
+<%tab%>if (lbSuccess)
+<%tab%>{
+<%tab%><%tab%>if (pInst && mpDestroyHook && mpDestroyHook->pFunc)
+<%tab%><%tab%>{
+<%tab%><%tab%><%tab%><%wrapped_class%>Wrapper* lpInst = dynamic_cast<<%wrapped_class%>Wrapper*>(pInst);
+<%tab%><%tab%><%tab%>if (lpInst)
+<%tab%><%tab%><%tab%>{
+<%tab%><%tab%><%tab%><%tab%>mpDestroyHook->pFunc(lpInst, mpDestroyHook->pUserData);
+<%tab%><%tab%><%tab%>}
+<%tab%><%tab%>}
+
+<%tab%><%tab%>mHookMutex.unlock();
+<%tab%>}
+
+<%tab%>return lbSuccess;
+}
+

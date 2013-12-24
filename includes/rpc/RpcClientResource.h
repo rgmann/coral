@@ -3,11 +3,14 @@
 
 #include <string>
 #include "RpcObject.h"
-#include "RpcError.h"
+#include "RpcException.h"
 #include "RpcClient.h"
+#include "Md5Hash.h"
 
-class RpcClientResource
-{
+namespace liber {
+namespace rpc {
+
+class RpcClientResource {
 public:
 
    RpcClientResource(RpcClient &client, const std::string &classname);
@@ -15,34 +18,29 @@ public:
    
    enum { InvalidInstance = -1 };
    
-   RpcError getLastError();
+   RpcException getLastError();
 
 protected:
    
-   static const Structure EmptyParamList;
-   
    void setCallTimeout(ui32 nTimeoutMs);
    
-   bool construct(const Structure &paramList = EmptyParamList);
+   bool construct(const PbMessage* pParams = NULL);
    
-   bool destroy(const Structure &paramList = EmptyParamList);
-   
-   bool call(const std::string &methodName,
-             Structure         &returnValue);
+   bool destroy(const PbMessage* pParams = NULL);
    
    bool call(const std::string &methodName,
-             const Structure   &paramList,
-             Structure         &returnValue);
+             const PbMessage   &paramList,
+             PbMessage         &returnValue);
 
-   void marshall(RpcObject         &object, 
-                 const std::string &methodName, 
-                 const Structure   &paramList);
+   void marshall(RpcObject&         object, 
+                 const std::string& methodName, 
+                 const PbMessage*   pParamList);
    
 private:
    
-   bool invoke(const RpcObject &object,
-               RpcObject       &result,
-               ui32            nTimeoutMs = 3000);
+   bool invoke(const RpcObject& object,
+               RpcObject&       result,
+               ui32             nTimeoutMs = 3000);
 
 protected:
 
@@ -50,9 +48,11 @@ protected:
    
    std::string mClassname;
    
-   int mnInstanceId;
+   Md5Hash mUiid;
 
-   RpcError mLastError;
+   RpcException mLastError;
 };
+
+}}
 
 #endif // RPC_CLIENT_RESOURCE_H

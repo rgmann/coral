@@ -5,38 +5,32 @@
 #include <string>
 #include "RpcPacket.h"
 #include "RpcServerResource.h"
+#include "PacketSubscriber.h"
 
-class RpcServer
-{
+namespace liber {
+namespace rpc {
+
+class RpcServer : public liber::netapp::PacketSubscriber {
 public:
 
-   RpcServer();
+  RpcServer();
 
-   bool registerResource(RpcServerResource* pResource);
+  bool registerResource(RpcServerResource* pResource);
 
-   static bool IsRpcCommand(const GenericPacket *pPacket);
-
-   bool processPacket(const RpcPacket* pPacket);
-   
-   bool popPacket(RpcPacket** pPacket);
-
-   //bool pushCommand(const RpcCommand* pCmd);
-
-   //void setAckQueue(Queue<GenericPacket*>* pQueue);
+  bool processPacket(const RpcPacket* pPacket);
+  bool put(const char* pData, ui32 nLength);
 
 private:
 
-   RpcServerResource* getResource(const RpcObject &object);
+  RpcServerResource* getResource(const RpcObject &object);
 
-   //bool invoke(RpcObject &object);
-   void sendObject(const RpcObject &object);
+  void sendObject(const RpcObject &object);
 
 private:
 
-   std::map<std::string, RpcServerResource*> mResourceMap;
-
-   //Queue<RpcCommand*>      mCmdQueue;
-   Queue<RpcPacket*>   mResponseQueue;
+  std::map<std::string, RpcServerResource*> mResourceMap;
 };
+
+}}
 
 #endif // RPC_SERVER_H

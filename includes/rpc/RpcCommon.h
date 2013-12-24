@@ -2,8 +2,13 @@
 #define RPC_COMMON_H
 
 #include <string>
+#include "BaseTypes.h"
+#include "CryptoHashTypes.h"
 
-enum RpcException
+namespace liber {
+namespace rpc {
+
+enum RpcErrorId
 {
    NoException = 0,
    
@@ -12,9 +17,9 @@ enum RpcException
 
    // Server Exceptions
    InvalidClassname,
-   MissingInstanceId,
-   InstIdAssignmentErr,
-   InvalidInstanceId,
+   MissingUIID,
+   UIIDAssignmentErr,
+   InvalidUIID,
    MissingParameters,
 
    // Instance ID was found byte the pointer is NULL
@@ -22,15 +27,16 @@ enum RpcException
    UnknownMethod
 };
 
-inline std::string ToRpcExceptionString(RpcException exception)
+inline std::string ToRpcErrorString(RpcErrorId error)
 {
    std::string lsException;
    
-   switch (exception) {
+   switch (error) {
       case NoException: lsException = "NoException"; break;
       case InvalidClassname: lsException = "InvalidClassname"; break;
-      case MissingInstanceId: lsException = "MissingInstanceId"; break;
-      case InvalidInstanceId: lsException = "InvalidInstanceId"; break;
+      case MissingUIID: lsException = "MissingUIID"; break;
+      case UIIDAssignmentErr: lsException = "UIIDAssignmentErr"; break;
+      case InvalidUIID: lsException = "InvalidUIID"; break;
       case MissingParameters: lsException = "MissingParameters"; break;
       case NullInstance: lsException = "NullInstance"; break;
       case UnknownMethod: lsException = "UnknownMethod"; break;
@@ -40,6 +46,14 @@ inline std::string ToRpcExceptionString(RpcException exception)
    return lsException;
 };
 
-static const std::string RpcReturnValue("retval");
+
+struct RpcCallInfo {
+   std::string resource;
+   std::string action;
+   Hash128     uiid; // Unique Instance ID
+   i64         rpcId;
+};
+
+}}
 
 #endif // RPC_COMMON_H

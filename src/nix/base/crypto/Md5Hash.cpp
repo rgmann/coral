@@ -33,6 +33,19 @@ void PrintSegMd5(unsigned char* pBlock, int nBytes)
 }
 
 //------------------------------------------------------------------------------
+Md5Hash::Md5Hash() : CryptoHash()
+{
+   memset(m_Hash.b, 0, sizeof(Hash128));
+}
+
+//------------------------------------------------------------------------------
+Md5Hash::Md5Hash(const Hash128& hash)
+{
+   memcpy(m_Hash.b, hash.b, sizeof(Hash128));
+   setValid();
+}
+
+//------------------------------------------------------------------------------
 bool Md5Hash::hashify(unsigned char *pData, unsigned int nBlockSizeBytes)
 {
    compute(pData, nBlockSizeBytes);
@@ -48,10 +61,9 @@ bool Md5Hash::get(Hash128* pHash)
    if (isValid())
    {
       memcpy(pHash, &m_Hash, sizeof(Hash128));
-      return true;
    }
    
-   return false;
+   return isValid();
 }
 
 //------------------------------------------------------------------------------
@@ -69,6 +81,36 @@ Md5Hash& Md5Hash::operator=(const Md5Hash &rhs)
    }
    
    return *this;  // Return a reference to myself.
+}
+
+//------------------------------------------------------------------------------
+bool Md5Hash::operator == (const Md5Hash& other) const
+{
+   return (memcmp(m_Hash.b, other.m_Hash.b, sizeof(Hash128)) == 0);
+}
+
+//------------------------------------------------------------------------------
+bool Md5Hash::operator < (const Md5Hash& other) const
+{
+   return (memcmp(m_Hash.b, other.m_Hash.b, sizeof(Hash128)) < 0);
+}
+
+//------------------------------------------------------------------------------
+bool Md5Hash::operator <= (const Md5Hash& other) const
+{
+   return (*this == other) || (*this < other);
+}
+
+//------------------------------------------------------------------------------
+bool Md5Hash::operator > (const Md5Hash& other) const
+{
+   return (memcmp(m_Hash.b, other.m_Hash.b, sizeof(Hash128)) > 0);
+}
+
+//------------------------------------------------------------------------------
+bool Md5Hash::operator >= (const Md5Hash& other) const
+{
+   return (*this == other) || (*this > other);
 }
 
 //------------------------------------------------------------------------------

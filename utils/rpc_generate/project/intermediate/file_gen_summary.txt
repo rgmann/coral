@@ -1,0 +1,14 @@
+project/server/rpc_include/CalculatorWrapper.h
+project/server/rpc_include/CalculatorServerStub.h
+project/client/rpc_include/CalculatorClientStub.h
+project/server/rpc_include/DatabaseWrapper.h
+project/server/rpc_include/DatabaseServerStub.h
+project/client/rpc_include/DatabaseClientStub.h
+project/server/rpc_source/CalculatorWrapper.cpp
+project/server/rpc_source/user.CalculatorWrapper.cpp
+project/client/rpc_source/CalculatorClientStub.cpp
+project/server/rpc_source/CalculatorServerStub.cpp
+project/server/rpc_source/DatabaseWrapper.cpp
+project/server/rpc_source/user.DatabaseWrapper.cpp
+project/client/rpc_source/DatabaseClientStub.cpp
+project/server/rpc_source/DatabaseServerStub.cpp

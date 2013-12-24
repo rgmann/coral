@@ -1,6 +1,7 @@
 #include <iostream>
 #include "RpcMarshalledCall.h"
-#include "JsonTransportObject.h"
+
+using namespace liber::rpc;
 
 i64 RpcMarshalledCall::ourCurrentRpcId = 0;
 
@@ -9,14 +10,13 @@ RpcMarshalledCall::RpcMarshalledCall(const RpcObject &object)
 : mbIsDisposed(false)
 {
    mParamObj = object;
-   mParamObj.setRpcId(++ourCurrentRpcId);
+   mParamObj.callInfo().rpcId = ++ourCurrentRpcId;
 }
 
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::getRpcPacket(RpcPacket** pPacket) const
 {
-   JsonTransportObject lTransportObject(mParamObj);
-   *pPacket = new RpcPacket(lTransportObject);
+   *pPacket = new RpcPacket(mParamObj);
 }
 
 //-----------------------------------------------------------------------------
@@ -28,7 +28,7 @@ void RpcMarshalledCall::getResult(RpcObject &result)
 //-----------------------------------------------------------------------------
 i64 RpcMarshalledCall::getRpcId() const
 {
-   return mParamObj.getRpcId();
+   return mParamObj.callInfo().rpcId;
 }
 
 //-----------------------------------------------------------------------------

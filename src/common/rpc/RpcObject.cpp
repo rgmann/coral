@@ -1,26 +1,23 @@
+#include <string>
+#include <iostream>
+#include <sstream>
+#include "PacketHelper.h"
 #include "RpcObject.h"
 
-static const std::string ClassNameField("class");
-static const std::string MethodNameField("method");
-static const std::string InstIdField("iid");
-static const std::string RpcIdFieldName("rpcid");
-static const std::string ExceptionFieldName("eid");
-static const std::string RetvalNameField("retval");
-static const std::string ParameterField("params");
+using namespace liber::rpc;
+using namespace packethelper;
 
 //-----------------------------------------------------------------------------
 RpcObject::RpcObject()
-:  Structure("rpcobject")
 {
 }
 
 //-----------------------------------------------------------------------------
-RpcObject::RpcObject(const std::string &className, 
-                     const std::string &methodName)
-:  Structure("rpcobject")
+RpcObject::RpcObject(const std::string &resourceName, 
+                     const std::string &actionName)
 {
-   setClass(className);
-   setMethod(methodName);
+   mCallInfo.resource = resourceName;
+   mCallInfo.action = actionName;
 }
 
 //-----------------------------------------------------------------------------
@@ -29,135 +26,48 @@ RpcObject::~RpcObject()
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::setClass(const std::string &className)
-{
-   set(ClassNameField, className);
-}
-
-//-----------------------------------------------------------------------------
-std::string RpcObject::getClass() const
-{
-   std::string lClassname = "";
-   get(ClassNameField, lClassname);
-   return lClassname;
-}
-
-//-----------------------------------------------------------------------------
-void RpcObject::setMethod(const std::string &methodName)
-{
-   set(MethodNameField, methodName);
-}
-
-//-----------------------------------------------------------------------------
-std::string RpcObject::getMethod() const
-{
-   std::string lMethodname = "";
-   get(MethodNameField, lMethodname);
-   return lMethodname;
-}
-
-//-----------------------------------------------------------------------------
-bool RpcObject::methodEquals(const std::string &methodName) const
-{
-   return (getMethod().compare(methodName) == 0);
-}
-
-//-----------------------------------------------------------------------------
-void RpcObject::setInstanceId(int nId)
-{
-   set(InstIdField, (i32)nId);
-}
-
-//-----------------------------------------------------------------------------
-int RpcObject::getInstanceId() const
-{
-   i32 lInstanceId = -1;
-   
-   if (hasField(InstIdField))
-   {
-      get(InstIdField, lInstanceId);
-   }
-   
-   return (int)lInstanceId;
-}
-
-//-----------------------------------------------------------------------------
 bool RpcObject::isValid() const
 {
-   return hasField(ClassNameField) && hasField(MethodNameField);
+   return !mCallInfo.resource.empty() && !mCallInfo.action.empty();
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::setRpcId(i64 rpcId)
+RpcCallInfo& RpcObject::callInfo()
 {
-   set(RpcIdFieldName, rpcId);
+   return mCallInfo;
+}
+const RpcCallInfo& RpcObject::callInfo() const
+{
+   return mCallInfo;
+}
+RpcException& RpcObject::exception()
+{
+   mException.mCallInfo = callInfo();
+   return mException;
 }
 
 //-----------------------------------------------------------------------------
-i64 RpcObject::getRpcId() const
+void RpcObject::setParams(const PbMessage& message)
 {
-   i64 lRpcId = -1;
-   
-   if (hasField(RpcIdFieldName))
-   {
-      get(RpcIdFieldName, lRpcId);
-   }
-   
-   return lRpcId;
+   message.SerializeToString(&mMessage);
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::
-setException(RpcException exception, const std::string& message)
+void RpcObject::setParams(const std::string& message)
 {
-   RpcError lError;
-
-   lError.exceptionId = exception;
-   lError.message     = message;
-
-   setError(lError);
+   mMessage.assign(message.data(), message.size());
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::setError(RpcError& error)
+void RpcObject::getParams(PbMessage& message) const
 {
-   error.resourceName = getClass();
-   error.actionName   = getMethod();
-   error.instanceId   = getInstanceId();
-   error.rpcId        = getRpcId();
-   set(ExceptionFieldName, error.toStructure());
+   message.ParseFromString(mMessage);
 }
 
 //-----------------------------------------------------------------------------
-RpcException RpcObject::getException() const
+void RpcObject::getParams(std::string& message) const
 {
-   return getError().exceptionId;
-}
-
-//-----------------------------------------------------------------------------
-RpcError RpcObject::getError() const
-{
-   RpcError lError;
-   Structure lErrorStruct;
-
-   if (get(ExceptionFieldName, lErrorStruct))
-   {
-      lError.fromStructure(lErrorStruct);
-   }
-
-   return lError;
-}
-
-//-----------------------------------------------------------------------------
-void RpcObject::setParams(const Structure &value)
-{
-   set(ParameterField, value);
-}
-
-//-----------------------------------------------------------------------------
-bool RpcObject::getParams(Structure &value) const
-{
-   return get(ParameterField, value);
+   message.assign(mMessage.data(), mMessage.size());
 }
 
 //-----------------------------------------------------------------------------
@@ -165,27 +75,100 @@ bool RpcObject::getResponse(RpcObject &response) const
 {
    if (!isValid()) return false;
    
-   response.setClass(getClass());
-   response.setMethod(getMethod());
-   response.setRpcId(getRpcId());
-   response.setInstanceId(getInstanceId());
-   
+   response.mCallInfo = mCallInfo;
+   response.mException = mException;
    return true;
 }
 
 //-----------------------------------------------------------------------------
 bool RpcObject::getResponse(RpcObject &response,
-                            const Structure &value) const
+                            const PbMessage& message) const
 {
    if (!getResponse(response)) return false;
-   response.setParams(value);
+   response.setParams(message);
    return true;
 }
 
 //-----------------------------------------------------------------------------
-bool RpcObject::getResponse(RpcObject &response, RpcError& error) const
+bool RpcObject::getResponse(RpcObject &response,
+                            const std::string& message) const
 {
    if (!getResponse(response)) return false;
-   response.setError(error);
+   response.setParams(message);
    return true;
 }
+
+//-----------------------------------------------------------------------------
+std::string RpcObject::serialize() const
+{
+   PacketCtor lPacket(packethelper::NetworkByteOrder);
+
+   lPacket.writeCString(callInfo().resource);
+   lPacket.writeCString(callInfo().action);
+
+   std::string lUiidData;
+   lUiidData.assign((char*)callInfo().uiid.b, sizeof(Hash128));
+   lPacket.write(lUiidData);
+   lPacket.write((ui64)callInfo().rpcId);
+
+   std::string lError = mException.serialize();
+   lPacket.write(lError);
+
+   lPacket.write(mMessage);
+
+   return lPacket.stream.str();
+}
+
+//-----------------------------------------------------------------------------
+bool RpcObject::deserialize(const std::string &data)
+{
+   PacketDtor lPacket(packethelper::NetworkByteOrder);
+   lPacket.setData(data);
+
+   // Read the resource name
+   if (lPacket.readCString(callInfo().resource) == PacketDtor::ReadFail)
+   {
+      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      return false;
+   }
+
+   // Read the action name.
+   if (lPacket.readCString(callInfo().action) == PacketDtor::ReadFail)
+   {
+      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      return false;
+   }
+
+   std::string lUiidData;
+   if (lPacket.read(lUiidData) != PacketDtor::ReadOk)
+   {
+      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      return false;
+   }
+   memcpy(callInfo().uiid.b, lUiidData.data(), lUiidData.size());
+
+   if (!lPacket.read(callInfo().rpcId))
+   {
+      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      return false;
+   }
+
+   // Read the exception.
+   std::string lException;
+   if (lPacket.read(lException) == PacketDtor::ReadFail)
+   {
+      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      return false;
+   }
+   exception().deserialize(lException);
+
+   // Read the protobuf message.
+   if (lPacket.read(mMessage) == PacketDtor::ReadFail)
+   {
+      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      return false;
+   }
+
+   return true;
+}
+

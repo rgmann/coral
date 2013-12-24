@@ -2,10 +2,12 @@
 #define RPC_PACKET_H
 
 #include "GenericPacket.h"
-#include "Structure.h"
+#include "RpcObject.h"
 
-class RpcPacket : public GenericPacket
-{
+namespace liber {
+namespace rpc {
+
+class RpcPacket : public liber::netapp::GenericPacket {
 public:
 
    enum Type
@@ -13,7 +15,7 @@ public:
       // TODO: add types
    };
 
-   static const ui32 RpcMarkerSize = 6;
+   static const ui32 RpcMarkerSize = 7;
    struct __attribute ((__packed__)) Data
    {
       char marker[RpcMarkerSize];
@@ -25,23 +27,27 @@ public:
 
    RpcPacket();
    
-   RpcPacket(const TransportObject &object, 
-             TransportObject::Encoding encoding = TransportObject::Base64);
+   RpcPacket(const RpcObject &object); 
    
-   bool  getObject(TransportObject &object) const;
+   bool  getObject(RpcObject &object) const;
 
    bool  unpack(const void* pPkt, ui32 nSizeBytes);
    
    Data* const data() const;
 
-private:
+//  virtual void*        dataPtr();
+//  virtual void* const  dataPtr() const;
+
+//private:
    
-   ui32  dataSize() const;
+//   ui32  dataSize() const;
    
 private:
 
-   typedef GenericPacket inherited;
+   typedef liber::netapp::GenericPacket inherited;
 
 };
+
+}}
 
 #endif // RPC_PACKET_H

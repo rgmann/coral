@@ -9,7 +9,7 @@ CPP =	../../src/nix/$(LIBDIR)/*.cpp \
 	../../src/nix/$(LIBDIR)/crypto/*.cpp \
 	../../src/nix/$(LIBDIR)/concurrency/*.cpp \
 	../../src/nix/$(LIBDIR)/time/*.cpp \
-	../../src/common/$(LIBDIR)/concurrency/*.cpp \
+	../../src/nix/$(LIBDIR)/net/*.cpp \
 	../../src/common/$(LIBDIR)/container/*.cpp \
 	../../src/common/$(LIBDIR)/logging/*.cpp \
 	../../src/common/$(LIBDIR)/file_system/*.cpp
@@ -22,6 +22,7 @@ INC =	-I../../includes/$(LIBDIR) \
 	-I../../includes/$(LIBDIR)/concurrency \
 	-I../../includes/$(LIBDIR)/time \
 	-I../../includes/$(LIBDIR)/logging \
+	-I../../includes/$(LIBDIR)/net
 
 all:
 	$(CC) $(FLAG) $(CPP) $(INC)

@@ -1,27 +1,29 @@
-#ifndef <%COMP_GUARD%>_WRAPPER_H
-#define <%COMP_GUARD%>_WRAPPER_H
+#ifndef <%comp_guard%>_WRAPPER_H
+#define <%comp_guard%>_WRAPPER_H
 
 #include "InstanceWrapper.h"
-#include "<%WRAPPED_CLASS%>.h"
+#include "<%nspace%>.pb.h"
 
-class <%WRAPPED_CLASS%>Wrapper : public InstanceWrapper {
+class <%wrapped_class%>Wrapper : public liber::rpc::InstanceWrapper {
 public:
 
-<%tab%><%WRAPPED_CLASS%>Wrapper();
-<%tab%>~<%WRAPPED_CLASS%>Wrapper();
+<%tab%><%wrapped_class%>Wrapper();
+<%tab%>~<%wrapped_class%>Wrapper();
 
-<%tab%>bool initialize(const Structure& params);
-<%tab%>bool destroy(const Structure& params);
+<%tab%>bool initialize(const std::string& params);
+<%tab%>bool destroy(const std::string& params);
 
-<%tab%>static RpcException <%ACTIONS%>Delegate(InstanceWrapper *pInst, const Structure& input, Structure& output);
+<%tab%>static void <%delegates%>Delegate(InstanceWrapper *pInst, const std::string& input, std::string& output, liber::rpc::RpcException&);
 
-private:
-
-<%tab%><%ACTION_WRAPPERS%>
 
 private:
 
-<%tab%><%WRAPPED_CLASS%>* mpInst;
+<%tab%><%actions%>
+
+
+private:
+
+<%tab%>// TODO: Add additional instance variables here.
 };
 
-#endif // <%COMP_GUARD%>_WRAPPER_H
+#endif // <%comp_guard%>_WRAPPER_H

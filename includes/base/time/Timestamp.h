@@ -11,6 +11,8 @@ public:
    Timestamp();
    
    ~Timestamp();
+
+   static Timestamp Now();
    
    void  sample();
    
