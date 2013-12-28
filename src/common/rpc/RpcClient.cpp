@@ -38,7 +38,8 @@ RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
   if (mRpcMap.count(lpCall->getRpcId()) == 0)
   {
     mRpcMutex.lock();
-    mRpcMap[lpCall->getRpcId()] = lpCall;
+    //mRpcMap[lpCall->getRpcId()] = lpCall;
+    mRpcMap.insert(std::make_pair(lpCall->getRpcId(), lpCall));
     mRpcMutex.unlock();
       
     RpcPacket* lpPacket = NULL;
@@ -59,26 +60,38 @@ bool RpcClient::put(const char* pData, ui32 nLength)
 
   lpPacket->unpack(pData, nLength);
 
-  if (lpPacket->getObject(lRxObject))
+  if (lpPacket->unpack(pData, nLength))
   {
-    RpcMarshalledCall* lpCall = NULL;
+    if (lpPacket->getObject(lRxObject))
+    {
+      RpcMarshalledCall* lpCall = NULL;
       
-    if (mRpcMap.count(lRxObject.callInfo().rpcId) > 0)
-    {
-      lpCall = mRpcMap[lRxObject.callInfo().rpcId];
-    }
+      if (mRpcMap.count(lRxObject.callInfo().rpcId) > 0)
+      {
+        //lpCall = mRpcMap[lRxObject.callInfo().rpcId];
+        lpCall = mRpcMap.find(lRxObject.callInfo().rpcId)->second;
+      }
 
-    if (lpCall)
-    {
-      lpCall->notify(lRxObject);
-      lbSuccess = true;
+      if (lpCall)
+      {
+        lpCall->notify(lRxObject);
+        lbSuccess = true;
+      }
+      else
+      {
+        std::cout << "Failed to find RPC with ID = " 
+                  << lRxObject.callInfo().rpcId 
+                  << std::endl;
+      }
     }
     else
     {
-      std::cout << "Failed to find RPC with ID = " 
-                << lRxObject.callInfo().rpcId 
-                << std::endl;
+      printf("RpcClient::put: Failed to get RpcObject\n");
     }
+  }
+  else
+  {
+    printf("RpcClient::put: Failed to unpack RpcPacket\n");
   }
 
   processCancellations();

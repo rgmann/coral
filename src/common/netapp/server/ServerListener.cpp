@@ -121,6 +121,7 @@ void  ServerListener::listenThread(ThreadArg* pArg)
     // distribution and load balancing thread.
     if (lpWorker)
     {
+      lpWorker->initialize();
       distributeWorker(lpWorker);
     }
       
@@ -134,12 +135,6 @@ void  ServerListener::listenThread(ThreadArg* pArg)
    
   printf("ServerListener::listenThread: Stopped!\n");
 }
-
-//------------------------------------------------------------------------------
-/*ServerWorker*  ServerListener::createWorker(TcpSocket* pSocket)
-{
-   return NULL;
-}*/
 
 //------------------------------------------------------------------------------
 bool ServerListener::distributeWorker(ServerWorker* pWorker)

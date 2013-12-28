@@ -19,13 +19,11 @@ public:
    
   virtual ~ServerWorker();
    
-  bool  initialize();
+  bool initialize();
+  void shutdown();
    
   liber::net::TcpSocket* socket();
   netapp::ServerPacketRouter& router();   
-//  bool  lockSocket(ui32 timeoutMs);
-   
-//  void  releaseSocket();
    
   ui32   elapseMsSinceRecv();
    
@@ -39,13 +37,10 @@ public:
 protected:
    
   void  sampleRecvTime();
-   
-  /*void  pushRx(liber::netapp::NetAppPacket*);
-  bool  popRx(liber::netapp::NetAppPacket**);
-   
-  void  pushTx(liber::netapp::NetAppPacket*);
-  bool  popTx(liber::netapp::NetAppPacket**);
-   */
+
+  virtual bool setup();
+  virtual void teardown();   
+
 protected:
    
   Mutex mSocketLock;

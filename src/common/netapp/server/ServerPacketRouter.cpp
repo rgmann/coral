@@ -10,59 +10,14 @@ using namespace liber::netapp;
 ServerPacketRouter::
 ServerPacketRouter(Queue<NetAppPacket*>* pInQueue,
                    Queue<NetAppPacket*>* pOutQueue)
-: mpInQueue(pInQueue)
-, mpOutQueue(pOutQueue)
+: PacketRouter(pOutQueue)
+, mpInQueue(pInQueue)
 {
 }
 
 //----------------------------------------------------------------------------
 ServerPacketRouter::~ServerPacketRouter()
 {
-}
-
-//-----------------------------------------------------------------------------
-bool ServerPacketRouter::addSubscriber(int               subscriberId,
-                                       PacketSubscriber* pSubscriber)
-{
-  bool lbSuccess = (mSubscriberTable.count(subscriberId) != 0);
-
-  lbSuccess &= (pSubscriber != NULL);
-  if (lbSuccess)
-  {
-    lbSuccess = mTableLock.lock();
-    if (lbSuccess)
-    {
-      pSubscriber->setId(subscriberId);
-      pSubscriber->setOutputQueue(mpOutQueue);
-      mSubscriberTable.insert(std::make_pair(subscriberId, pSubscriber));
-      lbSuccess = true;
-      mTableLock.unlock();
-    }
-  }
-
-  return lbSuccess;
-}
-
-//-----------------------------------------------------------------------------
-PacketSubscriber* ServerPacketRouter::removeSubscriber(int subscriberId)
-{
-  PacketSubscriber* lpSubscriber = NULL;
-  bool lbSuccess = (mSubscriberTable.count(subscriberId) != 0);
-
-  lbSuccess &= (lpSubscriber != NULL);
-  if (lbSuccess)
-  {
-    lbSuccess = mTableLock.lock();
-    if (lbSuccess)
-    {
-      lpSubscriber = mSubscriberTable.find(subscriberId)->second;
-      mSubscriberTable.erase(subscriberId);
-      lbSuccess = true;
-      mTableLock.unlock();
-    }
-  }
-
-  return lpSubscriber;
 }
 
 //-----------------------------------------------------------------------------
@@ -74,20 +29,18 @@ bool ServerPacketRouter::route(NetAppPacket* pPacket)
   if (pPacket)
   {
     int lSubscriberId = pPacket->data()->type;
-    lbSuccess = (mSubscriberTable.count(lSubscriberId) != 0);
+
+    lbSuccess = hasSubscriber(lSubscriberId);
     if (lbSuccess)
     {
-      lbSuccess = mTableLock.lock();
+      lpSubscriber = getSubscriber(lSubscriberId);
+      lbSuccess = (lpSubscriber != NULL);
+
       if (lbSuccess)
       {
-        lpSubscriber = mSubscriberTable.find(lSubscriberId)->second;
-        lbSuccess = (lpSubscriber != NULL);
-
-        if (lbSuccess)
-        {
-          lbSuccess = lpSubscriber->put((char*)pPacket->dataPtr(),
-                                        pPacket->data()->length);
-        }
+//        printf("ServerPacketRouter::route: id = %d, length = %u\n", lSubscriberId, pPacket->data()->length);
+        lbSuccess = lpSubscriber->put((char*)pPacket->dataPtr(),
+                                      pPacket->data()->length);
       }
     }
   }

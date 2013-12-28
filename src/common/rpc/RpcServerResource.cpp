@@ -36,7 +36,8 @@ bool RpcServerResource::unmarshall(RpcObject &input, RpcObject &output)
       exception(input, output, MissingParameters);
       return false;
    }
-   
+
+   printf("RpcServerResource::unmarshall: resource = %s, name = %s\n", mName.c_str(), input.callInfo().action.c_str());   
    if (input.callInfo().action == "construct")
    {
       lbSuccess = construct(input, output);

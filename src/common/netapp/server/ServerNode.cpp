@@ -17,23 +17,7 @@ ServerNode::ServerNode()
 //------------------------------------------------------------------------------
 ServerNode::~ServerNode()
 {
-  if (mpRxThread)
-  {
-    delete mpRxThread;
-    mpRxThread = NULL;
-  }
-
-  if (mpWorkerThread)
-  {
-    delete mpWorkerThread;
-    mpWorkerThread = NULL;
-  }
-
-  if (mpTxThread)
-  {
-    delete mpTxThread;
-    mpTxThread = NULL;
-  }
+  stop();
 }
 
 //------------------------------------------------------------------------------
@@ -99,18 +83,24 @@ bool  ServerNode::stop()
   {
     mpRxThread->stop();
     mpRxThread->join();
+    delete mpRxThread;
+    mpRxThread = NULL;
   }
    
   if (mpWorkerThread)
   {
     mpWorkerThread->stop();
     mpWorkerThread->join();
+    delete mpWorkerThread;
+    mpWorkerThread = NULL;
   }
-   
+
   if (mpTxThread)
   {
     mpTxThread->stop();
     mpTxThread->join();
+    delete mpTxThread;
+    mpTxThread = NULL;
   }
    
   cleanup();
@@ -131,10 +121,11 @@ void ServerNode::rxThreadFunc(ThreadArg* pArg)
 }
 
 //------------------------------------------------------------------------------
-bool ServerNode::recvPacket(ServerWorker* pWorker)
+SocketError ServerNode::recvPacket(ServerWorker* pWorker)
 {
-  bool  lbSuccess  = true;
-  ui32  lnBytesRecvd  = 0;
+//  bool  lbSuccess  = false;
+  //int   lnBytesRecvd  = 0;
+  SocketStatus lStatus;
 
   NetAppPacket::Data lPacketHeader;
    
@@ -143,75 +134,77 @@ bool ServerNode::recvPacket(ServerWorker* pWorker)
   // Each worker has a standard application specific header.  Each
   // packet should be preceded by a header and the header should
   // indicate the length of the following data.
-  lnBytesRecvd  = lpSocket->read((char*)&lPacketHeader, sizeof(lPacketHeader), 20);
-  if (lnBytesRecvd != sizeof(lPacketHeader))
-  {      
-    return false;
-  }
-   
-  // Pass the header to the worker so that it can parse the
-  // expected payload length.
-  NetAppPacket* lpPacket = new NetAppPacket();
-  lpPacket->allocate(lPacketHeader);
- 
-  if (lPacketHeader.length > 0)
+  lpSocket->read(lStatus, (char*)&lPacketHeader, sizeof(lPacketHeader), 20);
+
+  if ((lStatus.status == SocketOk) && (lStatus.byteCount == sizeof(lPacketHeader)))
   {
-    lnBytesRecvd = lpSocket->read((char*)lpPacket->dataPtr(), lPacketHeader.length, 0);
-      
-    if (lnBytesRecvd != lPacketHeader.length)
+    if (lPacketHeader.length > 0)
     {
-      lbSuccess = false;
+      // Pass the header to the worker so that it can parse the
+      // expected payload length.
+      NetAppPacket* lpPacket = new NetAppPacket();
+      if (lpPacket->allocate(lPacketHeader))
+      {
+        lpSocket->read(lStatus, (char*)lpPacket->dataPtr(),
+                       lPacketHeader.length, 20);
+    
+        if (lStatus.byteCount == lPacketHeader.length)
+        {
+          if (!pWorker->put(lpPacket))
+          {
+            delete lpPacket;
+          }
+        }
+      }
+      else
+      {
+        printf("ServerNode::recvPacket: Failed to allocate NetAppPacket!\n");
+      }
     }
   }
    
-  if (lbSuccess)
-  {
-    pWorker->put(lpPacket);
-  }
-
-  return lbSuccess;
+  return lStatus.status;
 }
 
 //------------------------------------------------------------------------------
 void ServerNode::rxThread(ThreadArg* pArg)
 {
-  bool           lbSuccess  = false;
   ServerWorker*  lpWorker   = NULL;
    
   printf("ServerNode::rxThread: Started!\n");
    
   while (!pArg->stopSignalled())
   {
-    if (!mRxQueue.pop(lpWorker, 500))
+    lpWorker = NULL;
+
+    if (mRxQueue.pop(lpWorker, 500))
     {
-      continue;
-    }
-      
-    // Get the worker's socket
-    if (lpWorker == NULL)
-    {
-      continue;
-    }
- 
-    lbSuccess = recvPacket(lpWorker);
-         
-    // Release the socket so that it can be used by the TX thread.
-    if (lbSuccess)
-    {
-      // Push the worker into the work queue
-      mWorkQueue.push(lpWorker, 500);
-    }
-    else
-    {
-      if (lpWorker->elapseMsSinceRecv() > mnTimeoutMs)
+      if (lpWorker)
       {
-        printf("ServerNode: Removing worker\n");
-        delete lpWorker;
-        lpWorker = NULL;
-      }
-      else
-      {
-        mRxQueue.push(lpWorker, 500);
+        // Release the socket so that it can be used by the TX thread.
+        SocketError lStatus = recvPacket(lpWorker);
+        if (lStatus == SocketOk)
+        {
+          // Push the worker into the work queue
+          mWorkQueue.push(lpWorker, 500);
+        }
+        else if (lStatus == SocketTimeout)
+        {
+          // Remove in active workers.  Workers are considered inactive if
+          // the client hasn't sent anything in a while
+          if (lpWorker->elapseMsSinceRecv() > mnTimeoutMs)
+          {
+            removeWorker(lpWorker);
+          }
+          else
+          {
+            mRxQueue.push(lpWorker, 500);
+          }
+        }
+        else
+        {
+          removeWorker(lpWorker);
+        }
       }
     }
   }
@@ -226,51 +219,41 @@ void ServerNode::txThreadFunc(ThreadArg* pArg)
 //------------------------------------------------------------------------------
 void ServerNode::txThread(ThreadArg* pArg)
 {
-  TcpSocket*  lpSocket = NULL;
+  SocketStatus  lStatus;
+  TcpSocket*    lpSocket = NULL;
   ServerWorker* lpWorker = NULL;
 
   printf("ServerNode::txThread: Started!\n");
    
   while (!pArg->stopSignalled())
   {
-    if (!mTxQueue.pop(lpWorker, 500))
+    lpWorker = NULL;
+
+    if (mTxQueue.pop(lpWorker, 500))
     {
-      continue;
-    }
-      
-    // Get the worker's socket
-    if (lpWorker == NULL)
-    {
-      printf("ServerNode::txThread: null\n");
-      continue;
-    }
+      if (lpWorker)
+      {
+        lpSocket = lpWorker->socket();
 
-    lpSocket = lpWorker->socket();
+        NetAppPacket* lpPacket = lpWorker->get();
+        if (lpPacket == NULL)
+        {
+          // Push the worker back into the Rx queue
+          mRxQueue.push(lpWorker, 500);
+        }
+        else
+        {
+          // Send the message
+          lpSocket->write(lStatus,
+                          (char*)lpPacket->basePtr(),
+                          lpPacket->allocatedSize());
+          delete lpPacket;
 
-    // Each worker has a standard application specific header.  Each
-    // packet should be preceded by a header and the header should
-    // indicate the length of the following data.
-    
-    NetAppPacket* lpPacket = lpWorker->get();
-    if (lpPacket == NULL)
-    {         
-      // Push the worker back into the Rx queue
-      mRxQueue.push(lpWorker, 500);
-         
-      continue;
+          // Push the worker back into the Rx queue
+          mRxQueue.push(lpWorker, 500);
+        }
+      }
     }
-         
-    // Send the message
-    
-    lpSocket->write((char*)lpPacket->basePtr(), lpPacket->allocatedSize());
-      
-    // Release the socket so that it can be used by the TX thread.
-    //lpWorker->releaseSocket();
-      
-    delete lpPacket;
-
-    // Push the worker back into the Rx queue
-    mRxQueue.push(lpWorker, 500);
   }
 }
 
@@ -287,21 +270,18 @@ void ServerNode::workThread(ThreadArg* pArg)
 
   while (!pArg->stopSignalled())
   {
-    if (!mWorkQueue.pop(lpWorker, 500))
-    {
-      continue;
-    }
-      
-    // Get the worker's socket
-    if (lpWorker == NULL)
-    {
-      continue;
-    }
-         
-    lpWorker->work(100);
+    lpWorker = NULL;
 
-    // Push the worker back into the Rx queue
-    mTxQueue.push(lpWorker, 500);
+    if (mWorkQueue.pop(lpWorker, 500))
+    {
+      if (lpWorker)
+      {
+        lpWorker->work(100);
+
+        // Push the worker back into the Rx queue
+        mTxQueue.push(lpWorker, 500);
+      }
+    }
   }
 }
 
@@ -314,8 +294,7 @@ void ServerNode::cleanup()
   {
     if (lpWorker)
     {
-      printf("ServerNode::mWorkQueue\n");
-      delete lpWorker;
+      removeWorker(lpWorker);
       lpWorker = NULL;
     }
   }
@@ -324,8 +303,7 @@ void ServerNode::cleanup()
   {
     if (lpWorker)
     {
-      printf("ServerNode::mRxQueue\n");
-      delete lpWorker;
+      removeWorker(lpWorker);
       lpWorker = NULL;
     }
   }
@@ -334,10 +312,18 @@ void ServerNode::cleanup()
   {
     if (lpWorker)
     {
-      printf("ServerNode::mTxQueue\n");
-      delete lpWorker;
+      removeWorker(lpWorker);
       lpWorker = NULL;
     }
   }
+}
+
+//-----------------------------------------------------------------------------
+void ServerNode::removeWorker(ServerWorker* pWorker)
+{
+  printf("ServerNode: Removing worker\n");
+
+  pWorker->shutdown();
+  delete pWorker;
 }
 

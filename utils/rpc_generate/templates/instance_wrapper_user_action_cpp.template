@@ -2,6 +2,8 @@
 void <%wrapped_class%>Wrapper::
 <%action_name%>(<%in_param%> request, <%out_param%> response, RpcException& e)
 {
-<%tab%>/* TODO: Implement action here. */
+<%tab%>/* TODO: Implement action here and remove the following two lines. */
+<%tab%>e.id = UnimplementedAction;
+<%tab%>e.message = "<%wrapped_class%>Wrapper::<%action_name%> has not been implemented.";
 }
 

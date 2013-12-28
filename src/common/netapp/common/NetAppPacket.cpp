@@ -22,7 +22,7 @@ NetAppPacket::NetAppPacket(int type, ui32 length)
 //-----------------------------------------------------------------------------
 bool NetAppPacket::allocate(const NetAppPacket::Data& rData)
 {
-  bool lbSuccess = GenericPacket::allocate(sizeof(NetAppPacket::Data) + 
+  bool lbSuccess = GenericPacket::allocate(sizeof(NetAppPacket::Data), 
                                            rData.length);
 
   if (lbSuccess)

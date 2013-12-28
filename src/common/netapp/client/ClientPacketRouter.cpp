@@ -7,7 +7,8 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 ClientPacketRouter::ClientPacketRouter(Socket& rSocket)
-: mrSocket(rSocket)
+: PacketRouter(&mTxQueue)
+, mrSocket(rSocket)
 , mpTxThread(NULL)
 , mpRxThread(NULL)
 , mnReadTimeoutMs(100)
@@ -17,60 +18,7 @@ ClientPacketRouter::ClientPacketRouter(Socket& rSocket)
 //----------------------------------------------------------------------------
 ClientPacketRouter::~ClientPacketRouter()
 {
-  if (mpTxThread)
-  {
-    delete mpTxThread;
-  }
-
-  if (mpRxThread)
-  {
-    delete mpRxThread;
-  }
-}
-
-//-----------------------------------------------------------------------------
-bool ClientPacketRouter::addSubscriber(int               subscriberId,
-                                       PacketSubscriber* pSubscriber)
-{
-  bool lbSuccess = (mSubscriberTable.count(subscriberId) != 0);
-
-  lbSuccess &= (pSubscriber != NULL);
-  if (lbSuccess)
-  {
-    lbSuccess = mTableLock.lock();
-    if (lbSuccess)
-    {
-      pSubscriber->setId(subscriberId);
-      pSubscriber->setOutputQueue(&mTxQueue);
-      mSubscriberTable.insert(std::make_pair(subscriberId, pSubscriber));
-      lbSuccess = true;
-      mTableLock.unlock();
-    }
-  }
-
-  return lbSuccess;
-}
-
-//-----------------------------------------------------------------------------
-PacketSubscriber* ClientPacketRouter::removeSubscriber(int subscriberId)
-{
-  PacketSubscriber* lpSubscriber = NULL;
-  bool lbSuccess = (mSubscriberTable.count(subscriberId) != 0);
-
-  lbSuccess &= (lpSubscriber != NULL);
-  if (lbSuccess)
-  {
-    lbSuccess = mTableLock.lock();
-    if (lbSuccess)
-    {
-      lpSubscriber = mSubscriberTable.find(subscriberId)->second;
-      mSubscriberTable.erase(subscriberId);
-      lbSuccess = true;
-      mTableLock.unlock();
-    }
-  }
-
-  return lpSubscriber;
+  stop();
 }
 
 //-----------------------------------------------------------------------------
@@ -108,6 +56,7 @@ void ClientPacketRouter::stop()
     mpTxThread->stop();
     mpTxThread->join();
     delete mpTxThread;
+    mpTxThread = NULL;
   }
 
   if (mpRxThread)
@@ -115,6 +64,7 @@ void ClientPacketRouter::stop()
     mpRxThread->stop();
     mpRxThread->join();
     delete mpRxThread;
+    mpRxThread = NULL;
   }
 }
 
@@ -145,53 +95,17 @@ void ClientPacketRouter::RxThreadEntry(ThreadArg* pArg)
 //-----------------------------------------------------------------------------
 void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
 {
-  i32 lnBytes = 0;
-  NetAppPacket::Data lPacketHeader;
-  NetAppPacket lPacket;
-
-  while (!pArg->stopSignalled())
-  {
-    lnBytes = mrSocket.read((char*)&lPacketHeader, sizeof(lPacketHeader), mnReadTimeoutMs);
-    if (lnBytes == sizeof(lPacketHeader))
-    {
-      if (lPacket.allocate(lPacketHeader))
-      {
-        lnBytes = mrSocket.read((char*)lPacket.dataPtr(), lPacketHeader.length, mnReadTimeoutMs);
-        if (lnBytes == lPacketHeader.length)
-        {
-          mTableLock.lock();
-          bool lbExists = (mSubscriberTable.count(lPacketHeader.type) != 0);
-
-          if (lbExists)
-          {
-            PacketSubscriber* lpSubscriber = NULL;
-            lpSubscriber = mSubscriberTable.find(lPacketHeader.type)->second;
-
-            if (lpSubscriber)
-            {
-              lpSubscriber->put((char*)lPacket.dataPtr(), lPacketHeader.length);
-            }
-          }
-
-          mTableLock.unlock();
-        }
-      }
-    }
-  }
-}
-
-//-----------------------------------------------------------------------------
-void ClientPacketRouter::rxThreadRun(ThreadArg* pArg)
-{
+  SocketStatus  lStatus;
   NetAppPacket* lpPacket = NULL;
 
   while (!pArg->stopSignalled())
   {
     if (mTxQueue.pop(lpPacket, 100))
     {
-      i32 lnBytes = mrSocket.write((char*)lpPacket->basePtr(), 
-                                   lpPacket->allocatedSize());
-      if (lnBytes != lpPacket->allocatedSize())
+      mrSocket.write(lStatus, (char*)lpPacket->basePtr(), lpPacket->allocatedSize());
+
+      // Check that the packet was successfully sent.
+      if (lStatus.status != SocketOk || lStatus.byteCount != lpPacket->allocatedSize())
       {
         printf("Failed to send packet\n");
       }
@@ -201,4 +115,36 @@ void ClientPacketRouter::rxThreadRun(ThreadArg* pArg)
     }
   }
 }
+
+//-----------------------------------------------------------------------------
+void ClientPacketRouter::rxThreadRun(ThreadArg* pArg)
+{
+  SocketStatus       lStatus;
+  NetAppPacket::Data lPacketHeader;
+  NetAppPacket       lPacket;
+
+  while (!pArg->stopSignalled())
+  {
+    mrSocket.read(lStatus, (char*)&lPacketHeader, sizeof(lPacketHeader), mnReadTimeoutMs);
+
+    if (lStatus.byteCount == sizeof(lPacketHeader))
+    {
+      if (lPacket.allocate(lPacketHeader))
+      {
+        mrSocket.read(lStatus, (char*)lPacket.dataPtr(),
+                      lPacketHeader.length, mnReadTimeoutMs);
+
+        if (lStatus.byteCount == lPacketHeader.length)
+        {
+          PacketSubscriber* lpSubscriber = getSubscriber(lPacketHeader.type);
+          if (lpSubscriber)
+          {
+            lpSubscriber->put((char*)lPacket.dataPtr(), lPacketHeader.length);
+          }
+        }
+      }
+    }
+  }
+}
+
 

@@ -17,14 +17,14 @@ public:
   /**
    *
    */
-  virtual int read(char* pData, int nMaxBytes, int nTimeoutMs);
+  virtual void read(SocketStatus& status, char* pData, int nMaxBytes, int nTimeoutMs);
 
   /**
    *
    */
-  virtual int write(const char* pData, int nBytes, int nTimeoutMs = 0);
+  virtual void write(SocketStatus& status, const char* pData, int nBytes, int nTimeoutMs = 0);
 
-  void disconnect();
+  static SocketError TranslateErrno(int err);
 
 protected:
 

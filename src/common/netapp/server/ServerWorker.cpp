@@ -16,14 +16,6 @@ ServerWorker::ServerWorker(TcpSocket* pSocket)
 //------------------------------------------------------------------------------
 ServerWorker::~ServerWorker()
 {
-  if (mpSocket)
-  {
-    printf("ServerWorker closing socket\n");
-    mpSocket->disconnect();
-      
-    delete mpSocket;
-    mpSocket = NULL;
-  }
 }
 
 //------------------------------------------------------------------------------
@@ -40,8 +32,52 @@ bool ServerWorker::initialize()
   {
     lbSuccess = false;
   }
+
+  //
+  lbSuccess &= setup();
    
   return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
+bool ServerWorker::setup()
+{
+  printf("ServerWorker::setup() is unimplemented\n");
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+void ServerWorker::shutdown()
+{
+  if (mpSocket)
+  {
+    printf("ServerWorker closing socket\n");
+    mpSocket->disconnect();
+
+    delete mpSocket;
+    mpSocket = NULL;
+  }
+
+  NetAppPacket* lpPacket = NULL;
+  while (mInQueue.pop(lpPacket, 5))
+  {
+    if (lpPacket) delete lpPacket;
+    lpPacket = NULL;
+  }
+
+  while (mOutQueue.pop(lpPacket, 5))
+  {
+    if (lpPacket) delete lpPacket;
+    lpPacket = NULL;
+  }
+
+  teardown();
+}
+
+//------------------------------------------------------------------------------
+void ServerWorker::teardown()
+{
+  printf("ServerWorker::teardown() is unimplemented\n");
 }
 
 //------------------------------------------------------------------------------
@@ -51,17 +87,10 @@ TcpSocket* ServerWorker::socket()
 }
 
 //------------------------------------------------------------------------------
-/*bool ServerWorker::lockSocket(ui32 timeoutMs)
+ServerPacketRouter& ServerWorker::router()
 {
-  //return m_SocketLock.lock(timeoutMs);
-  return true;
-}*/
-
-//------------------------------------------------------------------------------
-/*void ServerWorker::releaseSocket()
-{
-  //m_SocketLock.unlock();
-}*/
+  return mRouter;
+}
 
 //------------------------------------------------------------------------------
 ui32 ServerWorker::elapseMsSinceRecv()
@@ -100,27 +129,4 @@ void ServerWorker::work(int nSlotTimeUs)
   mRouter.routeFromQueue(nSlotTimeUs);
 }
 
-//------------------------------------------------------------------------------
-/*void ServerWorker::pushRx(GenericPacket* pPkt)
-{
-  mInQ.push(pPkt, 500);
-}*/
-
-//------------------------------------------------------------------------------
-/*bool ServerWorker::popRx(GenericPacket** pPkt)
-{
-  return mInQ.pop(*pPkt, 0);
-}*/
-
-//------------------------------------------------------------------------------
-/*void ServerWorker::pushTx(GenericPacket* pPkt)
-{
-  mOutQ.push(pPkt, 500);
-}*/
-
-//------------------------------------------------------------------------------
-/*bool ServerWorker::popTx(GenericPacket** pPkt)
-{
-  return mOutQ.pop(*pPkt, 0);
-}*/
 

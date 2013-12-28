@@ -1,17 +1,16 @@
-#ifndef PACKET_ROUTER_H
-#define PACKET_ROUTER_H
+#ifndef CLIENT_PACKET_ROUTER_H
+#define CLIENT_PACKET_ROUTER_H
 
-#include <map>
 #include "Thread.h"
 #include "Socket.h"
 #include "Mutex.h"
 #include "Queue.h"
-#include "PacketSubscriber.h"
+#include "PacketRouter.h"
 
 namespace liber {
 namespace netapp {
 
-class ClientPacketRouter {
+class ClientPacketRouter : public liber::netapp::PacketRouter {
 public:
 
   static const ui32 DefaultQueueCapacity = 10;
@@ -19,8 +18,8 @@ public:
   ClientPacketRouter(liber::net::Socket& rSocket);
   virtual ~ClientPacketRouter();
 
-  bool addSubscriber(int subscriberId, liber::netapp::PacketSubscriber* pSubscriber);
-  liber::netapp::PacketSubscriber* removeSubscriber(int subscriberId);
+//  bool addSubscriber(int subscriberId, liber::netapp::PacketSubscriber* pSubscriber);
+//  liber::netapp::PacketSubscriber* removeSubscriber(int subscriberId);
 
   bool start(ui32 txCapacity = DefaultQueueCapacity);
   void stop();
@@ -51,11 +50,11 @@ private:
 
   Queue<netapp::NetAppPacket*> mTxQueue;
 
-  Mutex mTableLock;
-  std::map<int, liber::netapp::PacketSubscriber*> mSubscriberTable;
+//  Mutex mTableLock;
+//  std::map<int, liber::netapp::PacketSubscriber*> mSubscriberTable;
 };
 
 }}
 
-#endif
+#endif // CLIENT_PACKET_ROUTER_H
 

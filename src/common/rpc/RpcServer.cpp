@@ -68,6 +68,10 @@ bool RpcServer::put(const char* pData, ui32 nLength)
     {
       lbSuccess = processPacket(lpPacket);
     }
+    else
+    {
+      printf("RpcServer::put: Fail to unpack packet of size %u\n", nLength);
+    }
   }
 
   return lbSuccess;

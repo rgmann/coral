@@ -46,14 +46,15 @@ private:
   static void workThreadFunc(ThreadArg* pArg);
    
   void        workThread(ThreadArg* pArg);
+
+  void        removeWorker(ServerWorker* pWorker);
    
   void        cleanup();
    
-  bool        recvPacket(ServerWorker* pWorker);
+  net::SocketError recvPacket(ServerWorker* pWorker);
    
 private:
    
-  //std::vector<ServerWorker*> m_vWorkerList;
   Queue<ServerWorker*> mTxQueue;
   Queue<ServerWorker*> mWorkQueue;
   Queue<ServerWorker*> mRxQueue;

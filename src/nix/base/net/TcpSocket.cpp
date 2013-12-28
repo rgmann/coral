@@ -16,29 +16,47 @@ using namespace liber::net;
 //-----------------------------------------------------------------------------
 TcpSocket::TcpSocket()
 {
-//   m_nSocket = -1;
-//   FD_ZERO(&mFdSet);
 }
 
 //-----------------------------------------------------------------------------
 TcpSocket::~TcpSocket()
 {
+  disconnect();
 }
 
 //-----------------------------------------------------------------------------
-int TcpSocket::read(char* pBuffer, int nBytes, int nTimeoutMs)
+void TcpSocket::read(SocketStatus& status, char* pBuffer, int nBytes, int nTimeoutMs)
 {
-  int            lnBytesRead = -1;
+  //int            lnBytesRead = -1;
   struct timeval lTimeout;
   fd_set         lReadSet;
    
-  if (mAttributes.fd <= 0)
+  memset(&status, 0, sizeof(status));
+  if (mAttributes.fd > 0)
+  {
+    // Set the timeout.
+    lTimeout.tv_sec = nTimeoutMs / 1000;
+    lTimeout.tv_usec = 1000 * (nTimeoutMs - lTimeout.tv_sec * 1000);
+
+    FD_ZERO(&lReadSet);
+    FD_SET(mAttributes.fd, &lReadSet);
+
+    if (select(mAttributes.fd + 1, &lReadSet, NULL, NULL, &lTimeout) > 0)
+    {
+      Socket::read(status, pBuffer, nBytes, nTimeoutMs);
+    }
+    else
+    {
+      status.status = SocketTimeout;
+    }
+  }
+  else
   {
     printf("TcpSocket::recv: invalid socket\n");
-    return -1;
+    status.status = SocketInvalid;
   }
 	
-  lTimeout.tv_sec = nTimeoutMs / 1000;
+/*  lTimeout.tv_sec = nTimeoutMs / 1000;
   lTimeout.tv_usec = 1000 * (nTimeoutMs - lTimeout.tv_sec * 1000);
    
   FD_ZERO(&lReadSet);
@@ -50,7 +68,7 @@ int TcpSocket::read(char* pBuffer, int nBytes, int nTimeoutMs)
     // Blocks for the specified timeout period.
     if (select(mAttributes.fd + 1, &lReadSet, NULL, NULL, &lTimeout) <= 0)
     {
-      printf("TcpSocket::recv: timeout\n");
+      //printf("TcpSocket::recv: timeout\n");
       return -1;
     }
 		
@@ -62,26 +80,43 @@ int TcpSocket::read(char* pBuffer, int nBytes, int nTimeoutMs)
     }
   }
 	
-  return lnBytesRead;
+  return lnBytesRead;*/
 }
 
 //-----------------------------------------------------------------------------
-int TcpSocket::write(const char* pBuffer, int nBytes, int nTimeoutMs)
+void TcpSocket::
+write(SocketStatus& status, const char* pBuffer, int nBytes, int nTimeoutMs)
 {
-  int lnBytesSent = -1;
-
-  if (mAttributes.fd <= 0)
+//  int lnBytesSent = -1;
+  memset(&status, 0, sizeof(status));
+  if (mAttributes.fd > 0)
   {
-    return -1;
+    Socket::write(status, pBuffer, nBytes, nTimeoutMs);
+  }
+  else
+  {
+    status.status = SocketInvalid;
   }
    
    //if (FD_ISSET(m_nSocket, &mFdSet))
    //{
    //	l_nBytesSent = write(m_nSocket, pBuffer, nBytes);
    //l_nBytesSent = send(m_nSocket, pBuffer, nBytes, MSG_NOSIGNAL);
-  lnBytesSent = Socket::write(pBuffer, nBytes, nTimeoutMs);
+  //lnBytesSent = Socket::write(pBuffer, nBytes, nTimeoutMs);
    //}
 	
-  return lnBytesSent;
+  //return lnBytesSent;
+}
+
+//------------------------------------------------------------------------------
+void TcpSocket::disconnect()
+{
+  if (mAttributes.fd > 0)
+  {
+    shutdown(mAttributes.fd, SHUT_RDWR);
+    close(mAttributes.fd);
+    FD_CLR(mAttributes.fd, &mAttributes.set);
+    mAttributes.fd = -1;
+  }
 }
 
