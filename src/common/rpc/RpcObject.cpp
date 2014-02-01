@@ -5,7 +5,7 @@
 #include "RpcObject.h"
 
 using namespace liber::rpc;
-using namespace packethelper;
+using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 RpcObject::RpcObject()
@@ -36,10 +36,14 @@ RpcCallInfo& RpcObject::callInfo()
 {
    return mCallInfo;
 }
+
+//-----------------------------------------------------------------------------
 const RpcCallInfo& RpcObject::callInfo() const
 {
    return mCallInfo;
 }
+
+//-----------------------------------------------------------------------------
 RpcException& RpcObject::exception()
 {
    mException.mCallInfo = callInfo();
@@ -101,7 +105,7 @@ bool RpcObject::getResponse(RpcObject &response,
 //-----------------------------------------------------------------------------
 std::string RpcObject::serialize() const
 {
-   PacketCtor lPacket(packethelper::NetworkByteOrder);
+   PacketCtor lPacket(NetworkByteOrder);
 
    lPacket.writeCString(callInfo().resource);
    lPacket.writeCString(callInfo().action);
@@ -122,7 +126,7 @@ std::string RpcObject::serialize() const
 //-----------------------------------------------------------------------------
 bool RpcObject::deserialize(const std::string &data)
 {
-   PacketDtor lPacket(packethelper::NetworkByteOrder);
+   PacketDtor lPacket(NetworkByteOrder);
    lPacket.setData(data);
 
    // Read the resource name

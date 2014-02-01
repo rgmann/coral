@@ -1,69 +1,65 @@
-#ifndef RSYNC_ClIENT_H
-#define RSYNC_ClIENT_H
+#ifndef RSYNC_CLIENT_H
+#define RSYNC_CLIENT_H
 
-struct RsyncClientStatus
-{
-   bool  bServerConnected;
-   bool  bServerAccepted;
-   
-   unsigned int nSegmentCount;
-   unsigned int nSegmentSize;
-   
-   unsigned int nSegmentsTx;
-   unsigned int nSegmentRx;
-   
-   // Chunks are aribtrarily sized blocks of data received from the server.
-   // Chunks contain data found in the authoritative file that are missing
-   // from the client file.
-   unsigned int nChunksRx;
-   
-   bool  bDone;
-   
-   bool  bStagingEnabled;
-   unsigned int nStageThreshold;
-   
-   // Pre-processing, cancelled, reconstructing, etc.
-   RsyncClientState state;
-}
+namespace liber {
+namespace rsync {
 
-typedef void (RsyncComplCb*)(const RsyncClientStatus &status);
-
-class RsyncClient
-{
+class RsyncJobCallback : public liber::Callback {
 public:
-   
-   RsyncClient();
-   
-   ~RsyncClient();
-   
-   void  setSocket(Socket *pSocket);
-   
-   bool  start(const std::string &filename);
-   
-   bool  cancel();
-   
-   void  subscribeCompletion(RsyncComplCb pCb);
-   
-   unsigned int getSegmentCount();
-   
-private:
-   
-   // TODO: Override copy construct and = operator
-   
-   void  segmenterThread(Thread* pThread);
-   
-   void  rebuilderThread(Thread* pThread);
-   
-private:
-   
-   std::ifstream  m_File;
-   
-   Thread*  m_pSegmenter;
-   
-   Thread*  m_pRebuilder;
-   
-   Socket*  m_pSocket;
+
+  virtual ~RsyncJobCallback();
+
+  using liber::Callback::call;
+  virtual void* call(const liber::rsync::RsyncJobInfo& info) {};
+
 };
 
 
-#endif // RSYNC_ClIENT_H
+// Active Object pattern
+class RsyncClient : public liber::netapp::PacketSubscriber {
+public:
+
+  Rsync();
+  ~Rsync();
+
+  void pause();
+  void resume();
+
+  void setCompletionCallback(RsyncJobCallback* pCallback);
+
+  bool push(RsyncJob& job,
+            const liber::fs::FilePath& source,
+            const liber::fs::FilePath& destination);
+
+  bool pull(RsyncJob& job,
+            const liber::fs::FilePath& source,
+            const liber::fs::FilePath& destination);
+
+  bool put(const char* pData, ui32 nLength);
+
+private:
+
+  static void TranslateThreadEntry(ThreadArg* pArg);
+  void translationThread(ThreadArg* pArg);
+
+  static void RsyncJobThreadEntry(ThreadArg* pArg);
+  void rsyncJobThread(ThreadArg* pArg);
+
+  static void CallbackThreadEntry(ThreadArg* pArg);
+  void callbackThread(ThreadArg* pArg);
+
+private:
+
+  RsyncJobCallback* mpCompletionCallback;
+
+  Queue<RsyncCoreJob*> mPendingJobs;
+  Queue<RsyncCoreJob*> mCompletedJobs;
+
+  Queue<RscynPacket*>  mRsyncOutQueue;
+
+  Thread* mpJobThread;
+  Thread* mpTranslationThread;
+};
+
+#endif // RSYNC_CLIENT_H
+

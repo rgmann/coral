@@ -35,12 +35,7 @@ public:
    
    Data* const data() const;
 
-//  virtual void*        dataPtr();
-//  virtual void* const  dataPtr() const;
-
-//private:
-   
-//   ui32  dataSize() const;
+   void swap(void* pData, ui32 nSizeBytes);
    
 private:
 

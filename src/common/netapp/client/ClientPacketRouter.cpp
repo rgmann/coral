@@ -8,6 +8,7 @@ using namespace liber::netapp;
 //-----------------------------------------------------------------------------
 ClientPacketRouter::ClientPacketRouter(Socket& rSocket)
 : PacketRouter(&mTxQueue)
+, mbKeepaliveEnabled(true)
 , mrSocket(rSocket)
 , mpTxThread(NULL)
 , mpRxThread(NULL)
@@ -30,6 +31,10 @@ bool ClientPacketRouter::start(ui32 txCapacity)
   {
     lbSuccess = false;
   }
+
+  // Register the connection status subscriber.
+  lbSuccess &= addSubscriber(ConnectionStatus::SubscriberId,
+                             &mConnectionStatus);
 
   mpTxThread = Thread::Create(TxThreadEntry, this);
   if (mpTxThread == NULL)
@@ -66,6 +71,9 @@ void ClientPacketRouter::stop()
     delete mpRxThread;
     mpRxThread = NULL;
   }
+
+  // Unregister the connection status subscriber.
+  removeSubscriber(ConnectionStatus::SubscriberId);
 }
 
 //-----------------------------------------------------------------------------
@@ -78,6 +86,12 @@ Socket& ClientPacketRouter::socket()
 void ClientPacketRouter::setReadTimeout(int nTimeoutMs)
 {
   mnReadTimeoutMs = nTimeoutMs;
+}
+
+//-----------------------------------------------------------------------------
+void ClientPacketRouter::enableKeepalive(bool bEnable)
+{
+  mbKeepaliveEnabled = bEnable;
 }
 
 //-----------------------------------------------------------------------------
@@ -100,6 +114,15 @@ void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
 
   while (!pArg->stopSignalled())
   {
+    // If keepalives are enabled, check whether it is time to send a keepalive.
+    if (mbKeepaliveEnabled)
+    {
+      if (Timestamp::Now().diffInMs(mConnectionStatus.lastKeepaliveSendTime()) > 2500)
+      {
+        mConnectionStatus.sendKeepalive();
+      }
+    }
+
     if (mTxQueue.pop(lpPacket, 100))
     {
       mrSocket.write(lStatus, (char*)lpPacket->basePtr(), lpPacket->allocatedSize());

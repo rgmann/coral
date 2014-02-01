@@ -6,6 +6,7 @@ SOURCE = ../../src/common/$(LIBNAME)/*.cpp
 INCLUDES = \
 	-I../../includes/base \
 	-I../../includes/base/crypto \
+	-I../../includes/base/net \
 	-I../../includes/base/file_system \
 	-I../../includes/base/cli \
 	-I../../includes/base/helpers \

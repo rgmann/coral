@@ -104,4 +104,14 @@ SocketError Socket::TranslateErrno(int err)
   return lError;
 }
 
+//------------------------------------------------------------------------------
+void Socket::disconnect()
+{
+  if (mAttributes.fd > 0)
+  {
+    close(mAttributes.fd);
+    FD_CLR(mAttributes.fd, &mAttributes.set);
+    mAttributes.fd = -1;
+  }
+}
 

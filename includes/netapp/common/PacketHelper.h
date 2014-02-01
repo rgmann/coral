@@ -6,7 +6,8 @@
 #include <sstream>
 #include "BaseTypes.h"
 
-namespace packethelper {
+namespace liber {
+namespace netapp {
 
 enum ByteOrder {
    HostByteOrder = 0,
@@ -68,7 +69,7 @@ private:
    ByteOrder mByteOrder;
 };
 
-}
+}}
 
 #endif // PACKET_HELPER_H
 

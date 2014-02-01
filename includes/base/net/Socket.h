@@ -14,10 +14,12 @@ public:
 
   void setAttributes(const SocketAttributes& attributes);
 
+  static const int Block = -1;
+
   /**
    *
    */
-  virtual void read(SocketStatus& status, char* pData, int nMaxBytes, int nTimeoutMs);
+  virtual void read(SocketStatus& status, char* pData, int nMaxBytes, int nTimeoutMs = Block);
 
   /**
    *

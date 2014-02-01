@@ -3,8 +3,10 @@
 
 #include "GenericPacket.h"
 
-class AssemblyEndMarker : public GenericPacket
-{
+namespace liber {
+namespace rsync {
+
+class AssemblyEndMarker : public liber::netapp::GenericPacket {
 public:
    
    enum Type
@@ -21,7 +23,9 @@ public:
 
 private:
 
-   typedef GenericPacket inherited;
+   typedef liber::netapp::GenericPacket inherited;
 };
+
+}}
 
 #endif // ASSEMBLY_END_MARKER_H

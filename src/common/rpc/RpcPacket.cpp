@@ -2,9 +2,11 @@
 #include <string.h>
 #include <iostream>
 #include "RpcPacket.h"
+#include "ByteOrder.h"
 
 using namespace liber::rpc;
 using namespace liber::netapp;
+using namespace liber::net;
 
 static const char MarkerData[RpcPacket::RpcMarkerSize] = {'r', 'p', 'c',
                                              'm', 's', 'g', '\0'};
@@ -93,24 +95,17 @@ bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
 }
 
 //------------------------------------------------------------------------------
-/*ui32 RpcPacket::dataSize() const
+void RpcPacket::swap(void* pData, ui32 nSizeBytes)
 {
-   return sizeof(Data);
-}*/
+  if (pData && (nSizeBytes >=  sizeof(RpcPacket::Data)))
+  {
+    RpcPacket::Data* lpData = reinterpret_cast<RpcPacket::Data*>(pData);
 
-//-----------------------------------------------------------------------------
-/*void* RpcPacket::dataPtr()
-{
-  char* lpData = NULL;
-  if (isAllocated()) lpData = (char*)basePtr() + sizeof(Data);
-  return (void*)lpData;
-}*/
+    ByteOrder::NetSwap(lpData->rpcId);
+    ByteOrder::NetSwap(lpData->length);
+    ByteOrder::NetSwap(lpData->format);
+    ByteOrder::NetSwap(lpData->encoding);
+  }
+}
 
-//-----------------------------------------------------------------------------
-/*void* const RpcPacket::dataPtr() const
-{
-  char* lpData = NULL;
-  if (isAllocated()) lpData = (char*)basePtr() + sizeof(Data);
-  return (void* const)lpData;
-}*/
 

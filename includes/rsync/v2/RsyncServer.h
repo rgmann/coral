@@ -1,18 +1,27 @@
-#ifndef RSYNC_HELPER_H
-#define RSYNC_HELPER_H
+#ifndef RSYNC_SERVER_H
+#define RSYNC_SERVER_H
 
+#include "FileQueryAgent.h"
 
-class RsyncServer
-{
+namespace liber {
+namespace rsync {
+
+class RsyncServer : public liber::netapp::PacketSubscriber {
 public:
    
-   RsyncNode(unsigned int nSegSizeBytes);
+   RsyncServer();
    
-   ~RsyncNode();
-   
+   ~RsyncServer();
+
+  void setFileQueryAgent(FileQueryAgent& rQueryAgent);
+
 private:
-   
-   std::ifstream  m_ReadStream;
+
+  FileQueryAgent  mDefaultQuery;
+  FileQueryAgent& mrFileQuery;
+
 };
 
-#endif // RSYNC_HELPER_H
+}}
+
+#endif // RSYNC_SERVER_H

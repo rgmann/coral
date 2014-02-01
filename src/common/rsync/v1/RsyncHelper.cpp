@@ -83,16 +83,17 @@ bool RsyncHelper::SegmentFile(const std::string &rootPath,
             pAdler = &oldweaksum;
          }
 
+         // Normally the length of the segment will be as configured
+         // (nSegLenBytes), but when we near the end of the file, the last
+         // segment will likely have to be smaller.
          l_nRemaining = (l_nFileLen - l_nOffs);
-//         l_nSegLen = (l_nRemaining < nSegLenBytes) ?
-//                     l_nRemaining : nSegLenBytes;
          l_nSegLen = nSegLenBytes;
          if (l_nRemaining < nSegLenBytes)
          {
             l_nSegLen = l_nRemaining;
          }
          
-         // Read the data into the buffer.
+         // Compute the number of bytes that should be read.
          if (l_nOffs == 0)
          {
             l_nReadLen = (l_nRemaining < nSegLenBytes) ?
@@ -107,6 +108,7 @@ bool RsyncHelper::SegmentFile(const std::string &rootPath,
          printf("seg: rem=%u, segLen=%u, readLen=%u\n",
                 l_nRemaining, l_nSegLen, l_nReadLen);
                   
+         // Read the data into the buffer.
          is.read(l_pFileBuffer, l_nReadLen);
          l_circBuff.write(l_pFileBuffer, l_nReadLen);
          

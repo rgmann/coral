@@ -2,19 +2,34 @@
 #define  RSYNC_PACKET_H
 
 #include <stdio.h>
-//#include "GenericPacket.h"
-#include "RsyncAssemblyInstr.h"
-#include "RsyncSegmentReportPacket.h"
+#include "GenericPacket.h"
 
-class RsyncPacket : public GenericPacket
-{
+namespace liber {
+namespace rsync {
+
+class RsyncPacket : public liber::netapp::GenericPacket {
 public:
    
    enum Type
    {
-      TypeNotSet,
-      SegmentReportType,
-      AssemblyInstType,
+      TypeNotSet = 0,
+
+      // Ask the server if a file exists
+      FileQueryType,
+
+      // Request that the server send the segment report for a file.
+      FilePushType,
+
+      // Assembly instruction packet types
+      AsmblBeginMarkerType,
+      AsmblChunkType,
+      AsmblSegmentType,
+      AsmblEndMarkerType,
+
+      // Segment report packet types
+      SegReportHeaderType,
+      SegReportBodyType,
+
       NumTypes
    };
    
@@ -28,34 +43,17 @@ public:
    
    RsyncPacket();
    
-   RsyncPacket(Type type, ui32 nDataSize);
-   
-   RsyncPacket(const RsyncAssemblyInstr* pPacket);
-   
-   RsyncPacket(const RsyncSegmentReportPacket* pPacket);
-      
-   Type type() const;
-   
-   bool length(ui32 &length) const;
+   RsyncPacket(Type type, ui32 nLengthBytes);
    
    Data* const data() const;
    
-   virtual ui32 dataSize() const;
-   
-   bool to(RsyncAssemblyInstr** pPacket) const;
-   bool to(RsyncSegmentReportPacket** pPacket) const;
+   virtual bool unpack(const void* pPkt, ui32 nLengthBytes);
 
-   virtual bool unpack(const void* pPkt, ui32 nSizeBytes);
-
-protected:
-   
-   GenericPacket* create(Type type) const;
-   
-   bool from(Type type, const GenericPacket* pPacket);
-   
 private:
    
    typedef GenericPacket inherited;
 };
+
+}}
 
 #endif   // RSYNC_PACKET_H

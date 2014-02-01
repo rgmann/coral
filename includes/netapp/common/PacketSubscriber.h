@@ -31,14 +31,10 @@ public:
    /**
     * Add a packet to the end of this PacketApp's input queue (if it has one).
     */
-   liber::netapp::GenericPacket* stage();
-   void release();
-
    virtual bool put(const char* pData, ui32 nLength) = 0;
 
 protected:
 
-   //virtual bool recvPacket(GenericPacket** pPacket, i32 nTimeoutMs = QueueTimeoutMs);
    virtual bool sendPacket(liber::netapp::GenericPacket* pPacket, i32 nTimeoutMs = QueueTimeoutMs);
 
 private:

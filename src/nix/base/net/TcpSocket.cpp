@@ -111,12 +111,12 @@ write(SocketStatus& status, const char* pBuffer, int nBytes, int nTimeoutMs)
 //------------------------------------------------------------------------------
 void TcpSocket::disconnect()
 {
+  // TCP sockets need to be shutdown.
   if (mAttributes.fd > 0)
   {
     shutdown(mAttributes.fd, SHUT_RDWR);
-    close(mAttributes.fd);
-    FD_CLR(mAttributes.fd, &mAttributes.set);
-    mAttributes.fd = -1;
   }
+
+  Socket::disconnect();
 }
 

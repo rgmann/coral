@@ -296,3 +296,9 @@ void GenericPacket::printDump()
   }
 }
 
+//-----------------------------------------------------------------------------
+void GenericPacket::swapByteOrder()
+{
+  swap(m_pPkt, allocatedSize());
+}
+

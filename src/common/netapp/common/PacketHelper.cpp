@@ -1,7 +1,7 @@
 #include <arpa/inet.h>
 #include "PacketHelper.h"
 
-using namespace packethelper;
+using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 PacketCtor::PacketCtor(ByteOrder end)

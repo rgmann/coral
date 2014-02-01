@@ -10,21 +10,19 @@ class NetAppPacket : public liber::netapp::GenericPacket {
 public:
 
   struct __attribute__((__packed__)) Data {
-    int  type;
+    i32  type;
     ui32 length;
   };
 
   NetAppPacket();
   NetAppPacket(int type, ui32 length);
-  //virtual ~NetAppPacket();
 
   using GenericPacket::allocate;
   virtual bool allocate(const Data& rData);
 
-//  virtual void*        dataPtr();
-//  virtual void* const  dataPtr() const;
-  
   Data* const data();
+
+  virtual void swap(void* pData, ui32 nSizeBytes);
 };
 
 }}

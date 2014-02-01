@@ -6,6 +6,7 @@
 #include "Mutex.h"
 #include "Queue.h"
 #include "PacketRouter.h"
+#include "ClientConnectionStatus.h"
 
 namespace liber {
 namespace netapp {
@@ -30,6 +31,8 @@ public:
 
   void setReadTimeout(int nTimeoutMs);
 
+  void enableKeepalive(bool bEnable);
+
 protected:
 
   void txThreadRun(ThreadArg*);
@@ -41,6 +44,9 @@ private:
   static void RxThreadEntry(ThreadArg*);
 
 private:
+
+  bool mbKeepaliveEnabled;
+  ClientConnectionStatus mConnectionStatus;
 
   liber::net::Socket& mrSocket;
   Thread* mpTxThread;

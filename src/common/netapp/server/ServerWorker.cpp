@@ -10,7 +10,6 @@ ServerWorker::ServerWorker(TcpSocket* pSocket)
 , mEnqueueTimeoutMs(DefaultEnqueueTimeoutMs)
 , mDequeueTimeoutMs(DefaultDequeueTimeoutMs)
 {
-  mRecvTs.sample();
 }
 
 //------------------------------------------------------------------------------
@@ -32,6 +31,10 @@ bool ServerWorker::initialize()
   {
     lbSuccess = false;
   }
+
+  // Register the keepalive subscriber.
+  lbSuccess &= mRouter.addSubscriber(ConnectionStatus::SubscriberId,
+                                     &mConnectionStatus);
 
   //
   lbSuccess &= setup();
@@ -71,6 +74,9 @@ void ServerWorker::shutdown()
     lpPacket = NULL;
   }
 
+  // Unregister the keepalive subscriber.
+  mRouter.removeSubscriber(ConnectionStatus::SubscriberId);
+
   teardown();
 }
 
@@ -93,19 +99,15 @@ ServerPacketRouter& ServerWorker::router()
 }
 
 //------------------------------------------------------------------------------
-ui32 ServerWorker::elapseMsSinceRecv()
+const ConnectionStatus& ServerWorker::status()
 {
-  Timestamp lTs;
-   
-  lTs.sample();
-   
-  return (ui32)lTs.diffInMs(mRecvTs);
+  return mConnectionStatus;
 }
 
 //------------------------------------------------------------------------------
 bool ServerWorker::put(NetAppPacket* pPacket)
 {
-  mRecvTs.sample();
+  mConnectionStatus.sampleRecvTime();
   return mInQueue.push(pPacket, mEnqueueTimeoutMs);
 }
 
@@ -115,12 +117,6 @@ NetAppPacket* ServerWorker::get()
   NetAppPacket* lpPacket = NULL;
   mOutQueue.pop(lpPacket, mDequeueTimeoutMs);
   return lpPacket;
-}
-
-//------------------------------------------------------------------------------
-void ServerWorker::sampleRecvTime()
-{
-  mRecvTs.sample();
 }
 
 //------------------------------------------------------------------------------

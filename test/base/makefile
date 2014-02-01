@@ -9,10 +9,14 @@ INC =	-I../../includes/base \
 	-I../../includes/base/container \
 	-I../../includes/base/concurrency \
 	-I../../includes/base/logging \
-	-I../../includes/base/time
+	-I../../includes/base/time \
+	-I../../includes/base/net
 ABSLIB = -L../../lib/base -lbase
 LIBS = -lstdc++ -lpthread
-	
+
+byte_order:
+	$(CC) -Wall -g -o byte_order byte_order_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
 client:
 	$(CC) -Wall -g -o client testclient.cpp $(INC) $(ABSLIB) $(LIBS)
 
@@ -53,4 +57,4 @@ log:
 	$(CC) -Wall -g -o log logtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
 clean:
-	rm -rf  *.o log client server thread sem queue fs mon dsv rsync arg hashtab segm *.dSYM
+	rm -rf  *.o log client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM

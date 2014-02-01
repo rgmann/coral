@@ -6,7 +6,7 @@
 #include "RpcException.h"
 
 using namespace liber::rpc;
-using namespace packethelper;
+using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 TraceFrame::TraceFrame(const std::string& className,
@@ -37,7 +37,7 @@ std::string TraceFrame::toString() const
 //-----------------------------------------------------------------------------
 std::string TraceFrame::serialize() const
 {
-   PacketCtor lPacket(packethelper::NetworkByteOrder);
+   PacketCtor lPacket(NetworkByteOrder);
    lPacket.writeCString(mClassName);
    lPacket.writeCString(mMethodName);
    lPacket.writeCString(mFileName);
@@ -48,7 +48,7 @@ std::string TraceFrame::serialize() const
 //-----------------------------------------------------------------------------
 bool TraceFrame::deserialize(const std::string& data)
 {
-   PacketDtor lPacket(packethelper::NetworkByteOrder);
+   PacketDtor lPacket(NetworkByteOrder);
    lPacket.setData(data);
    if (lPacket.readCString(mClassName) == PacketDtor::ReadFail)
    {
@@ -113,7 +113,7 @@ std::string RpcException::toString() const
 //-----------------------------------------------------------------------------
 std::string RpcException::serialize() const
 {
-   PacketCtor lPacket(packethelper::NetworkByteOrder);
+   PacketCtor lPacket(NetworkByteOrder);
 
    lPacket.write((ui32)reporter);
    lPacket.write((ui32)id);
@@ -141,7 +141,7 @@ std::string RpcException::serialize() const
 //-----------------------------------------------------------------------------
 bool RpcException::deserialize(const std::string& data)
 {
-   PacketDtor lPacket(packethelper::NetworkByteOrder);
+   PacketDtor lPacket(NetworkByteOrder);
    lPacket.setData(data);
 
    i32 tI32Field = -1;

@@ -4,8 +4,10 @@
 #include <string>
 #include "GenericPacket.h"
 
-class AssemblyBeginMarker : public GenericPacket
-{
+namespace liber {
+namespace rsync {
+
+class AssemblyBeginMarker : public liber::netapp::GenericPacket {
 public:
    
    enum Type
@@ -27,19 +29,18 @@ public:
    
    ~AssemblyBeginMarker();
    
-   bool  setPath(const std::string &filepath);
+   bool setPath(const std::string &filepath);
    
-   bool  getPath(std::string &filepath);
+   // Empty string indicates an error.
+   std::string getPath() const;
    
-   //bool  unpack(const void* pPkt, ui32 nSizeBytes);
+   bool  unpack(const void* pPkt, ui32 nSizeBytes);
    
-protected:
-   
-   virtual ui32 dataSize() const;
-
 private:
 
-   typedef GenericPacket inherited;
+   typedef liber::netapp::GenericPacket inherited;
 };
+
+}}
 
 #endif // ASSEMBLY_BEGIN_MARKER_H

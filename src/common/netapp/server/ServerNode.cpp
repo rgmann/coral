@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
 #include "ServerNode.h"
 
 using namespace liber::net;
@@ -7,11 +8,11 @@ using namespace liber::netapp;
 
 //------------------------------------------------------------------------------
 ServerNode::ServerNode()
+: mpRxThread(NULL)
+, mpWorkerThread(NULL)
+, mpTxThread(NULL)
+, mnTimeoutMs(MaxRecvTimeoutMs)
 {
-  mpRxThread = NULL;
-  mpWorkerThread = NULL;
-  mpTxThread = NULL;
-  mnTimeoutMs = MaxRecvTimeoutMs;
 }
 
 //------------------------------------------------------------------------------
@@ -85,6 +86,8 @@ bool  ServerNode::stop()
     mpRxThread->join();
     delete mpRxThread;
     mpRxThread = NULL;
+
+    std::cout << "ServerNode::stop: Shutdown receive thread." << std::endl;
   }
    
   if (mpWorkerThread)
@@ -93,6 +96,8 @@ bool  ServerNode::stop()
     mpWorkerThread->join();
     delete mpWorkerThread;
     mpWorkerThread = NULL;
+
+    std::cout << "ServerNode::stop: Shutdown worker thread." << std::endl;
   }
 
   if (mpTxThread)
@@ -101,6 +106,8 @@ bool  ServerNode::stop()
     mpTxThread->join();
     delete mpTxThread;
     mpTxThread = NULL;
+
+    std::cout << "ServerNode::stop: Shutdown transmit thread." << std::endl;
   }
    
   cleanup();
@@ -123,8 +130,6 @@ void ServerNode::rxThreadFunc(ThreadArg* pArg)
 //------------------------------------------------------------------------------
 SocketError ServerNode::recvPacket(ServerWorker* pWorker)
 {
-//  bool  lbSuccess  = false;
-  //int   lnBytesRecvd  = 0;
   SocketStatus lStatus;
 
   NetAppPacket::Data lPacketHeader;
@@ -150,10 +155,23 @@ SocketError ServerNode::recvPacket(ServerWorker* pWorker)
     
         if (lStatus.byteCount == lPacketHeader.length)
         {
+          std::cout << "ServerNode::recvPacket: type = " << lPacketHeader.type
+                    << ", length = " << lPacketHeader.length << std::endl;
+
           if (!pWorker->put(lpPacket))
           {
+            std::cout << "ServerNode::recvPacket: "
+                      << "Failed to send packet to worker." << std::endl;
             delete lpPacket;
           }
+        }
+        else
+        {
+          std::cout << "ServerNode::recvPacket: "
+                    << " Timed out receiving packet body "
+                    << "(expected = " << lPacketHeader.length
+                    << ", received = " << lStatus.byteCount
+                    << ")" << std::endl;
         }
       }
       else
@@ -186,19 +204,30 @@ void ServerNode::rxThread(ThreadArg* pArg)
         if (lStatus == SocketOk)
         {
           // Push the worker into the work queue
-          mWorkQueue.push(lpWorker, 500);
+          if (!mWorkQueue.push(lpWorker, 500))
+          {
+            std::cout << "ServerNode::rxThread: "
+                        << "Failed to put worker in the work queue."
+                        << std::endl;
+          }
         }
         else if (lStatus == SocketTimeout)
         {
-          // Remove in active workers.  Workers are considered inactive if
+          // Remove inactive workers.  Workers are considered inactive if
           // the client hasn't sent anything in a while
-          if (lpWorker->elapseMsSinceRecv() > mnTimeoutMs)
+          //if (lpWorker->elapseMsSinceRecv() > mnTimeoutMs)
+          if (!lpWorker->status().isActive())
           {
             removeWorker(lpWorker);
           }
           else
           {
-            mRxQueue.push(lpWorker, 500);
+            if (!mRxQueue.push(lpWorker, 500))
+            {
+              std::cout << "ServerNode::rxThread: "
+                        << "Failed to put worker back in the receive queue."
+                        << std::endl;
+            }
           }
         }
         else
@@ -236,21 +265,22 @@ void ServerNode::txThread(ThreadArg* pArg)
         lpSocket = lpWorker->socket();
 
         NetAppPacket* lpPacket = lpWorker->get();
-        if (lpPacket == NULL)
-        {
-          // Push the worker back into the Rx queue
-          mRxQueue.push(lpWorker, 500);
-        }
-        else
+        if (lpPacket)
         {
           // Send the message
           lpSocket->write(lStatus,
                           (char*)lpPacket->basePtr(),
                           lpPacket->allocatedSize());
           delete lpPacket;
+        }
 
-          // Push the worker back into the Rx queue
-          mRxQueue.push(lpWorker, 500);
+
+        // Push the worker back into the Rx queue
+        if (!mRxQueue.push(lpWorker, 500))
+        {
+          std::cout << "ServerNode::txThread: "
+                    << "Failed to put worker into receive queue."
+                    << std::endl;
         }
       }
     }
@@ -276,10 +306,16 @@ void ServerNode::workThread(ThreadArg* pArg)
     {
       if (lpWorker)
       {
+        std::cout << "ServerNode::workThread: Starting work interval."
+                  << std::endl;
         lpWorker->work(100);
 
         // Push the worker back into the Rx queue
-        mTxQueue.push(lpWorker, 500);
+        if (!mTxQueue.push(lpWorker, 500))
+        {
+          std::cout << "ServerNode::workThread: "
+                    << "Failed to add worker to transmit queue." << std::endl;
+        }
       }
     }
   }
@@ -290,6 +326,8 @@ void ServerNode::cleanup()
 {
   ServerWorker* lpWorker = NULL;
 
+  std::cout << "ServerNode::cleanup: Emptying queues." << std::endl;
+
   while (mWorkQueue.pop(lpWorker,20))
   {
     if (lpWorker)
@@ -298,6 +336,7 @@ void ServerNode::cleanup()
       lpWorker = NULL;
     }
   }
+  std::cout << "ServerNode::cleanup: Emptied work queue." << std::endl;
    
   while (mRxQueue.pop(lpWorker,20))
   {
@@ -307,6 +346,7 @@ void ServerNode::cleanup()
       lpWorker = NULL;
     }
   }
+  std::cout << "ServerNode::cleanup: Emptied receive queue." << std::endl;
    
   while (mTxQueue.pop(lpWorker,20))
   {
@@ -316,6 +356,7 @@ void ServerNode::cleanup()
       lpWorker = NULL;
     }
   }
+  std::cout << "ServerNode::cleanup: Emptied transmit queue." << std::endl;
 }
 
 //-----------------------------------------------------------------------------

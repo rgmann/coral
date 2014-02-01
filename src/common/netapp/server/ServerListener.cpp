@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include "ServerListener.h"
 #include "TcpServer.h"
 
@@ -186,8 +187,16 @@ void  ServerListener::distribThread(ThreadArg* pArg)
     // Currently, round-robin is the only assignment policy.
     if (mvNodeList[lnCurrentNode] != NULL)
     {
-      printf("ServerListener::distribThread: Adding worker\n");
-      mvNodeList[lnCurrentNode]->addWorker(lpWorker);
+      if (mvNodeList[lnCurrentNode]->addWorker(lpWorker))
+      {
+        std::cout << "ServerListener::distribThread: Added worker."
+                  << std::endl;
+      }
+      else
+      {
+        std::cout << "ServerListener::distribThread: Failed to add worker."
+                  << std::endl;
+      }
          
       lnCurrentNode = (lnCurrentNode + 1) % mvNodeList.size();
     }

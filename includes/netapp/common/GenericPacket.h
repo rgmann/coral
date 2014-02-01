@@ -65,8 +65,11 @@ public:
    virtual void*        dataPtr();
    virtual void* const  dataPtr() const;
 
+   virtual void swapByteOrder();
+   virtual void swap(void* pData, ui32 nSizeBytes) = 0;
+
    void printDump();
-   
+
 protected:
    
    unsigned char* m_pPkt;

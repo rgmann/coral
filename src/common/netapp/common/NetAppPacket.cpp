@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "NetAppPacket.h"
+#include "ByteOrder.h"
 
+using namespace liber::net;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
@@ -48,26 +50,16 @@ NetAppPacket::Data* const NetAppPacket::data()
 }
 
 //-----------------------------------------------------------------------------
-/*void* NetAppPacket::dataPtr()
+void NetAppPacket::swap(void* pData, ui32 nSizeBytes)
 {
-  char* lpData = NULL;
-  if (isAllocated())
-  {
-    lpData = reinterpret_cast<char*>(basePtr());
-    lpData += sizeof(Data);
-  }
-  return lpData;
-}*/
+  NetAppPacket::Data* lpHeader = NULL;
 
-//-----------------------------------------------------------------------------
-/*void* const NetAppPacket::dataPtr() const
-{
-  char* lpData = NULL;
-  if (isAllocated())
+  if (pData && (nSizeBytes >= sizeof(NetAppPacket::Data)))
   {
-    lpData = reinterpret_cast<char*>(basePtr());
-    lpData += sizeof(Data);
+    lpHeader = reinterpret_cast<NetAppPacket::Data*>(pData);
+
+    ByteOrder::NetSwap(lpHeader->type);
+    ByteOrder::NetSwap(lpHeader->length);
   }
-  return (void* const)lpData;
-}*/
+}
 

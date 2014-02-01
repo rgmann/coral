@@ -3,8 +3,10 @@
 
 #include "GenericPacket.h"
 
-class AssemblyChunkPacket : public GenericPacket
-{
+namespace liber {
+namespace rsync {
+
+class AssemblyChunkPacket : public liber::netapp::GenericPacket {
 public:
    
    enum Type
@@ -27,15 +29,15 @@ public:
     */
    AssemblyChunkPacket(ui32 nChunkSizeBytes);
    
-   virtual ui32 dataSize() const;
-   
    ui8* const data();
    
    bool  unpack(const void* pPkt, ui32 nSizeBytes);
    
 private:
    
-   typedef GenericPacket inherited;
+   typedef liber::netapp::GenericPacket inherited;
 };
+
+}}
 
 #endif // ASSEMBLY_CHUNK_PACKET_H

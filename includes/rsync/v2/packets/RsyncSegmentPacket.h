@@ -6,9 +6,10 @@
 #include "Md5Hash.h"
 #include "RsyncCommon.h"
 
+namespace liber {
+namespace rsync {
 
-class RsyncSegmentPacket : public GenericPacket
-{
+class RsyncSegmentPacket : public liber::netapp::GenericPacket {
 public:
    
    enum Type {};
@@ -48,5 +49,7 @@ private:
    Data* segmentData();
    const Data* segmentData() const;
 };
+
+}}
 
 #endif // RSYNC_SEGMENT_PACKET_H

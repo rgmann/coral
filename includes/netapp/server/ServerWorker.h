@@ -8,6 +8,7 @@
 #include "TcpSocket.h"
 #include "Timestamp.h"
 #include "ServerPacketRouter.h"
+#include "ServerConnectionStatus.h"
 
 namespace liber {
 namespace netapp {
@@ -25,7 +26,7 @@ public:
   liber::net::TcpSocket* socket();
   netapp::ServerPacketRouter& router();   
    
-  ui32   elapseMsSinceRecv();
+  //ui32   elapseMsSinceRecv();
    
   virtual bool put(liber::netapp::NetAppPacket* pPacket);
    
@@ -33,10 +34,11 @@ public:
    
   virtual netapp::NetAppPacket* get();
 
+  const ConnectionStatus& status();
 
 protected:
    
-  void  sampleRecvTime();
+  //void  sampleRecvTime();
 
   virtual bool setup();
   virtual void teardown();   
@@ -62,7 +64,8 @@ protected:
    // The work method adds packed messages to the output queue.
   Queue<liber::netapp::NetAppPacket*> mOutQueue;
    
-  Timestamp   mRecvTs;
+  //Timestamp   mRecvTs;
+  ServerConnectionStatus mConnectionStatus;
 };
 
 }}
