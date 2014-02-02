@@ -23,7 +23,7 @@ public:
 class RsyncNode : public netapp::PacketSubscriber {
 public:
 
-  RsyncNode();
+  RsyncNode(netapp::PacketRouter& rRouter);
   ~RsyncNode();
 
   void pause();

@@ -26,6 +26,8 @@ public:
    */
   virtual void write(SocketStatus& status, const char* pData, int nBytes, int nTimeoutMs = 0);
 
+  virtual void disconnect();
+
   static SocketError TranslateErrno(int err);
 
 protected:
