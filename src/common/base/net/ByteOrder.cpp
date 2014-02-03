@@ -4,15 +4,34 @@
 
 using namespace liber::net;
 
-#define NET_SWAP(type) \
-void ByteOrder::NetSwap(type& val) \
+#define NET_SWAP_IP(type) \
+void ByteOrder::NetSwapInPlace(type& val) \
 { \
   if (ByteOrder::platformByteOrder() == ByteOrder::LittleEndian) \
   { \
     ByteOrder::Swap(val); \
   } \
-} \
+} 
 
+#define NET_SWAP(type) \
+type ByteOrder::NetSwap(type val) \
+{ \
+  type swapped = val; \
+  if (ByteOrder::platformByteOrder() == ByteOrder::LittleEndian) \
+  { \
+    ByteOrder::Swap(swapped); \
+  } \
+  return swapped; \
+} 
+
+
+//-----------------------------------------------------------------------------
+NET_SWAP_IP(i16)
+NET_SWAP_IP(ui16)
+NET_SWAP_IP(i32)
+NET_SWAP_IP(ui32)
+NET_SWAP_IP(i64)
+NET_SWAP_IP(ui64)
 
 //-----------------------------------------------------------------------------
 NET_SWAP(i16)

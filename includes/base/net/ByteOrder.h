@@ -16,12 +16,20 @@ namespace ByteOrder {
   };
 
 
-  void NetSwap(i16&);
-  void NetSwap(ui16&);
-  void NetSwap(i32&);
-  void NetSwap(ui32&);
-  void NetSwap(i64&);
-  void NetSwap(ui64&);
+  void NetSwapInPlace(i16&);
+  void NetSwapInPlace(ui16&);
+  void NetSwapInPlace(i32&);
+  void NetSwapInPlace(ui32&);
+  void NetSwapInPlace(i64&);
+  void NetSwapInPlace(ui64&);
+
+  i16  NetSwap(i16);
+  ui16 NetSwap(ui16);
+  i32  NetSwap(i32);
+  ui32 NetSwap(ui32);
+  i64  NetSwap(i64);
+  ui64 NetSwap(ui64);
+
 
   void Swap(i16&);
   void Swap(ui16&);

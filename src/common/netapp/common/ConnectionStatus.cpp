@@ -32,7 +32,7 @@ void KeepalivePacket::swap(void* pData, ui32 nSizeBytes)
   {
     lpHeader = reinterpret_cast<KeepalivePacket::Data*>(pData);
 
-    ByteOrder::NetSwap(lpHeader->count);
+    lpHeader->count = ByteOrder::NetSwap(lpHeader->count);
   }
 }
 
