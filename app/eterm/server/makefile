@@ -17,9 +17,9 @@ INC =	-I$(BASE)/includes/base \
 	-I../common/include \
 	-I../common/rpc_include
 
-ABSLIB =-L$(BASE)/lib/base -lbase \
+ABSLIB =-L$(BASE)/lib/rpc -lrpc \
 	-L$(BASE)/lib/netapp -lnetapp \
-	-L$(BASE)/lib/rpc -lrpc
+	-L$(BASE)/lib/base -lbase
 
 LIBS = `pkg-config --cflags --libs protobuf` 
 
