@@ -60,4 +60,4 @@ log:
 	$(CC) -Wall -g -o log logtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
 clean:
-	rm -rf  *.o log base_types_test client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM
+	rm -rf  *.o log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM
