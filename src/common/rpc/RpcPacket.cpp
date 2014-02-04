@@ -101,10 +101,10 @@ void RpcPacket::swap(void* pData, ui32 nSizeBytes)
   {
     RpcPacket::Data* lpData = reinterpret_cast<RpcPacket::Data*>(pData);
 
-    ByteOrder::NetSwap(lpData->rpcId);
-    ByteOrder::NetSwap(lpData->length);
-    ByteOrder::NetSwap(lpData->format);
-    ByteOrder::NetSwap(lpData->encoding);
+    lpData->rpcId = ByteOrder::NetSwap(lpData->rpcId);
+    lpData->length = ByteOrder::NetSwap(lpData->length);
+    lpData->format = ByteOrder::NetSwap(lpData->format);
+    lpData->encoding = ByteOrder::NetSwap(lpData->encoding);
   }
 }
 
