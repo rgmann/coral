@@ -58,8 +58,8 @@ void NetAppPacket::swap(void* pData, ui32 nSizeBytes)
   {
     lpHeader = reinterpret_cast<NetAppPacket::Data*>(pData);
 
-    ByteOrder::NetSwap(lpHeader->type);
-    ByteOrder::NetSwap(lpHeader->length);
+    lpHeader->type   = ByteOrder::NetSwap(lpHeader->type);
+    lpHeader->length = ByteOrder::NetSwap(lpHeader->length);
   }
 }
 

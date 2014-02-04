@@ -1,3 +1,4 @@
+#include <string.h>
 #include "PacketSubscriber.h"
 
 using namespace liber::netapp;
