@@ -14,6 +14,9 @@ INC =	-I../../includes/base \
 ABSLIB = -L../../lib/base -lbase
 LIBS = -lstdc++ -lpthread
 
+base_types:
+	$(CC) -Wall -g -o base_types base_type_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
 byte_order:
 	$(CC) -Wall -g -o byte_order byte_order_test.cpp $(INC) $(ABSLIB) $(LIBS)
 
@@ -57,4 +60,4 @@ log:
 	$(CC) -Wall -g -o log logtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
 clean:
-	rm -rf  *.o log client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM
+	rm -rf  *.o log base_types_test client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM
