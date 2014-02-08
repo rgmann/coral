@@ -1,17 +1,17 @@
 #include <string.h>
+#include <iostream>
 #include "NetAppPacket.h"
 #include "ClientPacketRouter.h"
 
-using namespace liber::net;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
-ClientPacketRouter::ClientPacketRouter(Socket& rSocket)
+ClientPacketRouter::ClientPacketRouter()
 : PacketRouter(&mTxQueue)
 , mbKeepaliveEnabled(true)
-, mrSocket(rSocket)
 , mpTxThread(NULL)
 , mpRxThread(NULL)
+, mpRouterThread(NULL)
 , mnReadTimeoutMs(100)
 {
 }
@@ -32,21 +32,33 @@ bool ClientPacketRouter::start(ui32 txCapacity)
     lbSuccess = false;
   }
 
+  if (!mRxQueue.initialize(txCapacity))
+  {
+    lbSuccess = false;
+  }
+
   // Register the connection status subscriber.
   lbSuccess &= addSubscriber(ConnectionStatus::SubscriberId,
                              &mConnectionStatus);
 
+  mpRouterThread = Thread::Create(RouterThreadEntry, this);
+  if (mpRouterThread == NULL)
+  {
+    std::cout << "Failed to create Router Thread." << std::endl;
+    lbSuccess = false;
+  }
+
   mpTxThread = Thread::Create(TxThreadEntry, this);
   if (mpTxThread == NULL)
   {
-    printf("Failed to create worker thread!\r\n");
+    std::cout << "Failed to create Packet Transmission Thread." << std::endl;
     lbSuccess = false;
   }
 
   mpRxThread = Thread::Create(RxThreadEntry, this);
   if (mpRxThread == NULL)
   {
-    printf("Failed to create worker thread!\r\n");
+    std::cout << "Failed to create Packet Receive Thread." << std::endl;
     lbSuccess = false;
   }
 
@@ -72,14 +84,16 @@ void ClientPacketRouter::stop()
     mpRxThread = NULL;
   }
 
+  if (mpRouterThread)
+  {
+    mpRouterThread->stop();
+    mpRouterThread->join();
+    delete mpRouterThread;
+    mpRouterThread = NULL;
+  }
+
   // Unregister the connection status subscriber.
   removeSubscriber(ConnectionStatus::SubscriberId);
-}
-
-//-----------------------------------------------------------------------------
-Socket& ClientPacketRouter::socket()
-{
-  return mrSocket;
 }
 
 //-----------------------------------------------------------------------------
@@ -107,9 +121,14 @@ void ClientPacketRouter::RxThreadEntry(ThreadArg* pArg)
 }
 
 //-----------------------------------------------------------------------------
+void ClientPacketRouter::RouterThreadEntry(ThreadArg* pArg)
+{
+  ((ClientPacketRouter*)pArg->pUserData)->routerThreadRun(pArg);
+}
+
+//-----------------------------------------------------------------------------
 void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
 {
-  SocketStatus  lStatus;
   NetAppPacket* lpPacket = NULL;
 
   while (!pArg->stopSignalled())
@@ -117,19 +136,22 @@ void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
     // If keepalives are enabled, check whether it is time to send a keepalive.
     if (mbKeepaliveEnabled)
     {
-      if (Timestamp::Now().diffInMs(mConnectionStatus.lastKeepaliveSendTime()) > 2500)
+      if (Timestamp::Now().diffInMs(mConnectionStatus.lastKeepaliveSendTime()) > 1000)
       {
         mConnectionStatus.sendKeepalive();
       }
     }
 
-    if (mTxQueue.pop(lpPacket, 100))
+    // TODO: Should this peek or just drop the packet?
+    if (mTxQueue.pop(lpPacket, 100) && lpPacket)
     {
-      mrSocket.write(lStatus, (char*)lpPacket->basePtr(), lpPacket->allocatedSize());
-
-      // Check that the packet was successfully sent.
-      if (lStatus.status != SocketOk || lStatus.byteCount != lpPacket->allocatedSize())
+      if (writePacket(*lpPacket))
       {
+        // TODO: Increment TX success count.
+      }
+      else
+      {
+        // TODO: Increment TX failure count.
         printf("Failed to send packet\n");
       }
 
@@ -142,32 +164,49 @@ void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
 //-----------------------------------------------------------------------------
 void ClientPacketRouter::rxThreadRun(ThreadArg* pArg)
 {
-  SocketStatus       lStatus;
-  NetAppPacket::Data lPacketHeader;
-  NetAppPacket       lPacket;
+  NetAppPacket* lpPacket = NULL;
 
   while (!pArg->stopSignalled())
   {
-    mrSocket.read(lStatus, (char*)&lPacketHeader, sizeof(lPacketHeader), mnReadTimeoutMs);
+    lpPacket = new NetAppPacket();
 
-    if (lStatus.byteCount == sizeof(lPacketHeader))
+    if (readPacket(*lpPacket, mnReadTimeoutMs))
     {
-      if (lPacket.allocate(lPacketHeader))
+      if (mRxQueue.push(lpPacket))
       {
-        mrSocket.read(lStatus, (char*)lPacket.dataPtr(),
-                      lPacketHeader.length, mnReadTimeoutMs);
-
-        if (lStatus.byteCount == lPacketHeader.length)
-        {
-          PacketSubscriber* lpSubscriber = getSubscriber(lPacketHeader.type);
-          if (lpSubscriber)
-          {
-            lpSubscriber->put((char*)lPacket.dataPtr(), lPacketHeader.length);
-          }
-        }
+        // TODO: Increment packet receive count.
+        lpPacket = NULL;
       }
+      else
+      {
+        // TODO: Increment packet drop count.
+      }
+    }
+
+    if (lpPacket)
+    {
+       delete lpPacket;
+       lpPacket = NULL;
     }
   }
 }
 
+//-----------------------------------------------------------------------------
+void ClientPacketRouter::routerThreadRun(ThreadArg* pArg)
+{
+  NetAppPacket* lpPacket = NULL;
 
+  while (!pArg->stopSignalled())
+  {
+    if (mRxQueue.pop(lpPacket, 100) && lpPacket)
+    {
+      PacketSubscriber* lpSubscriber = getSubscriber(lpPacket->data()->type);
+      if (lpSubscriber)
+      {
+        lpSubscriber->put((char*)lpPacket->dataPtr(), lpPacket->data()->length);
+      }
+    }
+
+    lpPacket = NULL;
+  }
+}

@@ -20,6 +20,7 @@ public:
   void stop();
 	
   TcpSocket* acceptClient(int nTimeoutMs);
+  bool acceptClient(TcpSocket& rSocket, int nTimeoutMs);
 	
 private:
 

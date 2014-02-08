@@ -186,3 +186,66 @@ TcpSocket* TcpServer::acceptClient(int nTimeoutMs)
    return lpTcpSocket;
 }
 
+//-----------------------------------------------------------------------------
+bool TcpServer::acceptClient(TcpSocket& rSocket, int nTimeoutMs)
+{
+   SocketAttributes attributes;
+   struct timeval locTimeout;
+	
+   int locNumReady = 0;
+	
+   fd_set lWorkingSet;
+	
+
+   if (mListenSocket <= 0)
+   {
+      printf("TcpServer::Accept:  Server not started.\r\n");
+      return false;
+   }
+	
+   locTimeout.tv_sec = nTimeoutMs / 1000;
+   locTimeout.tv_usec = 1000 * (nTimeoutMs - locTimeout.tv_sec * 1000);
+	
+	
+   memcpy(&lWorkingSet, &mServerSet, sizeof(fd_set));
+   
+   // pass max descriptor and wait indefinitely until data arrives
+   locNumReady = select(mListenSocket+1, &lWorkingSet,
+                        NULL, NULL, &locTimeout);
+   if (locNumReady < 0)
+   {
+      perror("  TcpServer::Accept - Select failed");
+      return false;
+   }
+   
+   if (locNumReady == 0)
+   {
+      //printf("TcpServer::Accept - Select timed out\n");
+      return false;
+   }
+	
+   //printf("Waiting\n");
+	
+   if(FD_ISSET(mListenSocket, &lWorkingSet)) // new client connection
+   {
+      printf("New connection!\n");
+      socklen_t nAddrLen = sizeof(attributes.addr);
+		
+      attributes.fd = accept(mListenSocket, 
+                             (struct sockaddr *)&attributes.addr, 
+                              &nAddrLen);
+      if (attributes.fd == -1)
+      {
+         perror("TcpServer::Accept - accept error!");
+         return false;
+      }
+		
+      FD_SET(attributes.fd, &attributes.set); /* add to master set */
+      attributes.port = mnPort;
+
+      rSocket.setAttributes(attributes);
+   }
+	
+   return rSocket.isConnected();
+}
+

@@ -29,6 +29,9 @@ server:
 thread:
 	$(CC) -Wall -g -o thread threadtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
+ithread:
+	$(CC) -Wall -g -o ithread ithread_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
 sem:
 	$(CC) -Wall -g -o sem semtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
@@ -60,4 +63,4 @@ log:
 	$(CC) -Wall -g -o log logtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
 clean:
-	rm -rf  *.o log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM
+	rm -rf  *.o ithread log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM

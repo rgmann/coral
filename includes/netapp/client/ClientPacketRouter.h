@@ -2,7 +2,6 @@
 #define CLIENT_PACKET_ROUTER_H
 
 #include "Thread.h"
-#include "Socket.h"
 #include "Mutex.h"
 #include "Queue.h"
 #include "PacketRouter.h"
@@ -16,18 +15,16 @@ public:
 
   static const ui32 DefaultQueueCapacity = 10;
 
-  ClientPacketRouter(liber::net::Socket& rSocket);
+  ClientPacketRouter();
   virtual ~ClientPacketRouter();
 
 //  bool addSubscriber(int subscriberId, liber::netapp::PacketSubscriber* pSubscriber);
 //  liber::netapp::PacketSubscriber* removeSubscriber(int subscriberId);
 
-  bool start(ui32 txCapacity = DefaultQueueCapacity);
+  virtual bool start(ui32 txCapacity = DefaultQueueCapacity);
   void stop();
 
   // TODO: Add method to set logger.
-
-  liber::net::Socket& socket();
 
   void setReadTimeout(int nTimeoutMs);
 
@@ -35,26 +32,32 @@ public:
 
 protected:
 
+  virtual bool readPacket(NetAppPacket& rPacket, int nTimeoutMs) = 0;
+  virtual bool writePacket(const NetAppPacket& rPacket) = 0;
+
   void txThreadRun(ThreadArg*);
   void rxThreadRun(ThreadArg*);
+  void routerThreadRun(ThreadArg*);
 
 private:
 
   static void TxThreadEntry(ThreadArg*);
   static void RxThreadEntry(ThreadArg*);
+  static void RouterThreadEntry(ThreadArg*);
 
 private:
 
   bool mbKeepaliveEnabled;
   ClientConnectionStatus mConnectionStatus;
 
-  liber::net::Socket& mrSocket;
   Thread* mpTxThread;
   Thread* mpRxThread;
+  Thread* mpRouterThread;
 
   int mnReadTimeoutMs;
 
   Queue<netapp::NetAppPacket*> mTxQueue;
+  Queue<netapp::NetAppPacket*> mRxQueue;
 
 //  Mutex mTableLock;
 //  std::map<int, liber::netapp::PacketSubscriber*> mSubscriberTable;

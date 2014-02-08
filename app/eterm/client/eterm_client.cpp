@@ -4,7 +4,7 @@
 #include "RpcClient.h"
 #include "TcpClient.h"
 //#include "HeimdallControllerClientStub.h"
-#include "ClientPacketRouter.h"
+#include "TcpClientPacketRouter.h"
 #include "RpcAppCommon.h"
 #include "EtermCommands.h"
 #include "InteractiveCommandRouter.h"
@@ -48,15 +48,7 @@ int main(int argc, char *argv[])
   int lnPort = 0;
   args.getArgVal(lnPort, Argument::ArgName, "Port");
 
-  TcpSocket* lpSocket = TcpClient::Connect(lsHostName.c_str(), lnPort, 2000);
-
-  if (lpSocket == NULL)
-  {
-    std::cout << "Failed to connect to server!" << std::endl;
-    return -1;
-  }
- 
-  ClientPacketRouter router(*lpSocket);
+  TcpClientPacketRouter router;
   RpcClient client;
 
   // Register the RPC client application.
@@ -66,27 +58,14 @@ int main(int argc, char *argv[])
   }
 
   // Start the client packet router.
-  router.start();
-  /*
-  HeimdallControllerClientStub heimdallClient(client);
-  LedCommand ledCommand(heimdallClient);
-
-  InteractiveCommandRouter commandRouter;
-  commandRouter.add(&ledCommand);
-
-  commandRouter.run();
-  */
-  runClient(client);
-
-  // Stop the client router.
-  router.stop();
-
-  if (lpSocket)
+  if (router.start(lsHostName.c_str(), lnPort))
   {
-    delete lpSocket;
-    lpSocket = NULL;
+    runClient(client);
+
+    // Stop the client router.
+    router.stop();
   }
-   
+ 
   return 0;
 }
 

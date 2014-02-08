@@ -14,6 +14,8 @@ public:
 
   void setAttributes(const SocketAttributes& attributes);
 
+  bool isConnected() const;
+
   static const int Block = -1;
 
   /**

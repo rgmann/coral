@@ -10,7 +10,12 @@ class TcpClient {
 public:
 	
    static TcpSocket* Connect(const char* host, int nPort, int nTimeoutMs);
-	
+
+  static bool Connect(TcpSocket&  rSocket,
+                      const char* host,
+                      int         nPort,
+                      int         nTimeoutMs);
+
 private:
 	
    TcpClient();

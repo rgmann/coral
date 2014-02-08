@@ -36,7 +36,7 @@ public:
       
       LogLine(const char*);
       
-      LogLine(const IThread&);
+      LogLine(const liber::concurrency::IThread&);
       
       LogLine(LogLevel);
       

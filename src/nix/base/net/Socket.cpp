@@ -27,6 +27,11 @@ void Socket::setAttributes(const SocketAttributes& attributes)
 }
 
 //------------------------------------------------------------------------------
+bool Socket::isConnected() const
+{
+  return (mAttributes.fd > 0);
+}
+
 //------------------------------------------------------------------------------
 void Socket::
 read(SocketStatus& status, char* pBuffer, int nBytes, int nTimeoutMs)

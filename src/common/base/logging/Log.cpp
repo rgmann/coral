@@ -4,6 +4,8 @@
 #include "Log.h"
 #include "Date.h"
 
+using namespace liber::concurrency;
+
 #define LOG_EXT   (const char *)"llog"
 
 Log Log::ourInstance;
@@ -74,7 +76,7 @@ Log::LogLine::LogLine(const IThread& val)
 , mnContextId(0)
 {
    mContextName = val.getName();
-   mnContextId = val.getId();
+   mnContextId = val.getID();
 }
 
 //------------------------------------------------------------------------------
