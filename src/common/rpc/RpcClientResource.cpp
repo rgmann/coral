@@ -1,6 +1,7 @@
-#include <iostream>
+#include "Log.h"
 #include "RpcClientResource.h"
 
+using namespace liber;
 using namespace liber::rpc;
 
 //-----------------------------------------------------------------------------
@@ -36,7 +37,7 @@ bool RpcClientResource::construct(const PbMessage* pParams)
    if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
    {
       mUiid = Md5Hash(lOutObject.callInfo().uiid);
-      std::cout << "RpcClientResource::construct: success" << std::endl;
+      log::debug("RpcClientResource::construct: success\n");
    }
    
    return lbSuccess;   

@@ -23,7 +23,7 @@ public:
    * @return False if the thread failed to launch or has already been
    *         launched; true otherwise.
    */
-  bool launch();
+  virtual bool launch();
 
   /**
    * Signal the thread to stop and wait for it to join.
@@ -68,6 +68,13 @@ protected:
    *                   exit if run() has multiple cancellation points.
    */
   virtual void run(const bool &bShutdown) = 0;
+
+  bool isRunning() const;
+
+  /**
+   * Asserts the shutdown flag.
+   */
+  void shutdown();
 
 private:
 

@@ -1,26 +1,46 @@
 SHELL = /bin/bash
 CC = g++
-FLAG = -Wall -c -g
+CFLAGS = -Wall -c -g
 LIBNAME = netapp
-SOURCE = ../../src/common/$(LIBNAME)/common/*.cpp \
-	../../src/common/$(LIBNAME)/server/*.cpp \
-	../../src/common/$(LIBNAME)/client/*.cpp
-INCLUDES =-I../../includes/base \
-	-I../../includes/base/crypto \
-	-I../../includes/base/file_system \
-	-I../../includes/base/cli \
-	-I../../includes/base/net \
-	-I../../includes/base/helpers \
-	-I../../includes/base/time \
-	-I../../includes/base/container \
-	-I../../includes/base/concurrency \
-	-I../../includes/netapp/common \
-	-I../../includes/netapp/server \
-	-I../../includes/netapp/client
+BASE = ../..
 
-all:
-	$(CC) $(FLAG) $(SOURCE) $(INCLUDES)
-	ar -cvq lib$(LIBNAME).a *.o
+COMMON_SOURCE = \
+$(BASE)/src/common/$(LIBNAME)/common/*.cpp \
+
+COMMON_INCLUDES = \
+-I$(BASE)/includes/base \
+-I$(BASE)/includes/base/crypto \
+-I$(BASE)/includes/base/file_system \
+-I$(BASE)/includes/base/cli \
+-I$(BASE)/includes/base/net \
+-I$(BASE)/includes/base/helpers \
+-I$(BASE)/includes/base/time \
+-I$(BASE)/includes/base/logging \
+-I$(BASE)/includes/base/container \
+-I$(BASE)/includes/base/concurrency \
+-I$(BASE)/includes/netapp/common \
+
+SERVER_INCLUDES = $(COMMON_INCLUDES) \
+	-I$(BASE)/includes/netapp/server/v2
+
+SERVER_SOURCE = $(COMMON_SOURCE) \
+	$(BASE)/src/common/$(LIBNAME)/server/v2/*.cpp
+
+CLIENT_INCLUDES = $(COMMON_INCLUDES) \
+	-I$(BASE)/includes/netapp/client
+
+CLIENT_SOURCE = $(COMMON_SOURCE) \
+	$(BASE)/src/common/$(LIBNAME)/client/*.cpp
+
+netapp_client:
+	$(CC) $(CFLAGS) $(CLIENT_SOURCE) $(CLIENT_INCLUDES)
+	ar -cvq lib$(LIBNAME)_client.a *.o
+
+netapp_server:
+	$(CC) $(CFLAGS) $(SERVER_SOURCE) $(SERVER_INCLUDES)
+	ar -cvq lib$(LIBNAME)_server.a *.o 
+
+all: $(LIBNAME)_client $(LIBNAME)_server
 
 clean:
 	rm -rf  *.o *.a

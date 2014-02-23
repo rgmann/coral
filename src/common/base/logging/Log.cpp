@@ -1,338 +1,295 @@
-#include <iostream>
 #include <sstream>
-#include <string.h>
+#include <iostream>
+#include <unistd.h>
+#include <boost/filesystem.hpp>
 #include "Log.h"
 #include "Date.h"
 
-using namespace liber::concurrency;
+#define MAX_MESSAGE_LEN_BYTES  (512)
 
-#define LOG_EXT   (const char *)"llog"
+using namespace liber::log;
 
-Log Log::ourInstance;
-
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine()
-: mLine(std::string(""))
-, mLevel(Unset)
-, mContextName("main")
-, mnContextId(0)
+//-----------------------------------------------------------------------------
+LogMessage::LogMessage(LogLevel level, const std::string& message)
+: mLevel(level)
+, mMessage(message)
+, mTimestamp(Timestamp::Now())
 {
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine(int val)
-: mLevel(Unset)
-, mContextName("main")
-, mnContextId(0)
+//-----------------------------------------------------------------------------
+std::string LogMessage::toString(ui32 format) const
 {
-   std::stringstream ss;
-   ss << val;
-   mLine = ss.str();
+  std::stringstream ss;
+
+  if (format & log::DisplayTimestamp)
+  {
+    ss << std::fixed << mTimestamp.fseconds() << std::dec << " ";
+  }
+
+  if (format & log::DisplayLogLevel)
+  {
+    ss << LogLevelToString(mLevel) << ": ";
+  }
+
+  ss << mMessage;
+
+  return ss.str();
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine(unsigned int val)
-: mLevel(Unset)
-, mContextName("main")
-, mnContextId(0)
+
+//-----------------------------------------------------------------------------
+Logger::Logger()
+: liber::concurrency::IThread("CommonLoggingThread")
+, mConsoleLogOpts(log::DisplayLogLevel)
+, mLevel(liber::log::Status)
+, mbAllowMessages(true)
+, mbLogFileEnabled(false)
+, mPath(boost::filesystem::current_path().generic_string())
+, mSuffix("")
+, mnFileSizeBytes(0)
 {
-   std::stringstream ss;
-   ss << val;
-   mLine = ss.str();
+  mMessages.initialize();
+  launch();
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine(char val)
-: mLine("")
-, mLevel(Unset)
-, mContextName("main")
-, mnContextId(0)
+//-----------------------------------------------------------------------------
+Logger::~Logger()
 {
-   mLine += val;
+  cancel(true);
+  mFile.close();
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine(const std::string &val)
-: mLine(std::string(val))
-, mLevel(Unset)
-, mContextName("main")
-, mnContextId(0)
+//-----------------------------------------------------------------------------
+void Logger::setLogFileEnabled(bool bEnable)
 {
+  mbLogFileEnabled = bEnable;
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine(const char* val)
-: mLine(std::string(val))
-, mLevel(Unset)
-, mContextName("main")
-, mnContextId(0)
+//-----------------------------------------------------------------------------
+void Logger::setPath(const std::string& path)
 {
+  mFileAttrLock.lock();
+  mPath = path;
+  mFileAttrLock.unlock();
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine(const IThread& val)
-: mLine(std::string(""))
-, mLevel(Unset)
-, mnContextId(0)
+//-----------------------------------------------------------------------------
+void Logger::setSuffix(const std::string& suffix)
 {
-   mContextName = val.getName();
-   mnContextId = val.getID();
+  mFileAttrLock.lock();
+  mSuffix = suffix;
+  mFileAttrLock.unlock();
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine::LogLine(LogLevel level)
-: mLine(std::string(""))
-, mLevel(level)
-, mContextName("main")
-, mnContextId(0)
+//-----------------------------------------------------------------------------
+void Logger::setFilterLevel(LogLevel level)
 {
+  mLevel = level;
 }
 
-//------------------------------------------------------------------------------
-Log::LogLine& operator << (Log::LogLine &left, const Log::LogLine &right)
+//-----------------------------------------------------------------------------
+void Logger::setConsoleDisplayOptions(ui32 displayOptions)
 {
-   left.mLine += right.mLine;
-   
-   if (left.mLevel == Log::Unset)
-   {
-      left.mLevel = right.mLevel;
-   }
-   
-   return left;
+  mConsoleLogOpts = displayOptions;
 }
 
-//------------------------------------------------------------------------------
-std::string Log::LogLine::getContextStr() const
+//-----------------------------------------------------------------------------
+void Logger::send(const LogMessage& message)
 {
-   std::stringstream ss;
-   
-   ss << mContextName;
-   ss << "(";
-   ss << mnContextId;
-   ss << ")";
-   
-   return ss.str();
+  if (mbAllowMessages)
+  {
+    mMessages.push(message, 0);
+  }
 }
 
-//------------------------------------------------------------------------------
-Log::Log(LogLevel level)
-: mbIsSetup(false)
-, mbPrintToConsole(false)
-, mbSeperateLevels(false)
+//-----------------------------------------------------------------------------
+void Logger::flush()
 {
-   memset(&mnCurrentFileSize, 0, sizeof(mnCurrentFileSize));
+  mbAllowMessages = false;
+  while (mMessages.size() > 0)
+  {
+    usleep(100000);
+  }
+  mbAllowMessages = true;
 }
 
-//------------------------------------------------------------------------------
-Log::~Log()
+//-----------------------------------------------------------------------------
+void Logger::run(const bool& bShutdown)
 {
-}
+  LogMessage lMessage;
+  std::string lPath = mPath;
+  std::string lSuffix = mSuffix;
 
-//------------------------------------------------------------------------------
-bool Log::Setup(const std::string &appname,
-                const std::string &root,
-                bool bSeparate)
-{
-   bool lbSuccess = true;
-   ourInstance.mBaseName = root + "/" + appname;
-   
-   if (ourInstance.mbIsSetup) return false;
-   
-   if (bSeparate)
-   {
-      ourInstance.mbSeperateLevels = true;
-      std::string lFilename = ourInstance.mBaseName + 
-                              "_error." + std::string(LOG_EXT);
-      ourInstance.mStream[Error].open(lFilename.c_str());
-      lbSuccess &= ourInstance.mStream[Error].is_open();
-   
-      lFilename = ourInstance.mBaseName + 
-                  "_warning." + std::string(LOG_EXT);
-      ourInstance.mStream[Warning].open(lFilename.c_str());
-      lbSuccess &= ourInstance.mStream[Warning].is_open();
-   
-      lFilename = ourInstance.mBaseName + "_info." + std::string(LOG_EXT);
-      ourInstance.mStream[Info].open(lFilename.c_str());
-      lbSuccess &= ourInstance.mStream[Info].is_open();
-   
-      lFilename = ourInstance.mBaseName + "_trace." + std::string(LOG_EXT);
-      ourInstance.mStream[Trace].open(lFilename.c_str());
-      lbSuccess &= ourInstance.mStream[Trace].is_open();
-   }
-   else
-   {
-      std::string lFilename = ourInstance.mBaseName + 
-                              "_all." + std::string(LOG_EXT);
-      ourInstance.mStream[0].open(lFilename.c_str());
-      lbSuccess &= ourInstance.mStream[0].is_open();
-   }
-   
-   ourInstance.mAppName = appname;
-   ourInstance.mbIsSetup = true;
-   ourInstance.mTraceQueue.initialize();
-   
-   return lbSuccess;
-}
-
-//------------------------------------------------------------------------------
-bool Log::Teardown()
-{
-   if (!ourInstance.mbIsSetup) return false;
-   
-   // Flush the queue.
-   FlushTrace();
-   
-   for (int lLevel = 0; lLevel < NumLogLevels; lLevel++)
-   {
-      ourInstance.mStream[lLevel].close();
-   }
-   
-   ourInstance.mTraceQueue.initialize();
-   
-   ourInstance.mbIsSetup = false;
-   
-   return true;
-}
-
-//------------------------------------------------------------------------------
-bool Log::FlushTrace()
-{
-   std::string lTraceStr;
-   
-   if (!ourInstance.mbIsSetup) return false;
-   
-   while (ourInstance.mTraceQueue.pop(lTraceStr, 10))
-   {
-      int lnStreamInd = ourInstance.mbSeperateLevels ? Trace : 0;
-      
-      ourInstance.mStream[lnStreamInd] << lTraceStr;
-   }
-   
-   return true;
-}
-
-//------------------------------------------------------------------------------
-void Log::PrintToConsole(bool bEnable)
-{
-   ourInstance.mbPrintToConsole = bEnable;
-}
-
-//------------------------------------------------------------------------------
-void Log::SetLogSizeLimit(ui32 nMaxSize)
-{
-   ourInstance.mynSizeLimitBytes = nMaxSize;
-}
-
-//------------------------------------------------------------------------------
-std::string Log::LevelToString(LogLevel level)
-{
-   std::string lLevelStr = "";
-   switch (level) {
-      case Error:
-         lLevelStr = "ERROR";
-         break;
-      case Warning:
-         lLevelStr = "WARN";
-         break;
-      case Info:
-         lLevelStr = "INFO";
-         break;
-      case Trace:
-         lLevelStr = "TRACE";
-         break;
-      default:
-         lLevelStr = "UNSET";
-         break;
-   }
-   return lLevelStr;
-}
-
-//------------------------------------------------------------------------------
-std::string Log::LevelToLogSuffix(LogLevel level)
-{
-   std::string lLevelStr = "";
-   switch (level) {
-      case Error:
-         lLevelStr = "_error";
-         break;
-      case Warning:
-         lLevelStr = "_warn";
-         break;
-      case Info:
-         lLevelStr = "_info";
-         break;
-      case Trace:
-         lLevelStr = "_trace";
-         break;
-      default:
-         lLevelStr = "_all";
-         break;
-   }
-   return lLevelStr;
-}
-
-//------------------------------------------------------------------------------
-void Log::log(const LogLine &line, LogLevel level)
-{
-   LogLevel lLevel = level;
-   Date lDate;
-   std::stringstream lLogSs;
-   
-   if (level == Unset)
-   {
-      lLevel = (line.mLevel != Unset) ? line.mLevel : Info;
-   }
-   
-   lLogSs   << "[" << lDate.getString(Date::LOCAL)
-            << "] "
-            << LevelToString(lLevel)
-            << " {"
-            << ourInstance.mAppName << "."
-            << line.getContextStr()
-            << "} "
-            << line.mLine
-            << std::endl;
-   
-   if (ourInstance.mbPrintToConsole)
-   {
-      std::cout << lLogSs.str();
-   }
-   
-   if (!ourInstance.mbIsSetup) return;
-   
-   int lnStreamInd = ourInstance.mbSeperateLevels ? lLevel : 0;
-   if (lLevel != Trace)
-   {
-      if (ourInstance.mnCurrentFileSize[lnStreamInd] >= 
-          ourInstance.mynSizeLimitBytes)
+  while (!bShutdown)
+  {
+    if (mMessages.pop(lMessage))
+    {
+      if (lMessage.mLevel <= mLevel)
       {
-         ourInstance.createNewFile(lnStreamInd);
-         ourInstance.mnCurrentFileSize[lnStreamInd] = 0;
+        std::cout << lMessage.toString(mConsoleLogOpts);
       }
-      
-      ourInstance.mTraceQueue.push(lLogSs.str(), 0);
-      ourInstance.mnCurrentFileSize[lnStreamInd] += lLogSs.str().length();
-   }
-   else
-   {
-      ourInstance.mStream[lnStreamInd] << lLogSs.str();
-   }
+
+      if (mbLogFileEnabled)
+      {
+        mFileAttrLock.lock();
+        lPath = mPath;
+        lSuffix = mSuffix;
+        mFileAttrLock.unlock();
+
+        if (!mFile.is_open())
+        {
+          mFile.close();
+          openLogFile(lPath, lSuffix);
+        }
+
+        if (mFile.is_open())
+        {
+          std::string lLogStr = lMessage.toString(log::DisplayAll);
+          mnFileSizeBytes += lLogStr.size();
+          mFile << lLogStr;
+        }
+      }
+      else
+      {
+        if (mFile.is_open())
+        {
+          mFile.close();
+        }
+      }
+    }
+  }
 }
 
-//------------------------------------------------------------------------------
-bool Log::createNewFile(int nStreamInd)
+//-----------------------------------------------------------------------------
+void Logger::
+openLogFile(const std::string& path, const std::string& suffix)
 {
-   Date lDate;
-   std::stringstream lNameSs;
-   
-   ourInstance.mStream[nStreamInd].close();
-   
-   lNameSs  << ourInstance.mBaseName
-            << LevelToLogSuffix((LogLevel)nStreamInd)
-            << lDate.getString(Date::LOCAL, "MMDDYYYY_S")
-            << ".llog";
-   
-   ourInstance.mStream[nStreamInd].open(lNameSs.str().c_str());
-   
-   return (ourInstance.mStream[nStreamInd].is_open());
+  Date lDate;
+
+  lDate.sample();
+  std::stringstream ss;
+  ss << lDate.year() << "_";
+  ss << (lDate.month() + 1) << "_";
+  ss << lDate.dayOfMonth() << "_";
+  ss << lDate.hour() << "_";
+  ss << lDate.minute() << "_";
+  ss << lDate.second() << "_";
+
+  if (!suffix.empty())
+  {
+    ss << suffix << "_";
+  }
+  ss << "log.txt";
+
+  mnFileSizeBytes = 0;
+
+  boost::filesystem::path lPath(path);
+  lPath /= ss.str();
+
+  mFile.open(lPath.generic_string());
 }
+
+Logger liber::log::glog;
+
+//-----------------------------------------------------------------------------
+void liber::log::setPath(const std::string& path)
+{
+  liber::log::glog.setPath(path);
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::setSuffix(const std::string& suffix)
+{
+  liber::log::glog.setSuffix(suffix);
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::enable()
+{
+  liber::log::glog.setLogFileEnabled(true);
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::disable()
+{
+  liber::log::glog.setLogFileEnabled(false);
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::options(ui32 opts)
+{
+  liber::log::glog.setConsoleDisplayOptions(opts);
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::level(LogLevel level)
+{
+  liber::log::glog.setFilterLevel(level);
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::flush()
+{
+  liber::log::glog.flush();
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::print(LogLevel level, const char* format, va_list args)
+{
+  static char lBuffer[MAX_MESSAGE_LEN_BYTES];
+  if (format)
+  {
+    vsnprintf(lBuffer, sizeof(lBuffer), format, args);
+    liber::log::glog.send(LogMessage(level, std::string(lBuffer)));
+  }
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::status(const char* format, ...)
+{
+  if (format)
+  {
+    va_list args;
+    va_start(args, format);
+    liber::log::print(Status, format, args);
+    va_end(args);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::error(const char* format, ...)
+{
+  if (format)
+  {
+    va_list args;
+    va_start(args, format);
+    liber::log::print(Error, format, args);
+    va_end(args);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::warn(const char* format, ...)
+{
+  if (format)
+  {
+    va_list args;
+    va_start(args, format);
+    liber::log::print(Warn, format, args);
+    va_end(args);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::debug(const char* format, ...)
+{
+  if (format)
+  {
+    va_list args;
+    va_start(args, format);
+    liber::log::print(Debug, format, args);
+    va_end(args);
+  }
+}
+

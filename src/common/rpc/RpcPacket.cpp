@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include "Log.h"
 #include "RpcPacket.h"
 #include "ByteOrder.h"
 
+using namespace liber;
 using namespace liber::rpc;
 using namespace liber::netapp;
 using namespace liber::net;
@@ -47,7 +49,7 @@ bool RpcPacket::getObject(RpcObject &object) const
       lbSuccess = object.deserialize(lSerialObject);
       if (!lbSuccess)
       {
-         std::cout << "RpcPacket::getObject: Failed to deserialize." << std::endl;
+         log::error("RpcPacket::getObject: Failed to deserialize.\n");
       }
    }
    

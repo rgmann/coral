@@ -1,137 +1,187 @@
-#ifndef LOG_H
-#define LOG_H
-
-#include <map>
+#include <stdio.h>
+#include <stdarg.h>
 #include <string>
 #include <fstream>
 #include "Queue.h"
 #include "IThread.h"
+#include "Timestamp.h"
+#include "BaseTypes.h"
+#include "CountingSem.h"
 
-class Log
-{
-public:
-   
-   enum LogLevel {
-      Unset       = 0,
-      Error,
-      Warning,
-      Info,
-      Trace,
-      NumLogLevels
-   };
-   
-   class LogLine
-   {
-   public:
-      
-      LogLine();
-      
-      LogLine(int);
-      
-      LogLine(unsigned int);
-      
-      LogLine(char);
-      
-      LogLine(const std::string&);
-      
-      LogLine(const char*);
-      
-      LogLine(const liber::concurrency::IThread&);
-      
-      LogLine(LogLevel);
-      
-      friend LogLine& operator << (LogLine &left, const LogLine &right);
-      
-      std::string getContextStr() const;
-      
-      std::string mLine;
-      
-      LogLevel mLevel;
-      
-      std::string mContextName;
-      int         mnContextId;
-   };
-   
-   static bool Setup(const std::string &appname,
-                     const std::string &root,
-                     bool bSeparate = true);
-   
-   static bool Teardown();
-   
-   static bool FlushTrace();
-   
-   static void PrintToConsole(bool bEnable);
-   
-   static void SetLogSizeLimit(ui32 nMaxSize);
-   
-   static void log(const LogLine &line, LogLevel level = Unset);
-   
-   static std::string LevelToString(LogLevel level);
-   
-   static std::string LevelToLogSuffix(LogLevel level);
-   
-private:
-   
-   Log(LogLevel level = Info);
-   
-   ~Log();
-   
-   bool open();
-   
-   bool close();
-   
-   bool createNewFile(int nStreamInd);
-   
-private:
-   
-   static Log ourInstance;
-      
-   bool mbIsSetup;
-   
-   bool mbPrintToConsole;
-   
-   bool mbSeperateLevels;
-   
-   std::string mAppName;
-   
-   std::string mBaseName;
-      
-   Queue<std::string> mTraceQueue;
-   
-   std::ofstream mStream[NumLogLevels];
-   ui32          mnCurrentFileSize[NumLogLevels];
-   
-   ui32 mynSizeLimitBytes;   
-};
+namespace liber  {
+namespace log    {
 
-#define ERROR(line) \
-{ \
-   Log::LogLine lLine; \
-   Log::log(lLine << line, Log::Error); \
-}
+  // Console field configuration options:
+  // Prepend the log message with the log level.
+  static const ui32 DisplayLogLevel  = 0x00000001;
+  // Prepend the log message with the message timestamp.
+  static const ui32 DisplayTimestamp = 0x00000002;
+  // Display all fields when printing the log message.
+  static const ui32 DisplayAll       = 0xFFFFFFFF;
 
-#define WARN(line) \
-{ \
-   Log::LogLine lLine; \
-   Log::log(lLine << line, Log::Warning); \
-}
+  // Log message severity enumeration. The log level is additionally used to
+  // filter messages printed to the console. Only messages with a LogLevel
+  // lower than the Logger's log level are printed to the console.  All
+  // messages, regardless of level, are written to the log file.
+  enum LogLevel {
+    Supress = 0,
+    Status,
+    Error,
+    Warn,
+    Debug,
+  };
 
-#define INFO(line) \
-{ \
-   Log::LogLine lLine; \
-   Log::log(lLine << line, Log::Info); \
-}
 
-#define TRACE(line) \
-{ \
-   Log::LogLine lLine; \
-   Log::log(lLine << line, Log::Trace); \
-}
+  // Convert the LogLevel enumeration to a string representation.
+  inline std::string LogLevelToString(LogLevel level)
+  {
+    std::string levelString = "Unknown";
+    switch (level)
+    {
+      case Status: levelString = "Status"; break;
+      case Error:  levelString = "Error";  break;
+      case Warn:   levelString = "Warn";   break;
+      case Debug:  levelString = "Debug";  break;
+      default: break;
+    }
+    return levelString;
+  };
 
-#define LOG(line) \
-{ \
-   Log::LogLine lLine; \
-   Log::log(lLine << line); \
-}
 
-#endif // LOG_H
+  // Each log message has an associated severity, user-supplied log
+  // message, and finally a timestamp.  Log messages are queued
+  // by the logger and printed to a log file and the console.
+  class LogMessage {
+  public:
+
+    LogMessage() {};
+
+    /**
+     * Construct a message with a specified severity and message.
+     * The constructor automatically timestamps the message.
+     */
+    LogMessage(LogLevel level, const std::string& message);
+
+    /**
+     * Convert the message to a string. The message formate can be configured.
+     */
+    std::string toString(ui32 format = log::DisplayAll) const;
+
+    LogLevel    mLevel;
+    std::string mMessage;
+    Timestamp   mTimestamp;
+  };
+
+
+  class Logger : public liber::concurrency::IThread {
+  public:
+
+    /**
+     * Construct the Logger and launch the logging thread. By default,
+     * the logger does not send messages to a log file. Additionally, messages
+     * sent to the console are only prepended with the severity.
+     */
+    Logger();
+
+    /**
+     * Shutdown the logging thread and close the opened log file.
+     * Note: The logger makes no guarrantee that all messages in the queue
+     * will logged since the thread is cancelled.
+     */
+    ~Logger();
+
+    /**
+     * Sets the logging path. Defaults to the same directory
+     * as the executable.
+     */
+    void setLogFileEnabled(bool bEnable);
+    void setPath(const std::string& path);
+    void setSuffix(const std::string& suffix);
+
+    void setFilterLevel(LogLevel level);
+
+    /**
+     * Send a new message to the logging queue.
+     */
+    void send(const LogMessage& message);
+
+    /**
+     * Configure the display format for messages written to the console.
+     * Note: When a message is written to the log file, all fields are written.
+     */
+    void setConsoleDisplayOptions(ui32 displayOptions);
+
+    void flush();
+
+  private:
+
+    void run(const bool& bShutdown);
+
+    /**
+     * Open a new log file in the directory specified by "path". The "suffix"
+     * can be used to make the log names more specific.
+     */
+    void openLogFile(const std::string& path, const std::string& suffix);
+
+  private:
+
+    ui32 mConsoleLogOpts;
+
+    LogLevel mLevel;
+    Queue<LogMessage> mMessages;
+
+    bool mbAllowMessages;
+
+    Mutex mFileAttrLock;
+    bool mbLogFileEnabled;
+    std::string   mPath;
+    std::string   mSuffix;
+    std::ofstream mFile;
+    ui32 mnFileSizeBytes;
+  };
+
+  // Global Logger instance
+  extern Logger glog;
+
+  /**
+   * Configure the log directory. By default, the directory is the current
+   * working directory.
+   */
+  void setPath(const std::string& path);
+
+  /**
+   * Configure the log file suffix.
+   */
+  void setSuffix(const std::string& suffix);
+
+  /**
+   * Enable the Logger to write messages to a log file.
+   */
+  void enable();
+
+  /**
+   * Disable the Logger from writing messages to a log file.
+   */
+  void disable();
+
+  /**
+   * Configure how the Logger will print messages to console.
+   */
+  void options(ui32 opts);
+
+  /**
+   * Configure the Logger severity filter.
+   */
+  void level(LogLevel level);
+
+  void flush();
+
+  void print(LogLevel level, const char* format, va_list arg);
+  void status(const char* format, ...);
+  void error(const char* format, ...);
+  void warn(const char* format, ...);
+  void debug(const char* format, ...);
+
+} // End of namespace log
+} // End of namespace liber
+

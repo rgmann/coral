@@ -241,7 +241,7 @@ void RpcServerResource::createUIID(Md5Hash& hash)
    std::stringstream stream;
 
    ++mnCurrentInstId;
-   stream << mName << Timestamp::Now().microseconds() << mnCurrentInstId;
+   stream << mName << Timestamp::Now().toMicroseconds() << mnCurrentInstId;
    std::string lUiidBlock = stream.str();
 
    hash.hashify((ui8*)lUiidBlock.data(), lUiidBlock.size());

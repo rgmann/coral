@@ -4,6 +4,7 @@
 #include "TcpSocket.h"
 #include "ClientPacketRouter.h"
 #include "IThread.h"
+#include "Callback.h"
 
 namespace liber {
 namespace netapp {
@@ -41,6 +42,8 @@ public:
 
   liber::net::TcpSocket& socket();
 
+  bool setDisconnectCallback(liber::Callback* pCallback);
+
 protected:
 
   bool readPacket(NetAppPacket& rPacket, int nTimeoutMs);
@@ -60,6 +63,9 @@ private:
   Mutex mSocketLock;
 
   TcpSocketReconnectTask mReconnectTask;
+
+  liber::Callback* mpDisconnectCallback;
+  Mutex mCallbackLock;
 };
 
 }}

@@ -7,11 +7,14 @@ class Callback {
 public:
 
   Callback() {};
-  virtual ~Callback();
+  virtual ~Callback(){};
 
-  virtual void call(void* pUserParam) = 0;
+  virtual void* call(void* pUserParam) = 0;
 
 };
+
+// "Listener" alias for Emitter-Listener usage.
+typedef Callback Listener;
 
 }
 

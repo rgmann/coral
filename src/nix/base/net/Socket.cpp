@@ -114,6 +114,7 @@ void Socket::disconnect()
 {
   if (mAttributes.fd > 0)
   {
+    printf("Socket::disconnect\n");
     close(mAttributes.fd);
     FD_CLR(mAttributes.fd, &mAttributes.set);
     mAttributes.fd = -1;

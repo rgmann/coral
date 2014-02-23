@@ -1,6 +1,7 @@
-#include <iostream>
+#include "Log.h"
 #include "RpcClient.h"
 
+using namespace liber;
 using namespace liber::rpc;
 using namespace liber::netapp;
 
@@ -79,19 +80,18 @@ bool RpcClient::put(const char* pData, ui32 nLength)
       }
       else
       {
-        std::cout << "Failed to find RPC with ID = " 
-                  << lRxObject.callInfo().rpcId 
-                  << std::endl;
+        log::error("Failed to find RPC with ID = %d\n", 
+                   lRxObject.callInfo().rpcId);
       }
     }
     else
     {
-      printf("RpcClient::put: Failed to get RpcObject\n");
+      log::error("RpcClient::put: Failed to get RpcObject\n");
     }
   }
   else
   {
-    printf("RpcClient::put: Failed to unpack RpcPacket\n");
+    log::error("RpcClient::put: Failed to unpack RpcPacket\n");
   }
 
   processCancellations();

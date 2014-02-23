@@ -14,6 +14,16 @@ INC =	-I../../includes/base \
 ABSLIB = -L../../lib/base -lbase
 LIBS = -lstdc++ -lpthread
 
+BOOST_LIB_DIR = -L/opt/local/lib
+BOOST_LIBS = -lboost_system-mt -lboost_filesystem-mt
+BOOST_LIB = $(BOOST_LIB_DIR) $(BOOST_LIBS)
+
+allocator:
+	$(CC) -Wall -g -o allocator allocator_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
+functor:
+	$(CC) -Wall -g -o functor functor_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
 base_types:
 	$(CC) -Wall -g -o base_types base_type_test.cpp $(INC) $(ABSLIB) $(LIBS)
 
@@ -62,5 +72,15 @@ segm:
 log:
 	$(CC) -Wall -g -o log logtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
+logtest:
+	$(CC) -Wall -g -o logtest log_test_new.cpp OtherLogUser.cpp $(INC) $(ABSLIB) $(LIBS) $(BOOST_LIB)
+
+ts:
+	$(CC) -Wall -g -o ts timestamp_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
 clean:
-	rm -rf  *.o ithread log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order *.dSYM
+	rm -rf *.dSYM  *.o
+	rm -f allocator
+	rm -f functor
+	rm -f logtest
+	rm -f ts ithread log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order

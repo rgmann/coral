@@ -2,31 +2,40 @@
 CC = g++
 FLAG = -Wall -c -g
 LIBDIR = base
-CPP =	../../src/nix/$(LIBDIR)/*.cpp \
-	../../src/nix/$(LIBDIR)/file_system/*.cpp \
-	../../src/common/$(LIBDIR)/cli/*.cpp \
-	../../src/common/$(LIBDIR)/helpers/*.cpp \
-	../../src/nix/$(LIBDIR)/crypto/*.cpp \
-	../../src/nix/$(LIBDIR)/concurrency/*.cpp \
-	../../src/nix/$(LIBDIR)/time/*.cpp \
-	../../src/nix/$(LIBDIR)/net/*.cpp \
-	../../src/common/$(LIBDIR)/container/*.cpp \
-	../../src/common/$(LIBDIR)/logging/*.cpp \
-	../../src/common/$(LIBDIR)/file_system/*.cpp \
-	../../src/common/$(LIBDIR)/net/*.cpp
-INC =	-I../../includes/$(LIBDIR) \
-	-I../../includes/$(LIBDIR)/crypto \
-	-I../../includes/$(LIBDIR)/file_system \
-	-I../../includes/$(LIBDIR)/cli \
-	-I../../includes/$(LIBDIR)/helpers \
-	-I../../includes/$(LIBDIR)/container \
-	-I../../includes/$(LIBDIR)/concurrency \
-	-I../../includes/$(LIBDIR)/time \
-	-I../../includes/$(LIBDIR)/logging \
-	-I../../includes/$(LIBDIR)/net
+BASE = ../..
+
+BOOST_INCLUDE = \
+-I/opt/local/include
+
+INCLUDES = $(BOOST_INCLUDE)\
+-I$(BASE)/includes/$(LIBDIR) \
+-I$(BASE)/includes/$(LIBDIR)/crypto \
+-I$(BASE)/includes/$(LIBDIR)/file_system \
+-I$(BASE)/includes/$(LIBDIR)/cli \
+-I$(BASE)/includes/$(LIBDIR)/helpers \
+-I$(BASE)/includes/$(LIBDIR)/container \
+-I$(BASE)/includes/$(LIBDIR)/concurrency \
+-I$(BASE)/includes/$(LIBDIR)/time \
+-I$(BASE)/includes/$(LIBDIR)/logging \
+-I$(BASE)/includes/$(LIBDIR)/net
+
+
+SOURCE = \
+$(BASE)/src/nix/$(LIBDIR)/*.cpp \
+$(BASE)/src/nix/$(LIBDIR)/file_system/*.cpp \
+$(BASE)/src/common/$(LIBDIR)/cli/*.cpp \
+$(BASE)/src/common/$(LIBDIR)/helpers/*.cpp \
+$(BASE)/src/nix/$(LIBDIR)/crypto/*.cpp \
+$(BASE)/src/nix/$(LIBDIR)/concurrency/*.cpp \
+$(BASE)/src/nix/$(LIBDIR)/time/*.cpp \
+$(BASE)/src/nix/$(LIBDIR)/net/*.cpp \
+$(BASE)/src/common/$(LIBDIR)/container/*.cpp \
+$(BASE)/src/common/$(LIBDIR)/logging/*.cpp \
+$(BASE)/src/common/$(LIBDIR)/file_system/*.cpp \
+$(BASE)/src/common/$(LIBDIR)/net/*.cpp
 
 all:
-	$(CC) $(FLAG) $(CPP) $(INC)
+	$(CC) $(FLAG) $(INCLUDES) $(SOURCE)
 	ar -cvq libbase.a *.o
 
 clean:

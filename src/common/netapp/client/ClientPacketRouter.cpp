@@ -152,7 +152,8 @@ void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
       else
       {
         // TODO: Increment TX failure count.
-        printf("Failed to send packet\n");
+        std::cout << "ClientPacketRouter: Failed to send packet.\n"
+                  << std::endl;
       }
 
       delete lpPacket;

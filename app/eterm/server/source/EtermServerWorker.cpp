@@ -7,8 +7,7 @@ using namespace liber::netapp;
 using namespace liber::rpc;
 
 //-----------------------------------------------------------------------------
-EtermServerWorker::EtermServerWorker(liber::net::TcpSocket* pSocket)
-: ServerWorker(pSocket)
+EtermServerWorker::EtermServerWorker()
 {
 }
 
@@ -18,7 +17,7 @@ EtermServerWorker::~EtermServerWorker()
 }
 
 //-----------------------------------------------------------------------------
-bool EtermServerWorker::setup()
+bool EtermServerWorker::derivedInitialize()
 {
   bool lbSuccess = true;
   mRpcServer.registerResource(new HeimdallControllerServerStub());
@@ -27,7 +26,7 @@ bool EtermServerWorker::setup()
 }
 
 //-----------------------------------------------------------------------------
-void EtermServerWorker::teardown()
+void EtermServerWorker::derivedDestroy()
 {
   router().removeSubscriber(RPC_APP_ID);
 }

@@ -1,19 +1,19 @@
 #ifndef ETERM_SERVER_WORKER_H
 #define ETERM_SERVER_WORKER_H
 
-#include "ServerWorker.h"
+#include "ApplicationWorker.h"
 #include "RpcServer.h"
 
-class EtermServerWorker : public liber::netapp::ServerWorker {
+class EtermServerWorker : public liber::netapp::ApplicationWorker {
 public:
 
-  EtermServerWorker(liber::net::TcpSocket* pSocket);
+  EtermServerWorker();
   ~EtermServerWorker();
 
 protected:
 
-  bool setup();
-  void teardown();
+  bool derivedInitialize();
+  void derivedDestroy();
 
 private:
 

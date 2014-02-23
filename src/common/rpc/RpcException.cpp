@@ -2,9 +2,11 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include "Log.h"
 #include "PacketHelper.h"
 #include "RpcException.h"
 
+using namespace liber;
 using namespace liber::rpc;
 using namespace liber::netapp;
 
@@ -52,22 +54,22 @@ bool TraceFrame::deserialize(const std::string& data)
    lPacket.setData(data);
    if (lPacket.readCString(mClassName) == PacketDtor::ReadFail)
    {
-      std::cout << "TraceFrame::deserialize failure at " << __LINE__ << std::endl;
+      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
    if (lPacket.readCString(mMethodName) == PacketDtor::ReadFail)
    {
-      std::cout << "TraceFrame::deserialize failure at " << __LINE__ << std::endl;
+      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
    if (lPacket.readCString(mFileName) == PacketDtor::ReadFail)
    {
-      std::cout << "TraceFrame::deserialize failure at " << __LINE__ << std::endl;
+      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
    if (!lPacket.read(mLineNumber))
    {
-      std::cout << "TraceFrame::deserialize failure at " << __LINE__ << std::endl;
+      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
    return true;
@@ -147,28 +149,28 @@ bool RpcException::deserialize(const std::string& data)
    i32 tI32Field = -1;
    if (!lPacket.read(tI32Field))
    {
-      std::cout << "RpcException::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
    reporter = (Reporter)tI32Field;
 
    if (!lPacket.read(tI32Field))
    {
-      std::cout << "RpcException::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
    id = (RpcErrorId)tI32Field;
 
    if (lPacket.readCString(message) == PacketDtor::ReadFail)
    {
-      std::cout << "RpcException::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
 
    ui8 lnFrameCount = 0;
    if (!lPacket.read(lnFrameCount))
    {
-      std::cout << "RpcException::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
    for (ui8 lnFrameInd = 0; lnFrameInd < lnFrameCount; lnFrameInd++)
@@ -177,7 +179,7 @@ bool RpcException::deserialize(const std::string& data)
       TraceFrame lFrame;
       if (lPacket.read(lFrameData) == PacketDtor::ReadFail)
       {
-         std::cout << "RpcException::deserialize failure at " << __LINE__ << std::endl;
+         log::error("RpcException::deserialize failure at %d\n", __LINE__);
          return false;
       }
       if (!lFrame.deserialize(lFrameData)) return false;

@@ -151,6 +151,21 @@ bool IThread::cancel(bool bJoin)
 }
 
 //-----------------------------------------------------------------------------
+bool IThread::isRunning() const
+{
+  return mbRunning;
+}
+
+//-----------------------------------------------------------------------------
+void IThread::shutdown()
+{
+  if (mbRunning)
+  {
+    mbShutdown = true;
+  }
+}
+
+//-----------------------------------------------------------------------------
 void* IThread::ThreadEntry(void* pArg)
 {
   IThread* lpThread = reinterpret_cast<IThread*>(pArg);

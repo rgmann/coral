@@ -1,9 +1,11 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include "Log.h"
 #include "PacketHelper.h"
 #include "RpcObject.h"
 
+using namespace liber;
 using namespace liber::rpc;
 using namespace liber::netapp;
 
@@ -132,28 +134,28 @@ bool RpcObject::deserialize(const std::string &data)
    // Read the resource name
    if (lPacket.readCString(callInfo().resource) == PacketDtor::ReadFail)
    {
-      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;
    }
 
    // Read the action name.
    if (lPacket.readCString(callInfo().action) == PacketDtor::ReadFail)
    {
-      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;
    }
 
    std::string lUiidData;
    if (lPacket.read(lUiidData) != PacketDtor::ReadOk)
    {
-      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;
    }
    memcpy(callInfo().uiid.b, lUiidData.data(), lUiidData.size());
 
    if (!lPacket.read(callInfo().rpcId))
    {
-      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;
    }
 
@@ -161,7 +163,7 @@ bool RpcObject::deserialize(const std::string &data)
    std::string lException;
    if (lPacket.read(lException) == PacketDtor::ReadFail)
    {
-      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;
    }
    exception().deserialize(lException);
@@ -169,7 +171,7 @@ bool RpcObject::deserialize(const std::string &data)
    // Read the protobuf message.
    if (lPacket.read(mMessage) == PacketDtor::ReadFail)
    {
-      std::cout << "RpcObject::deserialize failure at " << __LINE__ << std::endl;
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;
    }
 

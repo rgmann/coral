@@ -89,7 +89,7 @@ bool TcpServer::start(int port)
       close(mListenSocket);
       return false;
    }
-	
+
    //printf("Server-listen() is OK...\n");
 	
    /* add the listener to the master set */
@@ -175,7 +175,24 @@ TcpSocket* TcpServer::acceptClient(int nTimeoutMs)
          perror("TcpServer::Accept - accept error!");
          return NULL;
       }
-		
+
+      // Get the existing socket settings.
+      /*int opts = 0;
+      if ((opts = fcntl(attributes.fd, F_GETFL)) < 0 )
+      {
+        perror("TcpServer::Accept: Failed to get opts - ");
+        close(attributes.fd);
+        return NULL;
+      }*/
+
+      // Setting socket to non-block mode
+      /*if (fcntl(attributes.fd, opts | O_NONBLOCK) < 0 )
+      {
+        perror("TcpServer::Accept: Failed set NONBLOCK - ");
+        close(attributes.fd);
+        return NULL;
+      }*/
+
       FD_SET(attributes.fd, &attributes.set); /* add to master set */
       attributes.port = mnPort;
 
@@ -239,7 +256,7 @@ bool TcpServer::acceptClient(TcpSocket& rSocket, int nTimeoutMs)
          perror("TcpServer::Accept - accept error!");
          return false;
       }
-		
+
       FD_SET(attributes.fd, &attributes.set); /* add to master set */
       attributes.port = mnPort;
 

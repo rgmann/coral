@@ -1,4 +1,5 @@
 #include <iostream>
+#include <signal.h>
 #include "ArgParser.h"
 #include "BinarySem.h"
 #include "RpcClient.h"
@@ -28,6 +29,18 @@ void runClient(RpcClient& client)
   commandRouter.run();
 }
 
+class DisconnectCallback : public liber::Callback {
+public:
+
+  DisconnectCallback(){};
+  ~DisconnectCallback(){};
+
+  void call(void* pUserparam)
+  {
+    std::cout << "Disconnected from server." << std::endl;
+  }
+};
+
 int main(int argc, char *argv[])
 {
   ArgParser args;
@@ -48,8 +61,14 @@ int main(int argc, char *argv[])
   int lnPort = 0;
   args.getArgVal(lnPort, Argument::ArgName, "Port");
 
+  // To prevent the application from crashing, ignore SIGPIPE.
+  signal(SIGPIPE, SIG_IGN);
+
+  DisconnectCallback    callback;
   TcpClientPacketRouter router;
   RpcClient client;
+
+  router.setDisconnectCallback(&callback);
 
   // Register the RPC client application.
   if (!router.addSubscriber(RPC_APP_ID, &client))
@@ -65,7 +84,9 @@ int main(int argc, char *argv[])
     // Stop the client router.
     router.stop();
   }
- 
+
+  signal(SIGPIPE, SIG_DFL);
+
   return 0;
 }
 

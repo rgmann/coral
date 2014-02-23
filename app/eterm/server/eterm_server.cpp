@@ -1,16 +1,25 @@
 #include <unistd.h>
 #include <signal.h>
-#include <iostream>
-//#include "Thread.h"
-//#include "BinarySem.h"
-//#include "RpcClient.h"
-//#include "RpcServer.h"
-//#include "HeimdallControllerServerStub.h"
-#include "EtermServerListener.h"
+#include "Log.h"
+#include "ApplicationServer.h"
+#include "EtermServerWorker.h"
 
-//using namespace liber::rpc;
 using namespace liber::netapp;
-//using namespace rpc_eterm;
+
+
+class EtermServerWorkerCreator : public liber::netapp::WorkerCreator {
+public:
+
+  EtermServerWorkerCreator() : liber::netapp::WorkerCreator() {};
+  ~EtermServerWorkerCreator() {};
+
+  liber::netapp::ApplicationWorker* create ()
+  {
+    return new EtermServerWorker();
+  };
+};
+
+
 
 bool  gbShutdown = false;
 
@@ -19,10 +28,11 @@ void sighandler(int s)
    gbShutdown = true;
 }
 
+
 int main()
 {
   struct sigaction sigIntHandler;
-  EtermServerListener server;
+  ApplicationServer server;
 
   sigIntHandler.sa_handler = sighandler;
   sigemptyset(&sigIntHandler.sa_mask);
@@ -30,8 +40,7 @@ int main()
   sigaction(SIGINT, &sigIntHandler, NULL);
 
   // Set the port and start the server.
-  server.setPort(14001);
-  server.start();
+  server.start(14001, new EtermServerWorkerCreator());
 
   while (!gbShutdown)
   {
@@ -41,6 +50,7 @@ int main()
   // Shutdown the server.
   server.stop();
 
+  liber::log::flush();
   return 0;
 }
 

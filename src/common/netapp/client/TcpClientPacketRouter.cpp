@@ -1,4 +1,6 @@
 #include <string.h>
+#include <iostream>
+
 #include "TcpClient.h"
 #include "NetAppPacket.h"
 #include "TcpClientPacketRouter.h"
@@ -78,6 +80,19 @@ TcpSocket& TcpClientPacketRouter::socket()
 }
 
 //-----------------------------------------------------------------------------
+bool TcpClientPacketRouter::
+setDisconnectCallback(liber::Callback* pCallback)
+{
+  bool lbSuccess = false;
+  if ((lbSuccess = mCallbackLock.lock(0)))
+  {
+    mpDisconnectCallback = pCallback;
+    mCallbackLock.unlock();
+  }
+  return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
 bool TcpClientPacketRouter::writePacket(const NetAppPacket& rPacket)
 {
   bool lbSuccess = false;
@@ -99,6 +114,8 @@ bool TcpClientPacketRouter::writePacket(const NetAppPacket& rPacket)
     }
     else
     {
+      std::cout << "TcpClientPacketRouter::writePacket: Failure #"
+                << lStatus.status << std::endl;
       processDisconnect();
     }
   }
@@ -137,15 +154,14 @@ bool TcpClientPacketRouter::readPacket(NetAppPacket& rPacket, int nTimeoutMs)
         {
           lbSuccess = (lStatus.byteCount == lPacketHeader.length);
         }
-        else
-        {
-          processDisconnect();
-        }
       }
-      else
-      {
-        processDisconnect();
-      }
+    }
+
+    if ((lStatus.status != SocketOk) && (lStatus.status != SocketTimeout))
+    {
+      std::cout << "TcpClientPacketRouter::readPacket: Failure #"
+                << lStatus.status << std::endl;
+      processDisconnect();
     }
   }
 
@@ -156,6 +172,8 @@ bool TcpClientPacketRouter::readPacket(NetAppPacket& rPacket, int nTimeoutMs)
 void TcpClientPacketRouter::processDisconnect()
 {
   bool lbFirstToDisconnect = false;
+
+  std::cout << "TcpClientPacketRouter::processDisconnect" << std::endl;
 
   if (mSocketLock.lock(mnLockTimeoutMs))
   {
@@ -171,9 +189,22 @@ void TcpClientPacketRouter::processDisconnect()
 
   // If auto reconnect is enabled, launch the auto reconnect task on
   // a standalone thread.
-  if (mbAutoReconnect && lbFirstToDisconnect)
+  if (lbFirstToDisconnect)
   {
-    mReconnectTask.launch();
+    if (mCallbackLock.lock(0))
+    {
+      if (mpDisconnectCallback)
+      {
+        mpDisconnectCallback->call(NULL);
+      }
+
+      mCallbackLock.unlock();
+    }
+
+    if (mbAutoReconnect)
+    {
+      mReconnectTask.launch();
+    }
   }
 }
 
