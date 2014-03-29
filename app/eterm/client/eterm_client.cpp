@@ -20,11 +20,19 @@ void runClient(RpcClient& client)
 {
   HeimdallControllerClientStub heimdallClient(client);
   eterm::LedCommand ledCommand(heimdallClient);
-  eterm::FpStatusCommand fpCommand(heimdallClient);
+  eterm::ActivateDoorCommand activateDoorCommand(heimdallClient);
+  eterm::EnrollUserCommand enrollUserCommand(heimdallClient);
+  eterm::RemoveOneCommand removeOneCommand(heimdallClient);
+  eterm::RemoveAllCommand removeAllCommand(heimdallClient);
+  eterm::PrintUsersCommand printUsersCommand(heimdallClient);
 
   InteractiveCommandRouter commandRouter;
   commandRouter.add(&ledCommand);
-  commandRouter.add(&fpCommand);
+  commandRouter.add(&activateDoorCommand);
+  commandRouter.add(&enrollUserCommand);
+  commandRouter.add(&removeOneCommand);
+  commandRouter.add(&removeAllCommand);
+  commandRouter.add(&printUsersCommand);
 
   commandRouter.run();
 }
@@ -35,9 +43,10 @@ public:
   DisconnectCallback(){};
   ~DisconnectCallback(){};
 
-  void call(void* pUserparam)
+  void* call(void* pUserparam)
   {
     std::cout << "Disconnected from server." << std::endl;
+    return NULL;
   }
 };
 

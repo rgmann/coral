@@ -10,13 +10,18 @@ using namespace liber::netapp;
 class EtermServerWorkerCreator : public liber::netapp::WorkerCreator {
 public:
 
-  EtermServerWorkerCreator() : liber::netapp::WorkerCreator() {};
+  EtermServerWorkerCreator()
+  : liber::netapp::WorkerCreator()
+  , mController("10.0.0.18", 5013) {};
+
   ~EtermServerWorkerCreator() {};
 
   liber::netapp::ApplicationWorker* create ()
   {
-    return new EtermServerWorker();
+    return new EtermServerWorker(mController);
   };
+
+  eterm::HeimdallController mController;
 };
 
 
@@ -33,6 +38,8 @@ int main()
 {
   struct sigaction sigIntHandler;
   ApplicationServer server;
+
+  liber::log::level(liber::log::Debug);
 
   sigIntHandler.sa_handler = sighandler;
   sigemptyset(&sigIntHandler.sa_mask);

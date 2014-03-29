@@ -58,6 +58,12 @@ void PacketCtor::write(const std::string& val)
    stream.write(val.data(), val.size());
 }
 
+//-----------------------------------------------------------------------------
+void PacketCtor::write(const char* pData, ui32 nBytes)
+{
+  PacketCtor::write(nBytes);
+  stream.write(pData, nBytes);
+}
 
 //-----------------------------------------------------------------------------
 PacketDtor::PacketDtor(ByteOrder end)
@@ -184,6 +190,43 @@ PacketDtor::Status PacketDtor::read(std::string& val)
    delete[] lpBuffer;
    //std::cout << "PacketCtor::read(std::string& val): "
    //          << lnLength << std::endl;
+   return stream.fail() ? ReadFail : ReadOk;
+}
+
+//-----------------------------------------------------------------------------
+PacketDtor::Status PacketDtor::read(char** ppData, ui32& nBytes)
+{
+   if (!PacketDtor::read(nBytes)) return ReadFail;
+   if (nBytes == 0) return ReadEmpty;
+
+   *ppData = new char[nBytes];
+   stream.read(*ppData, nBytes);
+
+   return stream.fail() ? ReadFail : ReadOk;
+}
+
+//-----------------------------------------------------------------------------
+PacketDtor::Status PacketDtor::read(char* pData, ui32 nMaxBytes)
+{
+   ui32 lnLength = 0;
+
+   if (!PacketDtor::read(lnLength)) return ReadFail;
+   if (lnLength == 0) return ReadEmpty;
+
+   ui32 lnWriteLength = (nMaxBytes < lnLength) ? nMaxBytes : lnLength;
+   ui32 lnRemainder   = (lnWriteLength < lnLength) ? (lnLength - lnWriteLength) : 0;
+
+   // Read as much as possible into the user supplied buffer.
+   stream.read(pData, lnWriteLength);
+
+   // Read and throw away whatever is left over.
+   if (lnRemainder > 0)
+   {
+      char* lpBuffer = new char[lnRemainder];
+      stream.read(lpBuffer, lnRemainder);
+      delete[] lpBuffer;
+   }
+
    return stream.fail() ? ReadFail : ReadOk;
 }
 

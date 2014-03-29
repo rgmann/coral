@@ -3,12 +3,15 @@
 
 #include "ApplicationWorker.h"
 #include "RpcServer.h"
+#include "HeimdallControllerServerStub.h"
 
 class EtermServerWorker : public liber::netapp::ApplicationWorker {
 public:
 
-  EtermServerWorker();
+  EtermServerWorker(eterm::HeimdallController& rController);
   ~EtermServerWorker();
+
+  eterm::HeimdallController& getController();
 
 protected:
 
@@ -17,7 +20,10 @@ protected:
 
 private:
 
+  HeimdallControllerServerStub mHeimdallStub;
   liber::rpc::RpcServer mRpcServer;
+
+  eterm::HeimdallController& mrController;
 };
 
 #endif // ETERM_SERVER_WORKER_H

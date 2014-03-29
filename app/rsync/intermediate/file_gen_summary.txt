@@ -1,0 +1,7 @@
+../../app/rsync/server/rpc_include/RsyncServiceWrapper.h
+../../app/rsync/server/rpc_include/RsyncServiceServerStub.h
+../../app/rsync/client/rpc_include/RsyncServiceClientStub.h
+../../app/rsync/server/rpc_source/RsyncServiceWrapper.cpp
+../../app/rsync/server/rpc_source/user.RsyncServiceWrapper.cpp
+../../app/rsync/client/rpc_source/RsyncServiceClientStub.cpp
+../../app/rsync/server/rpc_source/RsyncServiceServerStub.cpp

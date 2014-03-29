@@ -1,5 +1,6 @@
 #include <string.h>
 #include <iostream>
+#include <sstream>
 #include "EtermCommands.h"
 #include "RpcAppCommon.h"
 
@@ -19,18 +20,18 @@ process(const liber::cli::ArgumentList& args)
 {
   if (args.size() == 2)
   {
-    rpc_eterm::LedState lLedState;
+    rpc_eterm::HcSetLedState lLedState;
     rpc_eterm::Status lStatus;
 
     // Parse the LED ID
     std::string ledName = args[0];
     if (strcasecmp(ledName.c_str(), "main") == 0)
     {
-      lLedState.set_led_id(eterm::MainLed);
+      lLedState.set_led_id(eterm::HC_MAIN_LED);
     }
     else if (strcasecmp(ledName.c_str(), "fingerprint") == 0)
     {
-      lLedState.set_led_id(eterm::FingerprintLed);
+      lLedState.set_led_id(eterm::HC_FP_LED);
     }
     else
     {
@@ -57,14 +58,14 @@ process(const liber::cli::ArgumentList& args)
 
     try {
       mrHeimdall.setLedState(lLedState, lStatus);
-      if (!lStatus.is_connected())
+      if (!lStatus.connected())
       {
-        std::cout << "Heimdall is not connected." << std::endl;
+        std::cout << "Operation failed. Heimdall is not connected."
+                  << std::endl;
       }
-      else
+      else if (lStatus.busy())
       {
-        if (!lStatus.success())
-          std::cout << "Operation failed." << std::endl;
+        std::cout << "Heimdall is busy. Try back later." << std::endl;
       }
     } catch (liber::rpc::RpcException& e) {
       std::cout << "Error" << std::endl;
@@ -79,30 +80,218 @@ process(const liber::cli::ArgumentList& args)
 
 
 //-----------------------------------------------------------------------------
-FpStatusCommand::FpStatusCommand(HeimdallControllerClientStub& rHeimdall)
-: InteractiveCommand("fpstatus", "Get fingerprint reader status")
+ActivateDoorCommand::ActivateDoorCommand(HeimdallControllerClientStub& rHeimdall)
+: InteractiveCommand("activatedoor", "Open or close the door")
 , mrHeimdall(rHeimdall)
 {
 }
 
 //-----------------------------------------------------------------------------
-void FpStatusCommand::
+void ActivateDoorCommand::
 process(const liber::cli::ArgumentList& args)
 {
   rpc_eterm::EmptyParams       emptyParams;
   rpc_eterm::Status            heimdallStatus;
 
   try {
-    mrHeimdall.getFingerprintStatus(emptyParams, heimdallStatus);
-    if (!heimdallStatus.success())
+    mrHeimdall.activateDoor(emptyParams, heimdallStatus);
+    if (!heimdallStatus.connected())
     {
-      std::cout << "Operation failed. ";
-      if (!heimdallStatus.is_connected())
-        std::cout << "Heimdall is not connected.";
-      std::cout << std::endl;
+      std::cout << "Operation failed. Heimdall is not connected."
+                << std::endl;
+    }
+    else if (heimdallStatus.busy())
+    {
+      std::cout << "Heimdall is busy. Try back later." << std::endl;
     }
   } catch (liber::rpc::RpcException& e) {
     std::cout << "Error" << std::endl;
   }
 }
+
+
+//-----------------------------------------------------------------------------
+EnrollUserCommand::EnrollUserCommand(HeimdallControllerClientStub& rHeimdall)
+: InteractiveCommand("enroll", "Enroll a new user")
+, mrHeimdall(rHeimdall)
+{
+}
+
+//-----------------------------------------------------------------------------
+void EnrollUserCommand::
+process(const liber::cli::ArgumentList& args)
+{
+  rpc_eterm::UserName userName;
+  rpc_eterm::Status   heimdallStatus;
+
+  // The user must supply the user's first and last name.
+  if (args.size() == 2)
+  {
+    userName.set_first_name(args[0]);
+    userName.set_last_name(args[1]);
+    try {
+      mrHeimdall.enroll(userName, heimdallStatus);
+      if (!heimdallStatus.connected())
+      {
+        std::cout << "Operation failed. Heimdall is not connected."
+                  << std::endl;
+      }
+      else if (heimdallStatus.busy())
+      {
+        std::cout << "Heimdall is busy. Try back later." << std::endl;
+      }
+      else
+      {
+        std::cout << "Enrollment started. Proceed to register fingerprint." << std::endl;
+      }
+    } catch (liber::rpc::RpcException& e) {
+      std::cout << "Error" << std::endl;
+    }
+  }
+  else
+  {
+    std::cout << "Please specify the user's first and last name." << std::endl;
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+RemoveOneCommand::RemoveOneCommand(HeimdallControllerClientStub& rHeimdall)
+: InteractiveCommand("removeone", "Remove a user")
+, mrHeimdall(rHeimdall)
+{
+}
+
+//-----------------------------------------------------------------------------
+void RemoveOneCommand::
+process(const liber::cli::ArgumentList& args)
+{
+  rpc_eterm::Status heimdallStatus;
+
+  // The user must supply the user's first and last name.
+  if (args.size() == 1)
+  {
+    std::stringstream ss;
+    ss << args[1];
+
+    int lUserId = 0;
+    ss >> lUserId;
+    if (ss.fail())
+    {
+      std::cout << "Parsing failed. Please specify user ID as an integer."
+                << std::endl;
+    }
+    else if (lUserId < 1 || lUserId > 199)
+    {
+      std::cout << "Invalid user ID.  ID must be > 0 and < 200." << std::endl;
+    }
+    else
+    {
+      rpc_eterm::UserID userID;
+      userID.set_user_id(lUserId);
+
+      try {
+        mrHeimdall.removeOne(userID, heimdallStatus);
+        if (!heimdallStatus.connected())
+        {
+          std::cout << "Operation failed. Heimdall is not connected."
+                    << std::endl;
+        }
+        else if (heimdallStatus.busy())
+        {
+          std::cout << "Heimdall is busy. Try back later." << std::endl;
+        }
+        else
+        {
+          std::cout << "Enrollment started. Proceed to register fingerprint." << std::endl;
+        }
+      } catch (liber::rpc::RpcException& e) {
+        std::cout << "Error" << std::endl;
+      }
+    }
+  }
+  else
+  {
+    std::cout << "Please specify an individual user's ID."
+              << std::endl;
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+RemoveAllCommand::RemoveAllCommand(HeimdallControllerClientStub& rHeimdall)
+: InteractiveCommand("removeall", "Remove all registered users")
+, mrHeimdall(rHeimdall)
+{
+}
+
+//-----------------------------------------------------------------------------
+void RemoveAllCommand::
+process(const liber::cli::ArgumentList& args)
+{
+  rpc_eterm::EmptyParams       emptyParams;
+  rpc_eterm::Status            heimdallStatus;
+
+  try {
+    mrHeimdall.removeAll(emptyParams, heimdallStatus);
+    if (!heimdallStatus.connected())
+    {
+      std::cout << "Operation failed. Heimdall is not connected."
+                << std::endl;
+    }
+    else if (heimdallStatus.busy())
+    {
+      std::cout << "Heimdall is busy. Try back later." << std::endl;
+    }
+  } catch (liber::rpc::RpcException& e) {
+    std::cout << "Error" << std::endl;
+  }
+}
+
+
+//-----------------------------------------------------------------------------
+PrintUsersCommand::PrintUsersCommand(HeimdallControllerClientStub& rHeimdall)
+: InteractiveCommand("printusers", "Print all registered users")
+, mrHeimdall(rHeimdall)
+{
+}
+
+//-----------------------------------------------------------------------------
+void printUser(const rpc_eterm::User& user)
+{
+  std::cout << "  User: " << user.user_name().last_name() << ", "
+                          << user.user_name().first_name() << std::endl
+            << "        ID: " << user.user_id() << std::endl
+            << "        access count: " << user.access_count() << std::endl
+            << "        last access: " << user.last_access().seconds() << "."
+                                       << user.last_access().nanoseconds()
+                                       << std::endl << std::endl;
+}
+
+//-----------------------------------------------------------------------------
+void PrintUsersCommand::
+process(const liber::cli::ArgumentList& args)
+{
+  rpc_eterm::EmptyParams emptyParams;
+  rpc_eterm::UserList    userList;
+
+  try {
+    mrHeimdall.getUsers(emptyParams, userList);
+    std::cout << "Registered Heimdall users:" << std::endl;
+    if (userList.users_size() <= 0)
+    {
+      std::cout << "  No registered users." << std::endl;
+    }
+    else
+    {
+      for (int index = 0; index < userList.users_size(); index++)
+      {
+        printUser(userList.users(index));
+      }
+    }
+  } catch (liber::rpc::RpcException& e) {
+    std::cout << "Error" << std::endl;
+  }
+}
+
 

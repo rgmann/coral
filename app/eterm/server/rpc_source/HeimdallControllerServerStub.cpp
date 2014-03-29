@@ -42,7 +42,11 @@ HeimdallControllerServerStub::~HeimdallControllerServerStub()
 void HeimdallControllerServerStub::registerActions()
 {
    addAction("setLedState", HeimdallControllerWrapper::setLedStateDelegate);
-   addAction("getFingerprintStatus", HeimdallControllerWrapper::getFingerprintStatusDelegate);
+   addAction("activateDoor", HeimdallControllerWrapper::activateDoorDelegate);
+   addAction("enroll", HeimdallControllerWrapper::enrollDelegate);
+   addAction("getUsers", HeimdallControllerWrapper::getUsersDelegate);
+   addAction("removeOne", HeimdallControllerWrapper::removeOneDelegate);
+   addAction("removeAll", HeimdallControllerWrapper::removeAllDelegate);
 }
 
 //-----------------------------------------------------------------------------

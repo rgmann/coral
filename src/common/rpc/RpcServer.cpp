@@ -1,6 +1,8 @@
 #include <iostream>
 #include "RpcServer.h"
+#include "Log.h"
 
+using namespace liber;
 using namespace liber::rpc;
 using namespace liber::netapp;
 
@@ -70,7 +72,7 @@ bool RpcServer::put(const char* pData, ui32 nLength)
     }
     else
     {
-      printf("RpcServer::put: Fail to unpack packet of size %u\n", nLength);
+      log::error("RpcServer::put: Fail to unpack packet of size %u\n", nLength);
     }
   }
 

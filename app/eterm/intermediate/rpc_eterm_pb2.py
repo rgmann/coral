@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='rpc_eterm.proto',
   package='rpc_eterm',
-  serialized_pb='\n\x0frpc_eterm.proto\x12\trpc_eterm\"\r\n\x0b\x45mptyParams\"*\n\x08LedState\x12\x0e\n\x06led_on\x18\x01 \x01(\x08\x12\x0e\n\x06led_id\x18\x02 \x01(\x05\"@\n\x11\x46ingerprintStatus\x12\x16\n\x0e\x66inger_pressed\x18\x01 \x01(\x08\x12\x13\n\x0bnum_records\x18\x02 \x01(\x05\"`\n\x06Status\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x14\n\x0cis_connected\x18\x02 \x01(\x08\x12/\n\tfp_status\x18\x03 \x01(\x0b\x32\x1c.rpc_eterm.FingerprintStatus')
+  serialized_pb='\n\x0frpc_eterm.proto\x12\trpc_eterm\"\r\n\x0b\x45mptyParams\")\n\x06Status\x12\x11\n\tconnected\x18\x01 \x01(\x08\x12\x0c\n\x04\x62usy\x18\x02 \x01(\x08\"2\n\nAccessTime\x12\x0f\n\x07seconds\x18\x01 \x01(\x05\x12\x13\n\x0bnanoseconds\x18\x02 \x01(\x05\"1\n\x08UserName\x12\x12\n\nfirst_name\x18\x01 \x01(\t\x12\x11\n\tlast_name\x18\x02 \x01(\t\"\x81\x01\n\x04User\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12&\n\tuser_name\x18\x02 \x01(\x0b\x32\x13.rpc_eterm.UserName\x12\x14\n\x0c\x61\x63\x63\x65ss_count\x18\x04 \x01(\r\x12*\n\x0blast_access\x18\x05 \x01(\x0b\x32\x15.rpc_eterm.AccessTime\"*\n\x08UserList\x12\x1e\n\x05users\x18\x02 \x03(\x0b\x32\x0f.rpc_eterm.User\"\x19\n\x06UserID\x12\x0f\n\x07user_id\x18\x01 \x01(\r\"/\n\rHcSetLedState\x12\x0e\n\x06led_id\x18\x01 \x01(\r\x12\x0e\n\x06led_on\x18\x02 \x01(\x08')
 
 
 
@@ -39,24 +39,24 @@ _EMPTYPARAMS = _descriptor.Descriptor(
 )
 
 
-_LEDSTATE = _descriptor.Descriptor(
-  name='LedState',
-  full_name='rpc_eterm.LedState',
+_STATUS = _descriptor.Descriptor(
+  name='Status',
+  full_name='rpc_eterm.Status',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='led_on', full_name='rpc_eterm.LedState.led_on', index=0,
+      name='connected', full_name='rpc_eterm.Status.connected', index=0,
       number=1, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='led_id', full_name='rpc_eterm.LedState.led_id', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
+      name='busy', full_name='rpc_eterm.Status.busy', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -70,26 +70,26 @@ _LEDSTATE = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=45,
-  serialized_end=87,
+  serialized_end=86,
 )
 
 
-_FINGERPRINTSTATUS = _descriptor.Descriptor(
-  name='FingerprintStatus',
-  full_name='rpc_eterm.FingerprintStatus',
+_ACCESSTIME = _descriptor.Descriptor(
+  name='AccessTime',
+  full_name='rpc_eterm.AccessTime',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='finger_pressed', full_name='rpc_eterm.FingerprintStatus.finger_pressed', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='seconds', full_name='rpc_eterm.AccessTime.seconds', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='num_records', full_name='rpc_eterm.FingerprintStatus.num_records', index=1,
+      name='nanoseconds', full_name='rpc_eterm.AccessTime.nanoseconds', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -104,35 +104,77 @@ _FINGERPRINTSTATUS = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=89,
-  serialized_end=153,
+  serialized_start=88,
+  serialized_end=138,
 )
 
 
-_STATUS = _descriptor.Descriptor(
-  name='Status',
-  full_name='rpc_eterm.Status',
+_USERNAME = _descriptor.Descriptor(
+  name='UserName',
+  full_name='rpc_eterm.UserName',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='rpc_eterm.Status.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='first_name', full_name='rpc_eterm.UserName.first_name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='is_connected', full_name='rpc_eterm.Status.is_connected', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='last_name', full_name='rpc_eterm.UserName.last_name', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=140,
+  serialized_end=189,
+)
+
+
+_USER = _descriptor.Descriptor(
+  name='User',
+  full_name='rpc_eterm.User',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='rpc_eterm.User.user_id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='fp_status', full_name='rpc_eterm.Status.fp_status', index=2,
-      number=3, type=11, cpp_type=10, label=1,
+      name='user_name', full_name='rpc_eterm.User.user_name', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='access_count', full_name='rpc_eterm.User.access_count', index=2,
+      number=4, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='last_access', full_name='rpc_eterm.User.last_access', index=3,
+      number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -146,15 +188,112 @@ _STATUS = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=155,
-  serialized_end=251,
+  serialized_start=192,
+  serialized_end=321,
 )
 
-_STATUS.fields_by_name['fp_status'].message_type = _FINGERPRINTSTATUS
+
+_USERLIST = _descriptor.Descriptor(
+  name='UserList',
+  full_name='rpc_eterm.UserList',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='users', full_name='rpc_eterm.UserList.users', index=0,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=323,
+  serialized_end=365,
+)
+
+
+_USERID = _descriptor.Descriptor(
+  name='UserID',
+  full_name='rpc_eterm.UserID',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='rpc_eterm.UserID.user_id', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=367,
+  serialized_end=392,
+)
+
+
+_HCSETLEDSTATE = _descriptor.Descriptor(
+  name='HcSetLedState',
+  full_name='rpc_eterm.HcSetLedState',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='led_id', full_name='rpc_eterm.HcSetLedState.led_id', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='led_on', full_name='rpc_eterm.HcSetLedState.led_on', index=1,
+      number=2, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=394,
+  serialized_end=441,
+)
+
+_USER.fields_by_name['user_name'].message_type = _USERNAME
+_USER.fields_by_name['last_access'].message_type = _ACCESSTIME
+_USERLIST.fields_by_name['users'].message_type = _USER
 DESCRIPTOR.message_types_by_name['EmptyParams'] = _EMPTYPARAMS
-DESCRIPTOR.message_types_by_name['LedState'] = _LEDSTATE
-DESCRIPTOR.message_types_by_name['FingerprintStatus'] = _FINGERPRINTSTATUS
 DESCRIPTOR.message_types_by_name['Status'] = _STATUS
+DESCRIPTOR.message_types_by_name['AccessTime'] = _ACCESSTIME
+DESCRIPTOR.message_types_by_name['UserName'] = _USERNAME
+DESCRIPTOR.message_types_by_name['User'] = _USER
+DESCRIPTOR.message_types_by_name['UserList'] = _USERLIST
+DESCRIPTOR.message_types_by_name['UserID'] = _USERID
+DESCRIPTOR.message_types_by_name['HcSetLedState'] = _HCSETLEDSTATE
 
 class EmptyParams(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
@@ -162,23 +301,47 @@ class EmptyParams(_message.Message):
 
   # @@protoc_insertion_point(class_scope:rpc_eterm.EmptyParams)
 
-class LedState(_message.Message):
-  __metaclass__ = _reflection.GeneratedProtocolMessageType
-  DESCRIPTOR = _LEDSTATE
-
-  # @@protoc_insertion_point(class_scope:rpc_eterm.LedState)
-
-class FingerprintStatus(_message.Message):
-  __metaclass__ = _reflection.GeneratedProtocolMessageType
-  DESCRIPTOR = _FINGERPRINTSTATUS
-
-  # @@protoc_insertion_point(class_scope:rpc_eterm.FingerprintStatus)
-
 class Status(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _STATUS
 
   # @@protoc_insertion_point(class_scope:rpc_eterm.Status)
+
+class AccessTime(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _ACCESSTIME
+
+  # @@protoc_insertion_point(class_scope:rpc_eterm.AccessTime)
+
+class UserName(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _USERNAME
+
+  # @@protoc_insertion_point(class_scope:rpc_eterm.UserName)
+
+class User(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _USER
+
+  # @@protoc_insertion_point(class_scope:rpc_eterm.User)
+
+class UserList(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _USERLIST
+
+  # @@protoc_insertion_point(class_scope:rpc_eterm.UserList)
+
+class UserID(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _USERID
+
+  # @@protoc_insertion_point(class_scope:rpc_eterm.UserID)
+
+class HcSetLedState(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _HCSETLEDSTATE
+
+  # @@protoc_insertion_point(class_scope:rpc_eterm.HcSetLedState)
 
 
 # @@protoc_insertion_point(module_scope)

@@ -2,43 +2,109 @@
 
 using namespace liber::rpc;
 using namespace rpc_eterm;
+using namespace eterm;
 
 //-----------------------------------------------------------------------------
 void HeimdallControllerWrapper::
-setLedState(const LedState& request, Status& response, RpcException& e)
+setLedState(const HcSetLedState& request, Status& response, RpcException& e)
 {
    /* TODO: Implement action here and remove the following two lines. */
-   //e.id = UnimplementedAction;
-   //e.message = "HeimdallControllerWrapper::setLedState has not been implemented.";
-   eterm::HeimdallStatus::Data lStatus;
-   eterm::HeimdallController::Status lClientStatus;
-   lClientStatus = mController.setLedState((eterm::LedId)request.led_id(), request.led_on(), lStatus);
-   response.set_success(lStatus.success);
-   //response.set_is_connected(mController.isConnected());
-   response.set_is_connected(lClientStatus.connected);
+//   e.id = UnimplementedAction;
+//   e.message = "HeimdallControllerWrapper::setLedState has not been implemented.";
+
+   if (mpController)
+   {
+     HeimdallController::Status lStatus;
+     lStatus = mpController->setLedState((LedId)request.led_id(), request.led_on());
+     response.set_connected(lStatus.connected);
+     response.set_busy(lStatus.busy);
+   }
 }
 
 
 //-----------------------------------------------------------------------------
 void HeimdallControllerWrapper::
-getFingerprintStatus(const EmptyParams& request, Status& response, RpcException& e)
+activateDoor(const EmptyParams& request, Status& response, RpcException& e)
 {
    /* TODO: Implement action here and remove the following two lines. */
-   //e.id = UnimplementedAction;
-   //e.message = "HeimdallControllerWrapper::getFingerprintStatus has not been implemented.";
-   eterm::HeimdallStatus::Data lStatus;
-   eterm::FingerprintStatus::Data lFpStatus;
-   eterm::HeimdallController::Status lClientStatus;
-   lClientStatus = mController.getFingerprintStatus(lStatus, lFpStatus);
+//   e.id = UnimplementedAction;
+//   e.message = "HeimdallControllerWrapper::activateDoor has not been implemented.";
 
-   response.set_success(lStatus.success);
-   //response.set_is_connected(mController.isConnected());
-   response.set_is_connected(lClientStatus.connected);
-
-   if (lClientStatus.connected && lClientStatus.success)
+   if (mpController)
    {
-     response.mutable_fp_status()->set_num_records(lFpStatus.numRecords);
-     response.mutable_fp_status()->set_finger_pressed(lFpStatus.fingerPressed);
+     HeimdallController::Status lStatus;
+     lStatus = mpController->activateDoor();
+     response.set_connected(lStatus.connected);
+     response.set_busy(lStatus.busy);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void HeimdallControllerWrapper::
+enroll(const UserName& request, Status& response, RpcException& e)
+{
+   /* TODO: Implement action here and remove the following two lines. */
+//   e.id = UnimplementedAction;
+//   e.message = "HeimdallControllerWrapper::enroll has not been implemented.";
+
+   if (mpController)
+   {
+     HeimdallController::Status lStatus;
+     lStatus = mpController->enroll(request.first_name(), request.last_name());
+     response.set_connected(lStatus.connected);
+     response.set_busy(lStatus.busy);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void HeimdallControllerWrapper::
+getUsers(const EmptyParams& request, UserList& response, RpcException& e)
+{
+   /* TODO: Implement action here and remove the following two lines. */
+//   e.id = UnimplementedAction;
+//   e.message = "HeimdallControllerWrapper::getUsers has not been implemented.";
+
+   if (mpController)
+   {
+     mpController->db().all(response);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void HeimdallControllerWrapper::
+removeOne(const UserID& request, Status& response, RpcException& e)
+{
+   /* TODO: Implement action here and remove the following two lines. */
+//   e.id = UnimplementedAction;
+//   e.message = "HeimdallControllerWrapper::removeOne has not been implemented.";
+
+   if (mpController)
+   {
+     HeimdallController::Status lStatus;
+     lStatus = mpController->removeOne(request.user_id());
+     response.set_connected(lStatus.connected);
+     response.set_busy(lStatus.busy);
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+void HeimdallControllerWrapper::
+removeAll(const EmptyParams& request, Status& response, RpcException& e)
+{
+   /* TODO: Implement action here and remove the following two lines. */
+//   e.id = UnimplementedAction;
+//   e.message = "HeimdallControllerWrapper::removeAll has not been implemented.";
+
+   if (mpController)
+   {
+     HeimdallController::Status lStatus;
+     lStatus = mpController->removeAll();
+     response.set_connected(lStatus.connected);
+     response.set_busy(lStatus.busy);
    }
 }
 

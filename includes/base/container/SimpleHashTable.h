@@ -6,23 +6,20 @@
 #include <vector>
 
 template <size_t N, class T>
-class SimpleHashTable
-{
+class SimpleHashTable {
 public:
    
-   SimpleHashTable();
+  SimpleHashTable();
    
-   ~SimpleHashTable();
+  ~SimpleHashTable();
    
-   //bool  add(size_t key, T val);
-   bool  add(size_t key, T val, bool bAllowDups = false);
+  bool add(size_t key, T val, bool bAllowDups = false);
+
+  bool get(size_t key, std::vector<T>& matches);
+
+  void remove(size_t key);
    
-   //T     get(size_t key, bool &bFound);
-   //bool  get(size_t key, T &val);
-   //bool  get(size_t key, std::vector<T> &matches);
-   std::vector<T> get(size_t key);
-   
-   unsigned int count() const;
+  ui32 count() const;
 
 private:
    
@@ -47,140 +44,129 @@ private:
 template <size_t N, class T>
 SimpleHashTable<N,T>::SimpleHashTable()
 {
-   m_nElementCount = 0;
+  m_nElementCount = 0;
    
-   for (size_t l_nInd = 0; l_nInd < Modulus; l_nInd++)
-   {
-      m_HashArray[l_nInd] = NULL;
-   }
+  for (size_t l_nInd = 0; l_nInd < Modulus; l_nInd++)
+  {
+    m_HashArray[l_nInd] = NULL;
+  }
 }
 
 //------------------------------------------------------------------------------
 template <size_t N, class T>
 SimpleHashTable<N,T>::~SimpleHashTable()
 {
-   // TODO: Delete hash table chains.
-   LinkNode<T>* pHead = NULL;
+  // TODO: Delete hash table chains.
+  LinkNode<T>* pHead = NULL;
    
-   for (size_t l_nInd = 0; l_nInd < Modulus; ++l_nInd)
-   {
-      // Reel in each chain
+  for (size_t l_nInd = 0; l_nInd < Modulus; ++l_nInd)
+  {
+    // Reel in each chain
+#ifdef DEBUG_CHAIN
+    printf("{D:h=%lu}",l_nInd);printChain(m_HashArray[l_nInd]);
+#endif
+    while (m_HashArray[l_nInd] != NULL)
+    {
+      pHead = m_HashArray[l_nInd];
+
+      if (pHead)
+      {
+        m_HashArray[l_nInd] = pHead->next();
+
+        delete pHead;
+        pHead = NULL;
+      }
 #ifdef DEBUG_CHAIN
       printf("{D:h=%lu}",l_nInd);printChain(m_HashArray[l_nInd]);
 #endif
-      while (m_HashArray[l_nInd] != NULL)
-      {
-         pHead = m_HashArray[l_nInd];
-         
-         if (pHead)
-         {
-            m_HashArray[l_nInd] = pHead->next();
-            
-            delete pHead;
-            pHead = NULL;
-         }
-#ifdef DEBUG_CHAIN
-         printf("{D:h=%lu}",l_nInd);printChain(m_HashArray[l_nInd]);
-#endif
-      }
-   }
+    }
+  }
 }
 
 //------------------------------------------------------------------------------
 template <size_t N, class T>
-//bool SimpleHashTable<N,T>::add(size_t key, T val)
 bool SimpleHashTable<N,T>::add(size_t key, T val, bool bAllowDups)
 {
-   size_t l_nHash = 0;
-   bool l_bNodeAdded = false;
+  size_t l_nHash = 0;
+  bool l_bNodeAdded = false;
+
+  LinkNode<T>**  pHead = NULL;
+  LinkNode<T>*   pTemp = NULL;
+
+  l_nHash = hash(key);
+  pHead = &m_HashArray[l_nHash];
+
+  do {
+    if (*pHead == NULL)
+    {
+      (*pHead) = new LinkNode<T>(key, val);
+      l_bNodeAdded = true;
+      break;
+    }
+      
+    // If duplicate keys are forbidden and we've found a duplicate key,
+    // we're done.
+    if (!bAllowDups && (*pHead)->key() == key)
+    {
+      break;
+    }
+
+    if ((*pHead)->next() == NULL)
+    {
+      (*pHead)->next(new LinkNode<T>(key, val));
+      l_bNodeAdded = true;
+      break;
+    }
+
+    pTemp = (*pHead)->next();
+    pHead = &pTemp;
+  } while (1);
    
-   LinkNode<T>**  pHead = NULL;
-   LinkNode<T>*   pTemp = NULL;
-   
-   l_nHash = hash(key);
-   pHead = &m_HashArray[l_nHash];
-   
-   do {
-      
-      if (*pHead == NULL)
-      {
-         (*pHead) = new LinkNode<T>(key, val);
-         l_bNodeAdded = true;
-         break;
-      }
-      
-      // If duplicate keys are forbidden and we've found a duplicate key,
-      // we're done.
-      if (!bAllowDups && (*pHead)->key() == key)
-      {
-         break;
-      }
-      
-      if ((*pHead)->next() == NULL)
-      {
-         (*pHead)->next(new LinkNode<T>(key, val));
-         l_bNodeAdded = true;
-         break;
-      }
-      
-      pTemp = (*pHead)->next();
-      pHead = &pTemp;
-      
-   } while (1);
-   
-   if (l_bNodeAdded)
-   {
-      m_nElementCount++;
-   }
+  if (l_bNodeAdded)
+  {
+    m_nElementCount++;
+  }
 
 #ifdef DEBUG_CHAIN
-   printf("{A:h=%lu,k=%lu}",l_nHash,key);printChain(m_HashArray[l_nHash]);
+  printf("{A:h=%lu,k=%lu}",l_nHash,key);printChain(m_HashArray[l_nHash]);
 #endif
    
-   return l_bNodeAdded;
+  return l_bNodeAdded;
 }
 
 //------------------------------------------------------------------------------
 template <size_t N, class T>
-//bool SimpleHashTable<N,T>::get(size_t key, T &val)
-//bool SimpleHashTable<N,T>::get(size_t key, std::vector<T> &matches)
-std::vector<T> SimpleHashTable<N,T>::get(size_t key)
+bool SimpleHashTable<N,T>::get(size_t key, std::vector<T> &matches)
 {
-   bool  l_bFound = false;
-   size_t l_nHash = 0;
-   LinkNode<T>*  pHead = NULL;
-   std::vector<T> l_vMatches;
-   //T  l_Value;
+  bool  l_bFound = false;
+  size_t l_nHash = 0;
+  LinkNode<T>*  pHead = NULL;
+
+  l_nHash = hash(key);
+  pHead = m_HashArray[l_nHash];
    
-   l_nHash = hash(key);
-   pHead = m_HashArray[l_nHash];
-   
-   // We have not yet found the key.
-   while (1)
-   {
-      if (pHead == NULL)
-      {
-         break;
-      }
+  // We have not yet found the key.
+  while (1)
+  {
+    if (pHead == NULL)
+    {
+      break;
+    }
       
-      if (pHead->key() == key)
-      {
-         l_bFound = true;
-         //val = pHead->value();
-         //matches.push_back(pHead->value());
-         l_vMatches.push_back(pHead->value());
-         //break;
-      }
+    if (pHead->key() == key)
+    {
+      l_bFound = true;
+      matches.push_back(pHead->value());
+    }
       
-      pHead = pHead->next();
-   }
+    pHead = pHead->next();
+  }
    
 #ifdef DEBUG_CHAIN
    printf("{G:h=%lu,k=%lu}",l_nHash,key);printChain(m_HashArray[l_nHash]);
 #endif
    
-   //return l_bFound;
-   return l_vMatches;
+  return (matches.empty() == false);
 }
 
 //------------------------------------------------------------------------------

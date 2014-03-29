@@ -26,6 +26,7 @@ public:
    //  Appends a null character.
    void writeCString(const std::string& val);
    void write(const std::string& val);
+   void write(const char* pData, ui32 nBytes);
 
    std::stringstream stream;
 
@@ -61,6 +62,8 @@ public:
 
    // Does not assume a null terminating character.
    Status read(std::string& val);
+   Status read(char** ppData, ui32& nBytes);
+   Status read(char* pData, ui32 nMaxBytes);
 
    std::stringstream stream;
 

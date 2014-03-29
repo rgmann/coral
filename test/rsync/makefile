@@ -1,37 +1,45 @@
 
-CC = gcc
-INC =	-I../../includes/base \
-	-I../../includes/base/cli \
-	-I../../includes/base/hash \
-	-I../../includes/base/crypto \
-	-I../../includes/base/file_system \
-	-I../../includes/base/helpers \
-	-I../../includes/base/container \
-	-I../../includes/base/concurrency \
-	-I../../includes/appserver \
-	-I../../includes/rsync \
-       -I../../includes/rsync/packets
+CC = c++
+CFLAGS = -Wall -g
+BASE = ../..
 
-ABSLIB = -L../../lib/base -lbase \
-         -L../../lib/rsync -lrsync \
-         -L../../lib/appserver -lappserver
+BOOST_INCLUDE = \
+-I/opt/local/include
+
+INCLUDES = $(BOOST_INCLUDE)\
+-I$(BASE)/includes/base \
+-I$(BASE)/includes/base/cli \
+-I$(BASE)/includes/base/hash \
+-I$(BASE)/includes/base/crypto \
+-I$(BASE)/includes/base/file_system \
+-I$(BASE)/includes/base/helpers \
+-I$(BASE)/includes/base/container \
+-I$(BASE)/includes/base/concurrency \
+-I$(BASE)/includes/base/logging \
+-I$(BASE)/includes/base/time \
+-I$(BASE)/includes/base/net \
+-I$(BASE)/includes/rsync \
+-I$(BASE)/includes/netapp/common
+
+LIBER_LIBS = \
+-L$(BASE)/lib/rsync -lrsync \
+-L$(BASE)/lib/base -lbase \
+-L$(BASE)/lib/netapp -lnetapp_client
 LIBS = -lstdc++ -lpthread
 
-rsync:
-	$(CC) -Wall -g -o rsync rsynctest.cpp $(INC) $(ABSLIB) $(LIBS)
+BOOST_LIB_DIR = -L/opt/local/lib
+BOOST_LIBS = -lboost_system-mt -lboost_filesystem-mt
+BOOST_LIB = $(BOOST_LIB_DIR) $(BOOST_LIBS)
 
-packet:
-	$(CC) -Wall -g -o packet packettest.cpp $(INC) $(ABSLIB) $(LIBS)
 
-flow:
-	$(CC) -Wall -g -o flow flowtest.cpp $(INC) $(ABSLIB) $(LIBS)
+segment_test:
+	$(CC) $(CFLAGS) -o segment_test segment_test.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
-class:
-	$(CC) -Wall -g -o class classtest.cpp $(INC) $(ABSLIB) $(LIBS)
-
-unit:
-	$(CC) -Wall -g -o unit unitflow.cpp $(INC) $(ABSLIB) $(LIBS)
-
+inst_test:
+	$(CC) $(CFLAGS) -o inst_test instruction_test.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
 clean:
-	rm -rf  *.o rsync packet flow class unit *.dSYM
+	rm -rf *.dSYM  *.o
+	rm -f segment_test
+	rm -f inst_test
+

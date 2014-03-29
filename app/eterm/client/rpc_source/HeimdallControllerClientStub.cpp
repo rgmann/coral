@@ -16,7 +16,7 @@ HeimdallControllerClientStub::~HeimdallControllerClientStub()
 }
 
 //------------------------------------------------------------------------------
-void HeimdallControllerClientStub::setLedState(const LedState& request, Status& response) throw (RpcException)
+void HeimdallControllerClientStub::setLedState(const HcSetLedState& request, Status& response) throw (RpcException)
 {
    if (!call("setLedState", request, response))
    {
@@ -26,9 +26,49 @@ void HeimdallControllerClientStub::setLedState(const LedState& request, Status& 
 
 
 //------------------------------------------------------------------------------
-void HeimdallControllerClientStub::getFingerprintStatus(const EmptyParams& request, Status& response) throw (RpcException)
+void HeimdallControllerClientStub::activateDoor(const EmptyParams& request, Status& response) throw (RpcException)
 {
-   if (!call("getFingerprintStatus", request, response))
+   if (!call("activateDoor", request, response))
+   {
+      throw getLastError();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+void HeimdallControllerClientStub::enroll(const UserName& request, Status& response) throw (RpcException)
+{
+   if (!call("enroll", request, response))
+   {
+      throw getLastError();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+void HeimdallControllerClientStub::getUsers(const EmptyParams& request, UserList& response) throw (RpcException)
+{
+   if (!call("getUsers", request, response))
+   {
+      throw getLastError();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+void HeimdallControllerClientStub::removeOne(const UserID& request, Status& response) throw (RpcException)
+{
+   if (!call("removeOne", request, response))
+   {
+      throw getLastError();
+   }
+}
+
+
+//------------------------------------------------------------------------------
+void HeimdallControllerClientStub::removeAll(const EmptyParams& request, Status& response) throw (RpcException)
+{
+   if (!call("removeAll", request, response))
    {
       throw getLastError();
    }

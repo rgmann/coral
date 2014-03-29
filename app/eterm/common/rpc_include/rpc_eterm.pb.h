@@ -34,9 +34,13 @@ void protobuf_AssignDesc_rpc_5feterm_2eproto();
 void protobuf_ShutdownFile_rpc_5feterm_2eproto();
 
 class EmptyParams;
-class LedState;
-class FingerprintStatus;
 class Status;
+class AccessTime;
+class UserName;
+class User;
+class UserList;
+class UserID;
+class HcSetLedState;
 
 // ===================================================================
 
@@ -112,190 +116,6 @@ class EmptyParams : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class LedState : public ::google::protobuf::Message {
- public:
-  LedState();
-  virtual ~LedState();
-
-  LedState(const LedState& from);
-
-  inline LedState& operator=(const LedState& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const LedState& default_instance();
-
-  void Swap(LedState* other);
-
-  // implements Message ----------------------------------------------
-
-  LedState* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const LedState& from);
-  void MergeFrom(const LedState& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional bool led_on = 1;
-  inline bool has_led_on() const;
-  inline void clear_led_on();
-  static const int kLedOnFieldNumber = 1;
-  inline bool led_on() const;
-  inline void set_led_on(bool value);
-
-  // optional int32 led_id = 2;
-  inline bool has_led_id() const;
-  inline void clear_led_id();
-  static const int kLedIdFieldNumber = 2;
-  inline ::google::protobuf::int32 led_id() const;
-  inline void set_led_id(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:rpc_eterm.LedState)
- private:
-  inline void set_has_led_on();
-  inline void clear_has_led_on();
-  inline void set_has_led_id();
-  inline void clear_has_led_id();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  bool led_on_;
-  ::google::protobuf::int32 led_id_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
-
-  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
-  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
-  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
-
-  void InitAsDefaultInstance();
-  static LedState* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class FingerprintStatus : public ::google::protobuf::Message {
- public:
-  FingerprintStatus();
-  virtual ~FingerprintStatus();
-
-  FingerprintStatus(const FingerprintStatus& from);
-
-  inline FingerprintStatus& operator=(const FingerprintStatus& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const FingerprintStatus& default_instance();
-
-  void Swap(FingerprintStatus* other);
-
-  // implements Message ----------------------------------------------
-
-  FingerprintStatus* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const FingerprintStatus& from);
-  void MergeFrom(const FingerprintStatus& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional bool finger_pressed = 1;
-  inline bool has_finger_pressed() const;
-  inline void clear_finger_pressed();
-  static const int kFingerPressedFieldNumber = 1;
-  inline bool finger_pressed() const;
-  inline void set_finger_pressed(bool value);
-
-  // optional int32 num_records = 2;
-  inline bool has_num_records() const;
-  inline void clear_num_records();
-  static const int kNumRecordsFieldNumber = 2;
-  inline ::google::protobuf::int32 num_records() const;
-  inline void set_num_records(::google::protobuf::int32 value);
-
-  // @@protoc_insertion_point(class_scope:rpc_eterm.FingerprintStatus)
- private:
-  inline void set_has_finger_pressed();
-  inline void clear_has_finger_pressed();
-  inline void set_has_num_records();
-  inline void clear_has_num_records();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  bool finger_pressed_;
-  ::google::protobuf::int32 num_records_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
-
-  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
-  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
-  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
-
-  void InitAsDefaultInstance();
-  static FingerprintStatus* default_instance_;
-};
-// -------------------------------------------------------------------
-
 class Status : public ::google::protobuf::Message {
  public:
   Status();
@@ -350,46 +170,34 @@ class Status : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bool success = 1;
-  inline bool has_success() const;
-  inline void clear_success();
-  static const int kSuccessFieldNumber = 1;
-  inline bool success() const;
-  inline void set_success(bool value);
+  // optional bool connected = 1;
+  inline bool has_connected() const;
+  inline void clear_connected();
+  static const int kConnectedFieldNumber = 1;
+  inline bool connected() const;
+  inline void set_connected(bool value);
 
-  // optional bool is_connected = 2;
-  inline bool has_is_connected() const;
-  inline void clear_is_connected();
-  static const int kIsConnectedFieldNumber = 2;
-  inline bool is_connected() const;
-  inline void set_is_connected(bool value);
-
-  // optional .rpc_eterm.FingerprintStatus fp_status = 3;
-  inline bool has_fp_status() const;
-  inline void clear_fp_status();
-  static const int kFpStatusFieldNumber = 3;
-  inline const ::rpc_eterm::FingerprintStatus& fp_status() const;
-  inline ::rpc_eterm::FingerprintStatus* mutable_fp_status();
-  inline ::rpc_eterm::FingerprintStatus* release_fp_status();
-  inline void set_allocated_fp_status(::rpc_eterm::FingerprintStatus* fp_status);
+  // optional bool busy = 2;
+  inline bool has_busy() const;
+  inline void clear_busy();
+  static const int kBusyFieldNumber = 2;
+  inline bool busy() const;
+  inline void set_busy(bool value);
 
   // @@protoc_insertion_point(class_scope:rpc_eterm.Status)
  private:
-  inline void set_has_success();
-  inline void clear_has_success();
-  inline void set_has_is_connected();
-  inline void clear_has_is_connected();
-  inline void set_has_fp_status();
-  inline void clear_has_fp_status();
+  inline void set_has_connected();
+  inline void clear_has_connected();
+  inline void set_has_busy();
+  inline void clear_has_busy();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::rpc_eterm::FingerprintStatus* fp_status_;
-  bool success_;
-  bool is_connected_;
+  bool connected_;
+  bool busy_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
 
   friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
   friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
@@ -397,6 +205,575 @@ class Status : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Status* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class AccessTime : public ::google::protobuf::Message {
+ public:
+  AccessTime();
+  virtual ~AccessTime();
+
+  AccessTime(const AccessTime& from);
+
+  inline AccessTime& operator=(const AccessTime& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AccessTime& default_instance();
+
+  void Swap(AccessTime* other);
+
+  // implements Message ----------------------------------------------
+
+  AccessTime* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AccessTime& from);
+  void MergeFrom(const AccessTime& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 seconds = 1;
+  inline bool has_seconds() const;
+  inline void clear_seconds();
+  static const int kSecondsFieldNumber = 1;
+  inline ::google::protobuf::int32 seconds() const;
+  inline void set_seconds(::google::protobuf::int32 value);
+
+  // optional int32 nanoseconds = 2;
+  inline bool has_nanoseconds() const;
+  inline void clear_nanoseconds();
+  static const int kNanosecondsFieldNumber = 2;
+  inline ::google::protobuf::int32 nanoseconds() const;
+  inline void set_nanoseconds(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:rpc_eterm.AccessTime)
+ private:
+  inline void set_has_seconds();
+  inline void clear_has_seconds();
+  inline void set_has_nanoseconds();
+  inline void clear_has_nanoseconds();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 seconds_;
+  ::google::protobuf::int32 nanoseconds_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
+  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
+  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
+
+  void InitAsDefaultInstance();
+  static AccessTime* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class UserName : public ::google::protobuf::Message {
+ public:
+  UserName();
+  virtual ~UserName();
+
+  UserName(const UserName& from);
+
+  inline UserName& operator=(const UserName& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const UserName& default_instance();
+
+  void Swap(UserName* other);
+
+  // implements Message ----------------------------------------------
+
+  UserName* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const UserName& from);
+  void MergeFrom(const UserName& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string first_name = 1;
+  inline bool has_first_name() const;
+  inline void clear_first_name();
+  static const int kFirstNameFieldNumber = 1;
+  inline const ::std::string& first_name() const;
+  inline void set_first_name(const ::std::string& value);
+  inline void set_first_name(const char* value);
+  inline void set_first_name(const char* value, size_t size);
+  inline ::std::string* mutable_first_name();
+  inline ::std::string* release_first_name();
+  inline void set_allocated_first_name(::std::string* first_name);
+
+  // optional string last_name = 2;
+  inline bool has_last_name() const;
+  inline void clear_last_name();
+  static const int kLastNameFieldNumber = 2;
+  inline const ::std::string& last_name() const;
+  inline void set_last_name(const ::std::string& value);
+  inline void set_last_name(const char* value);
+  inline void set_last_name(const char* value, size_t size);
+  inline ::std::string* mutable_last_name();
+  inline ::std::string* release_last_name();
+  inline void set_allocated_last_name(::std::string* last_name);
+
+  // @@protoc_insertion_point(class_scope:rpc_eterm.UserName)
+ private:
+  inline void set_has_first_name();
+  inline void clear_has_first_name();
+  inline void set_has_last_name();
+  inline void clear_has_last_name();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* first_name_;
+  ::std::string* last_name_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
+  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
+  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
+
+  void InitAsDefaultInstance();
+  static UserName* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class User : public ::google::protobuf::Message {
+ public:
+  User();
+  virtual ~User();
+
+  User(const User& from);
+
+  inline User& operator=(const User& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const User& default_instance();
+
+  void Swap(User* other);
+
+  // implements Message ----------------------------------------------
+
+  User* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const User& from);
+  void MergeFrom(const User& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 user_id = 1;
+  inline bool has_user_id() const;
+  inline void clear_user_id();
+  static const int kUserIdFieldNumber = 1;
+  inline ::google::protobuf::int32 user_id() const;
+  inline void set_user_id(::google::protobuf::int32 value);
+
+  // optional .rpc_eterm.UserName user_name = 2;
+  inline bool has_user_name() const;
+  inline void clear_user_name();
+  static const int kUserNameFieldNumber = 2;
+  inline const ::rpc_eterm::UserName& user_name() const;
+  inline ::rpc_eterm::UserName* mutable_user_name();
+  inline ::rpc_eterm::UserName* release_user_name();
+  inline void set_allocated_user_name(::rpc_eterm::UserName* user_name);
+
+  // optional uint32 access_count = 4;
+  inline bool has_access_count() const;
+  inline void clear_access_count();
+  static const int kAccessCountFieldNumber = 4;
+  inline ::google::protobuf::uint32 access_count() const;
+  inline void set_access_count(::google::protobuf::uint32 value);
+
+  // optional .rpc_eterm.AccessTime last_access = 5;
+  inline bool has_last_access() const;
+  inline void clear_last_access();
+  static const int kLastAccessFieldNumber = 5;
+  inline const ::rpc_eterm::AccessTime& last_access() const;
+  inline ::rpc_eterm::AccessTime* mutable_last_access();
+  inline ::rpc_eterm::AccessTime* release_last_access();
+  inline void set_allocated_last_access(::rpc_eterm::AccessTime* last_access);
+
+  // @@protoc_insertion_point(class_scope:rpc_eterm.User)
+ private:
+  inline void set_has_user_id();
+  inline void clear_has_user_id();
+  inline void set_has_user_name();
+  inline void clear_has_user_name();
+  inline void set_has_access_count();
+  inline void clear_has_access_count();
+  inline void set_has_last_access();
+  inline void clear_has_last_access();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::rpc_eterm::UserName* user_name_;
+  ::google::protobuf::int32 user_id_;
+  ::google::protobuf::uint32 access_count_;
+  ::rpc_eterm::AccessTime* last_access_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
+  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
+  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
+
+  void InitAsDefaultInstance();
+  static User* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class UserList : public ::google::protobuf::Message {
+ public:
+  UserList();
+  virtual ~UserList();
+
+  UserList(const UserList& from);
+
+  inline UserList& operator=(const UserList& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const UserList& default_instance();
+
+  void Swap(UserList* other);
+
+  // implements Message ----------------------------------------------
+
+  UserList* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const UserList& from);
+  void MergeFrom(const UserList& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .rpc_eterm.User users = 2;
+  inline int users_size() const;
+  inline void clear_users();
+  static const int kUsersFieldNumber = 2;
+  inline const ::rpc_eterm::User& users(int index) const;
+  inline ::rpc_eterm::User* mutable_users(int index);
+  inline ::rpc_eterm::User* add_users();
+  inline const ::google::protobuf::RepeatedPtrField< ::rpc_eterm::User >&
+      users() const;
+  inline ::google::protobuf::RepeatedPtrField< ::rpc_eterm::User >*
+      mutable_users();
+
+  // @@protoc_insertion_point(class_scope:rpc_eterm.UserList)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::rpc_eterm::User > users_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
+  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
+  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
+
+  void InitAsDefaultInstance();
+  static UserList* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class UserID : public ::google::protobuf::Message {
+ public:
+  UserID();
+  virtual ~UserID();
+
+  UserID(const UserID& from);
+
+  inline UserID& operator=(const UserID& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const UserID& default_instance();
+
+  void Swap(UserID* other);
+
+  // implements Message ----------------------------------------------
+
+  UserID* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const UserID& from);
+  void MergeFrom(const UserID& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 user_id = 1;
+  inline bool has_user_id() const;
+  inline void clear_user_id();
+  static const int kUserIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 user_id() const;
+  inline void set_user_id(::google::protobuf::uint32 value);
+
+  // @@protoc_insertion_point(class_scope:rpc_eterm.UserID)
+ private:
+  inline void set_has_user_id();
+  inline void clear_has_user_id();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 user_id_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
+  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
+  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
+
+  void InitAsDefaultInstance();
+  static UserID* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class HcSetLedState : public ::google::protobuf::Message {
+ public:
+  HcSetLedState();
+  virtual ~HcSetLedState();
+
+  HcSetLedState(const HcSetLedState& from);
+
+  inline HcSetLedState& operator=(const HcSetLedState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const HcSetLedState& default_instance();
+
+  void Swap(HcSetLedState* other);
+
+  // implements Message ----------------------------------------------
+
+  HcSetLedState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const HcSetLedState& from);
+  void MergeFrom(const HcSetLedState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 led_id = 1;
+  inline bool has_led_id() const;
+  inline void clear_led_id();
+  static const int kLedIdFieldNumber = 1;
+  inline ::google::protobuf::uint32 led_id() const;
+  inline void set_led_id(::google::protobuf::uint32 value);
+
+  // optional bool led_on = 2;
+  inline bool has_led_on() const;
+  inline void clear_led_on();
+  static const int kLedOnFieldNumber = 2;
+  inline bool led_on() const;
+  inline void set_led_on(bool value);
+
+  // @@protoc_insertion_point(class_scope:rpc_eterm.HcSetLedState)
+ private:
+  inline void set_has_led_id();
+  inline void clear_has_led_id();
+  inline void set_has_led_on();
+  inline void clear_has_led_on();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 led_id_;
+  bool led_on_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_rpc_5feterm_2eproto();
+  friend void protobuf_AssignDesc_rpc_5feterm_2eproto();
+  friend void protobuf_ShutdownFile_rpc_5feterm_2eproto();
+
+  void InitAsDefaultInstance();
+  static HcSetLedState* default_instance_;
 };
 // ===================================================================
 
@@ -407,184 +784,469 @@ class Status : public ::google::protobuf::Message {
 
 // -------------------------------------------------------------------
 
-// LedState
+// Status
 
-// optional bool led_on = 1;
-inline bool LedState::has_led_on() const {
+// optional bool connected = 1;
+inline bool Status::has_connected() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void LedState::set_has_led_on() {
+inline void Status::set_has_connected() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void LedState::clear_has_led_on() {
+inline void Status::clear_has_connected() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void LedState::clear_led_on() {
-  led_on_ = false;
-  clear_has_led_on();
+inline void Status::clear_connected() {
+  connected_ = false;
+  clear_has_connected();
 }
-inline bool LedState::led_on() const {
-  return led_on_;
+inline bool Status::connected() const {
+  return connected_;
 }
-inline void LedState::set_led_on(bool value) {
-  set_has_led_on();
-  led_on_ = value;
+inline void Status::set_connected(bool value) {
+  set_has_connected();
+  connected_ = value;
 }
 
-// optional int32 led_id = 2;
-inline bool LedState::has_led_id() const {
+// optional bool busy = 2;
+inline bool Status::has_busy() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void LedState::set_has_led_id() {
+inline void Status::set_has_busy() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void LedState::clear_has_led_id() {
+inline void Status::clear_has_busy() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void LedState::clear_led_id() {
-  led_id_ = 0;
+inline void Status::clear_busy() {
+  busy_ = false;
+  clear_has_busy();
+}
+inline bool Status::busy() const {
+  return busy_;
+}
+inline void Status::set_busy(bool value) {
+  set_has_busy();
+  busy_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// AccessTime
+
+// optional int32 seconds = 1;
+inline bool AccessTime::has_seconds() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void AccessTime::set_has_seconds() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void AccessTime::clear_has_seconds() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void AccessTime::clear_seconds() {
+  seconds_ = 0;
+  clear_has_seconds();
+}
+inline ::google::protobuf::int32 AccessTime::seconds() const {
+  return seconds_;
+}
+inline void AccessTime::set_seconds(::google::protobuf::int32 value) {
+  set_has_seconds();
+  seconds_ = value;
+}
+
+// optional int32 nanoseconds = 2;
+inline bool AccessTime::has_nanoseconds() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void AccessTime::set_has_nanoseconds() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void AccessTime::clear_has_nanoseconds() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void AccessTime::clear_nanoseconds() {
+  nanoseconds_ = 0;
+  clear_has_nanoseconds();
+}
+inline ::google::protobuf::int32 AccessTime::nanoseconds() const {
+  return nanoseconds_;
+}
+inline void AccessTime::set_nanoseconds(::google::protobuf::int32 value) {
+  set_has_nanoseconds();
+  nanoseconds_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// UserName
+
+// optional string first_name = 1;
+inline bool UserName::has_first_name() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void UserName::set_has_first_name() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void UserName::clear_has_first_name() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void UserName::clear_first_name() {
+  if (first_name_ != &::google::protobuf::internal::kEmptyString) {
+    first_name_->clear();
+  }
+  clear_has_first_name();
+}
+inline const ::std::string& UserName::first_name() const {
+  return *first_name_;
+}
+inline void UserName::set_first_name(const ::std::string& value) {
+  set_has_first_name();
+  if (first_name_ == &::google::protobuf::internal::kEmptyString) {
+    first_name_ = new ::std::string;
+  }
+  first_name_->assign(value);
+}
+inline void UserName::set_first_name(const char* value) {
+  set_has_first_name();
+  if (first_name_ == &::google::protobuf::internal::kEmptyString) {
+    first_name_ = new ::std::string;
+  }
+  first_name_->assign(value);
+}
+inline void UserName::set_first_name(const char* value, size_t size) {
+  set_has_first_name();
+  if (first_name_ == &::google::protobuf::internal::kEmptyString) {
+    first_name_ = new ::std::string;
+  }
+  first_name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* UserName::mutable_first_name() {
+  set_has_first_name();
+  if (first_name_ == &::google::protobuf::internal::kEmptyString) {
+    first_name_ = new ::std::string;
+  }
+  return first_name_;
+}
+inline ::std::string* UserName::release_first_name() {
+  clear_has_first_name();
+  if (first_name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = first_name_;
+    first_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void UserName::set_allocated_first_name(::std::string* first_name) {
+  if (first_name_ != &::google::protobuf::internal::kEmptyString) {
+    delete first_name_;
+  }
+  if (first_name) {
+    set_has_first_name();
+    first_name_ = first_name;
+  } else {
+    clear_has_first_name();
+    first_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string last_name = 2;
+inline bool UserName::has_last_name() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void UserName::set_has_last_name() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void UserName::clear_has_last_name() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void UserName::clear_last_name() {
+  if (last_name_ != &::google::protobuf::internal::kEmptyString) {
+    last_name_->clear();
+  }
+  clear_has_last_name();
+}
+inline const ::std::string& UserName::last_name() const {
+  return *last_name_;
+}
+inline void UserName::set_last_name(const ::std::string& value) {
+  set_has_last_name();
+  if (last_name_ == &::google::protobuf::internal::kEmptyString) {
+    last_name_ = new ::std::string;
+  }
+  last_name_->assign(value);
+}
+inline void UserName::set_last_name(const char* value) {
+  set_has_last_name();
+  if (last_name_ == &::google::protobuf::internal::kEmptyString) {
+    last_name_ = new ::std::string;
+  }
+  last_name_->assign(value);
+}
+inline void UserName::set_last_name(const char* value, size_t size) {
+  set_has_last_name();
+  if (last_name_ == &::google::protobuf::internal::kEmptyString) {
+    last_name_ = new ::std::string;
+  }
+  last_name_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* UserName::mutable_last_name() {
+  set_has_last_name();
+  if (last_name_ == &::google::protobuf::internal::kEmptyString) {
+    last_name_ = new ::std::string;
+  }
+  return last_name_;
+}
+inline ::std::string* UserName::release_last_name() {
+  clear_has_last_name();
+  if (last_name_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = last_name_;
+    last_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void UserName::set_allocated_last_name(::std::string* last_name) {
+  if (last_name_ != &::google::protobuf::internal::kEmptyString) {
+    delete last_name_;
+  }
+  if (last_name) {
+    set_has_last_name();
+    last_name_ = last_name;
+  } else {
+    clear_has_last_name();
+    last_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// User
+
+// optional int32 user_id = 1;
+inline bool User::has_user_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void User::set_has_user_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void User::clear_has_user_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void User::clear_user_id() {
+  user_id_ = 0;
+  clear_has_user_id();
+}
+inline ::google::protobuf::int32 User::user_id() const {
+  return user_id_;
+}
+inline void User::set_user_id(::google::protobuf::int32 value) {
+  set_has_user_id();
+  user_id_ = value;
+}
+
+// optional .rpc_eterm.UserName user_name = 2;
+inline bool User::has_user_name() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void User::set_has_user_name() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void User::clear_has_user_name() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void User::clear_user_name() {
+  if (user_name_ != NULL) user_name_->::rpc_eterm::UserName::Clear();
+  clear_has_user_name();
+}
+inline const ::rpc_eterm::UserName& User::user_name() const {
+  return user_name_ != NULL ? *user_name_ : *default_instance_->user_name_;
+}
+inline ::rpc_eterm::UserName* User::mutable_user_name() {
+  set_has_user_name();
+  if (user_name_ == NULL) user_name_ = new ::rpc_eterm::UserName;
+  return user_name_;
+}
+inline ::rpc_eterm::UserName* User::release_user_name() {
+  clear_has_user_name();
+  ::rpc_eterm::UserName* temp = user_name_;
+  user_name_ = NULL;
+  return temp;
+}
+inline void User::set_allocated_user_name(::rpc_eterm::UserName* user_name) {
+  delete user_name_;
+  user_name_ = user_name;
+  if (user_name) {
+    set_has_user_name();
+  } else {
+    clear_has_user_name();
+  }
+}
+
+// optional uint32 access_count = 4;
+inline bool User::has_access_count() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void User::set_has_access_count() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void User::clear_has_access_count() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void User::clear_access_count() {
+  access_count_ = 0u;
+  clear_has_access_count();
+}
+inline ::google::protobuf::uint32 User::access_count() const {
+  return access_count_;
+}
+inline void User::set_access_count(::google::protobuf::uint32 value) {
+  set_has_access_count();
+  access_count_ = value;
+}
+
+// optional .rpc_eterm.AccessTime last_access = 5;
+inline bool User::has_last_access() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void User::set_has_last_access() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void User::clear_has_last_access() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void User::clear_last_access() {
+  if (last_access_ != NULL) last_access_->::rpc_eterm::AccessTime::Clear();
+  clear_has_last_access();
+}
+inline const ::rpc_eterm::AccessTime& User::last_access() const {
+  return last_access_ != NULL ? *last_access_ : *default_instance_->last_access_;
+}
+inline ::rpc_eterm::AccessTime* User::mutable_last_access() {
+  set_has_last_access();
+  if (last_access_ == NULL) last_access_ = new ::rpc_eterm::AccessTime;
+  return last_access_;
+}
+inline ::rpc_eterm::AccessTime* User::release_last_access() {
+  clear_has_last_access();
+  ::rpc_eterm::AccessTime* temp = last_access_;
+  last_access_ = NULL;
+  return temp;
+}
+inline void User::set_allocated_last_access(::rpc_eterm::AccessTime* last_access) {
+  delete last_access_;
+  last_access_ = last_access;
+  if (last_access) {
+    set_has_last_access();
+  } else {
+    clear_has_last_access();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// UserList
+
+// repeated .rpc_eterm.User users = 2;
+inline int UserList::users_size() const {
+  return users_.size();
+}
+inline void UserList::clear_users() {
+  users_.Clear();
+}
+inline const ::rpc_eterm::User& UserList::users(int index) const {
+  return users_.Get(index);
+}
+inline ::rpc_eterm::User* UserList::mutable_users(int index) {
+  return users_.Mutable(index);
+}
+inline ::rpc_eterm::User* UserList::add_users() {
+  return users_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::rpc_eterm::User >&
+UserList::users() const {
+  return users_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::rpc_eterm::User >*
+UserList::mutable_users() {
+  return &users_;
+}
+
+// -------------------------------------------------------------------
+
+// UserID
+
+// optional uint32 user_id = 1;
+inline bool UserID::has_user_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void UserID::set_has_user_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void UserID::clear_has_user_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void UserID::clear_user_id() {
+  user_id_ = 0u;
+  clear_has_user_id();
+}
+inline ::google::protobuf::uint32 UserID::user_id() const {
+  return user_id_;
+}
+inline void UserID::set_user_id(::google::protobuf::uint32 value) {
+  set_has_user_id();
+  user_id_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// HcSetLedState
+
+// optional uint32 led_id = 1;
+inline bool HcSetLedState::has_led_id() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void HcSetLedState::set_has_led_id() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void HcSetLedState::clear_has_led_id() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void HcSetLedState::clear_led_id() {
+  led_id_ = 0u;
   clear_has_led_id();
 }
-inline ::google::protobuf::int32 LedState::led_id() const {
+inline ::google::protobuf::uint32 HcSetLedState::led_id() const {
   return led_id_;
 }
-inline void LedState::set_led_id(::google::protobuf::int32 value) {
+inline void HcSetLedState::set_led_id(::google::protobuf::uint32 value) {
   set_has_led_id();
   led_id_ = value;
 }
 
-// -------------------------------------------------------------------
-
-// FingerprintStatus
-
-// optional bool finger_pressed = 1;
-inline bool FingerprintStatus::has_finger_pressed() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void FingerprintStatus::set_has_finger_pressed() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void FingerprintStatus::clear_has_finger_pressed() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void FingerprintStatus::clear_finger_pressed() {
-  finger_pressed_ = false;
-  clear_has_finger_pressed();
-}
-inline bool FingerprintStatus::finger_pressed() const {
-  return finger_pressed_;
-}
-inline void FingerprintStatus::set_finger_pressed(bool value) {
-  set_has_finger_pressed();
-  finger_pressed_ = value;
-}
-
-// optional int32 num_records = 2;
-inline bool FingerprintStatus::has_num_records() const {
+// optional bool led_on = 2;
+inline bool HcSetLedState::has_led_on() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void FingerprintStatus::set_has_num_records() {
+inline void HcSetLedState::set_has_led_on() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void FingerprintStatus::clear_has_num_records() {
+inline void HcSetLedState::clear_has_led_on() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void FingerprintStatus::clear_num_records() {
-  num_records_ = 0;
-  clear_has_num_records();
+inline void HcSetLedState::clear_led_on() {
+  led_on_ = false;
+  clear_has_led_on();
 }
-inline ::google::protobuf::int32 FingerprintStatus::num_records() const {
-  return num_records_;
+inline bool HcSetLedState::led_on() const {
+  return led_on_;
 }
-inline void FingerprintStatus::set_num_records(::google::protobuf::int32 value) {
-  set_has_num_records();
-  num_records_ = value;
-}
-
-// -------------------------------------------------------------------
-
-// Status
-
-// optional bool success = 1;
-inline bool Status::has_success() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void Status::set_has_success() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void Status::clear_has_success() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void Status::clear_success() {
-  success_ = false;
-  clear_has_success();
-}
-inline bool Status::success() const {
-  return success_;
-}
-inline void Status::set_success(bool value) {
-  set_has_success();
-  success_ = value;
-}
-
-// optional bool is_connected = 2;
-inline bool Status::has_is_connected() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void Status::set_has_is_connected() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void Status::clear_has_is_connected() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void Status::clear_is_connected() {
-  is_connected_ = false;
-  clear_has_is_connected();
-}
-inline bool Status::is_connected() const {
-  return is_connected_;
-}
-inline void Status::set_is_connected(bool value) {
-  set_has_is_connected();
-  is_connected_ = value;
-}
-
-// optional .rpc_eterm.FingerprintStatus fp_status = 3;
-inline bool Status::has_fp_status() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void Status::set_has_fp_status() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void Status::clear_has_fp_status() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void Status::clear_fp_status() {
-  if (fp_status_ != NULL) fp_status_->::rpc_eterm::FingerprintStatus::Clear();
-  clear_has_fp_status();
-}
-inline const ::rpc_eterm::FingerprintStatus& Status::fp_status() const {
-  return fp_status_ != NULL ? *fp_status_ : *default_instance_->fp_status_;
-}
-inline ::rpc_eterm::FingerprintStatus* Status::mutable_fp_status() {
-  set_has_fp_status();
-  if (fp_status_ == NULL) fp_status_ = new ::rpc_eterm::FingerprintStatus;
-  return fp_status_;
-}
-inline ::rpc_eterm::FingerprintStatus* Status::release_fp_status() {
-  clear_has_fp_status();
-  ::rpc_eterm::FingerprintStatus* temp = fp_status_;
-  fp_status_ = NULL;
-  return temp;
-}
-inline void Status::set_allocated_fp_status(::rpc_eterm::FingerprintStatus* fp_status) {
-  delete fp_status_;
-  fp_status_ = fp_status;
-  if (fp_status) {
-    set_has_fp_status();
-  } else {
-    clear_has_fp_status();
-  }
+inline void HcSetLedState::set_led_on(bool value) {
+  set_has_led_on();
+  led_on_ = value;
 }
 
 

@@ -6,6 +6,7 @@
 
 namespace eterm {
 
+
 class LedCommand : public liber::cli::InteractiveCommand {
 public:
 
@@ -18,11 +19,11 @@ private:
   HeimdallControllerClientStub& mrHeimdall;
 };
 
-// Fingerprint Status Command: Get fingerprint read status
-class FpStatusCommand : public liber::cli::InteractiveCommand {
+
+class ActivateDoorCommand : public liber::cli::InteractiveCommand {
 public:
 
-  FpStatusCommand(HeimdallControllerClientStub& rHeimdall);
+  ActivateDoorCommand(HeimdallControllerClientStub& rHeimdall);
 
   void process(const liber::cli::ArgumentList& args);
 
@@ -31,7 +32,61 @@ private:
   HeimdallControllerClientStub& mrHeimdall;
 };
 
-}
+
+class EnrollUserCommand : public liber::cli::InteractiveCommand {
+public:
+
+  EnrollUserCommand(HeimdallControllerClientStub& rHeimdall);
+
+  void process(const liber::cli::ArgumentList& args);
+
+private:
+
+  HeimdallControllerClientStub& mrHeimdall;
+};
+
+
+class RemoveOneCommand : public liber::cli::InteractiveCommand {
+public:
+
+  RemoveOneCommand(HeimdallControllerClientStub& rHeimdall);
+
+  void process(const liber::cli::ArgumentList& args);
+
+private:
+
+  HeimdallControllerClientStub& mrHeimdall;
+};
+
+
+class RemoveAllCommand : public liber::cli::InteractiveCommand {
+public:
+
+  RemoveAllCommand(HeimdallControllerClientStub& rHeimdall);
+
+  void process(const liber::cli::ArgumentList& args);
+
+private:
+
+  HeimdallControllerClientStub& mrHeimdall;
+};
+
+
+
+class PrintUsersCommand : public liber::cli::InteractiveCommand {
+public:
+
+  PrintUsersCommand(HeimdallControllerClientStub& rHeimdall);
+
+  void process(const liber::cli::ArgumentList& args);
+
+private:
+
+  HeimdallControllerClientStub& mrHeimdall;
+};
+
+
+} // End namespace eterm
 
 #endif // ETERM_COMMANDS_H
 

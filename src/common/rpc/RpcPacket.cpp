@@ -67,7 +67,7 @@ bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
 {
    if (!inherited::unpack(pPkt, nSizeBytes))
    {
-      printf("RpcPacket::unpack: inherited unpack failed.\n");
+      log::error("RpcPacket::unpack: inherited unpack failed.\n");
       return false;
    }
    
@@ -75,20 +75,20 @@ bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
    // RsyncAssemblyInstr data segment and all preceding data segments.
    if (nSizeBytes < sizeof(Data))
    {
-      printf("::unpack: too small\n");
+      log::error("RpcPacket::unpack: too small\n");
       return false;
    }
 
    if (strncmp(data()->marker, MarkerData, RpcPacket::RpcMarkerSize) != 0)
    {
-      printf("Invalid marker\n");
+      log::error("RpcPacket::unpack: Invalid marker\n");
       return false;
    }
        
    // Validate the size of the packet against the indicated payload size.
    if ((nSizeBytes - sizeof(Data)) != data()->length)
    {
-      printf("::unpack: size mismatch - size = %u, exp = %u\n",
+      log::error("RpcPacket::unpack: size mismatch - size = %u, exp = %u\n",
              (nSizeBytes - sizeof(Data)), data()->length);
       return false;
    }

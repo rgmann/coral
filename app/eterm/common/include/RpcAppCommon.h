@@ -6,8 +6,8 @@
 namespace eterm {
 
 enum LedId {
-  MainLed        = 0,
-  FingerprintLed,
+  HC_FP_LED        = 0,
+  HC_MAIN_LED,
 };
 
 }

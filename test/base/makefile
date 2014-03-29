@@ -78,9 +78,17 @@ logtest:
 ts:
 	$(CC) -Wall -g -o ts timestamp_test.cpp $(INC) $(ABSLIB) $(LIBS)
 
+derived:
+	$(CC) -Wall -g -o derived derived_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
+remove_if:
+	$(CC) -Wall -g -o remove_if remove_if_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
 clean:
 	rm -rf *.dSYM  *.o
 	rm -f allocator
+	rm -f derived
 	rm -f functor
 	rm -f logtest
+	rm -f remove_if
 	rm -f ts ithread log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order

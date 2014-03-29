@@ -1,202 +1,419 @@
 #include <string.h>
 #include <iostream>
+#include <exception>
+#include <boost/lexical_cast.hpp>
+#include "Timestamp.h"
 #include "client.HeimdallController.h"
-#include "NetAppPacket.h"
-#include "TcpClient.h"
-#include "HeimdallLedStateCommand.h"
+//#include "NetAppPacket.h"
 
-#define HOST_NAME "10.0.0.18"
+#define HC_MARKER  0xFEEDB33F
 
 using namespace eterm;
-using namespace liber::net;
-using namespace liber::netapp;
+using namespace rpc_eterm;
+//using namespace liber::net;
+//using namespace liber::netapp;
+using boost::asio::ip::tcp;
 
 //-----------------------------------------------------------------------------
-HeimdallController::HeimdallController()
-: mpSocket(NULL)
-, mnPort(5013)
+HeimdallController::HeimdallController(const char* pHost, int nPort)
+: liber::concurrency::IThread("HeimdallController")
+, mpHost(pHost)
+, mnPort(nPort)
+, mUserDb("data/userdb.bin")
+//, mbConnected(false)
 {
+  mStatus.busy = false;
+  mStatus.connected = false;
+
+  mCommands.initialize();
+  mUserDb.load();
+  launch();
 }
 
 //-----------------------------------------------------------------------------
 HeimdallController::~HeimdallController()
 {
-  mSocketLock.lock();
-  disconnect();
-  mSocketLock.unlock();
-}
-
-//------------------------------------------------------------------------------
-void HeimdallController::setPort(int nPort)
-{
-  mnPort = nPort;
+  mUserDb.store();
+  join();
 }
 
 //------------------------------------------------------------------------------
 HeimdallController::Status HeimdallController::
-setLedState(LedId id, bool bOn, HeimdallStatus::Data& status)
+setLedState(LedId id, bool bOn)
 {
-  Status lStatus;
-  lStatus.success = false;
-  eterm::HeimdallLedStateCommand lCommand;
+//  Status lStatus;
+//  lStatus.connected = mbConnected;
+//  lStatus.busy = mbBusyEnrolling;
 
-  lCommand.data()->ledId = id;
-  lCommand.data()->ledOn = bOn;
-
-  if ((lStatus.connected = connect()))
+//  if (!mbBusyEnrolling)
+  if (!mStatus.busy)
   {
-    if (sendCommand(HdallSetLedState, lCommand.basePtr(), lCommand.allocatedSize()))
-    {
-      lStatus.success = recvResponse(&status, sizeof(status));
-    }
+    HcMessage lMessage;
+    lMessage.header.type = HC_SET_LED_STATE;
+    lMessage.header.length = sizeof(HcLedCommand);
 
-    disconnect();
+    lMessage.data.ledState.ledID = id;
+    lMessage.data.ledState.ledOn = bOn;
+
+    mCommands.push(lMessage);
   }
 
-  return lStatus;
+//  return lStatus;
+  return mStatus;
 }
 
 //------------------------------------------------------------------------------
 HeimdallController::Status HeimdallController::
-getFingerprintStatus(HeimdallStatus::Data& hstatus, eterm::FingerprintStatus::Data& fstatus)
+activateDoor()
 {
-  Status lStatus;
-  lStatus.success = false;
+//  Status lStatus;
+//  lStatus.connected = mbConnected;
+//  lStatus.busy = mbBusyEnrolling;
 
-  if ((lStatus.connected = connect()))
+//  if (!mbBusyEnrolling)
+  if (!mStatus.busy)
   {
-    if (sendCommand(HdallFingerprintStatus, NULL, 0))
-    {
-      lStatus.success = recvResponse(&hstatus, sizeof(hstatus));
-      if (lStatus.success && hstatus.success)
-      {
-        lStatus.success = recvResponse(&fstatus, sizeof(fstatus));
-      }
-    }
+    HcMessage lMessage;
+    lMessage.header.type = HC_ACTIVATE_DOOR;
+    lMessage.header.length = 0;
 
-    disconnect();
+    mCommands.push(lMessage);
   }
 
-  return lStatus;
+//  return lStatus;
+  return mStatus;
+}
+
+//------------------------------------------------------------------------------
+HeimdallController::Status HeimdallController::
+enroll(const std::string& first, const std::string& last)
+{
+//  Status lStatus;
+//  lStatus.connected = mbConnected;
+//  lStatus.busy = mbBusyEnrolling;
+
+//  if (!mbBusyEnrolling)
+  if (!mStatus.busy)
+  {
+    HcMessage lMessage;
+    lMessage.header.type = HC_ENROLL_NEW;
+    lMessage.header.length = 0;
+
+    mActiveEnrollMutex.lock();
+    mpActiveUser = new User();
+    mpActiveUser->mutable_user_name()->set_first_name(first);
+    mpActiveUser->mutable_user_name()->set_last_name(last);
+    mActiveEnrollMutex.unlock();
+
+    mCommands.push(lMessage);
+  }
+
+//  return lStatus;
+  return mStatus;
+}
+
+//------------------------------------------------------------------------------
+HeimdallController::Status HeimdallController::
+removeOne(ui8 id)
+{
+//  Status lStatus;
+//  lStatus.connected = mbConnected;
+//  lStatus.busy = mbBusyEnrolling;
+
+//  if (!mbBusyEnrolling)
+  if (!mStatus.busy)
+  {
+    HcMessage lMessage;
+    lMessage.header.type = HC_REMOVE_ONE;
+    lMessage.header.length = sizeof(HcRemoveOne);
+
+    lMessage.data.removeOne.userID = id;
+
+    mCommands.push(lMessage);
+  }
+
+//  return lStatus;
+  return mStatus;
+}
+
+//------------------------------------------------------------------------------
+HeimdallController::Status HeimdallController::
+removeAll()
+{
+//  Status lStatus;
+//  lStatus.connected = mbConnected;
+//  lStatus.busy = mbBusyEnrolling;
+
+//  if (!mbBusyEnrolling)
+  if (!mStatus.busy)
+  {
+    HcMessage lMessage;
+    lMessage.header.type = HC_REMOVE_ALL;
+    lMessage.header.length = 0;
+
+    mCommands.push(lMessage);
+  }
+
+//  return lStatus;
+  return mStatus;
 }
 
 //------------------------------------------------------------------------------
 bool HeimdallController::
-sendCommand(i32 commandId, const void* pData, ui32 nBytes)
+sendCommand(boost::asio::ip::tcp::socket& rSocket, const HcMessage& rMessage)
 {
-  bool lbSuccess = false;
-  SocketStatus lStatus;
+  boost::system::error_code ignored_error;
 
-  if (mSocketLock.lock(50))
+  // Send the packet header.
+  char* lpData = (char*)&rMessage.header;
+  boost::asio::write(rSocket,
+                     boost::asio::buffer(lpData, sizeof(HcMessage::PacketHeader)), 
+                     ignored_error);
+
+  if (ignored_error == boost::asio::error::eof)
   {
-    if (mpSocket)
-    {
-      NetAppPacket packet(commandId, nBytes);
-
-      if (pData && (nBytes > 0)) memcpy(packet.dataPtr(), pData, nBytes);
-      //packet.swapByteOrder();
-      //printf("HeimdallController: type = 0x%08X\n", packet.data()->type);
-      //printf("HeimdallController: length = 0x%08X\n", packet.data()->length);
-      mpSocket->write(lStatus, (char*)packet.basePtr(), packet.allocatedSize());
-
-      if (lStatus.status == SocketOk)
-      {
-        std::cout << "HeimdallController::sendCommand: success" << std::endl;
-        lbSuccess = true;
-      }
-      /*else
-      {
-        destroySocket();
-      }*/
-    }
-
-    mSocketLock.unlock();
+//    mbConnected = false;
+    mStatus.connected = false;
+    rSocket.close();
+    return false;
   }
 
-  return lbSuccess;
+  // Send the packet data (if any).
+  if (rMessage.header.length > 0)
+  {
+    lpData = (char*)&rMessage.data;
+    boost::asio::write(rSocket,
+                       boost::asio::buffer(lpData, rMessage.header.length), 
+                       ignored_error);
+
+    if (ignored_error == boost::asio::error::eof)
+    {
+//      mbConnected = false;
+      mStatus.connected = false;
+      rSocket.close();
+      return false;
+    }
+  }
+
+  return true;
 }
 
 //------------------------------------------------------------------------------
-bool HeimdallController::recvResponse(void* pData, ui32 nBytes)
+bool HeimdallController::recvResponse(boost::asio::ip::tcp::socket& rSocket, HcMessage& rMessage)
 {
-  bool lbSuccess = false;
-  SocketStatus lStatus;
-  NetAppPacket::Data lHeader;
+  boost::system::error_code ignored_error;
 
-  if (mSocketLock.lock(50))
+  // Attempt to receive the packet header.
+  boost::asio::read(rSocket,
+                    boost::asio::buffer(&rMessage.header, sizeof(HcMessage::PacketHeader)),
+                    ignored_error);
+  if (ignored_error == boost::asio::error::eof)
   {
-    if (mpSocket)
+//    mbConnected = false;
+    mStatus.connected = false;
+    rSocket.close();
+    return false;
+  }
+
+  if (rMessage.header.length > 0)
+  {
+    boost::asio::read(rSocket,
+                      boost::asio::buffer(&rMessage.data, rMessage.header.length),
+                      ignored_error);
+    if (ignored_error == boost::asio::error::eof)
     {
-      // Attempt to read the packet header.
-      mpSocket->read(lStatus, (char*)&lHeader, sizeof(lHeader), 1000);
-      std::cout << "HeimdallController::recvRsponse: status = " << (int)lStatus.status << std::endl;
-      if (lStatus.status == SocketOk)
+//      mbConnected = false;
+      mStatus.connected = false;
+      rSocket.close();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+//------------------------------------------------------------------------------
+void HeimdallController::run(const bool& bShutdown)
+{
+  boost::asio::io_service io_service;
+  boost::asio::ip::tcp::socket lSocket(io_service);
+
+  HcMessage lCommand;
+  HcMessage lResponse;
+
+  Timestamp lReconnectTimer;
+  Timestamp lPollHeimdallTimer;
+
+  lReconnectTimer.sample();
+  lPollHeimdallTimer.sample();
+
+  while (!bShutdown)
+  {
+//    if (mbConnected)
+    if (mStatus.connected)
+    {
+      lCommand.header.type = 0;
+
+      // If an enrollment command is active, ask for newly enrolled users.
+//      if (!mbBusyEnrolling)
+      if (!mStatus.busy)
       {
-        lbSuccess = (lStatus.byteCount == sizeof(lHeader));
-
-        std::cout << "HeimdallController::recvRsponse: byteCount = " << (int)lStatus.byteCount << std::endl;
-        if (lbSuccess)
+        // If enrollment is not active,
+        // we can attempt to pull a command from the queue.
+        if (!mCommands.isEmpty())
         {
-          std::cout << "HeimdallController::recvResponse: type = "
-                    << lHeader.type << ", length = " << lHeader.length << std::endl;
-          if (lHeader.length == nBytes)
-          {
-            mpSocket->read(lStatus, (char*)pData, lHeader.length, 1000);
+          mCommands.pop(lCommand);
+        }
+        else if ((Timestamp::Now() - lPollHeimdallTimer).fseconds() > 2)
+        {
+          lPollHeimdallTimer.sample();
 
-            if (lStatus.status == SocketOk)
+          // Otherwise check for new identfied users.
+          lCommand.header.type = HC_GET_NEW_IDD;
+          lCommand.header.length = 0;
+        }
+      }
+      else if ((Timestamp::Now() - lPollHeimdallTimer).fseconds() > 2)
+      {
+        lPollHeimdallTimer.sample();
+
+        // Ask for newly enrolled user.
+        lCommand.header.type = HC_GET_NEW_ENROLLED;
+        lCommand.header.length = 0;
+      }
+
+      if (lCommand.header.type > 0)
+      {
+        lCommand.header.marker = HC_MARKER;
+
+        if (lCommand.header.type == HC_ENROLL_NEW)
+        {
+//          mbBusyEnrolling = true;
+          mStatus.busy = true;
+        }
+
+        if (sendCommand(lSocket, lCommand))
+        {
+          if (!recvResponse(lSocket, lResponse))
+          {
+            printf("HeimdallCtrl: Failed to receive valid response.\n");
+          }
+          else if (lResponse.header.type != lCommand.header.type)
+          {
+            printf("HeimdallCtrl: Unexpected response type = %d\n",
+                   lResponse.header.type);
+          }
+          else
+          {
+            // Handle the response.
+            switch (lResponse.header.type)
             {
-              lbSuccess = true;
+            case HC_GET_NEW_ENROLLED:
+              if (lResponse.data.newIdentified.userID > 0)
+              {
+                mActiveEnrollMutex.lock();
+                User* lpUser = mpActiveUser;
+                mpActiveUser = NULL;
+                mActiveEnrollMutex.unlock();
+
+                if (lpUser)
+                {
+                  Timestamp lTime = Timestamp::Now();
+                  lpUser->mutable_last_access()->set_seconds(lTime.seconds());
+                  lpUser->mutable_last_access()->set_nanoseconds(lTime.nanoseconds());
+                  lpUser->set_access_count(1);
+                  lpUser->set_user_id(lResponse.data.newIdentified.userID);
+
+                  if (!db().create(lpUser))
+                  {
+                    delete lpUser;
+                  }
+
+//                  mbBusyEnrolling = false;
+                  mStatus.busy = false;
+                }
+                else
+                {
+                  printf("HeimdallCtrl: New enrolled but no active user!\n");
+                }
+              }
+              break;
+
+            case HC_GET_NEW_IDD:
+              if (lResponse.data.newIdentified.userID > 0)
+              {
+                User* lpUser = db().find(lResponse.data.newIdentified.userID);
+                if (lpUser)
+                {
+                  // Update the user's timestamp.
+                  Timestamp lTime = Timestamp::Now();
+                  lpUser->mutable_last_access()->set_seconds(lTime.seconds());
+                  lpUser->mutable_last_access()->set_nanoseconds(lTime.nanoseconds());
+                  lpUser->set_access_count(lpUser->access_count() + 1);
+                }
+              }
+              break;
+
+            case HC_REMOVE_ONE:
+              if (lResponse.data.removeOne.userID > 0)
+              {
+                User* lpUser = db().destroy(lResponse.data.removeOne.userID);
+                if (lpUser) delete lpUser;
+              }
+              break;
+
+            case HC_REMOVE_ALL:
+              if (lResponse.data.ack.success)
+              {
+                db().destroyAll();
+              }
+              break;
+
+            default:
+              std::cout << "HeimdallCtrl: Unrecognized command type = "
+                        << lResponse.header.type << std::endl;
+              break;
             }
-            /*else
-            {
-              destroySocket();
-            }*/
           }
         }
       }
-      /*else
-      {
-        destroySocket();
-      }*/
     }
-
-    mSocketLock.unlock();
+    else
+    {
+      // Attempt to connect to Heimdall.
+      if ((Timestamp::Now() - lReconnectTimer).milliseconds() > 100)
+      {
+//        mbConnected = connect(lSocket, io_service);
+        mStatus.connected = connect(lSocket, io_service);
+      }
+    }
   }
 
-  return lbSuccess;
+  lSocket.close();
 }
 
 //------------------------------------------------------------------------------
-bool HeimdallController::connect()
+bool HeimdallController::
+connect(boost::asio::ip::tcp::socket& socket, boost::asio::io_service& service)
 {
   bool lbSuccess = false;
 
-  if (mSocketLock.lock(50))
+  try {
+    tcp::resolver resolver(service);
+    tcp::resolver::query query(mpHost, boost::lexical_cast<std::string>(mnPort));
+    tcp::resolver::iterator iterator = resolver.resolve(query);
+    tcp::resolver::iterator end;
+
+    boost::asio::connect(socket, iterator);
+    lbSuccess = (iterator != end);
+  }
+  catch (std::exception& e)
   {
-    mpSocket = TcpClient::Connect(HOST_NAME, mnPort, 1000);
-    lbSuccess = (mpSocket != NULL);
-
-    if (lbSuccess) std::cout << "HeimdallController::connect(): SUCCESS" << std::endl;
-    else std::cout << "HeimdallController::connect(): FAILURE" << std::endl;
-
-    mSocketLock.unlock();
+    std::cerr << e.what() << std::endl;
   }
 
   return lbSuccess;
 }
 
-//------------------------------------------------------------------------------
-void HeimdallController::disconnect()
-{
-  if (mSocketLock.lock(50) && mpSocket)
-  {
-    std::cout << "HeimdallController::disconnect()" << std::endl;
-    mpSocket->disconnect();
-    delete mpSocket;
-    mpSocket = NULL;
-
-    mSocketLock.unlock();
-  }
-}
 
 

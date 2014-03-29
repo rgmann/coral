@@ -3,6 +3,7 @@ CC = c++
 EXE = eterm_server
 BASE = ../../..
 
+BOOST_INCLUDE = -I/opt/local/include
 BOOST_LIB_DIR = -L/opt/local/lib
 BOOST_LIBS = -lboost_system-mt -lboost_filesystem-mt
 BOOST_LIB = $(BOOST_LIB_DIR) $(BOOST_LIBS)
@@ -19,7 +20,9 @@ COMMON_INCLUDES = \
 -I$(BASE)/includes/netapp/server/v2 \
 -I$(BASE)/includes/rpc \
 
-INCLUDES = $(COMMON_INCLUDES) \
+INCLUDES = \
+$(BOOST_INCLUDE) \
+$(COMMON_INCLUDES) \
 -I./include \
 -I./rpc_include \
 -I../common/include \
@@ -41,6 +44,9 @@ SOURCE = \
 $(EXE):
 	$(CC) -Wall -g -o $(EXE) $(EXE).cpp $(SOURCE) $(INCLUDES) -pthread $(LIBS) $(GPBUFLIB) 
 
+userdb:
+	$(CC) -Wall -g -o userdb userdb_test.cpp source/UserDb.cpp ../common/rpc_source/*.cc $(INCLUDES) -pthread $(LIBS) $(GPBUFLIB)
+
 clean:
-	rm -rf *.dSYM *.o $(EXE)
+	rm -rf *.dSYM *.o $(EXE) userdb
 

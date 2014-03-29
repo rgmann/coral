@@ -317,996 +317,28 @@ public final class RpcEterm {
     // @@protoc_insertion_point(class_scope:rpc_eterm.EmptyParams)
   }
 
-  public interface LedStateOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // optional bool led_on = 1;
-    /**
-     * <code>optional bool led_on = 1;</code>
-     */
-    boolean hasLedOn();
-    /**
-     * <code>optional bool led_on = 1;</code>
-     */
-    boolean getLedOn();
-
-    // optional int32 led_id = 2;
-    /**
-     * <code>optional int32 led_id = 2;</code>
-     */
-    boolean hasLedId();
-    /**
-     * <code>optional int32 led_id = 2;</code>
-     */
-    int getLedId();
-  }
-  /**
-   * Protobuf type {@code rpc_eterm.LedState}
-   */
-  public static final class LedState extends
-      com.google.protobuf.GeneratedMessage
-      implements LedStateOrBuilder {
-    // Use LedState.newBuilder() to construct.
-    private LedState(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
-    }
-    private LedState(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final LedState defaultInstance;
-    public static LedState getDefaultInstance() {
-      return defaultInstance;
-    }
-
-    public LedState getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private LedState(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              ledOn_ = input.readBool();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              ledId_ = input.readInt32();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_LedState_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_LedState_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              rpc_eterm.RpcEterm.LedState.class, rpc_eterm.RpcEterm.LedState.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<LedState> PARSER =
-        new com.google.protobuf.AbstractParser<LedState>() {
-      public LedState parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new LedState(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<LedState> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // optional bool led_on = 1;
-    public static final int LED_ON_FIELD_NUMBER = 1;
-    private boolean ledOn_;
-    /**
-     * <code>optional bool led_on = 1;</code>
-     */
-    public boolean hasLedOn() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>optional bool led_on = 1;</code>
-     */
-    public boolean getLedOn() {
-      return ledOn_;
-    }
-
-    // optional int32 led_id = 2;
-    public static final int LED_ID_FIELD_NUMBER = 2;
-    private int ledId_;
-    /**
-     * <code>optional int32 led_id = 2;</code>
-     */
-    public boolean hasLedId() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional int32 led_id = 2;</code>
-     */
-    public int getLedId() {
-      return ledId_;
-    }
-
-    private void initFields() {
-      ledOn_ = false;
-      ledId_ = 0;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBool(1, ledOn_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(2, ledId_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, ledOn_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, ledId_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    public static rpc_eterm.RpcEterm.LedState parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static rpc_eterm.RpcEterm.LedState parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(rpc_eterm.RpcEterm.LedState prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code rpc_eterm.LedState}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements rpc_eterm.RpcEterm.LedStateOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_LedState_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_LedState_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                rpc_eterm.RpcEterm.LedState.class, rpc_eterm.RpcEterm.LedState.Builder.class);
-      }
-
-      // Construct using rpc_eterm.RpcEterm.LedState.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        ledOn_ = false;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        ledId_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_LedState_descriptor;
-      }
-
-      public rpc_eterm.RpcEterm.LedState getDefaultInstanceForType() {
-        return rpc_eterm.RpcEterm.LedState.getDefaultInstance();
-      }
-
-      public rpc_eterm.RpcEterm.LedState build() {
-        rpc_eterm.RpcEterm.LedState result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public rpc_eterm.RpcEterm.LedState buildPartial() {
-        rpc_eterm.RpcEterm.LedState result = new rpc_eterm.RpcEterm.LedState(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.ledOn_ = ledOn_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.ledId_ = ledId_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof rpc_eterm.RpcEterm.LedState) {
-          return mergeFrom((rpc_eterm.RpcEterm.LedState)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(rpc_eterm.RpcEterm.LedState other) {
-        if (other == rpc_eterm.RpcEterm.LedState.getDefaultInstance()) return this;
-        if (other.hasLedOn()) {
-          setLedOn(other.getLedOn());
-        }
-        if (other.hasLedId()) {
-          setLedId(other.getLedId());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        rpc_eterm.RpcEterm.LedState parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (rpc_eterm.RpcEterm.LedState) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      // optional bool led_on = 1;
-      private boolean ledOn_ ;
-      /**
-       * <code>optional bool led_on = 1;</code>
-       */
-      public boolean hasLedOn() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>optional bool led_on = 1;</code>
-       */
-      public boolean getLedOn() {
-        return ledOn_;
-      }
-      /**
-       * <code>optional bool led_on = 1;</code>
-       */
-      public Builder setLedOn(boolean value) {
-        bitField0_ |= 0x00000001;
-        ledOn_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bool led_on = 1;</code>
-       */
-      public Builder clearLedOn() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        ledOn_ = false;
-        onChanged();
-        return this;
-      }
-
-      // optional int32 led_id = 2;
-      private int ledId_ ;
-      /**
-       * <code>optional int32 led_id = 2;</code>
-       */
-      public boolean hasLedId() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional int32 led_id = 2;</code>
-       */
-      public int getLedId() {
-        return ledId_;
-      }
-      /**
-       * <code>optional int32 led_id = 2;</code>
-       */
-      public Builder setLedId(int value) {
-        bitField0_ |= 0x00000002;
-        ledId_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 led_id = 2;</code>
-       */
-      public Builder clearLedId() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        ledId_ = 0;
-        onChanged();
-        return this;
-      }
-
-      // @@protoc_insertion_point(builder_scope:rpc_eterm.LedState)
-    }
-
-    static {
-      defaultInstance = new LedState(true);
-      defaultInstance.initFields();
-    }
-
-    // @@protoc_insertion_point(class_scope:rpc_eterm.LedState)
-  }
-
-  public interface FingerprintStatusOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
-
-    // optional bool finger_pressed = 1;
-    /**
-     * <code>optional bool finger_pressed = 1;</code>
-     */
-    boolean hasFingerPressed();
-    /**
-     * <code>optional bool finger_pressed = 1;</code>
-     */
-    boolean getFingerPressed();
-
-    // optional int32 num_records = 2;
-    /**
-     * <code>optional int32 num_records = 2;</code>
-     */
-    boolean hasNumRecords();
-    /**
-     * <code>optional int32 num_records = 2;</code>
-     */
-    int getNumRecords();
-  }
-  /**
-   * Protobuf type {@code rpc_eterm.FingerprintStatus}
-   */
-  public static final class FingerprintStatus extends
-      com.google.protobuf.GeneratedMessage
-      implements FingerprintStatusOrBuilder {
-    // Use FingerprintStatus.newBuilder() to construct.
-    private FingerprintStatus(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
-      super(builder);
-      this.unknownFields = builder.getUnknownFields();
-    }
-    private FingerprintStatus(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
-
-    private static final FingerprintStatus defaultInstance;
-    public static FingerprintStatus getDefaultInstance() {
-      return defaultInstance;
-    }
-
-    public FingerprintStatus getDefaultInstanceForType() {
-      return defaultInstance;
-    }
-
-    private final com.google.protobuf.UnknownFieldSet unknownFields;
-    @java.lang.Override
-    public final com.google.protobuf.UnknownFieldSet
-        getUnknownFields() {
-      return this.unknownFields;
-    }
-    private FingerprintStatus(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      initFields();
-      int mutable_bitField0_ = 0;
-      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-          com.google.protobuf.UnknownFieldSet.newBuilder();
-      try {
-        boolean done = false;
-        while (!done) {
-          int tag = input.readTag();
-          switch (tag) {
-            case 0:
-              done = true;
-              break;
-            default: {
-              if (!parseUnknownField(input, unknownFields,
-                                     extensionRegistry, tag)) {
-                done = true;
-              }
-              break;
-            }
-            case 8: {
-              bitField0_ |= 0x00000001;
-              fingerPressed_ = input.readBool();
-              break;
-            }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              numRecords_ = input.readInt32();
-              break;
-            }
-          }
-        }
-      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        throw e.setUnfinishedMessage(this);
-      } catch (java.io.IOException e) {
-        throw new com.google.protobuf.InvalidProtocolBufferException(
-            e.getMessage()).setUnfinishedMessage(this);
-      } finally {
-        this.unknownFields = unknownFields.build();
-        makeExtensionsImmutable();
-      }
-    }
-    public static final com.google.protobuf.Descriptors.Descriptor
-        getDescriptor() {
-      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_FingerprintStatus_descriptor;
-    }
-
-    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-        internalGetFieldAccessorTable() {
-      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_FingerprintStatus_fieldAccessorTable
-          .ensureFieldAccessorsInitialized(
-              rpc_eterm.RpcEterm.FingerprintStatus.class, rpc_eterm.RpcEterm.FingerprintStatus.Builder.class);
-    }
-
-    public static com.google.protobuf.Parser<FingerprintStatus> PARSER =
-        new com.google.protobuf.AbstractParser<FingerprintStatus>() {
-      public FingerprintStatus parsePartialFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws com.google.protobuf.InvalidProtocolBufferException {
-        return new FingerprintStatus(input, extensionRegistry);
-      }
-    };
-
-    @java.lang.Override
-    public com.google.protobuf.Parser<FingerprintStatus> getParserForType() {
-      return PARSER;
-    }
-
-    private int bitField0_;
-    // optional bool finger_pressed = 1;
-    public static final int FINGER_PRESSED_FIELD_NUMBER = 1;
-    private boolean fingerPressed_;
-    /**
-     * <code>optional bool finger_pressed = 1;</code>
-     */
-    public boolean hasFingerPressed() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>optional bool finger_pressed = 1;</code>
-     */
-    public boolean getFingerPressed() {
-      return fingerPressed_;
-    }
-
-    // optional int32 num_records = 2;
-    public static final int NUM_RECORDS_FIELD_NUMBER = 2;
-    private int numRecords_;
-    /**
-     * <code>optional int32 num_records = 2;</code>
-     */
-    public boolean hasNumRecords() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional int32 num_records = 2;</code>
-     */
-    public int getNumRecords() {
-      return numRecords_;
-    }
-
-    private void initFields() {
-      fingerPressed_ = false;
-      numRecords_ = 0;
-    }
-    private byte memoizedIsInitialized = -1;
-    public final boolean isInitialized() {
-      byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
-
-      memoizedIsInitialized = 1;
-      return true;
-    }
-
-    public void writeTo(com.google.protobuf.CodedOutputStream output)
-                        throws java.io.IOException {
-      getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBool(1, fingerPressed_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(2, numRecords_);
-      }
-      getUnknownFields().writeTo(output);
-    }
-
-    private int memoizedSerializedSize = -1;
-    public int getSerializedSize() {
-      int size = memoizedSerializedSize;
-      if (size != -1) return size;
-
-      size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, fingerPressed_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(2, numRecords_);
-      }
-      size += getUnknownFields().getSerializedSize();
-      memoizedSerializedSize = size;
-      return size;
-    }
-
-    private static final long serialVersionUID = 0L;
-    @java.lang.Override
-    protected java.lang.Object writeReplace()
-        throws java.io.ObjectStreamException {
-      return super.writeReplace();
-    }
-
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(
-        com.google.protobuf.ByteString data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(
-        com.google.protobuf.ByteString data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(byte[] data)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(
-        byte[] data,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws com.google.protobuf.InvalidProtocolBufferException {
-      return PARSER.parseFrom(data, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseDelimitedFrom(java.io.InputStream input)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseDelimitedFrom(
-        java.io.InputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseDelimitedFrom(input, extensionRegistry);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(
-        com.google.protobuf.CodedInputStream input)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input);
-    }
-    public static rpc_eterm.RpcEterm.FingerprintStatus parseFrom(
-        com.google.protobuf.CodedInputStream input,
-        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-        throws java.io.IOException {
-      return PARSER.parseFrom(input, extensionRegistry);
-    }
-
-    public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(rpc_eterm.RpcEterm.FingerprintStatus prototype) {
-      return newBuilder().mergeFrom(prototype);
-    }
-    public Builder toBuilder() { return newBuilder(this); }
-
-    @java.lang.Override
-    protected Builder newBuilderForType(
-        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-      Builder builder = new Builder(parent);
-      return builder;
-    }
-    /**
-     * Protobuf type {@code rpc_eterm.FingerprintStatus}
-     */
-    public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements rpc_eterm.RpcEterm.FingerprintStatusOrBuilder {
-      public static final com.google.protobuf.Descriptors.Descriptor
-          getDescriptor() {
-        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_FingerprintStatus_descriptor;
-      }
-
-      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
-          internalGetFieldAccessorTable() {
-        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_FingerprintStatus_fieldAccessorTable
-            .ensureFieldAccessorsInitialized(
-                rpc_eterm.RpcEterm.FingerprintStatus.class, rpc_eterm.RpcEterm.FingerprintStatus.Builder.class);
-      }
-
-      // Construct using rpc_eterm.RpcEterm.FingerprintStatus.newBuilder()
-      private Builder() {
-        maybeForceBuilderInitialization();
-      }
-
-      private Builder(
-          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
-        super(parent);
-        maybeForceBuilderInitialization();
-      }
-      private void maybeForceBuilderInitialization() {
-        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-        }
-      }
-      private static Builder create() {
-        return new Builder();
-      }
-
-      public Builder clear() {
-        super.clear();
-        fingerPressed_ = false;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        numRecords_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-
-      public Builder clone() {
-        return create().mergeFrom(buildPartial());
-      }
-
-      public com.google.protobuf.Descriptors.Descriptor
-          getDescriptorForType() {
-        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_FingerprintStatus_descriptor;
-      }
-
-      public rpc_eterm.RpcEterm.FingerprintStatus getDefaultInstanceForType() {
-        return rpc_eterm.RpcEterm.FingerprintStatus.getDefaultInstance();
-      }
-
-      public rpc_eterm.RpcEterm.FingerprintStatus build() {
-        rpc_eterm.RpcEterm.FingerprintStatus result = buildPartial();
-        if (!result.isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return result;
-      }
-
-      public rpc_eterm.RpcEterm.FingerprintStatus buildPartial() {
-        rpc_eterm.RpcEterm.FingerprintStatus result = new rpc_eterm.RpcEterm.FingerprintStatus(this);
-        int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.fingerPressed_ = fingerPressed_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.numRecords_ = numRecords_;
-        result.bitField0_ = to_bitField0_;
-        onBuilt();
-        return result;
-      }
-
-      public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof rpc_eterm.RpcEterm.FingerprintStatus) {
-          return mergeFrom((rpc_eterm.RpcEterm.FingerprintStatus)other);
-        } else {
-          super.mergeFrom(other);
-          return this;
-        }
-      }
-
-      public Builder mergeFrom(rpc_eterm.RpcEterm.FingerprintStatus other) {
-        if (other == rpc_eterm.RpcEterm.FingerprintStatus.getDefaultInstance()) return this;
-        if (other.hasFingerPressed()) {
-          setFingerPressed(other.getFingerPressed());
-        }
-        if (other.hasNumRecords()) {
-          setNumRecords(other.getNumRecords());
-        }
-        this.mergeUnknownFields(other.getUnknownFields());
-        return this;
-      }
-
-      public final boolean isInitialized() {
-        return true;
-      }
-
-      public Builder mergeFrom(
-          com.google.protobuf.CodedInputStream input,
-          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-          throws java.io.IOException {
-        rpc_eterm.RpcEterm.FingerprintStatus parsedMessage = null;
-        try {
-          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
-        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (rpc_eterm.RpcEterm.FingerprintStatus) e.getUnfinishedMessage();
-          throw e;
-        } finally {
-          if (parsedMessage != null) {
-            mergeFrom(parsedMessage);
-          }
-        }
-        return this;
-      }
-      private int bitField0_;
-
-      // optional bool finger_pressed = 1;
-      private boolean fingerPressed_ ;
-      /**
-       * <code>optional bool finger_pressed = 1;</code>
-       */
-      public boolean hasFingerPressed() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>optional bool finger_pressed = 1;</code>
-       */
-      public boolean getFingerPressed() {
-        return fingerPressed_;
-      }
-      /**
-       * <code>optional bool finger_pressed = 1;</code>
-       */
-      public Builder setFingerPressed(boolean value) {
-        bitField0_ |= 0x00000001;
-        fingerPressed_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bool finger_pressed = 1;</code>
-       */
-      public Builder clearFingerPressed() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        fingerPressed_ = false;
-        onChanged();
-        return this;
-      }
-
-      // optional int32 num_records = 2;
-      private int numRecords_ ;
-      /**
-       * <code>optional int32 num_records = 2;</code>
-       */
-      public boolean hasNumRecords() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional int32 num_records = 2;</code>
-       */
-      public int getNumRecords() {
-        return numRecords_;
-      }
-      /**
-       * <code>optional int32 num_records = 2;</code>
-       */
-      public Builder setNumRecords(int value) {
-        bitField0_ |= 0x00000002;
-        numRecords_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 num_records = 2;</code>
-       */
-      public Builder clearNumRecords() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        numRecords_ = 0;
-        onChanged();
-        return this;
-      }
-
-      // @@protoc_insertion_point(builder_scope:rpc_eterm.FingerprintStatus)
-    }
-
-    static {
-      defaultInstance = new FingerprintStatus(true);
-      defaultInstance.initFields();
-    }
-
-    // @@protoc_insertion_point(class_scope:rpc_eterm.FingerprintStatus)
-  }
-
   public interface StatusOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional bool success = 1;
+    // optional bool connected = 1;
     /**
-     * <code>optional bool success = 1;</code>
+     * <code>optional bool connected = 1;</code>
      */
-    boolean hasSuccess();
+    boolean hasConnected();
     /**
-     * <code>optional bool success = 1;</code>
+     * <code>optional bool connected = 1;</code>
      */
-    boolean getSuccess();
+    boolean getConnected();
 
-    // optional bool is_connected = 2;
+    // optional bool busy = 2;
     /**
-     * <code>optional bool is_connected = 2;</code>
+     * <code>optional bool busy = 2;</code>
      */
-    boolean hasIsConnected();
+    boolean hasBusy();
     /**
-     * <code>optional bool is_connected = 2;</code>
+     * <code>optional bool busy = 2;</code>
      */
-    boolean getIsConnected();
-
-    // optional .rpc_eterm.FingerprintStatus fp_status = 3;
-    /**
-     * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-     */
-    boolean hasFpStatus();
-    /**
-     * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-     */
-    rpc_eterm.RpcEterm.FingerprintStatus getFpStatus();
-    /**
-     * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-     */
-    rpc_eterm.RpcEterm.FingerprintStatusOrBuilder getFpStatusOrBuilder();
+    boolean getBusy();
   }
   /**
    * Protobuf type {@code rpc_eterm.Status}
@@ -1361,25 +393,12 @@ public final class RpcEterm {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              success_ = input.readBool();
+              connected_ = input.readBool();
               break;
             }
             case 16: {
               bitField0_ |= 0x00000002;
-              isConnected_ = input.readBool();
-              break;
-            }
-            case 26: {
-              rpc_eterm.RpcEterm.FingerprintStatus.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000004) == 0x00000004)) {
-                subBuilder = fpStatus_.toBuilder();
-              }
-              fpStatus_ = input.readMessage(rpc_eterm.RpcEterm.FingerprintStatus.PARSER, extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom(fpStatus_);
-                fpStatus_ = subBuilder.buildPartial();
-              }
-              bitField0_ |= 0x00000004;
+              busy_ = input.readBool();
               break;
             }
           }
@@ -1422,64 +441,41 @@ public final class RpcEterm {
     }
 
     private int bitField0_;
-    // optional bool success = 1;
-    public static final int SUCCESS_FIELD_NUMBER = 1;
-    private boolean success_;
+    // optional bool connected = 1;
+    public static final int CONNECTED_FIELD_NUMBER = 1;
+    private boolean connected_;
     /**
-     * <code>optional bool success = 1;</code>
+     * <code>optional bool connected = 1;</code>
      */
-    public boolean hasSuccess() {
+    public boolean hasConnected() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bool success = 1;</code>
+     * <code>optional bool connected = 1;</code>
      */
-    public boolean getSuccess() {
-      return success_;
+    public boolean getConnected() {
+      return connected_;
     }
 
-    // optional bool is_connected = 2;
-    public static final int IS_CONNECTED_FIELD_NUMBER = 2;
-    private boolean isConnected_;
+    // optional bool busy = 2;
+    public static final int BUSY_FIELD_NUMBER = 2;
+    private boolean busy_;
     /**
-     * <code>optional bool is_connected = 2;</code>
+     * <code>optional bool busy = 2;</code>
      */
-    public boolean hasIsConnected() {
+    public boolean hasBusy() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional bool is_connected = 2;</code>
+     * <code>optional bool busy = 2;</code>
      */
-    public boolean getIsConnected() {
-      return isConnected_;
-    }
-
-    // optional .rpc_eterm.FingerprintStatus fp_status = 3;
-    public static final int FP_STATUS_FIELD_NUMBER = 3;
-    private rpc_eterm.RpcEterm.FingerprintStatus fpStatus_;
-    /**
-     * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-     */
-    public boolean hasFpStatus() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-     */
-    public rpc_eterm.RpcEterm.FingerprintStatus getFpStatus() {
-      return fpStatus_;
-    }
-    /**
-     * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-     */
-    public rpc_eterm.RpcEterm.FingerprintStatusOrBuilder getFpStatusOrBuilder() {
-      return fpStatus_;
+    public boolean getBusy() {
+      return busy_;
     }
 
     private void initFields() {
-      success_ = false;
-      isConnected_ = false;
-      fpStatus_ = rpc_eterm.RpcEterm.FingerprintStatus.getDefaultInstance();
+      connected_ = false;
+      busy_ = false;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1494,13 +490,10 @@ public final class RpcEterm {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBool(1, success_);
+        output.writeBool(1, connected_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBool(2, isConnected_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeMessage(3, fpStatus_);
+        output.writeBool(2, busy_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1513,15 +506,11 @@ public final class RpcEterm {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(1, success_);
+          .computeBoolSize(1, connected_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, isConnected_);
-      }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, fpStatus_);
+          .computeBoolSize(2, busy_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1631,7 +620,6 @@ public final class RpcEterm {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getFpStatusFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1640,16 +628,10 @@ public final class RpcEterm {
 
       public Builder clear() {
         super.clear();
-        success_ = false;
+        connected_ = false;
         bitField0_ = (bitField0_ & ~0x00000001);
-        isConnected_ = false;
+        busy_ = false;
         bitField0_ = (bitField0_ & ~0x00000002);
-        if (fpStatusBuilder_ == null) {
-          fpStatus_ = rpc_eterm.RpcEterm.FingerprintStatus.getDefaultInstance();
-        } else {
-          fpStatusBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -1681,19 +663,11 @@ public final class RpcEterm {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.success_ = success_;
+        result.connected_ = connected_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.isConnected_ = isConnected_;
-        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
-          to_bitField0_ |= 0x00000004;
-        }
-        if (fpStatusBuilder_ == null) {
-          result.fpStatus_ = fpStatus_;
-        } else {
-          result.fpStatus_ = fpStatusBuilder_.build();
-        }
+        result.busy_ = busy_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1710,14 +684,11 @@ public final class RpcEterm {
 
       public Builder mergeFrom(rpc_eterm.RpcEterm.Status other) {
         if (other == rpc_eterm.RpcEterm.Status.getDefaultInstance()) return this;
-        if (other.hasSuccess()) {
-          setSuccess(other.getSuccess());
+        if (other.hasConnected()) {
+          setConnected(other.getConnected());
         }
-        if (other.hasIsConnected()) {
-          setIsConnected(other.getIsConnected());
-        }
-        if (other.hasFpStatus()) {
-          mergeFpStatus(other.getFpStatus());
+        if (other.hasBusy()) {
+          setBusy(other.getBusy());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1746,187 +717,70 @@ public final class RpcEterm {
       }
       private int bitField0_;
 
-      // optional bool success = 1;
-      private boolean success_ ;
+      // optional bool connected = 1;
+      private boolean connected_ ;
       /**
-       * <code>optional bool success = 1;</code>
+       * <code>optional bool connected = 1;</code>
        */
-      public boolean hasSuccess() {
+      public boolean hasConnected() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional bool success = 1;</code>
+       * <code>optional bool connected = 1;</code>
        */
-      public boolean getSuccess() {
-        return success_;
+      public boolean getConnected() {
+        return connected_;
       }
       /**
-       * <code>optional bool success = 1;</code>
+       * <code>optional bool connected = 1;</code>
        */
-      public Builder setSuccess(boolean value) {
+      public Builder setConnected(boolean value) {
         bitField0_ |= 0x00000001;
-        success_ = value;
+        connected_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bool success = 1;</code>
+       * <code>optional bool connected = 1;</code>
        */
-      public Builder clearSuccess() {
+      public Builder clearConnected() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        success_ = false;
+        connected_ = false;
         onChanged();
         return this;
       }
 
-      // optional bool is_connected = 2;
-      private boolean isConnected_ ;
+      // optional bool busy = 2;
+      private boolean busy_ ;
       /**
-       * <code>optional bool is_connected = 2;</code>
+       * <code>optional bool busy = 2;</code>
        */
-      public boolean hasIsConnected() {
+      public boolean hasBusy() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional bool is_connected = 2;</code>
+       * <code>optional bool busy = 2;</code>
        */
-      public boolean getIsConnected() {
-        return isConnected_;
+      public boolean getBusy() {
+        return busy_;
       }
       /**
-       * <code>optional bool is_connected = 2;</code>
+       * <code>optional bool busy = 2;</code>
        */
-      public Builder setIsConnected(boolean value) {
+      public Builder setBusy(boolean value) {
         bitField0_ |= 0x00000002;
-        isConnected_ = value;
+        busy_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bool is_connected = 2;</code>
+       * <code>optional bool busy = 2;</code>
        */
-      public Builder clearIsConnected() {
+      public Builder clearBusy() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        isConnected_ = false;
+        busy_ = false;
         onChanged();
         return this;
-      }
-
-      // optional .rpc_eterm.FingerprintStatus fp_status = 3;
-      private rpc_eterm.RpcEterm.FingerprintStatus fpStatus_ = rpc_eterm.RpcEterm.FingerprintStatus.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          rpc_eterm.RpcEterm.FingerprintStatus, rpc_eterm.RpcEterm.FingerprintStatus.Builder, rpc_eterm.RpcEterm.FingerprintStatusOrBuilder> fpStatusBuilder_;
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public boolean hasFpStatus() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public rpc_eterm.RpcEterm.FingerprintStatus getFpStatus() {
-        if (fpStatusBuilder_ == null) {
-          return fpStatus_;
-        } else {
-          return fpStatusBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public Builder setFpStatus(rpc_eterm.RpcEterm.FingerprintStatus value) {
-        if (fpStatusBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          fpStatus_ = value;
-          onChanged();
-        } else {
-          fpStatusBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public Builder setFpStatus(
-          rpc_eterm.RpcEterm.FingerprintStatus.Builder builderForValue) {
-        if (fpStatusBuilder_ == null) {
-          fpStatus_ = builderForValue.build();
-          onChanged();
-        } else {
-          fpStatusBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public Builder mergeFpStatus(rpc_eterm.RpcEterm.FingerprintStatus value) {
-        if (fpStatusBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004) &&
-              fpStatus_ != rpc_eterm.RpcEterm.FingerprintStatus.getDefaultInstance()) {
-            fpStatus_ =
-              rpc_eterm.RpcEterm.FingerprintStatus.newBuilder(fpStatus_).mergeFrom(value).buildPartial();
-          } else {
-            fpStatus_ = value;
-          }
-          onChanged();
-        } else {
-          fpStatusBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000004;
-        return this;
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public Builder clearFpStatus() {
-        if (fpStatusBuilder_ == null) {
-          fpStatus_ = rpc_eterm.RpcEterm.FingerprintStatus.getDefaultInstance();
-          onChanged();
-        } else {
-          fpStatusBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000004);
-        return this;
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public rpc_eterm.RpcEterm.FingerprintStatus.Builder getFpStatusBuilder() {
-        bitField0_ |= 0x00000004;
-        onChanged();
-        return getFpStatusFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      public rpc_eterm.RpcEterm.FingerprintStatusOrBuilder getFpStatusOrBuilder() {
-        if (fpStatusBuilder_ != null) {
-          return fpStatusBuilder_.getMessageOrBuilder();
-        } else {
-          return fpStatus_;
-        }
-      }
-      /**
-       * <code>optional .rpc_eterm.FingerprintStatus fp_status = 3;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          rpc_eterm.RpcEterm.FingerprintStatus, rpc_eterm.RpcEterm.FingerprintStatus.Builder, rpc_eterm.RpcEterm.FingerprintStatusOrBuilder> 
-          getFpStatusFieldBuilder() {
-        if (fpStatusBuilder_ == null) {
-          fpStatusBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              rpc_eterm.RpcEterm.FingerprintStatus, rpc_eterm.RpcEterm.FingerprintStatus.Builder, rpc_eterm.RpcEterm.FingerprintStatusOrBuilder>(
-                  fpStatus_,
-                  getParentForChildren(),
-                  isClean());
-          fpStatus_ = null;
-        }
-        return fpStatusBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:rpc_eterm.Status)
@@ -1940,26 +794,3558 @@ public final class RpcEterm {
     // @@protoc_insertion_point(class_scope:rpc_eterm.Status)
   }
 
+  public interface AccessTimeOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional int32 seconds = 1;
+    /**
+     * <code>optional int32 seconds = 1;</code>
+     */
+    boolean hasSeconds();
+    /**
+     * <code>optional int32 seconds = 1;</code>
+     */
+    int getSeconds();
+
+    // optional int32 nanoseconds = 2;
+    /**
+     * <code>optional int32 nanoseconds = 2;</code>
+     */
+    boolean hasNanoseconds();
+    /**
+     * <code>optional int32 nanoseconds = 2;</code>
+     */
+    int getNanoseconds();
+  }
+  /**
+   * Protobuf type {@code rpc_eterm.AccessTime}
+   */
+  public static final class AccessTime extends
+      com.google.protobuf.GeneratedMessage
+      implements AccessTimeOrBuilder {
+    // Use AccessTime.newBuilder() to construct.
+    private AccessTime(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AccessTime(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AccessTime defaultInstance;
+    public static AccessTime getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AccessTime getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AccessTime(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              seconds_ = input.readInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              nanoseconds_ = input.readInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_AccessTime_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_AccessTime_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              rpc_eterm.RpcEterm.AccessTime.class, rpc_eterm.RpcEterm.AccessTime.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AccessTime> PARSER =
+        new com.google.protobuf.AbstractParser<AccessTime>() {
+      public AccessTime parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AccessTime(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AccessTime> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional int32 seconds = 1;
+    public static final int SECONDS_FIELD_NUMBER = 1;
+    private int seconds_;
+    /**
+     * <code>optional int32 seconds = 1;</code>
+     */
+    public boolean hasSeconds() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional int32 seconds = 1;</code>
+     */
+    public int getSeconds() {
+      return seconds_;
+    }
+
+    // optional int32 nanoseconds = 2;
+    public static final int NANOSECONDS_FIELD_NUMBER = 2;
+    private int nanoseconds_;
+    /**
+     * <code>optional int32 nanoseconds = 2;</code>
+     */
+    public boolean hasNanoseconds() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int32 nanoseconds = 2;</code>
+     */
+    public int getNanoseconds() {
+      return nanoseconds_;
+    }
+
+    private void initFields() {
+      seconds_ = 0;
+      nanoseconds_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, seconds_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(2, nanoseconds_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, seconds_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(2, nanoseconds_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.AccessTime parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(rpc_eterm.RpcEterm.AccessTime prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code rpc_eterm.AccessTime}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements rpc_eterm.RpcEterm.AccessTimeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_AccessTime_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_AccessTime_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                rpc_eterm.RpcEterm.AccessTime.class, rpc_eterm.RpcEterm.AccessTime.Builder.class);
+      }
+
+      // Construct using rpc_eterm.RpcEterm.AccessTime.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        seconds_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        nanoseconds_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_AccessTime_descriptor;
+      }
+
+      public rpc_eterm.RpcEterm.AccessTime getDefaultInstanceForType() {
+        return rpc_eterm.RpcEterm.AccessTime.getDefaultInstance();
+      }
+
+      public rpc_eterm.RpcEterm.AccessTime build() {
+        rpc_eterm.RpcEterm.AccessTime result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public rpc_eterm.RpcEterm.AccessTime buildPartial() {
+        rpc_eterm.RpcEterm.AccessTime result = new rpc_eterm.RpcEterm.AccessTime(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.seconds_ = seconds_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.nanoseconds_ = nanoseconds_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof rpc_eterm.RpcEterm.AccessTime) {
+          return mergeFrom((rpc_eterm.RpcEterm.AccessTime)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(rpc_eterm.RpcEterm.AccessTime other) {
+        if (other == rpc_eterm.RpcEterm.AccessTime.getDefaultInstance()) return this;
+        if (other.hasSeconds()) {
+          setSeconds(other.getSeconds());
+        }
+        if (other.hasNanoseconds()) {
+          setNanoseconds(other.getNanoseconds());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        rpc_eterm.RpcEterm.AccessTime parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (rpc_eterm.RpcEterm.AccessTime) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional int32 seconds = 1;
+      private int seconds_ ;
+      /**
+       * <code>optional int32 seconds = 1;</code>
+       */
+      public boolean hasSeconds() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional int32 seconds = 1;</code>
+       */
+      public int getSeconds() {
+        return seconds_;
+      }
+      /**
+       * <code>optional int32 seconds = 1;</code>
+       */
+      public Builder setSeconds(int value) {
+        bitField0_ |= 0x00000001;
+        seconds_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 seconds = 1;</code>
+       */
+      public Builder clearSeconds() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        seconds_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional int32 nanoseconds = 2;
+      private int nanoseconds_ ;
+      /**
+       * <code>optional int32 nanoseconds = 2;</code>
+       */
+      public boolean hasNanoseconds() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int32 nanoseconds = 2;</code>
+       */
+      public int getNanoseconds() {
+        return nanoseconds_;
+      }
+      /**
+       * <code>optional int32 nanoseconds = 2;</code>
+       */
+      public Builder setNanoseconds(int value) {
+        bitField0_ |= 0x00000002;
+        nanoseconds_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 nanoseconds = 2;</code>
+       */
+      public Builder clearNanoseconds() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        nanoseconds_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:rpc_eterm.AccessTime)
+    }
+
+    static {
+      defaultInstance = new AccessTime(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:rpc_eterm.AccessTime)
+  }
+
+  public interface UserNameOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional string first_name = 1;
+    /**
+     * <code>optional string first_name = 1;</code>
+     */
+    boolean hasFirstName();
+    /**
+     * <code>optional string first_name = 1;</code>
+     */
+    java.lang.String getFirstName();
+    /**
+     * <code>optional string first_name = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getFirstNameBytes();
+
+    // optional string last_name = 2;
+    /**
+     * <code>optional string last_name = 2;</code>
+     */
+    boolean hasLastName();
+    /**
+     * <code>optional string last_name = 2;</code>
+     */
+    java.lang.String getLastName();
+    /**
+     * <code>optional string last_name = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getLastNameBytes();
+  }
+  /**
+   * Protobuf type {@code rpc_eterm.UserName}
+   */
+  public static final class UserName extends
+      com.google.protobuf.GeneratedMessage
+      implements UserNameOrBuilder {
+    // Use UserName.newBuilder() to construct.
+    private UserName(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private UserName(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final UserName defaultInstance;
+    public static UserName getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public UserName getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UserName(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              firstName_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              lastName_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserName_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserName_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              rpc_eterm.RpcEterm.UserName.class, rpc_eterm.RpcEterm.UserName.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<UserName> PARSER =
+        new com.google.protobuf.AbstractParser<UserName>() {
+      public UserName parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UserName(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UserName> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional string first_name = 1;
+    public static final int FIRST_NAME_FIELD_NUMBER = 1;
+    private java.lang.Object firstName_;
+    /**
+     * <code>optional string first_name = 1;</code>
+     */
+    public boolean hasFirstName() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional string first_name = 1;</code>
+     */
+    public java.lang.String getFirstName() {
+      java.lang.Object ref = firstName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          firstName_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string first_name = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFirstNameBytes() {
+      java.lang.Object ref = firstName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        firstName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    // optional string last_name = 2;
+    public static final int LAST_NAME_FIELD_NUMBER = 2;
+    private java.lang.Object lastName_;
+    /**
+     * <code>optional string last_name = 2;</code>
+     */
+    public boolean hasLastName() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional string last_name = 2;</code>
+     */
+    public java.lang.String getLastName() {
+      java.lang.Object ref = lastName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          lastName_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string last_name = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getLastNameBytes() {
+      java.lang.Object ref = lastName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        lastName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      firstName_ = "";
+      lastName_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, getFirstNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getLastNameBytes());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, getFirstNameBytes());
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getLastNameBytes());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static rpc_eterm.RpcEterm.UserName parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserName parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(rpc_eterm.RpcEterm.UserName prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code rpc_eterm.UserName}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements rpc_eterm.RpcEterm.UserNameOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserName_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserName_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                rpc_eterm.RpcEterm.UserName.class, rpc_eterm.RpcEterm.UserName.Builder.class);
+      }
+
+      // Construct using rpc_eterm.RpcEterm.UserName.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        firstName_ = "";
+        bitField0_ = (bitField0_ & ~0x00000001);
+        lastName_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserName_descriptor;
+      }
+
+      public rpc_eterm.RpcEterm.UserName getDefaultInstanceForType() {
+        return rpc_eterm.RpcEterm.UserName.getDefaultInstance();
+      }
+
+      public rpc_eterm.RpcEterm.UserName build() {
+        rpc_eterm.RpcEterm.UserName result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public rpc_eterm.RpcEterm.UserName buildPartial() {
+        rpc_eterm.RpcEterm.UserName result = new rpc_eterm.RpcEterm.UserName(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.firstName_ = firstName_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.lastName_ = lastName_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof rpc_eterm.RpcEterm.UserName) {
+          return mergeFrom((rpc_eterm.RpcEterm.UserName)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(rpc_eterm.RpcEterm.UserName other) {
+        if (other == rpc_eterm.RpcEterm.UserName.getDefaultInstance()) return this;
+        if (other.hasFirstName()) {
+          bitField0_ |= 0x00000001;
+          firstName_ = other.firstName_;
+          onChanged();
+        }
+        if (other.hasLastName()) {
+          bitField0_ |= 0x00000002;
+          lastName_ = other.lastName_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        rpc_eterm.RpcEterm.UserName parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (rpc_eterm.RpcEterm.UserName) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional string first_name = 1;
+      private java.lang.Object firstName_ = "";
+      /**
+       * <code>optional string first_name = 1;</code>
+       */
+      public boolean hasFirstName() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional string first_name = 1;</code>
+       */
+      public java.lang.String getFirstName() {
+        java.lang.Object ref = firstName_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          firstName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string first_name = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFirstNameBytes() {
+        java.lang.Object ref = firstName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          firstName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string first_name = 1;</code>
+       */
+      public Builder setFirstName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        firstName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string first_name = 1;</code>
+       */
+      public Builder clearFirstName() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        firstName_ = getDefaultInstance().getFirstName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string first_name = 1;</code>
+       */
+      public Builder setFirstNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        firstName_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional string last_name = 2;
+      private java.lang.Object lastName_ = "";
+      /**
+       * <code>optional string last_name = 2;</code>
+       */
+      public boolean hasLastName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional string last_name = 2;</code>
+       */
+      public java.lang.String getLastName() {
+        java.lang.Object ref = lastName_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          lastName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string last_name = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getLastNameBytes() {
+        java.lang.Object ref = lastName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          lastName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string last_name = 2;</code>
+       */
+      public Builder setLastName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        lastName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string last_name = 2;</code>
+       */
+      public Builder clearLastName() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        lastName_ = getDefaultInstance().getLastName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string last_name = 2;</code>
+       */
+      public Builder setLastNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        lastName_ = value;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:rpc_eterm.UserName)
+    }
+
+    static {
+      defaultInstance = new UserName(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:rpc_eterm.UserName)
+  }
+
+  public interface UserOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional int32 user_id = 1;
+    /**
+     * <code>optional int32 user_id = 1;</code>
+     */
+    boolean hasUserId();
+    /**
+     * <code>optional int32 user_id = 1;</code>
+     */
+    int getUserId();
+
+    // optional .rpc_eterm.UserName user_name = 2;
+    /**
+     * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+     */
+    boolean hasUserName();
+    /**
+     * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+     */
+    rpc_eterm.RpcEterm.UserName getUserName();
+    /**
+     * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+     */
+    rpc_eterm.RpcEterm.UserNameOrBuilder getUserNameOrBuilder();
+
+    // optional uint32 access_count = 4;
+    /**
+     * <code>optional uint32 access_count = 4;</code>
+     */
+    boolean hasAccessCount();
+    /**
+     * <code>optional uint32 access_count = 4;</code>
+     */
+    int getAccessCount();
+
+    // optional .rpc_eterm.AccessTime last_access = 5;
+    /**
+     * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+     */
+    boolean hasLastAccess();
+    /**
+     * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+     */
+    rpc_eterm.RpcEterm.AccessTime getLastAccess();
+    /**
+     * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+     */
+    rpc_eterm.RpcEterm.AccessTimeOrBuilder getLastAccessOrBuilder();
+  }
+  /**
+   * Protobuf type {@code rpc_eterm.User}
+   */
+  public static final class User extends
+      com.google.protobuf.GeneratedMessage
+      implements UserOrBuilder {
+    // Use User.newBuilder() to construct.
+    private User(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private User(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final User defaultInstance;
+    public static User getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public User getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private User(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              userId_ = input.readInt32();
+              break;
+            }
+            case 18: {
+              rpc_eterm.RpcEterm.UserName.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                subBuilder = userName_.toBuilder();
+              }
+              userName_ = input.readMessage(rpc_eterm.RpcEterm.UserName.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(userName_);
+                userName_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000002;
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000004;
+              accessCount_ = input.readUInt32();
+              break;
+            }
+            case 42: {
+              rpc_eterm.RpcEterm.AccessTime.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                subBuilder = lastAccess_.toBuilder();
+              }
+              lastAccess_ = input.readMessage(rpc_eterm.RpcEterm.AccessTime.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(lastAccess_);
+                lastAccess_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000008;
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_User_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_User_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              rpc_eterm.RpcEterm.User.class, rpc_eterm.RpcEterm.User.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<User> PARSER =
+        new com.google.protobuf.AbstractParser<User>() {
+      public User parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new User(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<User> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional int32 user_id = 1;
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private int userId_;
+    /**
+     * <code>optional int32 user_id = 1;</code>
+     */
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional int32 user_id = 1;</code>
+     */
+    public int getUserId() {
+      return userId_;
+    }
+
+    // optional .rpc_eterm.UserName user_name = 2;
+    public static final int USER_NAME_FIELD_NUMBER = 2;
+    private rpc_eterm.RpcEterm.UserName userName_;
+    /**
+     * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+     */
+    public boolean hasUserName() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+     */
+    public rpc_eterm.RpcEterm.UserName getUserName() {
+      return userName_;
+    }
+    /**
+     * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+     */
+    public rpc_eterm.RpcEterm.UserNameOrBuilder getUserNameOrBuilder() {
+      return userName_;
+    }
+
+    // optional uint32 access_count = 4;
+    public static final int ACCESS_COUNT_FIELD_NUMBER = 4;
+    private int accessCount_;
+    /**
+     * <code>optional uint32 access_count = 4;</code>
+     */
+    public boolean hasAccessCount() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional uint32 access_count = 4;</code>
+     */
+    public int getAccessCount() {
+      return accessCount_;
+    }
+
+    // optional .rpc_eterm.AccessTime last_access = 5;
+    public static final int LAST_ACCESS_FIELD_NUMBER = 5;
+    private rpc_eterm.RpcEterm.AccessTime lastAccess_;
+    /**
+     * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+     */
+    public boolean hasLastAccess() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+     */
+    public rpc_eterm.RpcEterm.AccessTime getLastAccess() {
+      return lastAccess_;
+    }
+    /**
+     * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+     */
+    public rpc_eterm.RpcEterm.AccessTimeOrBuilder getLastAccessOrBuilder() {
+      return lastAccess_;
+    }
+
+    private void initFields() {
+      userId_ = 0;
+      userName_ = rpc_eterm.RpcEterm.UserName.getDefaultInstance();
+      accessCount_ = 0;
+      lastAccess_ = rpc_eterm.RpcEterm.AccessTime.getDefaultInstance();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(1, userId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeMessage(2, userName_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeUInt32(4, accessCount_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeMessage(5, lastAccess_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(1, userId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, userName_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, accessCount_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, lastAccess_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static rpc_eterm.RpcEterm.User parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.User parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.User parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.User parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.User parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.User parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.User parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.User parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.User parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.User parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(rpc_eterm.RpcEterm.User prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code rpc_eterm.User}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements rpc_eterm.RpcEterm.UserOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_User_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_User_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                rpc_eterm.RpcEterm.User.class, rpc_eterm.RpcEterm.User.Builder.class);
+      }
+
+      // Construct using rpc_eterm.RpcEterm.User.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getUserNameFieldBuilder();
+          getLastAccessFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        userId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        if (userNameBuilder_ == null) {
+          userName_ = rpc_eterm.RpcEterm.UserName.getDefaultInstance();
+        } else {
+          userNameBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        accessCount_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        if (lastAccessBuilder_ == null) {
+          lastAccess_ = rpc_eterm.RpcEterm.AccessTime.getDefaultInstance();
+        } else {
+          lastAccessBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_User_descriptor;
+      }
+
+      public rpc_eterm.RpcEterm.User getDefaultInstanceForType() {
+        return rpc_eterm.RpcEterm.User.getDefaultInstance();
+      }
+
+      public rpc_eterm.RpcEterm.User build() {
+        rpc_eterm.RpcEterm.User result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public rpc_eterm.RpcEterm.User buildPartial() {
+        rpc_eterm.RpcEterm.User result = new rpc_eterm.RpcEterm.User(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.userId_ = userId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        if (userNameBuilder_ == null) {
+          result.userName_ = userName_;
+        } else {
+          result.userName_ = userNameBuilder_.build();
+        }
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.accessCount_ = accessCount_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        if (lastAccessBuilder_ == null) {
+          result.lastAccess_ = lastAccess_;
+        } else {
+          result.lastAccess_ = lastAccessBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof rpc_eterm.RpcEterm.User) {
+          return mergeFrom((rpc_eterm.RpcEterm.User)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(rpc_eterm.RpcEterm.User other) {
+        if (other == rpc_eterm.RpcEterm.User.getDefaultInstance()) return this;
+        if (other.hasUserId()) {
+          setUserId(other.getUserId());
+        }
+        if (other.hasUserName()) {
+          mergeUserName(other.getUserName());
+        }
+        if (other.hasAccessCount()) {
+          setAccessCount(other.getAccessCount());
+        }
+        if (other.hasLastAccess()) {
+          mergeLastAccess(other.getLastAccess());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        rpc_eterm.RpcEterm.User parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (rpc_eterm.RpcEterm.User) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional int32 user_id = 1;
+      private int userId_ ;
+      /**
+       * <code>optional int32 user_id = 1;</code>
+       */
+      public boolean hasUserId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional int32 user_id = 1;</code>
+       */
+      public int getUserId() {
+        return userId_;
+      }
+      /**
+       * <code>optional int32 user_id = 1;</code>
+       */
+      public Builder setUserId(int value) {
+        bitField0_ |= 0x00000001;
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 user_id = 1;</code>
+       */
+      public Builder clearUserId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        userId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional .rpc_eterm.UserName user_name = 2;
+      private rpc_eterm.RpcEterm.UserName userName_ = rpc_eterm.RpcEterm.UserName.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          rpc_eterm.RpcEterm.UserName, rpc_eterm.RpcEterm.UserName.Builder, rpc_eterm.RpcEterm.UserNameOrBuilder> userNameBuilder_;
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public boolean hasUserName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.UserName getUserName() {
+        if (userNameBuilder_ == null) {
+          return userName_;
+        } else {
+          return userNameBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public Builder setUserName(rpc_eterm.RpcEterm.UserName value) {
+        if (userNameBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          userName_ = value;
+          onChanged();
+        } else {
+          userNameBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public Builder setUserName(
+          rpc_eterm.RpcEterm.UserName.Builder builderForValue) {
+        if (userNameBuilder_ == null) {
+          userName_ = builderForValue.build();
+          onChanged();
+        } else {
+          userNameBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public Builder mergeUserName(rpc_eterm.RpcEterm.UserName value) {
+        if (userNameBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+              userName_ != rpc_eterm.RpcEterm.UserName.getDefaultInstance()) {
+            userName_ =
+              rpc_eterm.RpcEterm.UserName.newBuilder(userName_).mergeFrom(value).buildPartial();
+          } else {
+            userName_ = value;
+          }
+          onChanged();
+        } else {
+          userNameBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public Builder clearUserName() {
+        if (userNameBuilder_ == null) {
+          userName_ = rpc_eterm.RpcEterm.UserName.getDefaultInstance();
+          onChanged();
+        } else {
+          userNameBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.UserName.Builder getUserNameBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getUserNameFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.UserNameOrBuilder getUserNameOrBuilder() {
+        if (userNameBuilder_ != null) {
+          return userNameBuilder_.getMessageOrBuilder();
+        } else {
+          return userName_;
+        }
+      }
+      /**
+       * <code>optional .rpc_eterm.UserName user_name = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          rpc_eterm.RpcEterm.UserName, rpc_eterm.RpcEterm.UserName.Builder, rpc_eterm.RpcEterm.UserNameOrBuilder> 
+          getUserNameFieldBuilder() {
+        if (userNameBuilder_ == null) {
+          userNameBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              rpc_eterm.RpcEterm.UserName, rpc_eterm.RpcEterm.UserName.Builder, rpc_eterm.RpcEterm.UserNameOrBuilder>(
+                  userName_,
+                  getParentForChildren(),
+                  isClean());
+          userName_ = null;
+        }
+        return userNameBuilder_;
+      }
+
+      // optional uint32 access_count = 4;
+      private int accessCount_ ;
+      /**
+       * <code>optional uint32 access_count = 4;</code>
+       */
+      public boolean hasAccessCount() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional uint32 access_count = 4;</code>
+       */
+      public int getAccessCount() {
+        return accessCount_;
+      }
+      /**
+       * <code>optional uint32 access_count = 4;</code>
+       */
+      public Builder setAccessCount(int value) {
+        bitField0_ |= 0x00000004;
+        accessCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 access_count = 4;</code>
+       */
+      public Builder clearAccessCount() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        accessCount_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional .rpc_eterm.AccessTime last_access = 5;
+      private rpc_eterm.RpcEterm.AccessTime lastAccess_ = rpc_eterm.RpcEterm.AccessTime.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          rpc_eterm.RpcEterm.AccessTime, rpc_eterm.RpcEterm.AccessTime.Builder, rpc_eterm.RpcEterm.AccessTimeOrBuilder> lastAccessBuilder_;
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public boolean hasLastAccess() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public rpc_eterm.RpcEterm.AccessTime getLastAccess() {
+        if (lastAccessBuilder_ == null) {
+          return lastAccess_;
+        } else {
+          return lastAccessBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public Builder setLastAccess(rpc_eterm.RpcEterm.AccessTime value) {
+        if (lastAccessBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          lastAccess_ = value;
+          onChanged();
+        } else {
+          lastAccessBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public Builder setLastAccess(
+          rpc_eterm.RpcEterm.AccessTime.Builder builderForValue) {
+        if (lastAccessBuilder_ == null) {
+          lastAccess_ = builderForValue.build();
+          onChanged();
+        } else {
+          lastAccessBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public Builder mergeLastAccess(rpc_eterm.RpcEterm.AccessTime value) {
+        if (lastAccessBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              lastAccess_ != rpc_eterm.RpcEterm.AccessTime.getDefaultInstance()) {
+            lastAccess_ =
+              rpc_eterm.RpcEterm.AccessTime.newBuilder(lastAccess_).mergeFrom(value).buildPartial();
+          } else {
+            lastAccess_ = value;
+          }
+          onChanged();
+        } else {
+          lastAccessBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public Builder clearLastAccess() {
+        if (lastAccessBuilder_ == null) {
+          lastAccess_ = rpc_eterm.RpcEterm.AccessTime.getDefaultInstance();
+          onChanged();
+        } else {
+          lastAccessBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public rpc_eterm.RpcEterm.AccessTime.Builder getLastAccessBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getLastAccessFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      public rpc_eterm.RpcEterm.AccessTimeOrBuilder getLastAccessOrBuilder() {
+        if (lastAccessBuilder_ != null) {
+          return lastAccessBuilder_.getMessageOrBuilder();
+        } else {
+          return lastAccess_;
+        }
+      }
+      /**
+       * <code>optional .rpc_eterm.AccessTime last_access = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          rpc_eterm.RpcEterm.AccessTime, rpc_eterm.RpcEterm.AccessTime.Builder, rpc_eterm.RpcEterm.AccessTimeOrBuilder> 
+          getLastAccessFieldBuilder() {
+        if (lastAccessBuilder_ == null) {
+          lastAccessBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              rpc_eterm.RpcEterm.AccessTime, rpc_eterm.RpcEterm.AccessTime.Builder, rpc_eterm.RpcEterm.AccessTimeOrBuilder>(
+                  lastAccess_,
+                  getParentForChildren(),
+                  isClean());
+          lastAccess_ = null;
+        }
+        return lastAccessBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:rpc_eterm.User)
+    }
+
+    static {
+      defaultInstance = new User(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:rpc_eterm.User)
+  }
+
+  public interface UserListOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // repeated .rpc_eterm.User users = 2;
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    java.util.List<rpc_eterm.RpcEterm.User> 
+        getUsersList();
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    rpc_eterm.RpcEterm.User getUsers(int index);
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    int getUsersCount();
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    java.util.List<? extends rpc_eterm.RpcEterm.UserOrBuilder> 
+        getUsersOrBuilderList();
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    rpc_eterm.RpcEterm.UserOrBuilder getUsersOrBuilder(
+        int index);
+  }
+  /**
+   * Protobuf type {@code rpc_eterm.UserList}
+   */
+  public static final class UserList extends
+      com.google.protobuf.GeneratedMessage
+      implements UserListOrBuilder {
+    // Use UserList.newBuilder() to construct.
+    private UserList(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private UserList(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final UserList defaultInstance;
+    public static UserList getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public UserList getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UserList(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                users_ = new java.util.ArrayList<rpc_eterm.RpcEterm.User>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              users_.add(input.readMessage(rpc_eterm.RpcEterm.User.PARSER, extensionRegistry));
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          users_ = java.util.Collections.unmodifiableList(users_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserList_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserList_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              rpc_eterm.RpcEterm.UserList.class, rpc_eterm.RpcEterm.UserList.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<UserList> PARSER =
+        new com.google.protobuf.AbstractParser<UserList>() {
+      public UserList parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UserList(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UserList> getParserForType() {
+      return PARSER;
+    }
+
+    // repeated .rpc_eterm.User users = 2;
+    public static final int USERS_FIELD_NUMBER = 2;
+    private java.util.List<rpc_eterm.RpcEterm.User> users_;
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    public java.util.List<rpc_eterm.RpcEterm.User> getUsersList() {
+      return users_;
+    }
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    public java.util.List<? extends rpc_eterm.RpcEterm.UserOrBuilder> 
+        getUsersOrBuilderList() {
+      return users_;
+    }
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    public int getUsersCount() {
+      return users_.size();
+    }
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    public rpc_eterm.RpcEterm.User getUsers(int index) {
+      return users_.get(index);
+    }
+    /**
+     * <code>repeated .rpc_eterm.User users = 2;</code>
+     */
+    public rpc_eterm.RpcEterm.UserOrBuilder getUsersOrBuilder(
+        int index) {
+      return users_.get(index);
+    }
+
+    private void initFields() {
+      users_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      for (int i = 0; i < users_.size(); i++) {
+        output.writeMessage(2, users_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < users_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, users_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static rpc_eterm.RpcEterm.UserList parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserList parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(rpc_eterm.RpcEterm.UserList prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code rpc_eterm.UserList}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements rpc_eterm.RpcEterm.UserListOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserList_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserList_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                rpc_eterm.RpcEterm.UserList.class, rpc_eterm.RpcEterm.UserList.Builder.class);
+      }
+
+      // Construct using rpc_eterm.RpcEterm.UserList.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getUsersFieldBuilder();
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        if (usersBuilder_ == null) {
+          users_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          usersBuilder_.clear();
+        }
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserList_descriptor;
+      }
+
+      public rpc_eterm.RpcEterm.UserList getDefaultInstanceForType() {
+        return rpc_eterm.RpcEterm.UserList.getDefaultInstance();
+      }
+
+      public rpc_eterm.RpcEterm.UserList build() {
+        rpc_eterm.RpcEterm.UserList result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public rpc_eterm.RpcEterm.UserList buildPartial() {
+        rpc_eterm.RpcEterm.UserList result = new rpc_eterm.RpcEterm.UserList(this);
+        int from_bitField0_ = bitField0_;
+        if (usersBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            users_ = java.util.Collections.unmodifiableList(users_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.users_ = users_;
+        } else {
+          result.users_ = usersBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof rpc_eterm.RpcEterm.UserList) {
+          return mergeFrom((rpc_eterm.RpcEterm.UserList)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(rpc_eterm.RpcEterm.UserList other) {
+        if (other == rpc_eterm.RpcEterm.UserList.getDefaultInstance()) return this;
+        if (usersBuilder_ == null) {
+          if (!other.users_.isEmpty()) {
+            if (users_.isEmpty()) {
+              users_ = other.users_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureUsersIsMutable();
+              users_.addAll(other.users_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.users_.isEmpty()) {
+            if (usersBuilder_.isEmpty()) {
+              usersBuilder_.dispose();
+              usersBuilder_ = null;
+              users_ = other.users_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              usersBuilder_ = 
+                com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
+                   getUsersFieldBuilder() : null;
+            } else {
+              usersBuilder_.addAllMessages(other.users_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        rpc_eterm.RpcEterm.UserList parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (rpc_eterm.RpcEterm.UserList) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // repeated .rpc_eterm.User users = 2;
+      private java.util.List<rpc_eterm.RpcEterm.User> users_ =
+        java.util.Collections.emptyList();
+      private void ensureUsersIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          users_ = new java.util.ArrayList<rpc_eterm.RpcEterm.User>(users_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilder<
+          rpc_eterm.RpcEterm.User, rpc_eterm.RpcEterm.User.Builder, rpc_eterm.RpcEterm.UserOrBuilder> usersBuilder_;
+
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public java.util.List<rpc_eterm.RpcEterm.User> getUsersList() {
+        if (usersBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(users_);
+        } else {
+          return usersBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public int getUsersCount() {
+        if (usersBuilder_ == null) {
+          return users_.size();
+        } else {
+          return usersBuilder_.getCount();
+        }
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.User getUsers(int index) {
+        if (usersBuilder_ == null) {
+          return users_.get(index);
+        } else {
+          return usersBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder setUsers(
+          int index, rpc_eterm.RpcEterm.User value) {
+        if (usersBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureUsersIsMutable();
+          users_.set(index, value);
+          onChanged();
+        } else {
+          usersBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder setUsers(
+          int index, rpc_eterm.RpcEterm.User.Builder builderForValue) {
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          usersBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder addUsers(rpc_eterm.RpcEterm.User value) {
+        if (usersBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureUsersIsMutable();
+          users_.add(value);
+          onChanged();
+        } else {
+          usersBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder addUsers(
+          int index, rpc_eterm.RpcEterm.User value) {
+        if (usersBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureUsersIsMutable();
+          users_.add(index, value);
+          onChanged();
+        } else {
+          usersBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder addUsers(
+          rpc_eterm.RpcEterm.User.Builder builderForValue) {
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.add(builderForValue.build());
+          onChanged();
+        } else {
+          usersBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder addUsers(
+          int index, rpc_eterm.RpcEterm.User.Builder builderForValue) {
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          usersBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder addAllUsers(
+          java.lang.Iterable<? extends rpc_eterm.RpcEterm.User> values) {
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          super.addAll(values, users_);
+          onChanged();
+        } else {
+          usersBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder clearUsers() {
+        if (usersBuilder_ == null) {
+          users_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          usersBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public Builder removeUsers(int index) {
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.remove(index);
+          onChanged();
+        } else {
+          usersBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.User.Builder getUsersBuilder(
+          int index) {
+        return getUsersFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.UserOrBuilder getUsersOrBuilder(
+          int index) {
+        if (usersBuilder_ == null) {
+          return users_.get(index);  } else {
+          return usersBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public java.util.List<? extends rpc_eterm.RpcEterm.UserOrBuilder> 
+           getUsersOrBuilderList() {
+        if (usersBuilder_ != null) {
+          return usersBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(users_);
+        }
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.User.Builder addUsersBuilder() {
+        return getUsersFieldBuilder().addBuilder(
+            rpc_eterm.RpcEterm.User.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public rpc_eterm.RpcEterm.User.Builder addUsersBuilder(
+          int index) {
+        return getUsersFieldBuilder().addBuilder(
+            index, rpc_eterm.RpcEterm.User.getDefaultInstance());
+      }
+      /**
+       * <code>repeated .rpc_eterm.User users = 2;</code>
+       */
+      public java.util.List<rpc_eterm.RpcEterm.User.Builder> 
+           getUsersBuilderList() {
+        return getUsersFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilder<
+          rpc_eterm.RpcEterm.User, rpc_eterm.RpcEterm.User.Builder, rpc_eterm.RpcEterm.UserOrBuilder> 
+          getUsersFieldBuilder() {
+        if (usersBuilder_ == null) {
+          usersBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              rpc_eterm.RpcEterm.User, rpc_eterm.RpcEterm.User.Builder, rpc_eterm.RpcEterm.UserOrBuilder>(
+                  users_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          users_ = null;
+        }
+        return usersBuilder_;
+      }
+
+      // @@protoc_insertion_point(builder_scope:rpc_eterm.UserList)
+    }
+
+    static {
+      defaultInstance = new UserList(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:rpc_eterm.UserList)
+  }
+
+  public interface UserIDOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional uint32 user_id = 1;
+    /**
+     * <code>optional uint32 user_id = 1;</code>
+     */
+    boolean hasUserId();
+    /**
+     * <code>optional uint32 user_id = 1;</code>
+     */
+    int getUserId();
+  }
+  /**
+   * Protobuf type {@code rpc_eterm.UserID}
+   */
+  public static final class UserID extends
+      com.google.protobuf.GeneratedMessage
+      implements UserIDOrBuilder {
+    // Use UserID.newBuilder() to construct.
+    private UserID(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private UserID(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final UserID defaultInstance;
+    public static UserID getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public UserID getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UserID(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              userId_ = input.readUInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserID_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserID_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              rpc_eterm.RpcEterm.UserID.class, rpc_eterm.RpcEterm.UserID.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<UserID> PARSER =
+        new com.google.protobuf.AbstractParser<UserID>() {
+      public UserID parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UserID(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UserID> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional uint32 user_id = 1;
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private int userId_;
+    /**
+     * <code>optional uint32 user_id = 1;</code>
+     */
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint32 user_id = 1;</code>
+     */
+    public int getUserId() {
+      return userId_;
+    }
+
+    private void initFields() {
+      userId_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt32(1, userId_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, userId_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static rpc_eterm.RpcEterm.UserID parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.UserID parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(rpc_eterm.RpcEterm.UserID prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code rpc_eterm.UserID}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements rpc_eterm.RpcEterm.UserIDOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserID_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserID_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                rpc_eterm.RpcEterm.UserID.class, rpc_eterm.RpcEterm.UserID.Builder.class);
+      }
+
+      // Construct using rpc_eterm.RpcEterm.UserID.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        userId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_UserID_descriptor;
+      }
+
+      public rpc_eterm.RpcEterm.UserID getDefaultInstanceForType() {
+        return rpc_eterm.RpcEterm.UserID.getDefaultInstance();
+      }
+
+      public rpc_eterm.RpcEterm.UserID build() {
+        rpc_eterm.RpcEterm.UserID result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public rpc_eterm.RpcEterm.UserID buildPartial() {
+        rpc_eterm.RpcEterm.UserID result = new rpc_eterm.RpcEterm.UserID(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.userId_ = userId_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof rpc_eterm.RpcEterm.UserID) {
+          return mergeFrom((rpc_eterm.RpcEterm.UserID)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(rpc_eterm.RpcEterm.UserID other) {
+        if (other == rpc_eterm.RpcEterm.UserID.getDefaultInstance()) return this;
+        if (other.hasUserId()) {
+          setUserId(other.getUserId());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        rpc_eterm.RpcEterm.UserID parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (rpc_eterm.RpcEterm.UserID) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional uint32 user_id = 1;
+      private int userId_ ;
+      /**
+       * <code>optional uint32 user_id = 1;</code>
+       */
+      public boolean hasUserId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint32 user_id = 1;</code>
+       */
+      public int getUserId() {
+        return userId_;
+      }
+      /**
+       * <code>optional uint32 user_id = 1;</code>
+       */
+      public Builder setUserId(int value) {
+        bitField0_ |= 0x00000001;
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 user_id = 1;</code>
+       */
+      public Builder clearUserId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        userId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:rpc_eterm.UserID)
+    }
+
+    static {
+      defaultInstance = new UserID(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:rpc_eterm.UserID)
+  }
+
+  public interface HcSetLedStateOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional uint32 led_id = 1;
+    /**
+     * <code>optional uint32 led_id = 1;</code>
+     */
+    boolean hasLedId();
+    /**
+     * <code>optional uint32 led_id = 1;</code>
+     */
+    int getLedId();
+
+    // optional bool led_on = 2;
+    /**
+     * <code>optional bool led_on = 2;</code>
+     */
+    boolean hasLedOn();
+    /**
+     * <code>optional bool led_on = 2;</code>
+     */
+    boolean getLedOn();
+  }
+  /**
+   * Protobuf type {@code rpc_eterm.HcSetLedState}
+   */
+  public static final class HcSetLedState extends
+      com.google.protobuf.GeneratedMessage
+      implements HcSetLedStateOrBuilder {
+    // Use HcSetLedState.newBuilder() to construct.
+    private HcSetLedState(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private HcSetLedState(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final HcSetLedState defaultInstance;
+    public static HcSetLedState getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public HcSetLedState getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private HcSetLedState(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              ledId_ = input.readUInt32();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              ledOn_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_HcSetLedState_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return rpc_eterm.RpcEterm.internal_static_rpc_eterm_HcSetLedState_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              rpc_eterm.RpcEterm.HcSetLedState.class, rpc_eterm.RpcEterm.HcSetLedState.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<HcSetLedState> PARSER =
+        new com.google.protobuf.AbstractParser<HcSetLedState>() {
+      public HcSetLedState parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new HcSetLedState(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<HcSetLedState> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional uint32 led_id = 1;
+    public static final int LED_ID_FIELD_NUMBER = 1;
+    private int ledId_;
+    /**
+     * <code>optional uint32 led_id = 1;</code>
+     */
+    public boolean hasLedId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint32 led_id = 1;</code>
+     */
+    public int getLedId() {
+      return ledId_;
+    }
+
+    // optional bool led_on = 2;
+    public static final int LED_ON_FIELD_NUMBER = 2;
+    private boolean ledOn_;
+    /**
+     * <code>optional bool led_on = 2;</code>
+     */
+    public boolean hasLedOn() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bool led_on = 2;</code>
+     */
+    public boolean getLedOn() {
+      return ledOn_;
+    }
+
+    private void initFields() {
+      ledId_ = 0;
+      ledOn_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt32(1, ledId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBool(2, ledOn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(1, ledId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, ledOn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static rpc_eterm.RpcEterm.HcSetLedState parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(rpc_eterm.RpcEterm.HcSetLedState prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code rpc_eterm.HcSetLedState}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements rpc_eterm.RpcEterm.HcSetLedStateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_HcSetLedState_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_HcSetLedState_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                rpc_eterm.RpcEterm.HcSetLedState.class, rpc_eterm.RpcEterm.HcSetLedState.Builder.class);
+      }
+
+      // Construct using rpc_eterm.RpcEterm.HcSetLedState.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        ledId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        ledOn_ = false;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return rpc_eterm.RpcEterm.internal_static_rpc_eterm_HcSetLedState_descriptor;
+      }
+
+      public rpc_eterm.RpcEterm.HcSetLedState getDefaultInstanceForType() {
+        return rpc_eterm.RpcEterm.HcSetLedState.getDefaultInstance();
+      }
+
+      public rpc_eterm.RpcEterm.HcSetLedState build() {
+        rpc_eterm.RpcEterm.HcSetLedState result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public rpc_eterm.RpcEterm.HcSetLedState buildPartial() {
+        rpc_eterm.RpcEterm.HcSetLedState result = new rpc_eterm.RpcEterm.HcSetLedState(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.ledId_ = ledId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.ledOn_ = ledOn_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof rpc_eterm.RpcEterm.HcSetLedState) {
+          return mergeFrom((rpc_eterm.RpcEterm.HcSetLedState)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(rpc_eterm.RpcEterm.HcSetLedState other) {
+        if (other == rpc_eterm.RpcEterm.HcSetLedState.getDefaultInstance()) return this;
+        if (other.hasLedId()) {
+          setLedId(other.getLedId());
+        }
+        if (other.hasLedOn()) {
+          setLedOn(other.getLedOn());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        rpc_eterm.RpcEterm.HcSetLedState parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (rpc_eterm.RpcEterm.HcSetLedState) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional uint32 led_id = 1;
+      private int ledId_ ;
+      /**
+       * <code>optional uint32 led_id = 1;</code>
+       */
+      public boolean hasLedId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint32 led_id = 1;</code>
+       */
+      public int getLedId() {
+        return ledId_;
+      }
+      /**
+       * <code>optional uint32 led_id = 1;</code>
+       */
+      public Builder setLedId(int value) {
+        bitField0_ |= 0x00000001;
+        ledId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 led_id = 1;</code>
+       */
+      public Builder clearLedId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        ledId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // optional bool led_on = 2;
+      private boolean ledOn_ ;
+      /**
+       * <code>optional bool led_on = 2;</code>
+       */
+      public boolean hasLedOn() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bool led_on = 2;</code>
+       */
+      public boolean getLedOn() {
+        return ledOn_;
+      }
+      /**
+       * <code>optional bool led_on = 2;</code>
+       */
+      public Builder setLedOn(boolean value) {
+        bitField0_ |= 0x00000002;
+        ledOn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool led_on = 2;</code>
+       */
+      public Builder clearLedOn() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        ledOn_ = false;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:rpc_eterm.HcSetLedState)
+    }
+
+    static {
+      defaultInstance = new HcSetLedState(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:rpc_eterm.HcSetLedState)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_rpc_eterm_EmptyParams_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_rpc_eterm_EmptyParams_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_rpc_eterm_LedState_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_rpc_eterm_LedState_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_rpc_eterm_FingerprintStatus_descriptor;
-  private static
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_rpc_eterm_FingerprintStatus_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_rpc_eterm_Status_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_rpc_eterm_Status_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_rpc_eterm_AccessTime_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_rpc_eterm_AccessTime_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_rpc_eterm_UserName_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_rpc_eterm_UserName_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_rpc_eterm_User_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_rpc_eterm_User_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_rpc_eterm_UserList_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_rpc_eterm_UserList_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_rpc_eterm_UserID_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_rpc_eterm_UserID_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_rpc_eterm_HcSetLedState_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_rpc_eterm_HcSetLedState_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1970,12 +4356,17 @@ public final class RpcEterm {
   static {
     java.lang.String[] descriptorData = {
       "\n\017rpc_eterm.proto\022\trpc_eterm\"\r\n\013EmptyPar" +
-      "ams\"*\n\010LedState\022\016\n\006led_on\030\001 \001(\010\022\016\n\006led_i" +
-      "d\030\002 \001(\005\"@\n\021FingerprintStatus\022\026\n\016finger_p" +
-      "ressed\030\001 \001(\010\022\023\n\013num_records\030\002 \001(\005\"`\n\006Sta" +
-      "tus\022\017\n\007success\030\001 \001(\010\022\024\n\014is_connected\030\002 \001" +
-      "(\010\022/\n\tfp_status\030\003 \001(\0132\034.rpc_eterm.Finger" +
-      "printStatus"
+      "ams\")\n\006Status\022\021\n\tconnected\030\001 \001(\010\022\014\n\004busy" +
+      "\030\002 \001(\010\"2\n\nAccessTime\022\017\n\007seconds\030\001 \001(\005\022\023\n" +
+      "\013nanoseconds\030\002 \001(\005\"1\n\010UserName\022\022\n\nfirst_" +
+      "name\030\001 \001(\t\022\021\n\tlast_name\030\002 \001(\t\"\201\001\n\004User\022\017" +
+      "\n\007user_id\030\001 \001(\005\022&\n\tuser_name\030\002 \001(\0132\023.rpc" +
+      "_eterm.UserName\022\024\n\014access_count\030\004 \001(\r\022*\n" +
+      "\013last_access\030\005 \001(\0132\025.rpc_eterm.AccessTim" +
+      "e\"*\n\010UserList\022\036\n\005users\030\002 \003(\0132\017.rpc_eterm" +
+      ".User\"\031\n\006UserID\022\017\n\007user_id\030\001 \001(\r\"/\n\rHcSe",
+      "tLedState\022\016\n\006led_id\030\001 \001(\r\022\016\n\006led_on\030\002 \001(" +
+      "\010"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1988,24 +4379,48 @@ public final class RpcEterm {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_rpc_eterm_EmptyParams_descriptor,
               new java.lang.String[] { });
-          internal_static_rpc_eterm_LedState_descriptor =
-            getDescriptor().getMessageTypes().get(1);
-          internal_static_rpc_eterm_LedState_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_rpc_eterm_LedState_descriptor,
-              new java.lang.String[] { "LedOn", "LedId", });
-          internal_static_rpc_eterm_FingerprintStatus_descriptor =
-            getDescriptor().getMessageTypes().get(2);
-          internal_static_rpc_eterm_FingerprintStatus_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_rpc_eterm_FingerprintStatus_descriptor,
-              new java.lang.String[] { "FingerPressed", "NumRecords", });
           internal_static_rpc_eterm_Status_descriptor =
-            getDescriptor().getMessageTypes().get(3);
+            getDescriptor().getMessageTypes().get(1);
           internal_static_rpc_eterm_Status_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_rpc_eterm_Status_descriptor,
-              new java.lang.String[] { "Success", "IsConnected", "FpStatus", });
+              new java.lang.String[] { "Connected", "Busy", });
+          internal_static_rpc_eterm_AccessTime_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_rpc_eterm_AccessTime_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_rpc_eterm_AccessTime_descriptor,
+              new java.lang.String[] { "Seconds", "Nanoseconds", });
+          internal_static_rpc_eterm_UserName_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+          internal_static_rpc_eterm_UserName_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_rpc_eterm_UserName_descriptor,
+              new java.lang.String[] { "FirstName", "LastName", });
+          internal_static_rpc_eterm_User_descriptor =
+            getDescriptor().getMessageTypes().get(4);
+          internal_static_rpc_eterm_User_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_rpc_eterm_User_descriptor,
+              new java.lang.String[] { "UserId", "UserName", "AccessCount", "LastAccess", });
+          internal_static_rpc_eterm_UserList_descriptor =
+            getDescriptor().getMessageTypes().get(5);
+          internal_static_rpc_eterm_UserList_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_rpc_eterm_UserList_descriptor,
+              new java.lang.String[] { "Users", });
+          internal_static_rpc_eterm_UserID_descriptor =
+            getDescriptor().getMessageTypes().get(6);
+          internal_static_rpc_eterm_UserID_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_rpc_eterm_UserID_descriptor,
+              new java.lang.String[] { "UserId", });
+          internal_static_rpc_eterm_HcSetLedState_descriptor =
+            getDescriptor().getMessageTypes().get(7);
+          internal_static_rpc_eterm_HcSetLedState_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_rpc_eterm_HcSetLedState_descriptor,
+              new java.lang.String[] { "LedId", "LedOn", });
           return null;
         }
       };

@@ -1,10 +1,12 @@
 #include <utility>
 #include <iostream>
 #include <sstream>
+#include "Log.h"
 #include "Md5Hash.h"
 #include "Timestamp.h"
 #include "RpcServerResource.h"
 
+using namespace liber;
 using namespace liber::rpc;
 
 //------------------------------------------------------------------------------
@@ -37,7 +39,9 @@ bool RpcServerResource::unmarshall(RpcObject &input, RpcObject &output)
       return false;
    }
 
-   printf("RpcServerResource::unmarshall: resource = %s, name = %s\n", mName.c_str(), input.callInfo().action.c_str());   
+   log::debug("RpcServerResource::unmarshall: resource = %s, name = %s\n",
+              mName.c_str(), input.callInfo().action.c_str());   
+
    if (input.callInfo().action == "construct")
    {
       lbSuccess = construct(input, output);
