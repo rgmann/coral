@@ -1,8 +1,16 @@
-require File.join(File.dirname(__FILE__), 'definition_parser')
+version = 'v2.'
+require File.join(File.dirname(__FILE__), "#{version}definition_parser")
 
-definitions = DefinitionParser.parse(ARGV[0])
+unless ARGV.count > 0
+  puts "Please specify a file path."
+  exit
+end
 
-definitions.each do |definition|
-  puts definition.to_lineage_s
+collection = DefinitionParser.parse(ARGV[0])
+#collection.select(:type => 'class') do |definition|
+collection.select() do |definition|
+#  puts definition.to_lineage_s
+  puts definition.mangle
+  puts ""
 end
 
