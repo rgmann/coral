@@ -6,8 +6,8 @@ module DefinitionParser
     attr_accessor :type
     attr_accessor :parent
     attr_accessor :children
-    attr_accessor :raw_body
-    attr_accessor :body
+    attr_accessor :raw_text
+    attr_accessor :text
     attr_reader :position
 
     attr_accessor :anonymous_count
@@ -20,11 +20,11 @@ module DefinitionParser
       @children = []
 
       # Raw body text as parsed from definition file.
-      @raw_body = nil
+      @raw_text = nil
 
-      # Body text where child definitions in @raw_body have been
+      # Body text where child definitions in @raw_text have been
       # replaced with the child's name.
-      @body = nil
+      @text = nil
 
       @anonymous = false
       @anonymous_count = 0
@@ -56,22 +56,40 @@ module DefinitionParser
         @anonymous = true
         @name = 'anon'
       end
+#      puts "open_tokens = #{tokens.inspect} #{@name}"
     end
 
     def close(text, end_position)
       @end_position = end_position
-      @raw_body = text[@begin_position..@end_position].dup
+      @raw_text = text[@begin_position..@end_position].dup
 
-      # Replace child definitions with names.
-      @body = @raw_body.dup
+      # Replace child definitions with names. After replacements have
+      # been completed, the inner_text should no longer have brackets.
+      @text = @raw_text.dup
       @children.each do |child|
-        @body.sub!(/#{Regexp.escape(child.raw_body)}[^;]*;/m) do |match|
-          match.sub!(/#{Regexp.escape(child.raw_body)}/m, child.name)
+        @text.sub!(/#{Regexp.escape(child.raw_text)}[^;]*;/m) do |match|
+          # Replace the definition with its name
+          match.sub!(/#{Regexp.escape(child.raw_text)}/m, child.name)
+
+          # Split the resulting string into cleaned word tokens.
           tokens = Definition.word_tokens(match)
+
+          # If there are two tokens, this definition is immediately used
+          # to specify the type for a member and we need to substitute.
+          # Otherwise, this is a stand-alone definition.
           (tokens.count == 2) ? match : ""
         end
       end
-      # puts "body: #{@body}"
+
+#      puts "#{mangle}:"
+#      puts "  raw_text = #{@raw_text}"
+#      puts "  text = #{@text}"
+      @inner_text = @text.partition(/\{[^\}]*\}/m)[1].split(/[\{\}]/m)
+      @inner_text.delete_if { |token| token.empty? or (token =~ /\S/m).nil? } 
+      @inner_text = @inner_text.first
+      @inner_text = '' unless @inner_text
+#      puts "  inner_text: #{@inner_text}"
+#      puts "\n\n"
     end
 
     def add_child(child)
@@ -86,7 +104,7 @@ module DefinitionParser
     end
 
     def to_lineage_s(sep="::")
-      lineage = @name
+      lineage = @name.dup
       node = @parent
       while node
         lineage = "#{node.name}#{sep}#{lineage}"
@@ -116,9 +134,15 @@ module DefinitionParser
       end
       satisfied
     end
-  end
 
-  DEF_START_REGEX = /\b[\w_]+[^\{\}]*\{/m
+    def members(filter=nil)
+      @inner_text.scan(/\b[^;]*;/m) do |member|
+        is_match = true
+        is_match = (member =~ filter) if filter
+        yield member if is_match
+      end
+    end
+  end
 
   def self.parse(filename)
     enumerator_list = Collection.new
@@ -152,7 +176,11 @@ module DefinitionParser
         segment_of_interest = text[(last_start + 1)..(bracket[:position] - 1)]
         def_start = segment_of_interest.rindex /[;\{\}]/
         def_start = -1 unless def_start
-        bracket[:start] = segment_of_interest[(def_start + 1)..-1]
+        #bracket[:start] = segment_of_interest[(def_start + 1)..-1]
+        segment_of_interest = segment_of_interest[(def_start + 1)..-1]
+        # Additionally, leave the white space the while (especially newline) behind.
+        segment_of_interest = segment_of_interest[segment_of_interest.index(/[^\s]/)..-1]
+        bracket[:start] = segment_of_interest
       end
       last_start = bracket[:position]
     end

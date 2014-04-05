@@ -3,7 +3,7 @@ tab_size = 2;
 
 struct test_struct {
 
-  allow_exceptions = true;
+  exceptions: no;
 
   struct{
     int value;
@@ -26,6 +26,8 @@ struct test_struct {
     char a;
     char b;
   } d;
+
+  struct empty {} emptydef;
 };
 
 class TestClass {
@@ -33,6 +35,7 @@ public:
 };
 
 resource Service {
-  void method
+  allow_exceptions = true;
+  void method(int param1, float param2);
 }
 
