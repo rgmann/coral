@@ -2,14 +2,64 @@
 #define RSYNC_INSTRUCTION_H
 
 #include <fstream>
+#include "JobDescriptor.h"
 #include "Segment.h"
 #include "SegmentAccessor.h"
-#include "Segmenter.h"
 #include "PacketHelper.h"
+#include "RsyncError.h"
 
 namespace liber {
 namespace rsync {
 
+class ExecutionStatus {
+public:
+
+  enum ExecuteError {
+    NoError,
+    DeserializeError,
+    SegmentAccessError,
+    IoError,
+    CancelError
+  } error;
+
+  ExecutionStatus();
+  ~ExecutionStatus();
+
+  /**
+   * Returns true if execution of an instruction failed or if the instruction
+   * stream has been cancelled by the Authority.
+   */
+  bool failed() const;
+
+  /**
+   * Returns true if the instruction stream has been cancelled by the Authority.
+   */
+  bool cancelled() const;
+
+  /**
+   * Returns true if the instruction stream completed successfully.
+   */
+  bool done() const;
+
+  static inline std::string ErrorDescription(ExecuteError e)
+  {
+    switch (e)
+    {
+      case NoError: return "No error";
+      case DeserializeError: return "Deserialize error";
+      case SegmentAccessError: return "Segment access error";
+      case IoError: return "IO error";
+      case CancelError: return "Cancel error";
+      default: return "Unknown error";
+    }
+  }
+
+private:
+
+  bool mbDone;
+
+  friend class EndInstruction;
+};
 
 
 class Instruction {
@@ -18,11 +68,11 @@ public:
   Instruction(ui32 type);
   virtual ~Instruction();
 
-  ui32 getType() const;
+  ui32 type() const;
 
   virtual std::string toString() const = 0;
 
-  virtual bool execute(SegmentAccessor&, std::ofstream&) = 0;
+  virtual void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&) = 0;
 
   virtual void serialize(liber::netapp::PacketCtor& ctor) const = 0;
   virtual bool deserialize(liber::netapp::PacketDtor& dtor) = 0;
@@ -46,7 +96,7 @@ public:
 
   std::string toString() const;
 
-  bool execute(SegmentAccessor&, std::ofstream&);
+  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
   void serialize(liber::netapp::PacketCtor& ctor) const;
   bool deserialize(liber::netapp::PacketDtor& dtor);
@@ -69,7 +119,7 @@ public:
   liber::rsync::Segment::ID getSegmentId() const;
 
   std::string toString() const;
-  bool execute(SegmentAccessor&, std::ofstream&);
+  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
   void serialize(liber::netapp::PacketCtor& ctor) const;
   bool deserialize(liber::netapp::PacketDtor& dtor);
@@ -93,7 +143,7 @@ public:
   ui32 size() const;
 
   std::string toString() const;
-  bool execute(SegmentAccessor&, std::ofstream&);
+  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
   void serialize(liber::netapp::PacketCtor& ctor) const;
   bool deserialize(liber::netapp::PacketDtor& dtor);
@@ -113,12 +163,22 @@ public:
   EndInstruction();
   ~EndInstruction();
 
+  void cancel(RsyncError error);
+  bool cancelled() const;
+  RsyncError error() const;
+
   std::string toString() const;
-  bool execute(SegmentAccessor&, std::ofstream&);
+  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
   void serialize(liber::netapp::PacketCtor& ctor) const;
   bool deserialize(liber::netapp::PacketDtor& dtor);
 
+private:
+
+  bool mbCancelled;
+
+  // If cancelled, error that caused cancellation.
+  ui32 mCancelError;
 };
 
 class InstructionFactory {

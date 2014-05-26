@@ -34,13 +34,18 @@ CLIENT_SOURCE = $(COMMON_SOURCE) \
 
 netapp_client:
 	$(CC) $(CFLAGS) $(CLIENT_SOURCE) $(CLIENT_INCLUDES)
-	ar -cvq lib$(LIBNAME)_client.a *.o
+	ar -cvq lib$@.a *.o
 
 netapp_server:
 	$(CC) $(CFLAGS) $(SERVER_SOURCE) $(SERVER_INCLUDES)
-	ar -cvq lib$(LIBNAME)_server.a *.o 
+	ar -cvq lib$@.a *.o 
 
-all: $(LIBNAME)_client $(LIBNAME)_server
+# For test applications where everything happens locally.
+netapp_all:
+	$(CC) $(CFLAGS) $(SERVER_SOURCE) $(SERVER_INCLUDES) $(CLIENT_SOURCE) $(CLIENT_INCLUDES)
+	ar -cvq lib$@.a *.o
+
+all: $(LIBNAME)_client $(LIBNAME)_server $(LIBNAME)_all
 
 clean:
 	rm -rf  *.o *.a

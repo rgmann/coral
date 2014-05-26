@@ -1,5 +1,6 @@
 #include "Log.h"
 #include "RpcClientResource.h"
+#include "BlockingRpcSupervisor.h"
 
 using namespace liber;
 using namespace liber::rpc;
@@ -7,16 +8,23 @@ using namespace liber::rpc;
 //-----------------------------------------------------------------------------
 RpcClientResource::RpcClientResource(RpcClient&         client,
                                      const std::string& classname)
-: mrClient(client),
-  mClassname(classname)
+: mrClient(client)
+, mClassname(classname)
+, mnTimeoutMs(3000)
 {
-   construct(NULL);
+   construct();
 }
 
 //-----------------------------------------------------------------------------
 RpcClientResource::~RpcClientResource()
 {
-   destroy(NULL);
+   destroy();
+}
+
+//-----------------------------------------------------------------------------
+void RpcClientResource::setTimeout(int nTimeoutMs)
+{
+  mnTimeoutMs = nTimeoutMs;
 }
 
 //-----------------------------------------------------------------------------
@@ -26,17 +34,22 @@ RpcException RpcClientResource::getLastError()
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::construct(const PbMessage* pParams)
+bool RpcClientResource::construct()
 {
    bool lbSuccess = false;
-   RpcObject lInObject;
-   RpcObject lOutObject;
+   BlockingRpcSupervisor lSupervisor;
+   RpcObject lRequestObject;
    
-   marshall(lInObject, "construct", pParams);
+   marshallRequest(lRequestObject, "construct");
    
-   if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
+   lbSuccess = lSupervisor.invoke(mrClient,
+                                  lRequestObject,
+                                  NULL,
+                                  mnTimeoutMs);
+
+   if (lbSuccess)
    {
-      mUiid = Md5Hash(lOutObject.callInfo().uiid);
+      mUiid = Md5Hash(lSupervisor.response().callInfo().uiid);
       log::debug("RpcClientResource::construct: success\n");
    }
    
@@ -44,15 +57,20 @@ bool RpcClientResource::construct(const PbMessage* pParams)
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::destroy(const PbMessage* pParams)
+bool RpcClientResource::destroy()
 {
    bool lbSuccess = false;
-   RpcObject lInObject;
-   RpcObject lOutObject;
+   BlockingRpcSupervisor lSupervisor;
+   RpcObject lRequestObject;
    
-   marshall(lInObject, "destroy", pParams);
-      
-   if ((lbSuccess = invoke(lInObject, lOutObject)) == true)
+   marshallRequest(lRequestObject, "destroy");
+
+   lbSuccess = lSupervisor.invoke(mrClient,
+                                  lRequestObject,
+                                  NULL,
+                                  mnTimeoutMs);
+
+   if (lbSuccess)
    {
       mUiid.invalidate();
    }
@@ -61,46 +79,50 @@ bool RpcClientResource::destroy(const PbMessage* pParams)
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::call(const std::string& methodName,
-                             const PbMessage&   params,
-                             PbMessage&         returnValue)
+bool RpcClientResource::call(const std::string&  methodName,
+                             const PbMessage&    request,
+                             PbMessage&          response,
+                             AsyncRpcSupervisor* pAsyncSupervisor)
 {
    bool lbSuccess = false;
-   RpcObject lInObject;
-   RpcObject lOutObject;
-   
-   marshall(lInObject, methodName, &params);
-   
-   if (invoke(lInObject, lOutObject))
+   RpcObject lRequestObject;
+
+   BlockingRpcSupervisor lBlockingSupervisor;
+   RpcSupervisor* lpSupervisor = &lBlockingSupervisor;
+
+   mLastError.reset();
+   mLastError.pushFrame(TraceFrame("RpcClientResource", "call",
+                                   __FILE__, __LINE__));
+
+   if (pAsyncSupervisor != NULL)
    {
-      lbSuccess = (lOutObject.exception().id == NoException);
-      
-      if (lbSuccess)
-      {
-         lOutObject.getParams(returnValue);
-      }
-      else
-      {
-         mLastError = lOutObject.exception();
-      }
+     lpSupervisor = pAsyncSupervisor;
    }
+
+   marshallRequest(lRequestObject, methodName, &request);
+   
+   lbSuccess = lpSupervisor->invoke(mrClient, lRequestObject, &response, mnTimeoutMs);
+
+   if (!lbSuccess)
+   {
+     mLastError.pushTrace(lpSupervisor->exception());
+   }
+
+   mLastError.popFrame();
    
    return lbSuccess;
 }
 
 //-----------------------------------------------------------------------------
-void RpcClientResource::marshall(RpcObject&         object, 
-                                 const std::string& action, 
-                                 const PbMessage*   pParamList)
+void RpcClientResource::
+marshallRequest(RpcObject&         requestObject,
+                const std::string& methodName,
+                const PbMessage*   pRequestParameters)
 {
-   object.callInfo().resource = mClassname;
-   mUiid.get(&object.callInfo().uiid);
-   object.callInfo().action   = action;
-
-   if (pParamList)
-   {
-      object.setParams(*pParamList);
-   }
+  requestObject.callInfo().resource = mClassname;
+  mUiid.get(&requestObject.callInfo().uiid);
+  requestObject.callInfo().action = methodName;
+  if (pRequestParameters) requestObject.setParams(*pRequestParameters);
 }
 
 //-----------------------------------------------------------------------------

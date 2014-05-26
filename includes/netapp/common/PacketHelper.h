@@ -27,6 +27,7 @@ public:
    void writeCString(const std::string& val);
    void write(const std::string& val);
    void write(const char* pData, ui32 nBytes);
+   void write(bool val);
 
    std::stringstream stream;
 
@@ -56,6 +57,7 @@ public:
    bool read(i32& val);
    bool read(ui64& val);
    bool read(i64& val);
+   bool read(bool& val);
 
    // Assumes a null termination character.
    Status readCString(std::string& val);

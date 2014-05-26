@@ -4,6 +4,18 @@
 #include "RpcCommon.h"
 #include "RpcException.h"
 
+#define DELEGATE(action_delegate)                        \
+  action_delegate(InstanceWrapper *pInst,                \
+              const std::string& request,                \
+              std::string& response,                     \
+              liber::rpc::RpcException& e)
+
+#define ACTION(action_name, request_type, response_type) \
+  action_name(const request_type& request,               \
+              response_type& response,                   \
+              liber::rpc::RpcException& e)
+
+
 namespace liber {
 namespace rpc {
 

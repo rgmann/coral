@@ -113,6 +113,20 @@ std::string RpcException::toString() const
 }
 
 //-----------------------------------------------------------------------------
+void RpcException::reset()
+{
+  id = NoException;
+  message = "";
+
+  mCallInfo.resource = "";
+  mCallInfo.action = "";
+  memset(&mCallInfo.uiid, 0, sizeof(Hash128)); // Unique Instance ID
+  mCallInfo.rpcId = 0;
+
+  mTrace.clear();
+}
+
+//-----------------------------------------------------------------------------
 std::string RpcException::serialize() const
 {
    PacketCtor lPacket(NetworkByteOrder);
@@ -196,9 +210,30 @@ void RpcException::pushFrame(const TraceFrame& frame)
 }
 
 //-----------------------------------------------------------------------------
+bool RpcException::pushTrace(const RpcException& other)
+{
+  bool lbSuccess = false;
+
+  if (id == NoException)
+  {
+    id = other.id;
+    message = other.message;
+    mCallInfo = other.mCallInfo;
+
+    std::vector<TraceFrame>::const_iterator lIt = other.frameTrace().begin();
+    for (; lIt != other.frameTrace().end(); lIt++) pushFrame(*lIt);
+  }
+
+  return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
 void RpcException::popFrame() 
 {
-   mTrace.pop_back();
+   if (id == NoException)
+   {
+     mTrace.pop_back();
+   }
 }
 
 //-----------------------------------------------------------------------------

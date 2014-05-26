@@ -1,6 +1,8 @@
 #ifndef CIRCULAR_BUFFER_H
 #define CIRCULAR_BUFFER_H
 
+#include <istream>
+
 class CircularBuffer
 {
 public:
@@ -14,6 +16,7 @@ public:
    unsigned int   write(const char* pData,
                         unsigned int nBytes,
                         bool bOverwrite = true);
+   unsigned int   write(std::istream& stream, unsigned int nMaxBytes, bool bOverwrite = true);
    
    unsigned int   read(char* pData, unsigned int nMaxBytes);
    
@@ -21,7 +24,7 @@ public:
     * Read data without removing it from the buffer.
     */
    unsigned int   peek(char* pData, unsigned int nMaxBytes);
-   
+
    bool  isEmpty() const;
    
    bool  isFull() const;
@@ -32,14 +35,12 @@ private:
    
    char extractByte();
    
-   void initPeekPos();
-   
-   char peekExtractByte();
-   
-   char isPeekEmpty() const;
-   
    unsigned int increment(unsigned int &counter);
-   
+
+   unsigned int getLinearFreeCount();
+
+   unsigned int getLinearUsedCount(unsigned int nReadPos);
+
 private:
    
    unsigned int m_nHead;
@@ -49,10 +50,6 @@ private:
    unsigned int m_nCapacity;
    
    unsigned int m_nCount;
-   
-   unsigned int m_nPeekPos;
-   
-   unsigned int m_nPeekCount;
    
    char* m_pBuffer;
 };

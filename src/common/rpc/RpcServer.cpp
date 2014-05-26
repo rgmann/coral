@@ -44,7 +44,7 @@ bool RpcServer::processPacket(const RpcPacket* pPacket)
       else
       {
          lInput.exception().reporter = RpcException::Server;
-         lInput.exception().id = InvalidUIID;
+         lInput.exception().id = UnknownResource;
 
          lInput.getResponse(lOutput);
       }

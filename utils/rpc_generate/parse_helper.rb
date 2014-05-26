@@ -49,14 +49,4 @@ module ParseHelper
   end
 end
 
-#File.open(ARGV[0], 'r') do |io|
-#  text = io.read
-#  ParseHelper.blocks(text) do |type, name, body|
-#    puts "type = #{type}, name = #{name}, #{body}"
-#  end
-#end
-#text = "attri_bute = false"
-#ParseHelper.pairs(text) do |name, value|
-#  puts "name: #{name} => value: #{value}"
-#end
 

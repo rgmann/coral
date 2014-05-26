@@ -19,6 +19,8 @@ public:
    static std::string& RTrim(std::string &s);
    
    static std::string& Trim(std::string &s);
+
+   static std::string ToUpper(const std::string& s);
    
 private:
    

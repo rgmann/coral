@@ -47,6 +47,8 @@ private:
    CountingSem* m_pPushSem;
    
    CountingSem* m_pPopSem;
+
+   Mutex m_queueLock;
 };
 
 
@@ -119,7 +121,9 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
       l_bSuccess = true;
       
       // Otherwise, the item can pushed onto the end of the queue.
+      m_queueLock.lock();
       m_queue.push(item);
+      m_queueLock.unlock();
       
       // Post the push semaphore
       m_pPushSem->give();      
@@ -136,8 +140,10 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
       
    if (m_pPushSem->take(nTimeoutMs) == Sem::SemAcquired)
    {
+      m_queueLock.lock();
       item = m_queue.front();
       m_queue.pop();
+      m_queueLock.unlock();
       
 //      m_pPopSem->give();
       if (!m_bIsInfinite) m_pPopSem->give();
@@ -156,7 +162,9 @@ bool Queue<T>::peek(T &item)
    
    if (!isEmpty())
    {
+      m_queueLock.lock();
       item = m_queue.front();
+      m_queueLock.unlock();
       l_bSuccess = true;
    }
    
@@ -167,14 +175,20 @@ bool Queue<T>::peek(T &item)
 template <class T>
 bool Queue<T>::isEmpty()
 {
-   return m_queue.empty();
+   m_queueLock.lock();
+   bool l_bEmpty = m_queue.empty();
+   m_queueLock.unlock();
+   return l_bEmpty;
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 ui32 Queue<T>::size()
 {
-   return (ui32)m_queue.size();
+   m_queueLock.lock();
+   ui32 l_nSize = m_queue.size();
+   m_queueLock.unlock();
+   return l_nSize;
 }
 
 #endif // QUEUE_H

@@ -3,19 +3,24 @@
 
 #include <fstream>
 #include <sstream>
-#include "SegmentHash.h"
+#include "HashTable.h"
+#include "JobReport.h"
 #include "SegmentHook.h"
-#include "InstructionReceiver.h"
+#include "Segmenter.h"
 
 namespace liber {
 namespace rsync {
 
-class Authority : public liber::rsync::SegmentHook {
+class Instruction;
+class JobDescriptor;
+class InstructionReceiver;
+
+class Authority : public SegmentHook {
 public:
 
-  Authority(liber::rsync::JobDescriptor&,
-            liber::rsync::SegmentHash&,
-            liber::rsync::InstructionReceiver&);
+  Authority(JobDescriptor&,
+            liber::HashTable<16, Segment*>&,
+            InstructionReceiver&);
   ~Authority();
 
   /**
@@ -24,24 +29,34 @@ public:
    * in the Segment Hash.  Generates a set for instructions for updating the hashed
    * file to match the authoritative file.
    */
-  bool process(std::istream& rInStream);
+  bool process(std::istream& rInStream,
+               JobReport::SourceReport& rReport);
 
 private:
 
-  void call(Segment* pSegment);
+  void call(Segment& rSegment);
 
-  Instruction* createInstruction(std::stringstream& stream);
+  //Instruction* createInstruction(std::stringstream& stream);
+  Instruction* createInstruction(std::string& stream);
+
+  void flushChunkBuffer();
 
 private:
 
-  liber::rsync::JobDescriptor mDescriptor;
-  liber::rsync::SegmentHash&  mrHash;
-  liber::rsync::InstructionReceiver&  mrReceiver;
+  JobDescriptor& mrDescriptor;
+  liber::HashTable<16, Segment*>&  mrHash;
+  InstructionReceiver&  mrReceiver;
+
+  Segmenter mSegmenter;
 
   ui32 mnSegmentSkipCount;
-  std::stringstream mChunkBuffer;
+  //std::stringstream mChunkBuffer;
+  std::string mChunkBuffer;
 
   ui32 mnMaxChunkSize;
+  ui32 mnBufferedCount;
+
+  AuthorityReport* mpReport;
 };
 
 } // End namespace rsync

@@ -1,0 +1,17 @@
+#ifndef <%comp_guard%>_CLIENT_STUB_H
+#define <%comp_guard%>_CLIENT_STUB_H
+
+#include "RpcClientResource.h"
+<%includes%>
+
+class <%wrapped_class%>ClientStub : public liber::rpc::RpcClientResource {
+public:
+
+<%tab%><%wrapped_class%>ClientStub(liber::rpc::RpcClient &client);
+
+<%tab%>~<%wrapped_class%>ClientStub();
+
+<%tab%>void <%actions%>
+};
+
+#endif // <%comp_guard%>_CLIENT_STUB_H

@@ -66,6 +66,9 @@ arg:
 hashtab:
 	$(CC) -Wall -g -o hashtab hashtest.cpp $(INC) $(ABSLIB) $(LIBS)
 
+hash:
+	$(CC) -Wall -g -o $@ hash_table_test.cpp $(INC) $(ABSLIB) $(LIBS)
+
 segm:
 	$(CC) -Wall -g -o segm segmentertest.cpp $(INC) $(ABSLIB) $(LIBS)
 
@@ -84,11 +87,13 @@ derived:
 remove_if:
 	$(CC) -Wall -g -o remove_if remove_if_test.cpp $(INC) $(ABSLIB) $(LIBS)
 
+
 clean:
 	rm -rf *.dSYM  *.o
 	rm -f allocator
 	rm -f derived
 	rm -f functor
 	rm -f logtest
+	rm -f hash
 	rm -f remove_if
 	rm -f ts ithread log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order

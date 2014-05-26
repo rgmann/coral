@@ -39,7 +39,6 @@ RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
   if (mRpcMap.count(lpCall->getRpcId()) == 0)
   {
     mRpcMutex.lock();
-    //mRpcMap[lpCall->getRpcId()] = lpCall;
     mRpcMap.insert(std::make_pair(lpCall->getRpcId(), lpCall));
     mRpcMutex.unlock();
       
@@ -59,8 +58,6 @@ bool RpcClient::put(const char* pData, ui32 nLength)
   RpcPacket* lpPacket = new RpcPacket();
   RpcObject lRxObject;
 
-  lpPacket->unpack(pData, nLength);
-
   if (lpPacket->unpack(pData, nLength))
   {
     if (lpPacket->getObject(lRxObject))
@@ -69,7 +66,6 @@ bool RpcClient::put(const char* pData, ui32 nLength)
       
       if (mRpcMap.count(lRxObject.callInfo().rpcId) > 0)
       {
-        //lpCall = mRpcMap[lRxObject.callInfo().rpcId];
         lpCall = mRpcMap.find(lRxObject.callInfo().rpcId)->second;
       }
 

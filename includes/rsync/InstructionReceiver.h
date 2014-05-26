@@ -1,5 +1,5 @@
-#ifndef INSTRUCTION_RECEIVER_H
-#define INSTRUCTION_RECEIVER_H
+#ifndef RSYNC_INSTRUCTION_RECEIVER_H
+#define RSYNC_INSTRUCTION_RECEIVER_H
 
 #include "Instruction.h"
 
@@ -24,4 +24,4 @@ public:
 } // End namespace rsync
 } // End namespace liber
 
-#endif // INSTRUCTION_RECEIVER_H
+#endif // RSYNC_INSTRUCTION_RECEIVER_H

@@ -3,6 +3,7 @@
 #include <sstream>
 #include "Segment.h"
 #include "PacketHelper.h"
+#include "CircularBuffer.h"
 
 using namespace liber::rsync;
 using namespace liber::netapp;
@@ -31,6 +32,7 @@ Segment::Segment()
 , mpData(NULL)
 , mnSegmentSize(0)
 , mnOffset(0)
+, mnVSegmentSize(0)
 {
 }
 
@@ -40,7 +42,34 @@ Segment::Segment(ID id, ui32 offset)
 , mpData(NULL)
 , mnSegmentSize(0)
 , mnOffset(offset)
+, mnVSegmentSize(0)
 {
+}
+
+//------------------------------------------------------------------------------
+Segment::Segment(ui32 nVSegmentSize)
+: mID(-1)
+, mpData(NULL)
+, mnSegmentSize(0)
+, mnOffset(0)
+, mnVSegmentSize(nVSegmentSize)
+{
+  mpData = new ui8[mnVSegmentSize];
+}
+
+//------------------------------------------------------------------------------
+Segment::Segment(const Segment& other)
+{
+  mID = other.mID;
+  mnSegmentSize = other.mnSegmentSize;
+  mnVSegmentSize = other.mnVSegmentSize;
+  mnOffset = other.mnOffset;
+  mWeak = other.mWeak;
+  if (other.mpData)
+  {
+    mpData = new ui8[mnVSegmentSize];
+    memcpy(mpData, other.mpData, mnVSegmentSize);
+  }
 }
 
 //------------------------------------------------------------------------------
@@ -57,15 +86,87 @@ Segment::~Segment()
 void Segment::
 setData(const ui8* pData, ui32 nVSegmentSize, ui32 nSegmentSize, const Adler32Checksum* pPrev)
 {
+  mStrong.invalidate();
+
   mnSegmentSize = nSegmentSize;
 
-  if (mpData)
+  if (mpData && (mnVSegmentSize != nVSegmentSize))
   {
     delete[] mpData;
     mpData = NULL;
   }
-  mpData = new ui8[mnSegmentSize];
+  if (mpData == NULL)
+  {
+    //mpData = new ui8[mnSegmentSize];
+    mpData = new ui8[nVSegmentSize];
+  }
+  mnVSegmentSize = nVSegmentSize;
+
   memcpy(mpData, pData, mnSegmentSize);
+
+  if (pPrev)
+  {
+    rollWeak(mWeak, mnOffset, nVSegmentSize, *pPrev);
+  }
+  else
+  {
+    computeWeak(mWeak, mnOffset, nVSegmentSize);
+  }
+}
+
+//------------------------------------------------------------------------------
+void Segment::
+setData(CircularBuffer& buffer, ui32 nVSegmentSize, const Adler32Checksum* pPrev)
+{
+  mStrong.invalidate();
+
+  //mnSegmentSize = nSegmentSize;
+
+  if (mpData && (mnVSegmentSize != nVSegmentSize))
+  {
+    delete[] mpData;
+    mpData = NULL;
+  }
+  if (mpData == NULL)
+  {
+    //mpData = new ui8[mnSegmentSize];
+    mpData = new ui8[nVSegmentSize];
+  }
+  mnVSegmentSize = nVSegmentSize;
+
+  //if (nSegmentSize < nVSegmentSize) memset(mpData, 0, mnVSegmentSize);
+  //memcpy(mpData, pData, mnSegmentSize);
+  mnSegmentSize = buffer.peek((char*)mpData, mnVSegmentSize);
+
+  if (pPrev)
+  {
+    rollWeak(mWeak, mnOffset, nVSegmentSize, *pPrev);
+  }
+  else
+  {
+    computeWeak(mWeak, mnOffset, nVSegmentSize);
+  }
+}
+
+//------------------------------------------------------------------------------
+void Segment::
+setData(std::istream& stream, ui32 nVSegmentSize, const Adler32Checksum* pPrev)
+{
+  mStrong.invalidate();
+
+  if (mpData && (mnVSegmentSize != nVSegmentSize))
+  {
+    delete[] mpData;
+    mpData = NULL;
+  }
+  if (mpData == NULL)
+  {
+    mpData = new ui8[nVSegmentSize];
+  }
+  mnVSegmentSize = nVSegmentSize;
+
+  stream.read((char*)mpData, mnVSegmentSize);
+  mnSegmentSize = stream.gcount();
 
   if (pPrev)
   {
@@ -135,6 +236,12 @@ ui32 Segment::size() const
 Segment::ID Segment::getID() const
 {
   return mID;
+}
+
+//------------------------------------------------------------------------------
+bool Segment::endOfStream() const
+{
+  return (getID() == -1);
 }
 
 //------------------------------------------------------------------------------
@@ -211,29 +318,25 @@ std::string Segment::serialize()
 }
 
 //------------------------------------------------------------------------------
-/*bool Segment::unpack(ui8* const pData, ui32 nSizeBytes)
+bool Segment::deserialize(const char* pData, ui32 nSizeBytes)
 {
-  bool lbValid = (pData && (nSizeBytes == sizeof(PackedSegment)));
-
-  if (lbValid)
-  {
-    PackedSegment* lpSegment = reinterpret_cast<PackedSegment*>(pData);
-
-    mID           = lpSegment->id;
-    mnSegmentSize = lpSegment->size;
-    mnOffset      = lpSegment->offset;
-    mWeak.s       = lpSegment->weak;
-    mStrong       = Md5Hash(lpSegment->strong);
-  }
-
-  return lbValid;
-}*/
+  PacketDtor dtor;
+  dtor.stream.write(pData, nSizeBytes);
+  return deserialize(dtor);
+}
 
 //------------------------------------------------------------------------------
 bool Segment::deserialize(const std::string& data)
 {
-  bool lbSuccess = true;
   PacketDtor dtor;
+  dtor.setData(data);
+  return deserialize(dtor);
+}
+
+//------------------------------------------------------------------------------
+bool Segment::deserialize(PacketDtor& dtor)
+{
+  bool lbSuccess = true;
 
   lbSuccess &= dtor.read(mID);
   lbSuccess &= dtor.read(mnSegmentSize);
@@ -344,4 +447,41 @@ rollWeak(Adler32Checksum&       next,
          next.l - nOffset, next.k, next.l, next.a, next.b, next.s, (prev.l-prev.k+1)*prev.x_k, next.x_k, next.x_l);
 #endif
 }
+
+
+
+//------------------------------------------------------------------------------
+SegmentComparator::SegmentComparator(Segment* pSegment)
+: mpSegment(pSegment)
+{
+}
+
+//------------------------------------------------------------------------------
+bool SegmentComparator::operator() (Segment* pSegment)
+{
+  bool lbEqual = false;
+
+  if (mpSegment->getWeak().checksum() == pSegment->getWeak().checksum())
+  {
+    if (mpSegment->getStrong() == pSegment->getStrong())
+    {
+      lbEqual = true;
+    }
+  }
+
+  return lbEqual;
+}
+
+
+
+//------------------------------------------------------------------------------
+void SegmentDestructor::operator() (Segment*& pSegment)
+{
+  if (pSegment)
+  {
+    delete pSegment;
+    pSegment = NULL;
+  }
+}
+
 

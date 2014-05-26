@@ -26,6 +26,10 @@ public:
 
   virtual Segment* getSegment(liber::rsync::Segment::ID id) = 0;
 
+private:
+
+  SegmentAccessor(const SegmentAccessor&);
+  SegmentAccessor& operator= (const SegmentAccessor&);
 };
 
 

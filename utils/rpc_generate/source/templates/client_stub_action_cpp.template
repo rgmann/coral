@@ -1,0 +1,9 @@
+//------------------------------------------------------------------------------
+void <%wrapped_class%>ClientStub::<%action_name%>(<%in_param%> request, <%out_param%> response) throw (RpcException)
+{
+<%tab%>if (!call("<%action_name%>", request, response))
+<%tab%>{
+<%tab%><%tab%>throw getLastError();
+<%tab%>}
+}
+

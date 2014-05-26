@@ -69,6 +69,9 @@ public:
    std::vector<std::string> textTrace() const;
    std::string trace() const;
 
+   bool pushTrace(const RpcException& other);
+
+   void reset();
 
 private:
 

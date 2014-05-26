@@ -5,7 +5,9 @@
 #include "RpcObject.h"
 #include "RpcException.h"
 #include "RpcClient.h"
+#include "AsyncRpcSupervisor.h"
 #include "Md5Hash.h"
+
 
 namespace liber {
 namespace rpc {
@@ -17,30 +19,33 @@ public:
    virtual ~RpcClientResource();
    
    enum { InvalidInstance = -1 };
-   
+
+   void setTimeout(int nTimeoutMs);
+ 
    RpcException getLastError();
 
 protected:
    
    void setCallTimeout(ui32 nTimeoutMs);
    
-   bool construct(const PbMessage* pParams = NULL);
+   bool construct();
    
-   bool destroy(const PbMessage* pParams = NULL);
+   bool destroy();
    
-   bool call(const std::string &methodName,
-             const PbMessage   &paramList,
-             PbMessage         &returnValue);
+   bool call(const std::string&  methodName,
+             const PbMessage&    request,
+             PbMessage&          response,
+             AsyncRpcSupervisor* pSupervisor = NULL);
 
-   void marshall(RpcObject&         object, 
-                 const std::string& methodName, 
-                 const PbMessage*   pParamList);
+   void marshallRequest(RpcObject&         requestObject,
+                        const std::string& methodName,
+                        const PbMessage*   pReqeustParameters = NULL);
    
 private:
    
    bool invoke(const RpcObject& object,
                RpcObject&       result,
-               ui32             nTimeoutMs = 3000);
+               ui32             nTimeoutMs);
 
 protected:
 
@@ -51,6 +56,8 @@ protected:
    Md5Hash mUiid;
 
    RpcException mLastError;
+
+   int mnTimeoutMs;
 };
 
 }}

@@ -1,18 +1,34 @@
+#include "FileSystemInterface.h"
+#include "JobDescriptor.h"
 #include "SegmentFile.h"
 
 using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
 SegmentFile::
-SegmentFile(const liber::rsync::JobDescriptor& descriptor)
+SegmentFile(FileSystemInterface& rFileSystemInterface)
 : SegmentAccessor()
-, mDescriptor(descriptor)
+, mpDescriptor(NULL)
+, mrFileSys(rFileSystemInterface)
 {
-  mIStream.open(mDescriptor.getPath().generic_string(), std::ifstream::binary);
 }
 
 //-----------------------------------------------------------------------------
 SegmentFile::~SegmentFile()
+{
+  close();
+}
+
+//-----------------------------------------------------------------------------
+bool SegmentFile::open(const liber::rsync::JobDescriptor& descriptor)
+{
+  close();
+  mpDescriptor = &descriptor;
+  return mrFileSys.open(descriptor.getDestination(), mIStream);
+}
+
+//-----------------------------------------------------------------------------
+void SegmentFile::close()
 {
   mIStream.close();
 }
@@ -22,17 +38,20 @@ Segment* SegmentFile::getSegment(liber::rsync::Segment::ID id)
 {
   Segment* lpSegment = NULL;
 
-  if ((id >= 0) && mIStream.is_open())
+  if (mpDescriptor)
   {
-    ui8* lpData = new ui8[mDescriptor.getSegmentSize()];
+    if ((id >= 0) && mIStream.is_open())
+    {
+      ui8* lpData = new ui8[mpDescriptor->getSegmentSize()];
 
-    mIStream.seekg(id * mDescriptor.getSegmentSize(), mIStream.beg);
-    mIStream.read((char*)lpData, mDescriptor.getSegmentSize());
+      mIStream.seekg(id * mpDescriptor->getSegmentSize(), mIStream.beg);
+      mIStream.read((char*)lpData, mpDescriptor->getSegmentSize());
 
-    lpSegment = new Segment(id, id * mDescriptor.getSegmentSize());
-    lpSegment->setData(lpData, mDescriptor.getSegmentSize(), mIStream.gcount());
+      lpSegment = new Segment(id, id * mpDescriptor->getSegmentSize());
+      lpSegment->setData(lpData, mpDescriptor->getSegmentSize(), mIStream.gcount());
 
-    delete[] lpData;
+      delete[] lpData;
+    }
   }
 
   return lpSegment;

@@ -1,0 +1,53 @@
+#require 'FileUtils'
+require 'open3'
+
+liberrpc_path = '/Users/vaughanbiker/Development/liber/utils/rpc_generate/source/liber_gen/protoc-gen-libergen'
+proto_dir = 'proto/'
+gen_stage = 'rpc_gen_temp/'
+
+task :generate do
+  command = "protoc "
+  command << "--plugin=protoc-gen-libergen=#{liberrpc_path} "
+  command << "--proto_path=#{proto_dir} "
+  command << "--cpp_out=#{gen_stage} "
+  command << "--libergen_out=#{gen_stage} "
+  command << "#{proto_dir}*.proto"
+  stdout_str, status = Open3.capture2(command)
+  puts stdout_str
+end
+
+task :situate do
+  Dir.glob(File.join(gen_stage, '*.{h,cpp,cc}')) do |filename|
+
+    filename = File.basename(filename)
+
+    file_type = nil
+    case File.extname(filename)
+    when '.h'
+      file_type = 'rpc_include'
+    when /\.(cc|cpp)/
+      file_type = 'rpc_source'
+    else
+      puts "Unknown file extension: #{File.extname(filename)}"
+    end
+
+    destination = ''
+    if filename.include? 'ClientStub'
+      destination << File.join('client', file_type)
+    elsif filename.include? 'ServerStub' or filename.include? 'Wrapper'
+      destination << File.join('server', file_type)
+    elsif filename.include? '.pb.h'
+      destination << File.join('common', file_type)
+    elsif filename.include? '.pb.cc'
+      destination << File.join('common', file_type)
+    end
+
+    unless destination.empty?
+      source = File.join(gen_stage, filename)
+#      destination = File.join(destination, filename)
+#      puts "Moving #{source} to #{destination}"
+      FileUtils.mv(source, destination)
+    end
+  end
+end
+

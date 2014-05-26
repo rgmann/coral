@@ -1,0 +1,14 @@
+require 'fileutils'
+
+task :prepare do
+  ['client', 'server'].each do |role|
+    Dir.glob(File.join('originals', "#{role}.*")) do |filename|
+      tokens = File.basename(filename).split('.')
+      role_filename = tokens[1..-1].join('.')
+      FileUtils.cp filename, File.join(role, File.basename(role_filename))
+    end
+  end
+#  FileUtils.cp File.join('originals', 'client.file.dat'), File.join('client', 'file.dat')
+#  FileUtils.cp File.join('originals', 'server.file.dat'), File.join('server', 'file.dat')
+end
+

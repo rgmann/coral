@@ -5,7 +5,17 @@ LIBNAME = rpc
 BASE = ../..
 
 SOURCE = \
-$(BASE)/src/common/$(LIBNAME)/*.cpp
+$(BASE)/src/common/$(LIBNAME)/RpcClient.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcClientResource.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcException.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcMarshalledCall.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcObject.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcPacket.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcServer.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcServerResource.cpp \
+$(BASE)/src/common/$(LIBNAME)/RpcSupervisor.cpp \
+$(BASE)/src/common/$(LIBNAME)/BlockingRpcSupervisor.cpp \
+$(BASE)/src/common/$(LIBNAME)/AsyncRpcSupervisor.cpp \
 
 INCLUDES = \
 -I$(BASE)/includes/base \

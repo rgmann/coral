@@ -1,0 +1,19 @@
+#include "<%nspace%>.pb.h"
+#include "<%wrapped_class%>ClientStub.h"
+
+using namespace liber::rpc;
+using namespace <%nspace%>;
+
+//------------------------------------------------------------------------------
+<%wrapped_class%>ClientStub::<%wrapped_class%>ClientStub(RpcClient &client)
+: RpcClientResource(client, "<%wrapped_class%>")
+{
+}
+
+//------------------------------------------------------------------------------
+<%wrapped_class%>ClientStub::~<%wrapped_class%>ClientStub()
+{
+}
+
+<%actions%>
+

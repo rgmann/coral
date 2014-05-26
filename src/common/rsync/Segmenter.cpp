@@ -1,72 +1,106 @@
 #include <stdio.h>
-#include "Segment.h"
-#include "Segmenter.h"
+#include "Log.h"
 #include "CircularBuffer.h"
+#include "Segment.h"
+#include "SegmentReceiver.h"
+#include "SegmentHook.h"
+#include "JobReport.h"
+#include "Segmenter.h"
 
+using namespace liber;
 using namespace liber::rsync;
-
-//-----------------------------------------------------------------------------
-//
-//-----------------------------------------------------------------------------
-JobDescriptor::JobDescriptor()
-{
-}
-
-//-----------------------------------------------------------------------------
-JobDescriptor::
-JobDescriptor(const boost::filesystem::path& path, ui32 nSegmentSizeBytes)
-: mnSegmentSizeBytes(nSegmentSizeBytes)
-, mPath(path)
-{
-}
-
-//-----------------------------------------------------------------------------
-ui32 JobDescriptor::getSegmentSize() const
-{
-  return mnSegmentSizeBytes;
-}
-
-//-----------------------------------------------------------------------------
-boost::filesystem::path& JobDescriptor::getPath()
-{
-  return mPath;
-}
-
-//-----------------------------------------------------------------------------
-const boost::filesystem::path& JobDescriptor::getPath() const
-{
-  return mPath;
-}
-
 
 //-----------------------------------------------------------------------------
 // Class: Segmenter
 //-----------------------------------------------------------------------------
-Segmenter::Segmenter()
+Segmenter::Segmenter(Segmenter::SegmentDistance distance)
+: mDistance(distance)
 {
 }
 
 //-----------------------------------------------------------------------------
-Segmenter::Segmenter(ui32 nSegmentSizeBytes, SegmentDistance distance)
-: mnSegmentSizeBytes(nSegmentSizeBytes)
-, mDistance(distance)
+bool Segmenter::
+process(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegmentSizeBytes, SegmentationReport& rReport)
 {
+  bool lbSuccess = false;
+
+  if (mDistance == FullStride)
+  {
+    lbSuccess = processFullStride(istream, rReceiver, nSegmentSizeBytes, rReport);
+  }
+  else
+  {
+    lbSuccess = processEveryOffset(istream, rReceiver, nSegmentSizeBytes, rReport);
+  }
+
+  return lbSuccess;
 }
 
 //-----------------------------------------------------------------------------
-bool Segmenter::process(std::istream& istream, SegmentReceiver& rReceiver)
+bool Segmenter::
+processFullStride(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegmentSizeBytes, SegmentationReport& rReport)
 {
-  ui8*  lpFileBuffer = NULL;
-  ui8*  lpReadBuffer = NULL;
-  ui8*  lpTempBuffer = NULL;
-//  char   lcTempChar;
   Segment::ID lnSegId = 0;
+  Segment lSegment(nSegmentSizeBytes);
+
+  // Offset, in bytes, from the beginning of the file.
+  ui32 lnOffset = 0;
+
+  if (istream.bad())
+  {
+    return false;
+  }
+
+  // Capture the start time.
+  rReport.segmentCount = 0;
+  rReport.begin.sample();
+
+  ui32 lnStrideSizeBytes = nSegmentSizeBytes;
+
+  // Record the stride size and segment size;
+  rReport.strideSizeBytes  = lnStrideSizeBytes;
+  rReport.segmentSizeBytes = nSegmentSizeBytes;
+
+  while (istream.eof() == false)
+  {
+    // Create the new segment.  The segment will compute its weak checksum.
+    // The Segment always defers its MD5 computation.
+    lSegment.setID(lnSegId++);
+    lSegment.setOffset(lnOffset);
+    lSegment.setData(istream, nSegmentSizeBytes, NULL);
+ 
+    // Add the segment to the segment list vector.
+    rReceiver.push(lSegment);
+    rReport.segmentCount++;
+
+    // Move to the next byte.
+    lnOffset += lnStrideSizeBytes;
+  }
+
+  // Push an empty segment to mark the end of the stream.
+  lSegment.setID(Segment::EndOfStream);
+  rReceiver.push(lSegment);
+
+  // Capture the segmentation end time.
+  rReport.end.sample();
+
+  return true;
+}
+
+//-----------------------------------------------------------------------------
+bool Segmenter::
+processEveryOffset(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegmentSizeBytes, SegmentationReport& rReport)
+{
+  ui8*  lpTempBuffer = NULL;
+
+  Segment::ID lnSegId = 0;
+
+  Segment lSegment(nSegmentSizeBytes);
 
   // Offset, in bytes, from the beginning of the file.
   ui32 lnOffset = 0;
 
   Adler32Checksum   oldweaksum;
-  Md5Hash           tempStrongHash;
   CircularBuffer    lCircularBuff;
 
   if (istream.bad())
@@ -75,93 +109,79 @@ bool Segmenter::process(std::istream& istream, SegmentReceiver& rReceiver)
   }
 
   // Allocated the buffer to the segment length.
-  if (!lCircularBuff.allocate(mnSegmentSizeBytes))
+  if (!lCircularBuff.allocate(nSegmentSizeBytes))
   {
     return false;
   }
 
-  lpFileBuffer = new ui8[mnSegmentSizeBytes];
-  if (lpFileBuffer == NULL)
-  {
-    return false;
-  }
-
-  lpTempBuffer = new ui8[mnSegmentSizeBytes];
+  lpTempBuffer = new ui8[nSegmentSizeBytes];
   if (lpTempBuffer == NULL)
   {
     return false;
   }
 
+  // Capture the start time.
+  rReport.segmentCount = 0;
+  rReport.begin.sample();
 
-  lpReadBuffer = new ui8[mnSegmentSizeBytes];
-  if (lpReadBuffer == NULL)
-  {
-    delete[] lpFileBuffer;
-    lpFileBuffer = NULL;
-    return false;
-  }
+  // Record the stride size and segment size;
+  rReport.strideSizeBytes  = 1;
+  rReport.segmentSizeBytes = nSegmentSizeBytes;
 
-  ui32 lnStrideSizeBytes = (mDistance == FullStride) ? mnSegmentSizeBytes : 1;
-
+  //ui32 lnReadLen = nSegmentSizeBytes;
   while ((istream.eof() == false) || (lCircularBuff.isEmpty() == false))
   {
-    if ((lnOffset % lnStrideSizeBytes) == 0)
+    //ui32 lnReadLen = nSegmentSizeBytes;
+
+    // Compute the number of bytes that should be read.
+    // If the stride is one, the first read will read the full segment size, but all
+    // following reads will read only one byte.
+    //if (lnOffset > 0)
+    //{
+    //  lnReadLen = 1;
+    //}
+
+    // Read the data into the buffer.
+    if (istream.eof() == false)
     {
-      ui32 lnReadLen = 0;
-      Adler32Checksum* pAdler = NULL;
-
-      // Compute the number of bytes that should be read.
-      // If the stride is one, the first read will read the full segment size, but all
-      // following reads will read only one byte.
-      lnReadLen = mnSegmentSizeBytes;
-      if ((mDistance == EveryOffset) && (lnOffset > 0))
-      {
-        pAdler = &oldweaksum;
-        lnReadLen = 1;
-      }
-      //printf("read_len=%u, pAdler=%p\n", lnReadLen, pAdler);
-
-      // Read the data into the buffer.
-      if (istream.eof() == false)
-      {
-        istream.read((char*)lpFileBuffer, lnReadLen);
-        lCircularBuff.write((char*)lpFileBuffer, istream.gcount());
-#ifdef DEBUG_SEGMENTER
-        printf("bytes_read=%d\n", (int)istream.gcount());
-#endif
-      }
-
-      ui32 lnSegmentLength = lCircularBuff.peek((char*)lpReadBuffer, mnSegmentSizeBytes);
-#ifdef DEBUG_SEGMENTER
-      printf("segment_length=%u\n", lnSegmentLength);
-#endif
-
-      // If the stride is the full segment, drain the full segment from the
-      // buffer.  Drain one byte if we're striding to each offset.
-      lCircularBuff.read((char*)lpTempBuffer,
-                         (mDistance == FullStride) ? mnSegmentSizeBytes : 1);
-
-      // Create the new segment.  The segment will compute its weak checksum.
-      // The Segment always defers its MD5 computation.
-      Segment* lpSegment = new Segment(lnSegId++, lnOffset);
-      //lpSegment->setData(lpReadBuffer, lnSegmentLength, pAdler);
-      lpSegment->setData(lpReadBuffer, mnSegmentSizeBytes, lnSegmentLength, pAdler);
-
-      // Get the weak checksum for the next iteration just in case
-      // checksum rolling is enabled.
-      oldweaksum = lpSegment->getWeak();
-
-      // Add the segment to the segment list vector.
-      rReceiver.push(lpSegment);
+      //lCircularBuff.write(istream, lnReadLen);
+      lCircularBuff.write(istream, (lnOffset == 0) ? nSegmentSizeBytes : 1);
     }
 
+    // Create the new segment.  The segment will compute its weak checksum.
+    // The Segment always defers its MD5 computation.
+    //printf("every_offset: ID=%d, seg_size=%d, seg_len=%d, d[0]=%02X\n",
+    //           lnSegId, nSegmentSizeBytes, lnSegmentLength, lpReadBuffer[0]);
+    lSegment.setID(lnSegId++);
+    lSegment.setOffset(lnOffset);
+    lSegment.setData(lCircularBuff,
+                     nSegmentSizeBytes,
+                     (lnOffset > 0) ? &oldweaksum : NULL);
+
+    // Get the weak checksum for the next iteration just in case
+    // checksum rolling is enabled.
+    oldweaksum = lSegment.getWeak();
+
+    // Add the segment to the segment list vector.
+    rReceiver.push(lSegment);
+    rReport.segmentCount++;
+
+    lCircularBuff.read((char*)lpTempBuffer, 1);
+
+    // Move to the next byte.
     lnOffset += 1;
   }
 
-  delete[] lpFileBuffer;
-  delete[] lpReadBuffer;
+  // Push an empty segment to mark the end of the stream.
+  lSegment.setID(Segment::EndOfStream);
+  rReceiver.push(lSegment);
+
+  // Capture the segmentation end time.
+  rReport.end.sample();
+
+  // Delete all heap allocations. If we got to this point, we know that the
+  // buffers were successfully allocated.
   delete[] lpTempBuffer;
 
   return true;
 }
-

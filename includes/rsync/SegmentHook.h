@@ -8,20 +8,25 @@ namespace rsync {
 
 // Particularly used by the FileAuthority to look up each of the Segments
 // as they are created.
-class SegmentHook : public liber::rsync::SegmentReceiver {
+class SegmentHook : public SegmentReceiver {
 public:
 
   SegmentHook();
   virtual ~SegmentHook();
 
-  void push(Segment* pSegment);
+  void push(Segment& rSegment);
 
   /**
    * Derived class overrides call and does something with the Segment.
    * The call method should transfer control of the Segment or destroy
    * the segment.
    */
-  virtual void call(Segment* pSegment) = 0;
+  virtual void call(Segment& rSegment) = 0;
+
+private:
+
+  SegmentHook(const SegmentHook&);
+  SegmentHook& operator= (const SegmentHook&);
 };
 
 } // End namespace rsync

@@ -1,0 +1,21 @@
+//------------------------------------------------------------------------------
+bool <%wrapped_class%>ClientStub::
+<%ACTION%>(<%PARAMS%>, <%RETURN_TYPE%>& result)
+{
+<%tab%><%ACTION_PARAM_LIST_IN%> lInParams;
+<%tab%>Structure lOutStructure;
+<%tab%>bool lbSucces = false;
+
+<%tab%>// Marshall the parameters.
+<%tab%>lInParams.marshall(<%IN_PARAMS%>);
+
+<%tab%>if (call("<%ACTION%>", lInParams.getParameters(), lOutStructure))
+<%tab%>{
+<%tab%><%tab%><%ACTION_PARAM_LIST_OUT%> lOutParams(lOutStructure);
+<%tab%><%tab%>lbSuccess = lOutParams.unmarshall(<%OUT_PARAMS%>);
+<%tab%><%tab%>lbSuccess &= lOutParams.getReturnValue(result);
+<%tab%>}
+
+<%tab%>return lbSuccess;
+}
+

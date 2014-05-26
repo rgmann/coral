@@ -23,6 +23,8 @@ public:
    i64 getRpcId() const;
 
    void notify(const RpcObject &object);
+   void cancel();
+   bool cancelled() const;
 
    bool wait(ui32 nTimeoutMs, bool bCancelOnTimeout = true);
    
@@ -43,6 +45,7 @@ private:
    RpcObject mResultObj;
  
    bool mbIsDisposed;
+   bool mbCancelled;
 };
 
 }}

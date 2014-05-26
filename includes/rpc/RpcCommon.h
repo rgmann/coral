@@ -14,9 +14,10 @@ enum RpcErrorId
    
    // Client exceptions
    RpcCallTimeout,
+   RpcCallCancelled,
 
    // Server Exceptions
-   InvalidClassname,
+   UnknownResource,
    MissingUIID,
    UIIDAssignmentErr,
    InvalidUIID,
@@ -36,7 +37,11 @@ inline std::string ToRpcErrorString(RpcErrorId error)
    
    switch (error) {
       case NoException: lsException = "NoException"; break;
-      case InvalidClassname: lsException = "InvalidClassname"; break;
+
+      case RpcCallTimeout:   return "RpcCallTimeout";
+      case RpcCallCancelled: return "RpcCallCancelled";
+
+      case UnknownResource: lsException = "UnknownResource"; break;
       case MissingUIID: lsException = "MissingUIID"; break;
       case UIIDAssignmentErr: lsException = "UIIDAssignmentErr"; break;
       case InvalidUIID: lsException = "InvalidUIID"; break;

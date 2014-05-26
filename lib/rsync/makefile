@@ -8,18 +8,32 @@ BOOST_INCLUDE = \
 -I/opt/local/include \
 
 SOURCE = \
+$(BASE)/src/common/$(LIBNAME)/JobDescriptor.cpp \
+$(BASE)/src/common/$(LIBNAME)/JobReport.cpp \
+$(BASE)/src/common/$(LIBNAME)/FileSystemInterface.cpp \
+$(BASE)/src/common/$(LIBNAME)/RsyncJob.cpp \
 $(BASE)/src/common/$(LIBNAME)/Segment.cpp \
+$(BASE)/src/common/$(LIBNAME)/RsyncPacket.cpp \
 $(BASE)/src/common/$(LIBNAME)/Assembler.cpp \
+$(BASE)/src/common/$(LIBNAME)/AssemblerThread.cpp \
 $(BASE)/src/common/$(LIBNAME)/Authority.cpp \
+$(BASE)/src/common/$(LIBNAME)/AuthorityInterface.cpp \
+$(BASE)/src/common/$(LIBNAME)/LocalAuthorityInterface.cpp \
+$(BASE)/src/common/$(LIBNAME)/RemoteAuthorityInterface.cpp \
+$(BASE)/src/common/$(LIBNAME)/RemoteAuthorityService.cpp \
+$(BASE)/src/common/$(LIBNAME)/AuthorityThread.cpp \
 $(BASE)/src/common/$(LIBNAME)/Instruction.cpp \
 $(BASE)/src/common/$(LIBNAME)/InstructionReceiver.cpp \
 $(BASE)/src/common/$(LIBNAME)/InstructionList.cpp \
+$(BASE)/src/common/$(LIBNAME)/InstructionQueue.cpp \
 $(BASE)/src/common/$(LIBNAME)/Segmenter.cpp \
+$(BASE)/src/common/$(LIBNAME)/SegmenterThread.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentAccessor.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentHook.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentReceiver.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentFile.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentList.cpp \
+$(BASE)/src/common/$(LIBNAME)/SegmentQueue.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentHash.cpp \
 
 INCLUDES = $(BOOST_INCLUDE) \

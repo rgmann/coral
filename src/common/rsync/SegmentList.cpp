@@ -14,12 +14,9 @@ SegmentList::~SegmentList()
 }
 
 //-----------------------------------------------------------------------------
-void SegmentList::push(Segment* pSegment)
+void SegmentList::push(Segment& rSegment)
 {
-  if (pSegment)
-  {
-    mSegments.push_back(pSegment);
-  }
+  mSegments.push_back(new Segment(rSegment));
 }
 
 //-----------------------------------------------------------------------------

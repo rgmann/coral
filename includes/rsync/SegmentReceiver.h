@@ -18,7 +18,13 @@ public:
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  virtual void push(Segment* const pSegment) = 0;
+  virtual void push(Segment& rSegment) = 0;
+
+
+private:
+
+  SegmentReceiver(const SegmentReceiver&);
+  SegmentReceiver& operator= (const SegmentReceiver&);
 
 };
 

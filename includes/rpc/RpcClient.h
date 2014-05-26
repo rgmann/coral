@@ -19,13 +19,8 @@ public:
    ~RpcClient();
 
    RpcMarshalledCall* invokeRpc(const RpcObject &object);
-   void dispose(RpcMarshalledCall& call);
 
-//   static bool IsRpcPacket(const GenericPacket* pPacket);
-
-   //bool processPacket(const RpcPacket* pPacket);
    bool put(const char* pData, ui32 nLength);
-   //bool popPacket(RpcPacket** pPacket);
 
 private:
 
@@ -34,8 +29,6 @@ private:
    void processCancellations();
 
 private:
-
-   //Queue<RpcPacket*> mOutQueue;
 
    Mutex mRpcMutex;
    

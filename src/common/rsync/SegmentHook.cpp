@@ -13,8 +13,8 @@ SegmentHook::~SegmentHook()
 }
 
 //-----------------------------------------------------------------------------
-void SegmentHook::push(Segment* pSegment)
+void SegmentHook::push(Segment& rSegment)
 {
-  call(pSegment);
+  call(rSegment);
 }
 

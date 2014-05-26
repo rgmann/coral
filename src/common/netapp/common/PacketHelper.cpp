@@ -43,6 +43,12 @@ void PacketCtor::write(ui64 val)
 }
 
 //-----------------------------------------------------------------------------
+void PacketCtor::write(bool val)
+{
+  stream.write((char*)val, sizeof(ui8));
+}
+
+//-----------------------------------------------------------------------------
 void PacketCtor::writeCString(const std::string& val)
 {
    PacketCtor::write((ui32)(val.size() + 1));
@@ -153,6 +159,13 @@ bool PacketDtor::read(i64& val)
    if (!PacketDtor::read(lVal)) return false;
    val = lVal;
    return true;
+}
+
+//-----------------------------------------------------------------------------
+bool PacketDtor::read(bool& val)
+{
+   stream.read((char*)&val, sizeof(ui8));
+   return (stream.fail() == false);
 }
 
 //-----------------------------------------------------------------------------

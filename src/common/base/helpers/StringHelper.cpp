@@ -52,3 +52,15 @@ std::string &StringHelper::Trim(std::string &s)
 {
    return LTrim(RTrim(s));
 }
+
+//------------------------------------------------------------------------------
+std::string StringHelper::ToUpper(const std::string& s)
+{
+  std::stringstream ss;
+  std::locale loc;
+  std::string str="Test String.\n";
+  for (std::string::size_type i=0; i<s.length(); ++i)
+    ss << std::toupper(s[i], loc);
+  return ss.str();
+}
+

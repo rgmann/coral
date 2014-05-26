@@ -168,7 +168,7 @@ void IThread::shutdown()
 //-----------------------------------------------------------------------------
 void* IThread::ThreadEntry(void* pArg)
 {
-  IThread* lpThread = reinterpret_cast<IThread*>(pArg);
+  IThread* lpThread = static_cast<IThread*>(pArg);
 
   // Signal that the thread has started.
   lpThread->mbRunning = true;

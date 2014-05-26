@@ -1,41 +1,51 @@
 #ifndef RSYNC_JOB_H
 #define RSYNC_JOB_H
 
+#include <boost/filesystem.hpp>
+#include "BinarySem.h"
+#include "JobDescriptor.h"
+#include "JobReport.h"
+#include "SegmentQueue.h"
+#include "InstructionQueue.h"
 
+namespace liber {
+namespace rsync {
 
 class RsyncJob {
 public:
 
-  enum Type {
-    Push = 0,
-    Pull
-  };
+  RsyncJob();
+  ~RsyncJob();
 
-  RsyncJob(Type type, const FilePath& source, const FilePath& destination);
+  JobDescriptor& descriptor();
 
-  // Methods used in the pull configuration.
-  bool sendSegments(Queue<RsyncPacket*>& rOutQueue);
-  bool reassemble(Queue<RsyncPacket*>& rInQueue);
+  JobReport& report();
 
-  // Methods used in the push configuration.
-  bool receiveSegments(Queue<RsyncPacket*>& rInQueue);
-  bool createInstructions(Queue<RsyncPacket*>& rOutQueue);
+  SegmentQueue& segments();
+
+  InstructionQueue& instructions();
+
+  void signalDone();
+  bool waitDone(int nTimeoutMs = Sem::SemWaitForever);
+
+private: 
+  RsyncJob(const RsyncJob&);
+  RsyncJob& operator= (const RsyncJob&);
 
 private:
 
-  Type     mJobType;
-  FilePath mSource;
-  FilePath mDestination;
+  JobDescriptor mDescriptor;
 
-  // In the PULL configuration the job will allocate the segmenter and the 
-  // Assembler.
-  RsyncSegmenter* mpSegmenter;
-  RsyncAssembler* mpAssembler;
+  JobReport mReport;
 
-  // In the PUSH configuration the job will allocated the Authority.
-  RsyncSegmentTable*  mpSegmentTable;
-  RsyncFileAuthority* mpAuthority;
+  SegmentQueue mSegments;
+  InstructionQueue mInstructions;
+
+  BinarySem mDoneCondition;
 };
+
+} // End namespace rsync
+} // End namespace liber
 
 #endif // RSYNC_JOB_H
 

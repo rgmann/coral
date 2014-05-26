@@ -3,29 +3,14 @@
 
 #include <fstream>
 #include <boost/filesystem.hpp>
-#include "SegmentReceiver.h"
+#include "BaseTypes.h"
 
 namespace liber {
 namespace rsync {
 
-
-class JobDescriptor {
-public:
-
-  JobDescriptor();
-  JobDescriptor(const boost::filesystem::path& path, ui32 nSegmentSizeBytes);
-
-  ui32 getSegmentSize() const;
-  boost::filesystem::path& getPath();
-  const boost::filesystem::path& getPath() const;
-  bool isValid() const;
-
-private:
-
-  ui32 mnSegmentSizeBytes;
-  boost::filesystem::path mPath;
-};
-
+class SegmentReceiver;
+class SegmentHook;
+struct SegmentationReport;
 
 class Segmenter {
 public:
@@ -39,14 +24,27 @@ public:
     EveryOffset
   };
 
-  Segmenter();
-  Segmenter(ui32 nSegmentSizeBytes, SegmentDistance distance = FullStride);
+  explicit Segmenter(SegmentDistance distance = FullStride);
 
-  bool process(std::istream& istream, liber::rsync::SegmentReceiver& rReceiver);
+  bool process(std::istream& istream,
+               SegmentReceiver& rReceiver,
+               ui32 nSegmentSizeBytes,
+               SegmentationReport& rReport);
 
 private:
 
-  ui32 mnSegmentSizeBytes;
+  bool processFullStride(std::istream& istream,
+               SegmentReceiver& rReceiver,
+               ui32 nSegmentSizeBytes,
+               SegmentationReport& rReport);
+
+  bool processEveryOffset(std::istream& istream,
+               SegmentReceiver& rReceiver,
+               ui32 nSegmentSizeBytes,
+               SegmentationReport& rReport);
+
+private:
+
   SegmentDistance mDistance;
 };
 

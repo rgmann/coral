@@ -14,7 +14,7 @@ public:
   SegmentList();
   ~SegmentList();
 
-  void push(Segment* pSegment);
+  void push(Segment& rSegment);
   Segment* pop();
 
   std::vector<Segment*>& segments();

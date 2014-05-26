@@ -1,4 +1,5 @@
 #include <sstream>
+#include "Log.h"
 #include "Instruction.h"
 
 #undef DEBUG_RSYNC_INSTRUCTIONS
@@ -17,13 +18,45 @@ void dump_buffer(const char* pBuffer, ui32 nBytes)
 }
 
 //-----------------------------------------------------------------------------
+// Class: ExecutionStatus
+//-----------------------------------------------------------------------------
+ExecutionStatus::ExecutionStatus()
+: error(ExecutionStatus::NoError)
+, mbDone(false)
+{
+}
+
+//-----------------------------------------------------------------------------
+ExecutionStatus::~ExecutionStatus()
+{
+}
+
+//-----------------------------------------------------------------------------
+bool ExecutionStatus::failed() const
+{
+  return (error != NoError);
+}
+
+//-----------------------------------------------------------------------------
+bool ExecutionStatus::cancelled() const
+{
+  return (error == CancelError);
+}
+
+//-----------------------------------------------------------------------------
+bool ExecutionStatus::done() const
+{
+  return mbDone;
+}
+
+//-----------------------------------------------------------------------------
 // Class: Instruction
 //-----------------------------------------------------------------------------
 std::string InstructionFactory::Serialize(const Instruction* pInstruction)
 {
   PacketCtor ctor;
 
-  ctor.write(pInstruction->getType());
+  ctor.write(pInstruction->type());
   pInstruction->serialize(ctor);
 
 //  dump_buffer(ctor.stream.str().data(), ctor.stream.str().size());
@@ -84,7 +117,7 @@ Instruction::~Instruction()
 }
 
 //-----------------------------------------------------------------------------
-ui32 Instruction::getType() const
+ui32 Instruction::type() const
 {
   return mType;
 }
@@ -116,26 +149,31 @@ std::string BeginInstruction::toString() const
   std::stringstream ss;
 
   ss << "BeginInstruction:" << std::endl
-     << "  path: " << mDescriptor.getPath().generic_string() << std::endl
+     << "  path: " << mDescriptor.getDestination().generic_string() << std::endl
      << "  segment size: " << mDescriptor.getSegmentSize() << std::endl;
 
   return ss.str();
 }
 
 //-----------------------------------------------------------------------------
-bool BeginInstruction::
-execute(SegmentAccessor& rAccessor, std::ofstream& ostream)
+void BeginInstruction::
+execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
 {
-  if (ostream.is_open()) return false;
-  ostream.open(mDescriptor.getPath().generic_string(), std::ofstream::binary);
-  return ostream.is_open();
+  if (ostream.is_open()) return;
+  ostream.open(mDescriptor.getDestination().generic_string(),
+               std::ofstream::binary);
+  if ((ostream.is_open() == false) || ostream.fail())
+  {
+    rStatus.error = ExecutionStatus::IoError;
+    log::error("BeginInstruction: Failed ostream or not open.\n");
+  }
 }
 
 //-----------------------------------------------------------------------------
 void BeginInstruction::serialize(PacketCtor& ctor) const
 {
   ctor.write(mDescriptor.getSegmentSize());
-  ctor.writeCString(mDescriptor.getPath().generic_string());
+  ctor.writeCString(mDescriptor.getDestination().generic_string());
 }
 
 //-----------------------------------------------------------------------------
@@ -187,20 +225,28 @@ std::string SegmentInstruction::toString() const
 }
 
 //-----------------------------------------------------------------------------
-bool SegmentInstruction::
-execute(SegmentAccessor& rAccessor, std::ofstream& ostream)
+void SegmentInstruction::
+execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
 {
   Segment* lpSegment = rAccessor.getSegment(mID);
   if (lpSegment)
   {
     ostream.write((char*)lpSegment->data(), lpSegment->size());
 
+    if (ostream.fail())
+    {
+      rStatus.error = ExecutionStatus::IoError;
+      log::error("SegmentInstruction: Failed to write segment to ostream.\n");
+    }
 #ifdef DEBUG_RSYNC_INSTRUCTIONS
-    std::cout << "Executing SegmentInstruction:" << std::endl
-              << " " << lpSegment->debugDump() << std::endl;
+    log::debug("Executing SegmentInstruction:\n%s\n",
+               lpSegment->debugDump().c_str());
 #endif
   }
-  return (lpSegment && (ostream.fail() == false));
+  else
+  {
+    rStatus.error = ExecutionStatus::SegmentAccessError;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -283,14 +329,14 @@ std::string ChunkInstruction::toString() const
 }
 
 //-----------------------------------------------------------------------------
-bool ChunkInstruction::
-execute(SegmentAccessor& rAccessor, std::ofstream& ostream)
+void ChunkInstruction::
+execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
 {
   if (mpData && (mnSizeBytes > 0))
   {
     ostream.write((char*)mpData, mnSizeBytes);
 #ifdef DEBUG_RSYNC_INSTRUCTIONS
-    printf("Executing ChunkInstruction:\n");
+    log::debug("Executing ChunkInstruction:\n");
     for (int ind = 0; ind < mnSizeBytes; ind++)
     {
       printf("0x%02X ", mpData[ind]);
@@ -299,7 +345,12 @@ execute(SegmentAccessor& rAccessor, std::ofstream& ostream)
     printf("\n");
 #endif
   }
-  return (mpData && (ostream.fail() == false));
+
+  if ((mpData == NULL) || ostream.fail())
+  {
+    rStatus.error = ExecutionStatus::IoError;
+    log::error("ChunkInstruction: NULL data or failed ostream.\n");
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -340,6 +391,8 @@ bool ChunkInstruction::deserialize(PacketDtor& dtor)
 //-----------------------------------------------------------------------------
 EndInstruction::EndInstruction()
 : Instruction(EndInstruction::Type)
+, mbCancelled(false)
+, mCancelError((RsyncError)RsyncSuccess)
 {
 }
 
@@ -349,28 +402,59 @@ EndInstruction::~EndInstruction()
 }
 
 //-----------------------------------------------------------------------------
+void EndInstruction::cancel(RsyncError error)
+{
+  mbCancelled = true;
+  mCancelError = (ui32)error;
+}
+
+//-----------------------------------------------------------------------------
+bool EndInstruction::cancelled() const
+{
+  return mbCancelled;
+}
+
+//-----------------------------------------------------------------------------
+RsyncError EndInstruction::error() const
+{
+  return (RsyncError)mCancelError;
+}
+
+//-----------------------------------------------------------------------------
 std::string EndInstruction::toString() const
 {
   return std::string("EndInstruction");
 }
 
 //-----------------------------------------------------------------------------
-bool EndInstruction::
-execute(SegmentAccessor& rAccessor, std::ofstream& ostream)
+void EndInstruction::
+execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
 {
+  if (mbCancelled)
+  {
+    rStatus.error = ExecutionStatus::CancelError;
+  }
+  else
+  {
+    rStatus.mbDone = true;
+  }
+
   ostream.close();
-  return (ostream.is_open() == false);
 }
 
 //-----------------------------------------------------------------------------
 void EndInstruction::serialize(PacketCtor& ctor) const
 {
+  ctor.write(mbCancelled);
+  ctor.write(mCancelError);
 }
 
 //-----------------------------------------------------------------------------
 bool EndInstruction::deserialize(PacketDtor& dtor)
 {
   bool lbSuccess = true;
+  lbSuccess &= dtor.read(mbCancelled);
+  lbSuccess &= dtor.read(mCancelError);
   return lbSuccess;
 }
 

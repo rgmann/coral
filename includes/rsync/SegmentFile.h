@@ -8,22 +8,29 @@
 namespace liber {
 namespace rsync {
 
+class JobDescriptor;
+class FileSystemInterface;
+
 // Since SegmentIDs are simply sequential indeces of blocks, it is simple
 // enough to open the file and seek forward into the file if the chunk size
 // is known.
-class SegmentFile : public liber::rsync::SegmentAccessor {
+class SegmentFile : public SegmentAccessor {
 public:
 
-  SegmentFile(const liber::rsync::JobDescriptor&);
+  SegmentFile(FileSystemInterface&);
   ~SegmentFile();
 
-  Segment* getSegment(liber::rsync::Segment::ID id);
+  bool open(const JobDescriptor& descriptor);
+  void close();
+
+  Segment* getSegment(Segment::ID id);
 
 private:
 
-  liber::rsync::JobDescriptor mDescriptor;
+  const JobDescriptor* mpDescriptor;
   std::ifstream mIStream;
 
+  FileSystemInterface& mrFileSys;
 };
 
 } // End namespace rsync
