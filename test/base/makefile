@@ -78,6 +78,10 @@ log:
 logtest:
 	$(CC) -Wall -g -o logtest log_test_new.cpp OtherLogUser.cpp $(INC) $(ABSLIB) $(LIBS) $(BOOST_LIB)
 
+bufftest:
+	$(CC) -Wall -g -o bufftest circ_buff_test.cpp $(INC) $(ABSLIB) $(LIBS) $(BOOST_LIB)
+
+
 ts:
 	$(CC) -Wall -g -o ts timestamp_test.cpp $(INC) $(ABSLIB) $(LIBS)
 
@@ -96,4 +100,5 @@ clean:
 	rm -f logtest
 	rm -f hash
 	rm -f remove_if
+	rm -f bufftest
 	rm -f ts ithread log base_types client server thread sem queue fs mon dsv rsync arg hashtab segm byte_order

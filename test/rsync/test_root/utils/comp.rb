@@ -24,8 +24,8 @@ File.open(ARGV[0], 'r') do |left|
         puts "at #{byte_count} left=#{'%02X' % left_byte}, right=#{'%02X' % right_byte}"
         diff_count += 1
       else
-        byte_count += 1
       end
+      byte_count += 1
     end
   end
 end

@@ -1,16 +1,29 @@
 #ifndef RSYNC_CLIENT_H
 #define RSYNC_CLIENT_H
 
+#include "IThread.h"
+#include "Queue.h"
+#include "JobDescriptor.h"
+#include "JobReport.h"
+#include "FileSystemInterface.h"
+#include "SegmenterThread.h"
+#include "AuthorityThread.h"
+#include "AssemblerThread.h"
+
 namespace liber {
 namespace rsync {
 
-class RsyncJobCallback : public liber::Callback {
+class RsyncJob;
+//class JobDescriptor;
+//class JobReport;
+
+class RsyncJobCallback {
 public:
 
-  virtual ~RsyncJobCallback();
+  RsyncJobCallback() {};
+  virtual ~RsyncJobCallback() {};
 
-  using liber::Callback::call;
-  virtual void* call(const liber::rsync::RsyncJobInfo& info) {};
+  virtual void call(const JobDescriptor& job, const JobReport& report) = 0;
 
 };
 
@@ -20,45 +33,40 @@ public:
 // - Requesters either have the same Router as the server or
 //   they are registered with a different router based on which
 //   foreign node they are syncing with.
-class RsyncNode : public netapp::PacketSubscriber {
+class RsyncNode : public liber::concurrency::IThread {
 public:
 
-  RsyncNode(netapp::PacketRouter& rRouter);
+  //RsyncNode(netapp::PacketRouter& rRouter);
+  RsyncNode(const boost::filesystem::path& root);
   ~RsyncNode();
-
-  void pause();
-  void resume();
 
   void setCompletionCallback(RsyncJobCallback* pCallback);
 
-  bool pull(netapp::PacketRouter& rRouter,
-            RsyncJob& job,
-            const liber::fs::FilePath& source);
-
-
-private:
-
-  static void TranslateThreadEntry(ThreadArg* pArg);
-  void translationThread(ThreadArg* pArg);
-
-  static void RsyncJobThreadEntry(ThreadArg* pArg);
-  void rsyncJobThread(ThreadArg* pArg);
-
-  static void CallbackThreadEntry(ThreadArg* pArg);
-  void callbackThread(ThreadArg* pArg);
+  bool sync(const boost::filesystem::path& destination,
+            const boost::filesystem::path& source,
+            bool bRemoteSource = false);
 
 private:
 
-  RsyncJobCallback* mpCompletionCallback;
+  void run(const bool& bShutdown);
 
-  Queue<RsyncCoreJob*> mPendingJobs;
-  Queue<RsyncCoreJob*> mCompletedJobs;
+private:
 
-  Queue<RscynPacket*>  mRsyncOutQueue;
+  Mutex mCallbackLock;
+  RsyncJobCallback* mpCallback;
 
-  Thread* mpJobThread;
-  Thread* mpTranslationThread;
+  Queue<RsyncJob*> mPendingJobs;
+
+  FileSystemInterface mFileSys;
+  SegmenterThread mSegmenter;
+  AuthorityThread mAuthority;
+  AssemblerThread mAssembler;
+
+  ui32 mnSegmentSize;
 };
+
+} // End namespace rsync
+} // End namesapce liber
 
 #endif // RSYNC_CLIENT_H
 

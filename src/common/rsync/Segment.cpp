@@ -1,10 +1,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <sstream>
+#include "Log.h"
 #include "Segment.h"
 #include "PacketHelper.h"
 #include "CircularBuffer.h"
 
+using namespace liber;
 using namespace liber::rsync;
 using namespace liber::netapp;
 
@@ -134,8 +136,6 @@ setData(CircularBuffer& buffer, ui32 nVSegmentSize, const Adler32Checksum* pPrev
   }
   mnVSegmentSize = nVSegmentSize;
 
-  //if (nSegmentSize < nVSegmentSize) memset(mpData, 0, mnVSegmentSize);
-  //memcpy(mpData, pData, mnSegmentSize);
   mnSegmentSize = buffer.peek((char*)mpData, mnVSegmentSize);
 
   if (pPrev)

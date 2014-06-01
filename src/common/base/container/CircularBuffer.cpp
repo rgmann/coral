@@ -1,136 +1,95 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "Log.h"
 #include "CircularBuffer.h"
+
+using namespace liber;
 
 //------------------------------------------------------------------------------
 CircularBuffer::CircularBuffer()
+: mpBuffer(NULL)
+, mnHead(1)
+, mnTail(mnHead)
+, mnCapacity(0)
 {
-   m_pBuffer = NULL;
-   
-   // Zero is an invalid offset
-   m_nHead = m_nTail = 0;
-   
-   m_nCapacity = 0;
-   
-   m_nCount = 0;
 }
 
 //------------------------------------------------------------------------------
 CircularBuffer::~CircularBuffer()
 {
-   if (m_pBuffer)
-   {
-      delete[] m_pBuffer;
-      m_pBuffer = NULL;
-   }
-   
-   m_nHead = m_nTail = 0;
-   
-   m_nCapacity = 0;
+  if (mpBuffer)
+  {
+    delete[] mpBuffer;
+    mpBuffer = NULL;
+  }
 }
 
 //------------------------------------------------------------------------------
-bool CircularBuffer::allocate(unsigned int nMaxBytes)
+bool CircularBuffer::allocate(unsigned int nCapacity)
 {
-   m_pBuffer = new char[nMaxBytes];
-   
-   m_nCapacity = nMaxBytes;
-   
-   return (m_pBuffer != NULL);
+  mnCapacity = nCapacity;
+  mpBuffer = new char[mnCapacity + 1];
+  return (mpBuffer != NULL);
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::write(const char* pData,
-                                   unsigned int nBytes,
-                                   bool bOverwrite)
+unsigned int CircularBuffer::write(const char* pData, unsigned int nBytes)
 {
-   unsigned int l_nBytesWritten = 0;
-   char l_cTempChar;
-   unsigned int l_nBytesNeeded = 0;
-   unsigned int l_nReadCount = 0;
+  unsigned int lnBytesWritten = 0;
    
-   if (m_pBuffer == NULL)
-   {
-      return 0;
-   }
-   
-   // If forced, compute how much space is required and free up the space
-   // if possible.
-   if (bOverwrite && nBytes > (m_nCapacity - m_nCount))
-   {
-      l_nBytesNeeded = nBytes - (m_nCapacity - m_nCount);
-      
-      if (l_nBytesNeeded > m_nCount)
+  if (mpBuffer)
+  {
+    while (!isFull() && (lnBytesWritten < nBytes))
+    {
+      unsigned int lnBytesToWrite = linearFreeSize();
+
+      if (lnBytesToWrite > (nBytes - lnBytesWritten))
       {
-         l_nBytesNeeded = m_nCount;
+        lnBytesToWrite = (nBytes - lnBytesWritten);
       }
-      
-      // Free the bytes by reading.
-      for (l_nReadCount = 0;
-           l_nReadCount < l_nBytesNeeded;
-           l_nReadCount++)
-      {
-         read(&l_cTempChar, 1);
-      }
-   }
-      
-   while (!isFull() && l_nBytesWritten < nBytes)
-   {
-      insertByte(pData[l_nBytesWritten++]);
-   }
+
+      memcpy(&mpBuffer[mnHead], &pData[lnBytesWritten], lnBytesToWrite);
+      add(mnHead, lnBytesToWrite);
+ 
+      lnBytesWritten += lnBytesToWrite;
+    }
+  }
    
 //   printf("write: cnt=%u, cap=%u, head=%u, tail=%u, needed=%u, wrttn=%u\n",
-//          m_nCount, m_nCapacity, m_nHead, m_nTail,
+//          m_nCount, mnCapacity, mnHead, mnTail,
 //          l_nBytesNeeded, l_nBytesWritten);
    
-   return l_nBytesWritten;
+   return lnBytesWritten;
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::write(std::istream& stream, unsigned int nBytes, bool bOverwrite)
+unsigned int CircularBuffer::write(std::istream& stream, unsigned int nBytes)
 {
    unsigned int lnBytesWritten = 0;
 
-   if (m_pBuffer)
+   if (mpBuffer)
    {
-     // If forced, compute how much space is required and free up the space
-     // if possible.
-     if (bOverwrite && (nBytes > (m_nCapacity - m_nCount)))
+     while (!isFull() && (lnBytesWritten < nBytes))
      {
-       char l_cTempChar;
-       unsigned int l_nBytesNeeded = nBytes - (m_nCapacity - m_nCount);
-      
-       if (l_nBytesNeeded > m_nCount)
-       {
-         l_nBytesNeeded = m_nCount;
-       }
-      
-       // Free the bytes by reading.
-       for (unsigned int l_nReadCount = 0;
-            l_nReadCount < l_nBytesNeeded;
-            l_nReadCount++)
-       {
-          read(&l_cTempChar, 1);
-       }
-     }
- 
+       unsigned int lnBytesToWrite = linearFreeSize();
+//       log::status("write: lnBytesToWrite=%u, nBytes=%u, lnBytesWritten=%u, mnHead=%u, mnTail=%u\n", lnBytesToWrite, nBytes, lnBytesWritten, mnHead, mnTail);
 
-     while (!isFull() && !stream.eof() && (lnBytesWritten < nBytes))
-     {
-       unsigned int lnBytesToWrite = getLinearFreeCount();
-       //printf("lnBytesToWrite = %d\n", lnBytesToWrite);
        if (lnBytesToWrite > (nBytes - lnBytesWritten))
        {
           lnBytesToWrite = (nBytes - lnBytesWritten);
        }
 
-       stream.read(&m_pBuffer[m_nHead], lnBytesToWrite);
-
-       m_nHead += stream.gcount();
-       m_nHead %= m_nCapacity;
-       m_nCount += stream.gcount();
-       
+       stream.read(&mpBuffer[mnHead], lnBytesToWrite);
+       add(mnHead, stream.gcount());
        lnBytesWritten += stream.gcount();
+       if (stream.eof())
+       {
+         break;
+       }
+       if (stream.fail())
+       {
+         log::error("write: stream read failure - attempted %u, atual %u\n", lnBytesToWrite, stream.gcount());
+       }
      }
    }
 
@@ -140,21 +99,30 @@ unsigned int CircularBuffer::write(std::istream& stream, unsigned int nBytes, bo
 //------------------------------------------------------------------------------
 unsigned int CircularBuffer::read(char* pData, unsigned int nMaxBytes)
 {
-   unsigned int l_nBytesRead = 0;
+   unsigned int lnBytesRead = 0;
    
-   if (m_pBuffer == NULL)
+   if (mpBuffer)
    {
-      return 0;
-   }
+     while (!isEmpty() && (lnBytesRead < nMaxBytes))
+     {
+       unsigned int lnBytesToRead = linearUsedSize(mnTail);
+//       log::status("read: lnBytesToRead=%u, nMaxBytes=%u, lnBytesRead=%u, mnHead=%u, mnTail=%u\n", lnBytesToRead, nMaxBytes, lnBytesRead, mnHead, mnTail);
+
+       if (lnBytesToRead == 0) break;
+
+       if (lnBytesToRead > (nMaxBytes - lnBytesRead))
+       {
+         lnBytesToRead = (nMaxBytes - lnBytesRead);
+       }
+
+       memcpy(&pData[lnBytesRead], &mpBuffer[mnTail], lnBytesToRead);
+       add(mnTail, lnBytesToRead);
+
+       lnBytesRead += lnBytesToRead;
+    }
+  }
    
-//   printf("read: tail=%d, data[0]=%c\n", m_nTail, m_pBuffer[m_nTail]);
-   
-   while (!isEmpty() && l_nBytesRead < nMaxBytes)
-   {
-      pData[l_nBytesRead++] = extractByte();
-   }
-   
-   return l_nBytesRead;
+  return lnBytesRead;
 }
 
 //------------------------------------------------------------------------------
@@ -162,13 +130,14 @@ unsigned int CircularBuffer::peek(char* pData, unsigned int nMaxBytes)
 {
   unsigned int lnBytesRead = 0;
 
-  if (m_pBuffer)
+  if (mpBuffer)
   {
-    unsigned int lnPeekPos = m_nTail;
+    unsigned int lnPeekPos = mnTail;
 
     while (lnBytesRead < nMaxBytes)
     {
-      unsigned int lnBytesToRead = getLinearUsedCount(lnPeekPos);
+      unsigned int lnBytesToRead = linearUsedSize(lnPeekPos);
+//      log::status("peek: lnBytesToRead=%u, nMaxBytes=%u, lnBytesRead=%u, mnHead=%u, mnTail=%u, peek=%u\n", lnBytesToRead, nMaxBytes, lnBytesRead, mnHead, mnTail, lnPeekPos);
 
       if (lnBytesToRead == 0) break;
 
@@ -177,9 +146,8 @@ unsigned int CircularBuffer::peek(char* pData, unsigned int nMaxBytes)
         lnBytesToRead = (nMaxBytes - lnBytesRead);
       }
 
-      memcpy(&pData[lnBytesRead], &m_pBuffer[lnPeekPos], lnBytesToRead);
-      lnPeekPos += lnBytesToRead;
-      lnPeekPos %= m_nCapacity;
+      memcpy(&pData[lnBytesRead], &mpBuffer[lnPeekPos], lnBytesToRead);
+      add(lnPeekPos, lnBytesToRead);
 
       lnBytesRead += lnBytesToRead;
     }
@@ -191,76 +159,86 @@ unsigned int CircularBuffer::peek(char* pData, unsigned int nMaxBytes)
 //------------------------------------------------------------------------------
 bool CircularBuffer::isFull() const
 {
-   return (m_nCount == m_nCapacity);
+   return (((mnHead + 1) % (mnCapacity + 1)) == mnTail);
 }
 
 //------------------------------------------------------------------------------
 bool CircularBuffer::isEmpty() const
 {
-   return (m_nCount == 0);
+   return (mnHead == mnTail);
 }
 
 //------------------------------------------------------------------------------
-void CircularBuffer::insertByte(char byte)
+void CircularBuffer::clear()
 {
-   m_pBuffer[increment(m_nHead)] = byte;
-   m_nCount++;
+  mnHead = mnTail = 1;
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::getLinearFreeCount()
+unsigned int CircularBuffer::size() const
+{
+  unsigned int lnSize = mnHead;
+  if (mnHead < mnTail) lnSize += allocatedSize();
+  lnSize -= mnTail;
+  return lnSize;
+}
+
+//------------------------------------------------------------------------------
+unsigned int CircularBuffer::capacity() const
+{
+  return mnCapacity;
+}
+
+//------------------------------------------------------------------------------
+unsigned int CircularBuffer::allocatedSize() const
+{
+  return mnCapacity + 1;
+}
+
+//------------------------------------------------------------------------------
+unsigned int CircularBuffer::freeSize() const
+{
+  return capacity() - size();
+}
+
+//------------------------------------------------------------------------------
+unsigned int CircularBuffer::linearFreeSize()
 {
   unsigned int lnFree = 0;
 
-  if (!isFull())
+  if (mnTail <= mnHead)
   {
-    if (m_nHead >= m_nTail)
-    {
-      lnFree = m_nCapacity - m_nHead;
-    }
-    else
-    {
-      lnFree = m_nTail - m_nHead;
-    }
+    lnFree = allocatedSize() - mnHead;
+  }
+  else
+  {
+    lnFree = (mnTail - mnHead) - 1;
   }
 
   return lnFree;
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::getLinearUsedCount(unsigned int nReadPos)
+unsigned int CircularBuffer::linearUsedSize(unsigned int nReadPos)
 {
-  unsigned int lnAvailable = 0;
+  unsigned int lnReadable = 0;
 
-  if (!isEmpty())
+  if (nReadPos <= mnHead)
   {
-    if (nReadPos < m_nHead)
-    {
-      lnAvailable =  m_nHead - nReadPos;
-    }
-    else
-    {
-      lnAvailable = m_nCapacity - nReadPos;
-    }
+    lnReadable = mnHead - nReadPos;
+  }
+  else
+  {
+    lnReadable = allocatedSize() - nReadPos;
   }
 
-  return lnAvailable;
+  return lnReadable;
 }
 
-//------------------------------------------------------------------------------
-char CircularBuffer::extractByte()
+//----------------------------------------------------------------------------
+void CircularBuffer::add(unsigned int& nPos, unsigned int adj)
 {
-   char l_cTempChar = m_pBuffer[increment(m_nTail)];
-   m_nCount--;
-   return l_cTempChar;
+  nPos += adj;
+  nPos %= allocatedSize();
 }
 
-//------------------------------------------------------------------------------
-unsigned int CircularBuffer::increment(unsigned int &counter)
-{
-   unsigned int l_nCounter = counter;
-   
-   counter = (counter + 1) % m_nCapacity;
-   
-   return l_nCounter;
-}

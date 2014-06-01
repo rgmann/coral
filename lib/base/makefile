@@ -29,7 +29,7 @@ $(BASE)/src/nix/$(LIBDIR)/crypto/*.cpp \
 $(BASE)/src/nix/$(LIBDIR)/concurrency/*.cpp \
 $(BASE)/src/nix/$(LIBDIR)/time/*.cpp \
 $(BASE)/src/nix/$(LIBDIR)/net/*.cpp \
-$(BASE)/src/common/$(LIBDIR)/container/*.cpp \
+$(BASE)/src/common/$(LIBDIR)/container/CircularBuffer.cpp \
 $(BASE)/src/common/$(LIBDIR)/logging/*.cpp \
 $(BASE)/src/common/$(LIBDIR)/file_system/*.cpp \
 $(BASE)/src/common/$(LIBDIR)/net/*.cpp

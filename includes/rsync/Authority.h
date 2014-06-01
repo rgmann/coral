@@ -7,6 +7,7 @@
 #include "JobReport.h"
 #include "SegmentHook.h"
 #include "Segmenter.h"
+#include "CircularBuffer.h"
 
 namespace liber {
 namespace rsync {
@@ -34,12 +35,12 @@ public:
 
 private:
 
+  void reset();
+
   void call(Segment& rSegment);
 
-  //Instruction* createInstruction(std::stringstream& stream);
-  Instruction* createInstruction(std::string& stream);
-
-  void flushChunkBuffer();
+  enum { FlushAll = -1 };
+  void flushChunkBuffer(int nFlushCount = FlushAll);
 
 private:
 
@@ -50,11 +51,15 @@ private:
   Segmenter mSegmenter;
 
   ui32 mnSegmentSkipCount;
-  //std::stringstream mChunkBuffer;
-  std::string mChunkBuffer;
+  CircularBuffer mChunkBuffer;
 
   ui32 mnMaxChunkSize;
   ui32 mnBufferedCount;
+  Segment::ID mBufferStartID;
+
+  ui32 mnTotalSegmentBytes;
+  ui32 mnSegmentBytes;
+  ui32 mnChunkBytes;
 
   AuthorityReport* mpReport;
 };

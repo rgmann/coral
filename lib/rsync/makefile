@@ -35,6 +35,7 @@ $(BASE)/src/common/$(LIBNAME)/SegmentFile.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentList.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentQueue.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentHash.cpp \
+$(BASE)/src/common/$(LIBNAME)/RsyncNode.cpp \
 
 INCLUDES = $(BOOST_INCLUDE) \
 -I$(BASE)/includes/base \

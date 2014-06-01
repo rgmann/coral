@@ -5,8 +5,6 @@
 #include "FileSystemInterface.h"
 #include "AssemblerThread.h"
 
-//#define  DEFAULT_INST_TIMEOUT_MS     (10000)
-
 using namespace liber;
 using namespace liber::concurrency;
 using namespace liber::rsync;

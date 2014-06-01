@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 #include "Log.h"
 #include "Segmenter.h"
 #include "JobDescriptor.h"
@@ -22,9 +23,14 @@ Authority(JobDescriptor& rDescriptor,
 , mrReceiver(rReceiver)
 , mSegmenter(Segmenter::EveryOffset)
 , mnSegmentSkipCount(0)
-, mnMaxChunkSize(4*512)
+, mnMaxChunkSize(512)
 , mnBufferedCount(0)
+, mBufferStartID(-1)
+, mnTotalSegmentBytes(0)
+, mnSegmentBytes(0)
+, mnChunkBytes(0)
 {
+  mChunkBuffer.allocate(mnMaxChunkSize);
   authLog.open("/Users/vaughanbiker/Development/liber/test/rsync/test_root/auth_log.csv");
 }
 
@@ -35,48 +41,75 @@ Authority::~Authority()
 }
 
 //-----------------------------------------------------------------------------
+void Authority::reset()
+{
+  mnBufferedCount = 0;
+  mnSegmentSkipCount = 0;
+  mBufferStartID = -1;
+
+  mnTotalSegmentBytes = 0;
+  mnSegmentBytes = 0;
+  mnChunkBytes = 0;
+
+  mChunkBuffer.clear();
+}
+
+//-----------------------------------------------------------------------------
 bool Authority::process(std::istream& istream, JobReport::SourceReport& rReport)
 {
+  reset();
+
   mpReport = &rReport.authority;
   mpReport->receivedSegmentCount = mrHash.size();
   mpReport->authBegin.sample();
-
-  mChunkBuffer.reserve(mnMaxChunkSize);
 
   mrReceiver.push(new BeginInstruction(mrDescriptor));
   bool lbSuccess = mSegmenter.process(istream, *this,
                                       mrDescriptor.getSegmentSize(),
                                       rReport.segmentation);
+  mpReport->authEnd.sample();
   mrReceiver.push(new EndInstruction());
 
-  mpReport->authEnd.sample();
   mpReport = NULL;
 
   return lbSuccess;
 }
 
 //-----------------------------------------------------------------------------
-Instruction* Authority::createInstruction(std::string& rBuffer)
+void Authority::flushChunkBuffer(int nFlushCount)
 {
-  ChunkInstruction* lpInstruction = new ChunkInstruction(rBuffer.size());
-  if (lpInstruction->data())
+  if (!mChunkBuffer.isEmpty())
   {
-    memcpy(lpInstruction->data(), rBuffer.data(), lpInstruction->size());
-#ifdef DEBUG_RSYNC_AUTHORITY
-    std::cout << "read " << stream.gcount() << std::endl;
-#endif
-    rBuffer.clear();
-  }
+    // Determine how many bytes to send in the chunk instruction. If the 
+    // caller specifies 'FlushAll', all bytes are sent.  Otherwise only the
+    // first 'nFlushCount' bytes are sent in the chunk and the remainder are
+    // thrown away.
+    ui32 lnChunkSize = (nFlushCount == FlushAll) ? mChunkBuffer.size() :
+                                                   (ui32)nFlushCount;
 
-  return lpInstruction;
-}
+    // Allocate the chunk instruction and move the specified number of bytes
+    // from the chunk buffer to the chunk instruction.
+    ChunkInstruction* lpInstruction = new ChunkInstruction(lnChunkSize);
+    if (lpInstruction->data())
+    {
+      if (mChunkBuffer.read((char*)lpInstruction->data(), lnChunkSize) != lnChunkSize)
+      {
+        log::error("Authority: Failed to read from chunk buffer\n");
+      }
 
-//-----------------------------------------------------------------------------
-void Authority::flushChunkBuffer()
-{
-  if (mChunkBuffer.size() > 0)
-  {
-    mrReceiver.push(createInstruction(mChunkBuffer));
+      // Reset the chunk buffer.
+      mChunkBuffer.clear();
+
+      mnChunkBytes += lnChunkSize;
+    }
+
+    // Send the chunk instruction to the instruction receiver.
+    mrReceiver.push(lpInstruction);
+
+    // All segment data has been removed from the buffer.
+    mnBufferedCount = 0;
+    mBufferStartID = -1;
+
     mpReport->chunkCount++;
   }
 }
@@ -84,22 +117,17 @@ void Authority::flushChunkBuffer()
 //-----------------------------------------------------------------------------
 void Authority::call(Segment& rSegment)
 {
-//  log::debug("Authority::call( 0x%08X, %d ):",
-//             pSegment->getWeak().checksum(),
-//             pSegment->size());
-//  log::debug("Authority::call( %d, %d ):",
-//             pSegment->getID(),
-//             pSegment->size());
-
-  Timestamp begin; begin.sample();
+  Timestamp time;
 
   if (rSegment.endOfStream())
   {
-    // Do nothing. This segment marks the end of the stream.
+    // Make sure all chunk data has been sent.
     flushChunkBuffer();
   }
   else if (mnSegmentSkipCount == 0)
   {
+    time.sample();
+
     Segment* lpMatchSegment = NULL;
     SegmentComparator comparator(&rSegment);
 //    if (mrHash.find(pSegment->getWeak().checksum(), lpMatchSegment, comparator))
@@ -107,7 +135,7 @@ void Authority::call(Segment& rSegment)
     {
       // Any data in the buffer when a match occurs should be moved to a chunk
       // instruction and sent before sending the ID of the matched segment.
-      flushChunkBuffer();
+      flushChunkBuffer((mBufferStartID == -1) ? FlushAll : (rSegment.getID() - mBufferStartID));
 
 //      log::debug("Match found: %d\n", pSegment->getID());
       // If the Segment exists in the hash, create a Segment instruction.
@@ -126,27 +154,31 @@ void Authority::call(Segment& rSegment)
       mnSegmentSkipCount = rSegment.size() - 1;
 
       mpReport->matchedSegmentCount++;
+      mnSegmentBytes += rSegment.size();
       delete lpMatchSegment;
+//      log::status("Authority: match at %d\n", rSegment.getID());
     }
     else
     {
-      // If the segment is not found in the hash, push the first byte
       if (rSegment.data())
       {
+        if ((mBufferStartID != -1) && ((rSegment.getID() - mBufferStartID) >= mnMaxChunkSize))
+        {
+          flushChunkBuffer();
+        }
+
         if (mnBufferedCount == 0)
         {
-          mChunkBuffer.append((const char*)rSegment.data(), rSegment.size());
-          mnBufferedCount = rSegment.size();
+//          log::status("Authority: mChunkBuffer.size=%u\n", mChunkBuffer.size());
+          if (mChunkBuffer.isEmpty()) mBufferStartID = rSegment.getID();
+          ui32 lnBytesWritten = mChunkBuffer.write((const char*)rSegment.data(), rSegment.size());
+          mnBufferedCount = rSegment.size() - 1;
+          
+//          log::status("Authority: push back exp=%d bytes, act = %u, size=%u\n", rSegment.size(), lnBytesWritten, mChunkBuffer.size());
         }
         else
         {
           mnBufferedCount--;
-        }
-
-        if (mChunkBuffer.size() > mnMaxChunkSize)
-        {
-          mrReceiver.push(createInstruction(mChunkBuffer));
-          mpReport->chunkCount++;
         }
       }
       else
@@ -160,7 +192,7 @@ void Authority::call(Segment& rSegment)
     mnSegmentSkipCount--;
   }
 
-  //authLog << (Timestamp::Now() - begin).fseconds() << std::endl;
+  mnTotalSegmentBytes += rSegment.size();
 }
 
 

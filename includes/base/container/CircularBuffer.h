@@ -11,12 +11,10 @@ public:
    
    ~CircularBuffer();
    
-   bool           allocate(unsigned int nMaxBytes);
+   bool           allocate(unsigned int nCapacity);
    
-   unsigned int   write(const char* pData,
-                        unsigned int nBytes,
-                        bool bOverwrite = true);
-   unsigned int   write(std::istream& stream, unsigned int nMaxBytes, bool bOverwrite = true);
+   unsigned int   write(const char* pData, unsigned int nBytes);
+   unsigned int   write(std::istream& stream, unsigned int nMaxBytes);
    
    unsigned int   read(char* pData, unsigned int nMaxBytes);
    
@@ -29,29 +27,33 @@ public:
    
    bool  isFull() const;
 
-private:
-   
-   void insertByte(char byte);
-   
-   char extractByte();
-   
-   unsigned int increment(unsigned int &counter);
+   unsigned int size() const;
 
-   unsigned int getLinearFreeCount();
+   unsigned int capacity() const;
 
-   unsigned int getLinearUsedCount(unsigned int nReadPos);
+   void clear();
 
 private:
    
-   unsigned int m_nHead;
+   void add(unsigned int& nPos, unsigned int nAdj);
+
+   unsigned int freeSize() const;
+
+   unsigned int linearFreeSize();
+
+   unsigned int linearUsedSize(unsigned int nReadPos);
+
+   unsigned int allocatedSize() const;
+
+private:
+
+   char* mpBuffer;
    
-   unsigned int m_nTail;
+   unsigned int mnHead;
    
-   unsigned int m_nCapacity;
+   unsigned int mnTail;
    
-   unsigned int m_nCount;
-   
-   char* m_pBuffer;
+   unsigned int mnCapacity;
 };
 
 #endif // CIRCULAR_BUFFER_H

@@ -128,24 +128,27 @@ processEveryOffset(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegm
   rReport.strideSizeBytes  = 1;
   rReport.segmentSizeBytes = nSegmentSizeBytes;
 
-  //ui32 lnReadLen = nSegmentSizeBytes;
+  ui32 lnReadLen = nSegmentSizeBytes;
   while ((istream.eof() == false) || (lCircularBuff.isEmpty() == false))
   {
-    //ui32 lnReadLen = nSegmentSizeBytes;
+//    log::status("segmenter: offset=%u\n", lnOffset);
 
     // Compute the number of bytes that should be read.
     // If the stride is one, the first read will read the full segment size, but all
     // following reads will read only one byte.
-    //if (lnOffset > 0)
-    //{
-    //  lnReadLen = 1;
-    //}
+    if (lnOffset > 0)
+    {
+      lnReadLen = 1;
+    }
 
     // Read the data into the buffer.
     if (istream.eof() == false)
     {
       //lCircularBuff.write(istream, lnReadLen);
-      lCircularBuff.write(istream, (lnOffset == 0) ? nSegmentSizeBytes : 1);
+      if ((lCircularBuff.write(istream, lnReadLen) != lnReadLen) && !istream.eof())
+      {
+        log::error("Segmenter: Failed to write to circular buffer\n");
+      }
     }
 
     // Create the new segment.  The segment will compute its weak checksum.
@@ -166,7 +169,10 @@ processEveryOffset(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegm
     rReceiver.push(lSegment);
     rReport.segmentCount++;
 
-    lCircularBuff.read((char*)lpTempBuffer, 1);
+    if (lCircularBuff.read((char*)lpTempBuffer, 1) != 1)
+    {
+      log::error("Segmenter: Failed to read from circular buffer\n");
+    }
 
     // Move to the next byte.
     lnOffset += 1;

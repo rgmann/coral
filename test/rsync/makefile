@@ -37,6 +37,9 @@ segment_test:
 job_test:
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
+node_test:
+	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
+
 seg_time:
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
@@ -49,6 +52,7 @@ inst_test:
 clean:
 	rm -rf *.dSYM  *.o
 	rm -f segment_test
+	rm -f node_test
 	rm -f seg_time
 	rm -f job_test
 	rm -f fs_test

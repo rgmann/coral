@@ -3,7 +3,6 @@
 
 #include "IThread.h"
 #include "Queue.h"
-//#include "FileSystemInterface.h"
 #include "SegmentFile.h"
 #include "Assembler.h"
 
@@ -32,7 +31,6 @@ private:
   SegmentFile          mSegmentFile;
   Assembler            mAssembler;
 
-//  int mnInstTimeoutMs;
 };
 
 } // End namespace rsync
