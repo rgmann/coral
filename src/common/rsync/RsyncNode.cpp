@@ -1,3 +1,4 @@
+#include "Log.h"
 #include "RsyncJob.h"
 #include "RsyncNode.h"
 
@@ -70,7 +71,11 @@ void RsyncNode::run(const bool& bShutdown)
       mAuthority.addJob(lpJob);
       mAssembler.addJob(lpJob);
 
-      lpJob->waitDone();
+      if (lpJob->waitDone() == false)
+      {
+        log::error("RsyncNode - Timeout waiting for %s job to finish.\n",
+                   lpJob->descriptor().getSource().string().c_str());
+      }
 
       mCallbackLock.lock();
       if (mpCallback)

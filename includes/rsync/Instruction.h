@@ -41,6 +41,11 @@ public:
    */
   bool done() const;
 
+  /**
+   *
+   */
+  void reset();
+
   static inline std::string ErrorDescription(ExecuteError e)
   {
     switch (e)

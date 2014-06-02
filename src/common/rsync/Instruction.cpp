@@ -21,9 +21,8 @@ void dump_buffer(const char* pBuffer, ui32 nBytes)
 // Class: ExecutionStatus
 //-----------------------------------------------------------------------------
 ExecutionStatus::ExecutionStatus()
-: error(ExecutionStatus::NoError)
-, mbDone(false)
 {
+  reset();
 }
 
 //-----------------------------------------------------------------------------
@@ -47,6 +46,13 @@ bool ExecutionStatus::cancelled() const
 bool ExecutionStatus::done() const
 {
   return mbDone;
+}
+
+//-----------------------------------------------------------------------------
+void ExecutionStatus::reset()
+{
+  error = ExecutionStatus::NoError;
+  mbDone = false;
 }
 
 //-----------------------------------------------------------------------------

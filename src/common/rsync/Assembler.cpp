@@ -1,9 +1,11 @@
+#include "log.h"
 #include "InstructionQueue.h"
 #include "JobReport.h"
 #include "Assembler.h"
 
 #define  DEFAULT_INST_TIMEOUT_MS     (100000)
 
+using namespace liber;
 using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
@@ -22,6 +24,8 @@ Assembler::~Assembler()
 //-----------------------------------------------------------------------------
 bool Assembler::process(InstructionQueue& rQueue, AssemblyReport& rReport)
 {
+  mStatus.reset();
+
   while ((mStatus.done() == false) && (mStatus.failed() == false))
   {
     Instruction* lpInstruction = rQueue.pop(mnInstructionTimeoutMs);
@@ -44,8 +48,12 @@ bool Assembler::process(InstructionQueue& rQueue, AssemblyReport& rReport)
 
         case EndInstruction::Type:
           rReport.end.sample();
+          break;
 
-        default: break;
+        default:
+          log::error("Assembler - Invalid instruction type %d\n",
+                     lpInstruction->type());
+          break;
       }
 
       lpInstruction->execute(mStatus, mrAccessor, mOStream);
@@ -53,26 +61,12 @@ bool Assembler::process(InstructionQueue& rQueue, AssemblyReport& rReport)
     }
     else
     {
+      log::error("Assembler - NULL instruction.\n");
     }
   }
 
   return (mStatus.failed() == false);
 }
-
-//-----------------------------------------------------------------------------
-/*bool Assembler::execute(Instruction* pInstruction)
-{
-  bool lbCanExecute = true;
-
-  // Pre-process the command.  For example, the Assembler does not execute
-  // the BeginInstruction.
-  if (lbCanExecute)
-  {
-    pInstruction->execute(mStatus, mrAccessor, mOStream);
-  }
-
-  return (mStatus.failed() == false);
-}*/
 
 //-----------------------------------------------------------------------------
 const ExecutionStatus& Assembler::status() const

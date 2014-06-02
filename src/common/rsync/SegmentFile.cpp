@@ -42,15 +42,9 @@ Segment* SegmentFile::getSegment(liber::rsync::Segment::ID id)
   {
     if ((id >= 0) && mIStream.is_open())
     {
-      ui8* lpData = new ui8[mpDescriptor->getSegmentSize()];
-
       mIStream.seekg(id * mpDescriptor->getSegmentSize(), mIStream.beg);
-      mIStream.read((char*)lpData, mpDescriptor->getSegmentSize());
-
       lpSegment = new Segment(id, id * mpDescriptor->getSegmentSize());
-      lpSegment->setData(lpData, mpDescriptor->getSegmentSize(), mIStream.gcount());
-
-      delete[] lpData;
+      lpSegment->setData(mIStream, mpDescriptor->getSegmentSize());
     }
   }
 
