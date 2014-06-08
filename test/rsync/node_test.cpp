@@ -34,10 +34,11 @@ int main (int argc, char* argv[])
   RsyncNode node("/Users/vaughanbiker/Development/liber/test/rsync/test_root");
 
   node.setCompletionCallback(&callback);
-//  node.sync("client/image.png", "server/image.png");
+  node.sync("client/image.png", "server/image.png");
   node.sync("client/file.dat", "server/file.dat");
   node.sync("client/instruction_test.cpp", "server/instruction_test.cpp");
 
+  callback.mSem.take();
   callback.mSem.take();
   callback.mSem.take();
 

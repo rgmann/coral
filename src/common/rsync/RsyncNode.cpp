@@ -1,8 +1,10 @@
 #include "Log.h"
 #include "RsyncJob.h"
 #include "RsyncNode.h"
+#include "PacketRouter.h"
 
 using namespace liber;
+using namespace liber::netapp;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
@@ -13,6 +15,7 @@ RsyncNode::RsyncNode(const boost::filesystem::path& root)
 , mAuthority(mFileSys)
 , mAssembler(mFileSys)
 , mnSegmentSize(256)
+, mAuthorityService(mFileSys)
 {
   mPendingJobs.initialize();
   mFileSys.setRoot(root);
@@ -56,6 +59,16 @@ sync(const boost::filesystem::path& destination,
   }
 
   return (lpJob != NULL);
+}
+
+//----------------------------------------------------------------------------
+bool RsyncNode::
+registerSubscribers(PacketRouter& rRouter, int nRequestID, int nResponseID)
+{
+  bool lbSuccess = true;
+  lbSuccess &= mAuthority.registerSubscriber(rRouter, nRequestID);
+  lbSuccess &= rRouter.addSubscriber(nResponseID, &mAuthorityService);
+  return lbSuccess;
 }
 
 //----------------------------------------------------------------------------

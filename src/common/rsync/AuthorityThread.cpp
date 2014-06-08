@@ -1,9 +1,11 @@
 #include "Log.h"
 #include "RsyncJob.h"
 #include "AuthorityThread.h"
+#include "PacketRouter.h"
 
 using namespace liber;
 using namespace liber::concurrency;
+using namespace liber::netapp;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
@@ -23,6 +25,13 @@ AuthorityThread::~AuthorityThread()
 void AuthorityThread::addJob(RsyncJob* pJob)
 {
   if (pJob) mJobQueue.push(pJob);
+}
+
+//----------------------------------------------------------------------------
+bool AuthorityThread::
+registerSubscriber(PacketRouter& rRouter, int nRequestID)
+{
+  return rRouter.addSubscriber(nRequestID, &mRemoteAuthority);
 }
 
 //----------------------------------------------------------------------------

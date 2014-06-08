@@ -9,6 +9,7 @@
 #include "SegmenterThread.h"
 #include "AuthorityThread.h"
 #include "AssemblerThread.h"
+#include "RemoteAuthorityService.h"
 
 namespace liber {
 namespace rsync {
@@ -46,6 +47,9 @@ public:
             const boost::filesystem::path& source,
             bool bRemoteSource = false);
 
+  bool registerSubscribers(class liber::netapp::PacketRouter& rRouter,
+                           int nRequestID, int nResponseID);
+
 private:
 
   void run(const bool& bShutdown);
@@ -61,6 +65,8 @@ private:
   SegmenterThread mSegmenter;
   AuthorityThread mAuthority;
   AssemblerThread mAssembler;
+
+  RemoteAuthorityService mAuthorityService;
 
   ui32 mnSegmentSize;
 };

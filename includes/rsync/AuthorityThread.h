@@ -6,7 +6,7 @@
 #include "FileSystemInterface.h"
 #include "RemoteAuthorityInterface.h"
 #include "LocalAuthorityInterface.h"
-
+#include "PacketRouter.h"
 
 namespace liber {
 namespace rsync {
@@ -21,6 +21,8 @@ public:
   ~AuthorityThread();
 
   void addJob(RsyncJob* pJob);
+
+  bool registerSubscriber(liber::netapp::PacketRouter& rRouter, int nRequestID);
 
 private:
 
