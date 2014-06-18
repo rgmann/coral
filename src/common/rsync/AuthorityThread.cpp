@@ -28,10 +28,15 @@ void AuthorityThread::addJob(RsyncJob* pJob)
 }
 
 //----------------------------------------------------------------------------
-bool AuthorityThread::
-registerSubscriber(PacketRouter& rRouter, int nRequestID)
+PacketSubscriber& AuthorityThread::getSubscriber()
 {
-  return rRouter.addSubscriber(nRequestID, &mRemoteAuthority);
+  return mRemoteAuthority;
+}
+
+//----------------------------------------------------------------------------
+void AuthorityThread::setRequestID(int requestID)
+{
+  mRemoteAuthority.setRequestID(requestID);
 }
 
 //----------------------------------------------------------------------------

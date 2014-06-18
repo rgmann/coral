@@ -19,6 +19,8 @@ public:
    */
   virtual void push(Instruction* const pInstruction) = 0;
 
+
+  virtual const char* toString() const = 0;
 };
 
 } // End namespace rsync

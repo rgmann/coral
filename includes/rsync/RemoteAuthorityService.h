@@ -8,19 +8,49 @@
 #include "AuthorityInterface.h"
 #include "FileSystemInterface.h"
 #include "LocalAuthorityInterface.h"
+#include "InstructionHook.h"
 
 namespace liber {
 namespace rsync {
 
 class JobDescriptor;
 
+class JobQueue : public liber::concurrency::IThread {
+public:
+
+  JobQueue(FileSystemInterface&, InstructionReceiver&);
+
+
+  RsyncJob* activeJob();
+  Mutex& lock();
+  bool lockIfActive();
+
+  bool push(RsyncJob* pJob);
+
+private:
+
+  void run(const bool& bShutdown);
+
+private:
+
+  LocalAuthorityInterface mAuthority;
+  InstructionReceiver& mrReceiver;
+
+  Queue<RsyncJob*> mJobQueue;
+
+  RsyncJob* mpActiveJob;
+  Mutex mJobLock;
+};
+
 class RemoteAuthorityService
 : public liber::netapp::PacketSubscriber
-, public liber::concurrency::IThread {
+, public InstructionHook {
 public:
 
   RemoteAuthorityService(FileSystemInterface&);
   ~RemoteAuthorityService();
+
+  void setRequestID(int nRequestID);
 
   bool put(const char* pData, ui32 nLength);
 
@@ -29,7 +59,7 @@ public:
 
 private:
 
-  void run(const bool& bShutdown);
+  void call(Instruction* pInstruction);
 
   void handleRemoteJobRequest(const void* pData, ui32 nLength);
 
@@ -39,13 +69,13 @@ private:
 
 private:
 
-  Queue<RsyncJob*> mJobQueue;
-
   FileSystemInterface& mrFileSys;
 
-  LocalAuthorityInterface mAuthorityInterface;
-
   QueryHandler mpUserHandler;
+
+  int mRequestID;
+
+  JobQueue mJobQueue;
 };
 
 } // End namespace rsync

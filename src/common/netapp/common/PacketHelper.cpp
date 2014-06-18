@@ -45,7 +45,7 @@ void PacketCtor::write(ui64 val)
 //-----------------------------------------------------------------------------
 void PacketCtor::write(bool val)
 {
-  stream.write((char*)val, sizeof(ui8));
+  stream.write((char*)&val, sizeof(ui8));
 }
 
 //-----------------------------------------------------------------------------

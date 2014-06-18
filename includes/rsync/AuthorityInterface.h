@@ -1,8 +1,6 @@
 #ifndef RSYNC_AUTHORITY_INTERFACE_H
 #define RSYNC_AUTHORITY_INTERFACE_H
 
-#include "IThread.h"
-#include "Queue.h"
 //#include "RsyncJob.h"
 
 namespace liber {
@@ -16,7 +14,7 @@ public:
   AuthorityInterface();
   virtual ~AuthorityInterface();
 
-  void process(RsyncJob* pJob);
+  virtual void process(RsyncJob* pJob);
 
   bool lockActiveJob();
   void unlockActiveJob();

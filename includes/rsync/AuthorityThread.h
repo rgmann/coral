@@ -22,7 +22,8 @@ public:
 
   void addJob(RsyncJob* pJob);
 
-  bool registerSubscriber(liber::netapp::PacketRouter& rRouter, int nRequestID);
+  liber::netapp::PacketSubscriber& getSubscriber();
+  void setRequestID(int requestID);
 
 private:
 

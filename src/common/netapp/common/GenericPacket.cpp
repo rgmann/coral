@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "Log.h"
 #include "GenericPacket.h"
 
 using namespace liber::netapp;
@@ -278,21 +279,21 @@ void GenericPacket::printDump()
 {
   if (isAllocated())
   {
-    printf("printDump: size = %u\n", allocatedSize());
+    log::status("printDump: size = %u\n", allocatedSize());
     ui32 lnOffset = 0;
     char* pData = (char*)basePtr();
     while (lnOffset < allocatedSize())
     {
       if (lnOffset % 16 == 0)
-        printf("[%3d - %3d]: ", lnOffset, lnOffset + 15);
-      printf("%02X ", (unsigned char)pData[lnOffset++]);
+        log::status("[%3d - %3d]: ", lnOffset, lnOffset + 15);
+      log::status("%02X ", (unsigned char)pData[lnOffset++]);
       if ((lnOffset > 0) && (lnOffset % 16 == 0)) printf("\n");
     }
     printf("\n");
   }
   else
   {
-    printf("printDebug: Packet not allocated!\n");
+    log::debug("printDebug: Packet not allocated!\n");
   }
 }
 

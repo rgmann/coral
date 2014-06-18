@@ -10,17 +10,11 @@
 using namespace liber;
 using namespace liber::rsync;
 
-std::ofstream authLog;
+//std::ofstream authLog;
 
 //-----------------------------------------------------------------------------
-Authority::
-Authority(JobDescriptor& rDescriptor,
-          HashTable<16, Segment*>&   rHash, 
-          InstructionReceiver& rReceiver)
+Authority::Authority()
 : SegmentHook()
-, mrDescriptor(rDescriptor)
-, mrHash(rHash)
-, mrReceiver(rReceiver)
 , mSegmenter(Segmenter::EveryOffset)
 , mnSegmentSkipCount(0)
 , mnMaxChunkSize(512)
@@ -29,15 +23,15 @@ Authority(JobDescriptor& rDescriptor,
 , mnTotalSegmentBytes(0)
 , mnSegmentBytes(0)
 , mnChunkBytes(0)
+, mpReceiver(NULL)
 {
   mChunkBuffer.allocate(mnMaxChunkSize);
-  authLog.open("/Users/vaughanbiker/Development/liber/test/rsync/test_root/auth_log.csv");
+//  authLog.open("/Users/vaughanbiker/Development/liber/test/rsync/test_root/auth_log.csv");
 }
 
 //-----------------------------------------------------------------------------
 Authority::~Authority()
 {
-  authLog.close();
 }
 
 //-----------------------------------------------------------------------------
@@ -52,27 +46,42 @@ void Authority::reset()
   mnChunkBytes = 0;
 
   mChunkBuffer.clear();
+
+  mpReceiver = NULL;
+
+  SegmentDestructor destructor;
+  mHash.clear(destructor);
 }
 
 //-----------------------------------------------------------------------------
-bool Authority::process(std::istream& istream, JobReport::SourceReport& rReport)
+bool Authority::process(JobDescriptor& rDescriptor, std::istream& istream, InstructionReceiver& rReceiver, JobReport::SourceReport& rReport)
 {
-  reset();
-
   mpReport = &rReport.authority;
-  mpReport->receivedSegmentCount = mrHash.size();
+  mpReport->receivedSegmentCount = mHash.size();
   mpReport->authBegin.sample();
 
-  mrReceiver.push(new BeginInstruction(mrDescriptor));
+  mpReceiver = &rReceiver;
+  log::debug("Authority - receiver type = %s\n", mpReceiver->toString());
+
+  mpReceiver->push(new BeginInstruction(rDescriptor));
   bool lbSuccess = mSegmenter.process(istream, *this,
-                                      mrDescriptor.getSegmentSize(),
+                                      rDescriptor.getSegmentSize(),
                                       rReport.segmentation);
   mpReport->authEnd.sample();
-  mrReceiver.push(new EndInstruction());
+  mpReceiver->push(new EndInstruction());
 
   mpReport = NULL;
+  mpReceiver = NULL;
+  
+  reset();
 
   return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
+HashTable<16, Segment*>& Authority::hash()
+{
+  return mHash;
 }
 
 //-----------------------------------------------------------------------------
@@ -104,7 +113,7 @@ void Authority::flushChunkBuffer(int nFlushCount)
     }
 
     // Send the chunk instruction to the instruction receiver.
-    mrReceiver.push(lpInstruction);
+    mpReceiver->push(lpInstruction);
 
     // All segment data has been removed from the buffer.
     mnBufferedCount = 0;
@@ -131,7 +140,7 @@ void Authority::call(Segment& rSegment)
     Segment* lpMatchSegment = NULL;
     SegmentComparator comparator(&rSegment);
 //    if (mrHash.find(pSegment->getWeak().checksum(), lpMatchSegment, comparator))
-    if (mrHash.remove(rSegment.getWeak().checksum(), lpMatchSegment, comparator))
+    if (mHash.remove(rSegment.getWeak().checksum(), lpMatchSegment, comparator))
     {
       // Any data in the buffer when a match occurs should be moved to a chunk
       // instruction and sent before sending the ID of the matched segment.
@@ -141,7 +150,7 @@ void Authority::call(Segment& rSegment)
       // If the Segment exists in the hash, create a Segment instruction.
       if (lpMatchSegment)
       {
-        mrReceiver.push(new SegmentInstruction(lpMatchSegment->getID()));
+        mpReceiver->push(new SegmentInstruction(lpMatchSegment->getID()));
       }
       else
       {

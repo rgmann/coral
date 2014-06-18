@@ -8,20 +8,22 @@
 #include "SegmentHook.h"
 #include "Segmenter.h"
 #include "CircularBuffer.h"
+//#include "NullInstructionReceiver.h"
 
 namespace liber {
 namespace rsync {
 
 class Instruction;
-class JobDescriptor;
 class InstructionReceiver;
+class JobDescriptor;
 
 class Authority : public SegmentHook {
 public:
 
-  Authority(JobDescriptor&,
-            liber::HashTable<16, Segment*>&,
-            InstructionReceiver&);
+//  Authority(JobDescriptor&,
+//            liber::HashTable<16, Segment*>&,
+//            InstructionReceiver&);
+  Authority();
   ~Authority();
 
   /**
@@ -30,8 +32,10 @@ public:
    * in the Segment Hash.  Generates a set for instructions for updating the hashed
    * file to match the authoritative file.
    */
-  bool process(std::istream& rInStream,
-               JobReport::SourceReport& rReport);
+  bool process(JobDescriptor& rDescriptor, std::istream& rInStream,
+               InstructionReceiver& rReceiver, JobReport::SourceReport& rReport);
+
+  liber::HashTable<16, Segment*>& hash();
 
 private:
 
@@ -44,9 +48,8 @@ private:
 
 private:
 
-  JobDescriptor& mrDescriptor;
-  liber::HashTable<16, Segment*>&  mrHash;
-  InstructionReceiver&  mrReceiver;
+//  JobDescriptor& mrDescriptor;
+  liber::HashTable<16, Segment*>  mHash;
 
   Segmenter mSegmenter;
 
@@ -62,6 +65,9 @@ private:
   ui32 mnChunkBytes;
 
   AuthorityReport* mpReport;
+
+//  NullInstructionReceiver mNullReceiver;
+  InstructionReceiver*  mpReceiver;
 };
 
 } // End namespace rsync

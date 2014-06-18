@@ -1,5 +1,5 @@
-#ifndef INSTRUCTION_LIST_H
-#define INSTRUCTION_LIST_H
+#ifndef INSTRUCTION_HOOK_H
+#define INSTRUCTION_HOOK_H
 
 #include "InstructionReceiver.h"
 
@@ -7,11 +7,11 @@ namespace liber {
 namespace rsync {
 
 // Common interface expected by Segmenter.
-class InstructionList : public liber::rsync::InstructionReceiver {
+class InstructionHook : public liber::rsync::InstructionReceiver {
 public:
 
-  InstructionList();
-  ~InstructionList();
+  InstructionHook();
+  ~InstructionHook();
 
   /**
    * Transfer control of a Segment instance to the
@@ -19,20 +19,15 @@ public:
    */
   void push(Instruction* pInstruction);
 
-  std::vector<Instruction*>& instructions();
+  virtual void call(Instruction* pInstruction) = 0;
 
   const char* toString() const
   {
-    return "InstructionList";
+    return "InstructionHook";
   }
-  
-private:
-
-  std::vector<Instruction*> mInstructions;
-
 };
 
 } // End namespace rsync
 } // End namespace liber
 
-#endif // INSTRUCTION_LIST_H
+#endif // INSTRUCTION_HOOK_H

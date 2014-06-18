@@ -9,19 +9,85 @@ using namespace liber::rsync;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
-RemoteAuthorityService::RemoteAuthorityService(FileSystemInterface& rFileSystemInterface)
-: PacketSubscriber()
-, IThread("RemoteAuthorityService")
-, mrFileSys(rFileSystemInterface)
-, mAuthorityInterface(rFileSystemInterface)
-, mpUserHandler(NULL)
+JobQueue::JobQueue(FileSystemInterface& rFileSys, InstructionReceiver& rReceiver)
+: IThread("JobQueue")
+, mAuthority(rFileSys)
+, mrReceiver(rReceiver)
+, mpActiveJob(NULL)
 {
   mJobQueue.initialize();
 }
 
 //-----------------------------------------------------------------------------
+RsyncJob* JobQueue::activeJob()
+{
+  return mpActiveJob;
+}
+
+//-----------------------------------------------------------------------------
+Mutex& JobQueue::lock()
+{
+  return mJobLock;
+}
+
+//-----------------------------------------------------------------------------
+bool JobQueue::lockIfActive()
+{
+  mJobLock.lock();
+  bool lbIsActive = (mpActiveJob != NULL);
+  if (!lbIsActive) mJobLock.unlock();
+  return lbIsActive;
+}
+
+//-----------------------------------------------------------------------------
+bool JobQueue::push(RsyncJob* pJob)
+{
+  return mJobQueue.push(pJob);
+}
+
+//-----------------------------------------------------------------------------
+void JobQueue::run(const bool& bShutdown)
+{
+  while (!bShutdown)
+  {
+    RsyncJob* lpJob = NULL;
+    if (mJobQueue.pop(lpJob) && lpJob)
+    {
+      mJobLock.lock();
+      mpActiveJob = lpJob;
+      mJobLock.unlock();
+
+      mAuthority.process(lpJob, mrReceiver);
+
+      mJobLock.lock();
+      mpActiveJob = NULL;
+      mJobLock.unlock();
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+RemoteAuthorityService::
+  RemoteAuthorityService(FileSystemInterface& rFileSys)
+: PacketSubscriber()
+, mrFileSys(rFileSys)
+, mpUserHandler(NULL)
+, mRequestID(-1)
+, mJobQueue(rFileSys, *this)
+{
+  mJobQueue.launch();
+}
+
+//-----------------------------------------------------------------------------
 RemoteAuthorityService::~RemoteAuthorityService()
 {
+  mJobQueue.cancel(true);
+}
+
+//-----------------------------------------------------------------------------
+void RemoteAuthorityService::setRequestID(int requestID)
+{
+  mRequestID = requestID;
 }
 
 //-----------------------------------------------------------------------------
@@ -32,6 +98,8 @@ bool RemoteAuthorityService::put(const char* pData, ui32 nLength)
 
   if (lpPacket->unpack(pData, nLength))
   {
+    log::status("RemoteAuthorityService::put - Received packet length=%u\n", lpPacket->allocatedSize());
+    lpPacket->printDump();
     switch (lpPacket->data()->type)
     {
       case RsyncPacket::RsyncRemoteJobQuery:
@@ -44,11 +112,30 @@ bool RemoteAuthorityService::put(const char* pData, ui32 nLength)
         lbSuccess = true;
         break;
 
-      default: break;
+      default:
+        log::debug("RemoteAuthorityService::put - invalid packet type=%d\n",
+                   lpPacket->data()->type);
+        break;
     }
+  }
+  else
+  {
+    log::debug("RemoteAuthorityService::put - failed to unpack packet\n");
   }
 
   return lbSuccess;
+}
+
+//-----------------------------------------------------------------------------
+void RemoteAuthorityService::call(Instruction* pInstruction)
+{
+  if (pInstruction)
+  {
+    sendPacketTo(mRequestID,
+                 new RsyncPacket(RsyncPacket::RsyncInstruction,
+                 InstructionFactory::Serialize(pInstruction)));
+    delete pInstruction;
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -74,8 +161,9 @@ handleRemoteJobRequest(const void* pData, ui32 nLength)
       mJobQueue.push(lpJob);
     }
 
-    sendPacket(new RsyncPacket(RsyncPacket::RsyncRemoteJobAcknowledgment,
-               sizeof(lStatus), &lStatus));
+    RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncRemoteJobAcknowledgment,
+                                            sizeof(lStatus), &lStatus);
+    sendPacketTo(mRequestID, lpPacket);
   }
   else
   {
@@ -102,39 +190,24 @@ defaultQueryHandler(JobDescriptor& rJob)
 //-----------------------------------------------------------------------------
 void RemoteAuthorityService::pushSegment(const void* pData, ui32 nLength)
 {
-  mAuthorityInterface.lockActiveJob();
-
-  if (mAuthorityInterface.activeJob())
+  if (mJobQueue.lockIfActive())
   {
     Segment* lpSegment = new Segment();
     if (lpSegment->deserialize((const char*)pData, nLength))
     {
-      mAuthorityInterface.activeJob()->segments().push(lpSegment);
+      mJobQueue.activeJob()->segments().push(lpSegment);
     }
     else
     {
       log::error("Failed to deserialize segment.\n");
       delete lpSegment;
     }
+
+    mJobQueue.lock().unlock();
   }
   else
   {
     log::error("No job active to receive segment.\n");
-  }
-
-  mAuthorityInterface.unlockActiveJob();
-}
-
-//----------------------------------------------------------------------------
-void RemoteAuthorityService::run(const bool& bShutdown)
-{
-  while (!bShutdown)
-  {
-    RsyncJob* lpJob = NULL;
-    if (mJobQueue.pop(lpJob) && lpJob)
-    {
-      mAuthorityInterface.process(lpJob);
-    }
   }
 }
 

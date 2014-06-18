@@ -21,10 +21,10 @@ COMMON_INCLUDES = \
 -I$(BASE)/includes/netapp/common \
 
 SERVER_INCLUDES = $(COMMON_INCLUDES) \
-	-I$(BASE)/includes/netapp/server/v2
+	-I$(BASE)/includes/netapp/server
 
 SERVER_SOURCE = $(COMMON_SOURCE) \
-	$(BASE)/src/common/$(LIBNAME)/server/v2/*.cpp
+	$(BASE)/src/common/$(LIBNAME)/server/*.cpp
 
 CLIENT_INCLUDES = $(COMMON_INCLUDES) \
 	-I$(BASE)/includes/netapp/client

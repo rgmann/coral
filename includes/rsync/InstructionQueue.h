@@ -20,6 +20,11 @@ public:
   void push(Instruction* pInstruction);
 
   Instruction* pop(int nTimeoutMs);
+
+  const char* toString() const
+  {
+    return "InstructionQueue";
+  }
   
 private:
 

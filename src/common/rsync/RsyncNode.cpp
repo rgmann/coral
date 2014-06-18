@@ -19,6 +19,7 @@ RsyncNode::RsyncNode(const boost::filesystem::path& root)
 {
   mPendingJobs.initialize();
   mFileSys.setRoot(root);
+
   mSegmenter.launch();
   mAuthority.launch();
   mAssembler.launch();
@@ -29,6 +30,7 @@ RsyncNode::RsyncNode(const boost::filesystem::path& root)
 RsyncNode::~RsyncNode()
 {
   cancel(true);
+
   mSegmenter.cancel(true);
   mAuthority.cancel(true);
   mAssembler.cancel(true);
@@ -66,8 +68,13 @@ bool RsyncNode::
 registerSubscribers(PacketRouter& rRouter, int nRequestID, int nResponseID)
 {
   bool lbSuccess = true;
-  lbSuccess &= mAuthority.registerSubscriber(rRouter, nRequestID);
-  lbSuccess &= rRouter.addSubscriber(nResponseID, &mAuthorityService);
+
+  lbSuccess &= rRouter.addSubscriber(nResponseID, &mAuthority.getSubscriber());
+  mAuthority.setRequestID(nRequestID);
+
+  lbSuccess &= rRouter.addSubscriber(nRequestID, &mAuthorityService);
+  mAuthorityService.setRequestID(nResponseID);
+
   return lbSuccess;
 }
 

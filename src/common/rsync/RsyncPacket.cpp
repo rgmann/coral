@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include "Log.h"
 #include "RsyncPacket.h"
 #include "ByteOrder.h"
 
+using namespace liber;
 using namespace liber::net;
 using namespace liber::netapp;
 using namespace liber::rsync;
@@ -35,6 +37,7 @@ RsyncPacket::RsyncPacket(int type, const std::string& rData)
   {
     data()->type = type;
     data()->length = rData.size();
+    log::debug("RsyncPacket::RsyncPacket - type=%d, length=%d\n", type, rData.size());
 
     if (rData.size() > 0)
     {

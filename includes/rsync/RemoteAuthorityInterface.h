@@ -13,18 +13,23 @@ namespace liber {
 namespace rsync {
 
 class RemoteAuthorityInterface
-: public AuthorityInterface
-, public liber::netapp::PacketSubscriber {
+//: public AuthorityInterface
+: public liber::netapp::PacketSubscriber {
 public:
 
   RemoteAuthorityInterface();
   ~RemoteAuthorityInterface();
 
+  void setRequestID(int requestID);
+
   bool put(const char* pData, ui32 nLength);
+
+
+  void process(RsyncJob* pJob);
 
 private:
 
-  void processJob(RsyncJob* pJob);
+//  void processJob(RsyncJob* pJob);
 
   RsyncError waitForEndInstruction(int nTimeoutMs);
 
@@ -95,6 +100,8 @@ private:
   int mnSegmentTimeoutMs;
   int mnJobAckTimeoutMs;
   int mnJobCompletionTimeoutMs;
+
+  int mRequestID;
 };
 
 } // End namespace rsync

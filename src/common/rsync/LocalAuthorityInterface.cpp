@@ -13,8 +13,7 @@ using namespace liber::rsync;
 //----------------------------------------------------------------------------
 LocalAuthorityInterface::
   LocalAuthorityInterface(FileSystemInterface& rFileSystemInterface)
-: AuthorityInterface()
-, mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
+: mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
 , mrFileSys(rFileSystemInterface)
 {
 }
@@ -31,7 +30,21 @@ std::ifstream& LocalAuthorityInterface::file()
 }
 
 //----------------------------------------------------------------------------
-void LocalAuthorityInterface::processJob(RsyncJob* pJob)
+void LocalAuthorityInterface::process(RsyncJob* pJob)
+{
+  processJob(pJob, pJob->instructions());
+}
+
+//----------------------------------------------------------------------------
+void LocalAuthorityInterface::
+process(RsyncJob* pJob, InstructionReceiver& rInstructions)
+{
+  processJob(pJob, rInstructions);
+}
+
+//----------------------------------------------------------------------------
+void LocalAuthorityInterface::
+processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
 {
   int lnReceived = 0;
   RsyncError lStatus = RsyncSuccess;
@@ -44,7 +57,8 @@ void LocalAuthorityInterface::processJob(RsyncJob* pJob)
     if (pJob->segments().pop(&lpSegment, mnSegmentTimeoutMs) && lpSegment && (lpSegment->endOfStream() == false))
     {
       lnReceived++;
-      mHash.insert(lpSegment->getWeak().checksum(), lpSegment);
+      //mHash.insert(lpSegment->getWeak().checksum(), lpSegment);
+      mAuthority.hash().insert(lpSegment->getWeak().checksum(), lpSegment);
     }
     else
     {
@@ -69,11 +83,12 @@ void LocalAuthorityInterface::processJob(RsyncJob* pJob)
   {
     // Hash has been populated. Now the Authority can begin building the
     // instructions.
-    Authority* lpAuthority = new Authority(pJob->descriptor(), mHash, pJob->instructions());
+//    Authority* lpAuthority = new Authority(pJob->descriptor(), mHash, pJob->instructions());
 
     if (mrFileSys.open(pJob->descriptor().getSource(), file()))
     {
-      if (lpAuthority->process(file(), pJob->report().source()))
+      //if (lpAuthority->process(file(), pJob->report().source()))
+      if (mAuthority.process(pJob->descriptor(), file(), rInstructions, pJob->report().source()))
       {
         log::debug("AuthorityInterface: Completed instructions for %s\n",
                    pJob->descriptor().getSource().string().c_str());
@@ -92,16 +107,17 @@ void LocalAuthorityInterface::processJob(RsyncJob* pJob)
                  pJob->descriptor().getSource().string().c_str());
     }
 
-    delete lpAuthority;
+//    delete lpAuthority;
   }
   else
   {
     EndInstruction* lpEnd = new EndInstruction();
     lpEnd->cancel(lStatus);
-    pJob->instructions().push(lpEnd);
+    //pJob->instructions().push(lpEnd);
+    rInstructions.push(lpEnd);
   }
 
-  SegmentDestructor destructor;
-  mHash.clear(destructor);
+//  SegmentDestructor destructor;
+//  mHash.clear(destructor);
 }
 

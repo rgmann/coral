@@ -19,7 +19,7 @@ INCLUDES = $(BOOST_INCLUDE)\
 -I$(BASE)/includes/base/time \
 -I$(BASE)/includes/base/net \
 -I$(BASE)/includes/rsync \
--I$(BASE)/includes/netapp/common
+-I$(BASE)/includes/netapp/common \
 
 LIBER_LIBS = \
 -L$(BASE)/lib/rsync -lrsync \
@@ -40,6 +40,9 @@ job_test:
 node_test:
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
+end_to_end:
+	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
+
 seg_time:
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
@@ -53,6 +56,7 @@ clean:
 	rm -rf *.dSYM  *.o
 	rm -f segment_test
 	rm -f node_test
+	rm -f end_to_end
 	rm -f seg_time
 	rm -f job_test
 	rm -f fs_test

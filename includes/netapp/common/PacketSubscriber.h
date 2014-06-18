@@ -36,6 +36,7 @@ public:
 protected:
 
    virtual bool sendPacket(liber::netapp::GenericPacket* pPacket, i32 nTimeoutMs = QueueTimeoutMs);
+   bool sendPacketTo(int destinationID, GenericPacket* pPacket, i32 nTimeoutMs = QueueTimeoutMs);
 
 private:
 

@@ -7,6 +7,7 @@ BASE = ../..
 BOOST_INCLUDE = \
 -I/opt/local/include \
 
+#$(BASE)/src/common/$(LIBNAME)/AuthorityInterface.cpp
 SOURCE = \
 $(BASE)/src/common/$(LIBNAME)/JobDescriptor.cpp \
 $(BASE)/src/common/$(LIBNAME)/JobReport.cpp \
@@ -17,7 +18,6 @@ $(BASE)/src/common/$(LIBNAME)/RsyncPacket.cpp \
 $(BASE)/src/common/$(LIBNAME)/Assembler.cpp \
 $(BASE)/src/common/$(LIBNAME)/AssemblerThread.cpp \
 $(BASE)/src/common/$(LIBNAME)/Authority.cpp \
-$(BASE)/src/common/$(LIBNAME)/AuthorityInterface.cpp \
 $(BASE)/src/common/$(LIBNAME)/LocalAuthorityInterface.cpp \
 $(BASE)/src/common/$(LIBNAME)/RemoteAuthorityInterface.cpp \
 $(BASE)/src/common/$(LIBNAME)/RemoteAuthorityService.cpp \
@@ -26,6 +26,7 @@ $(BASE)/src/common/$(LIBNAME)/Instruction.cpp \
 $(BASE)/src/common/$(LIBNAME)/InstructionReceiver.cpp \
 $(BASE)/src/common/$(LIBNAME)/InstructionList.cpp \
 $(BASE)/src/common/$(LIBNAME)/InstructionQueue.cpp \
+$(BASE)/src/common/$(LIBNAME)/InstructionHook.cpp \
 $(BASE)/src/common/$(LIBNAME)/Segmenter.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmenterThread.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentAccessor.cpp \

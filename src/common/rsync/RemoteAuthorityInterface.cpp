@@ -11,10 +11,10 @@ using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
 RemoteAuthorityInterface::RemoteAuthorityInterface()
-: AuthorityInterface()
-, mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
+: mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
 , mnJobAckTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
 , mnJobCompletionTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
+, mRequestID(-1)
 {
 }
 
@@ -24,7 +24,13 @@ RemoteAuthorityInterface::~RemoteAuthorityInterface()
 }
 
 //----------------------------------------------------------------------------
-void RemoteAuthorityInterface::processJob(RsyncJob* pJob)
+void RemoteAuthorityInterface::setRequestID(int requestID)
+{
+  mRequestID = requestID;
+}
+
+//----------------------------------------------------------------------------
+void RemoteAuthorityInterface::process(RsyncJob* pJob)
 {
   // Send the JobDescriptor and then wait for an acknowledgement from the
   // RsyncService.  The RsyncService may send an acknowledgement saying that
@@ -163,18 +169,29 @@ startRemoteJob(RsyncJob* pJob)
 {
   RsyncError lQueryStatus = RsyncSuccess;
 
+  RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncRemoteJobQuery,
+                                          pJob->descriptor().serialize());
+
   mActiveJob.setJob(pJob);
 
-  sendPacket(new RsyncPacket(RsyncPacket::RsyncRemoteJobQuery, pJob->descriptor().serialize()));
-
-  if (mActiveJob.waitJobStart(mnJobAckTimeoutMs))
+  if (sendPacketTo(mRequestID, lpPacket))
   {
-    lQueryStatus = RsyncRemoteQueryTimeout;
+    if (mActiveJob.waitJobStart(mnJobAckTimeoutMs))
+    {
+      log::error("RemoteAuthorityInterface - RSYNC remote query timeout.\n");
+      lQueryStatus = RsyncRemoteQueryTimeout;
+    }
+    else
+    {
+      lQueryStatus = mActiveJob.queryResponse();
+    }
   }
   else
   {
-    lQueryStatus = mActiveJob.queryResponse();
+    log::error("RemoteAuthorityInterface - Failed to send job query.\n");
   }
+
+  delete lpPacket;
 
   return lQueryStatus;
 }
@@ -197,7 +214,8 @@ flushSegments(SegmentQueue& rSegments, bool bSend)
         RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncSegment,
                                                 lpSegment->serialize());
 
-        sendPacket(lpPacket);
+        sendPacketTo(mRequestID, lpPacket);
+        delete lpPacket;
       }
 
       delete lpSegment;
