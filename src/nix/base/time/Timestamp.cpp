@@ -87,6 +87,12 @@ ui32 Timestamp::nanoseconds() const
 }
 
 //------------------------------------------------------------------------------
+void Timestamp::nanoseconds(i32 ns)
+{
+  mNanoseconds = ns;
+}
+
+//------------------------------------------------------------------------------
 ui32 Timestamp::microseconds() const
 {
   return nanoseconds() / 1000;

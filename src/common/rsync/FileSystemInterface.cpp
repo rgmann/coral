@@ -1,3 +1,4 @@
+#include <fstream>
 #include <sstream>
 #include <boost/system/error_code.hpp>
 #include "Log.h"
@@ -134,13 +135,12 @@ open(const boost::filesystem::path& path, std::ifstream& stream) const
       stream.open(absolutePath(path).string().c_str(),
                   std::ofstream::binary);
 
-      if (stream.fail())
+      lbSuccess = stream.is_open() && stream.good();
+      if (!lbSuccess)
       {
         log::error("FileSystemInterface::open: Failed to open output stream at %s\n",
                    path.string().c_str());
       }
-
-      lbSuccess = stream.is_open();
     }
     else
     {
@@ -263,6 +263,29 @@ bool FileSystemInterface::remove(const boost::filesystem::path& path) const
     {
       log::error("FileSystemInterface::remove: %s not found.\n",
                  path.string().c_str());
+    }
+  }
+
+  return lbSuccess;
+}
+
+//----------------------------------------------------------------------------
+bool FileSystemInterface::touch(const boost::filesystem::path& path) const
+{
+  bool lbSuccess = false;
+
+  if (validate())
+  {
+    if ((lbSuccess = exists(path)) == false)
+    {
+      std::ofstream fs(absolutePath(path).string().c_str(),
+                       std::ofstream::binary);
+
+      lbSuccess = fs.is_open() && fs.good();
+
+      fs.close();
+
+      lbSuccess = (lbSuccess && exists(path));
     }
   }
 

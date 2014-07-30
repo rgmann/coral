@@ -1,6 +1,8 @@
 #include <arpa/inet.h>
+#include "Log.h"
 #include "PacketHelper.h"
 
+using namespace liber;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
@@ -58,8 +60,6 @@ void PacketCtor::writeCString(const std::string& val)
 //-----------------------------------------------------------------------------
 void PacketCtor::write(const std::string& val)
 {
-   //std::cout << "PacketCtor::write(const std::string& val): "
-   //          << val.size() << std::endl;
    PacketCtor::write((ui32)val.size());
    stream.write(val.data(), val.size());
 }
@@ -80,7 +80,13 @@ PacketDtor::PacketDtor(ByteOrder end)
 //-----------------------------------------------------------------------------
 void PacketDtor::setData(const std::string& data)
 {
-   stream.write(data.data(), data.size());
+   setData(data.data(), data.size());
+}
+
+//-----------------------------------------------------------------------------
+void PacketDtor::setData(const char* data, ui32 nSizeBytes)
+{
+   stream.write(data, nSizeBytes);
 }
 
 //-----------------------------------------------------------------------------
@@ -173,8 +179,17 @@ PacketDtor::Status PacketDtor::readCString(std::string& val)
 {
    ui32 lnLength = 0;
 
-   if (!PacketDtor::read(lnLength)) return ReadFail;
-   if (lnLength == 0) return ReadEmpty;
+   if (!PacketDtor::read(lnLength))
+   {
+     log::error("PacketDtor::readCString - Failed to read string length\n");
+     return ReadFail;
+   }
+
+   if (lnLength == 0)
+   {
+     log::error("PacketDtor::readCString - Empty string\n");
+     return ReadEmpty;
+   }
 
    char* lpBuffer = new char[lnLength];
    stream.read(lpBuffer, lnLength);
@@ -223,14 +238,25 @@ PacketDtor::Status PacketDtor::read(char* pData, ui32 nMaxBytes)
 {
    ui32 lnLength = 0;
 
-   if (!PacketDtor::read(lnLength)) return ReadFail;
-   if (lnLength == 0) return ReadEmpty;
+   if (PacketDtor::read(lnLength) == false)
+   {
+     log::error("PacketDtor::read(char* pData, ui32 nBytes) - "
+                "Failed to read data length\n");
+     return ReadFail;
+   }
 
-   ui32 lnWriteLength = (nMaxBytes < lnLength) ? nMaxBytes : lnLength;
-   ui32 lnRemainder   = (lnWriteLength < lnLength) ? (lnLength - lnWriteLength) : 0;
+   if (lnLength == 0)
+   {
+     log::debug("PacketDtor::read(char* pData, ui32 nBytes) - "
+                "Empty data field\n");
+     return ReadEmpty;
+   }
+
+   ui32 lnReadLength = (nMaxBytes < lnLength) ? nMaxBytes : lnLength;
+   ui32 lnRemainder   = (lnReadLength < lnLength) ? (lnLength - lnReadLength) : 0;
 
    // Read as much as possible into the user supplied buffer.
-   stream.read(pData, lnWriteLength);
+   stream.read(pData, lnReadLength);
 
    // Read and throw away whatever is left over.
    if (lnRemainder > 0)
@@ -240,6 +266,58 @@ PacketDtor::Status PacketDtor::read(char* pData, ui32 nMaxBytes)
       delete[] lpBuffer;
    }
 
+   if (stream.fail()) log::error("PacketDtor::read(char* pData, ui32 nBytes) - stream fail read_len=%u, rem=%u, len=%u\n", lnReadLength, lnRemainder, lnLength);
+
    return stream.fail() ? ReadFail : ReadOk;
+}
+
+//-----------------------------------------------------------------------------
+std::string Serializable::serialize() const
+{
+  PacketCtor ctor;
+  pack(ctor);
+  return ctor.stream.str();
+}
+
+//-----------------------------------------------------------------------------
+void Serializable::serialize(PacketCtor& ctor) const
+{
+  pack(ctor);
+}
+
+//-----------------------------------------------------------------------------
+std::string Serializable::serialize()
+{
+  PacketCtor ctor;
+  pack(ctor);
+  return ctor.stream.str();
+}
+
+//-----------------------------------------------------------------------------
+void Serializable::serialize(PacketCtor& ctor)
+{
+  pack(ctor);
+}
+
+//-----------------------------------------------------------------------------
+bool Serializable::deserialize(const char* pData, ui32 nSizeBytes)
+{
+  PacketDtor dtor;
+  dtor.setData(pData, nSizeBytes);
+  return unpack(dtor);
+}
+
+//-----------------------------------------------------------------------------
+bool Serializable::deserialize(const std::string& data)
+{
+  PacketDtor dtor;
+  dtor.setData(data.data(), data.size());
+  return unpack(dtor);
+}
+
+//-----------------------------------------------------------------------------
+bool Serializable::deserialize(PacketDtor& dtor)
+{
+  return unpack(dtor);
 }
 

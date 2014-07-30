@@ -30,7 +30,8 @@ void PrintSegRsync(unsigned char* pBlock, int nBytes)
 
 //------------------------------------------------------------------------------
 Segment::Segment()
-: mID(-1)
+: Serializable()
+, mID(-1)
 , mpData(NULL)
 , mnSegmentSize(0)
 , mnOffset(0)
@@ -40,7 +41,8 @@ Segment::Segment()
 
 //------------------------------------------------------------------------------
 Segment::Segment(ID id, ui32 offset)
-: mID(id)
+: Serializable()
+, mID(id)
 , mpData(NULL)
 , mnSegmentSize(0)
 , mnOffset(offset)
@@ -50,7 +52,8 @@ Segment::Segment(ID id, ui32 offset)
 
 //------------------------------------------------------------------------------
 Segment::Segment(ui32 nVSegmentSize)
-: mID(-1)
+: Serializable()
+, mID(-1)
 , mpData(NULL)
 , mnSegmentSize(0)
 , mnOffset(0)
@@ -61,6 +64,7 @@ Segment::Segment(ui32 nVSegmentSize)
 
 //------------------------------------------------------------------------------
 Segment::Segment(const Segment& other)
+: Serializable()
 {
   mID = other.mID;
   mnSegmentSize = other.mnSegmentSize;
@@ -279,80 +283,75 @@ bool Segment::isValid() const
 }
 
 //------------------------------------------------------------------------------
-/*bool Segment::pack(ui8** ppData, ui32& nSizeBytes)
+void Segment::pack(PacketCtor& ctor) const
 {
-  bool lbValid = false;
+//  ctor.write((ui32)mID);
+//  ctor.write(size());
+//  ctor.write(mnOffset);
+//  ctor.write((ui32)mWeak.checksum());
 
-  if ((lbValid = isValid()))
-  {
-    PackedSegment* lpSegment = reinterpret_cast<PackedSegment*>(*ppData);
-    lpSegment = new PackedSegment;
-
-    lpSegment->id     = mID;
-    lpSegment->size   = size();
-    lpSegment->offset = mnOffset;
-    lpSegment->weak   = mWeak.checksum();
-    getStrong().get(&lpSegment->strong);
-  }
-
-  return lbValid;
-}*/
+//  Hash128 strong;
+//  getStrong().get(&strong);
+//  ctor.write((char*)&strong, sizeof(strong));
+}
 
 //------------------------------------------------------------------------------
-std::string Segment::serialize()
+void Segment::pack(PacketCtor& ctor)
 {
-  PacketCtor ctor;
-
   ctor.write((ui32)mID);
   ctor.write(size());
   ctor.write(mnOffset);
   ctor.write((ui32)mWeak.checksum());
 
-  std::string strongBuffer;
+  //std::string strongBuffer;
   Hash128 strong;
   getStrong().get(&strong);
-  strongBuffer.assign((char*)&strong, sizeof(strong));
-  ctor.write(strongBuffer);
-
-  return ctor.stream.str(); 
+  //strongBuffer.assign((char*)&strong, sizeof(strong));
+  //ctor.write(strongBuffer);
+  ctor.write((char*)&strong, sizeof(strong));
 }
 
 //------------------------------------------------------------------------------
-bool Segment::deserialize(const char* pData, ui32 nSizeBytes)
+bool Segment::unpack(PacketDtor& dtor)
 {
-  PacketDtor dtor;
-  dtor.stream.write(pData, nSizeBytes);
-  return deserialize(dtor);
-}
+  if (!dtor.read(mID))
+  {
+    log::error("Segment::unpack - Failed to parse segment ID\n");
+    return false;
+  }
 
-//------------------------------------------------------------------------------
-bool Segment::deserialize(const std::string& data)
-{
-  PacketDtor dtor;
-  dtor.setData(data);
-  return deserialize(dtor);
-}
+  if (!dtor.read(mnSegmentSize))
+  {
+    log::error("Segment::unpack - Failed to parse segment size\n");
+    return false;
+  }
 
-//------------------------------------------------------------------------------
-bool Segment::deserialize(PacketDtor& dtor)
-{
-  bool lbSuccess = true;
+  if (!dtor.read(mnOffset))
+  {
+    log::error("Segment::unpack - Failed to parse segment offset\n");
+    return false;
+  }
 
-  lbSuccess &= dtor.read(mID);
-  lbSuccess &= dtor.read(mnSegmentSize);
-  lbSuccess &= dtor.read(mnOffset);
-  lbSuccess &= dtor.read(mWeak.s);
+  if (!dtor.read(mWeak.s))
+  {
+    log::error("Segment::unpack - Failed to parse weak hash\n");
+    return false;
+  }
 
   std::string strongBuffer;
-  lbSuccess &= dtor.read(strongBuffer);
-  if (lbSuccess)
+  if (dtor.read(strongBuffer) != PacketDtor::ReadOk)
+  {
+    log::error("Segment::unpack - Failed to parse strong hash\n");
+    return false;
+  }
+  else
   {
     Hash128 strong;
     memcpy(&strong, strongBuffer.data(), strongBuffer.size());
     mStrong = Md5Hash(strong);
   }
 
-  return lbSuccess;
+  return true;
 }
 
 //------------------------------------------------------------------------------

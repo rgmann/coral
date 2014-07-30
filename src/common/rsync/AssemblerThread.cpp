@@ -43,17 +43,16 @@ void AssemblerThread::run(const bool& bShutdown)
     {
       if (mSegmentFile.open(lpJob->descriptor()))
       {
-        if (mrFileSys.stage(lpJob->descriptor().getDestination(),
+        if (mrFileSys.stage(lpJob->descriptor().getDestination().path,
                             lStagePath,
                             mAssembler.outputStream()))
         {
-
           bool lbSuccess = mAssembler.process(lpJob->instructions(),
-                                              lpJob->report().destination().assembly);
+                                              lpJob->report().destination.assembly);
           if (lbSuccess == false)
           {
             log::error("AssemblerThread - Assembly failed for %s: %s\n",
-                       lpJob->descriptor().getDestination().string().c_str(),
+                       lpJob->descriptor().getDestination().path.string().c_str(),
                        ExecutionStatus::ErrorDescription(mAssembler.status().error).c_str());
           }
 
@@ -64,7 +63,7 @@ void AssemblerThread::run(const bool& bShutdown)
           // swap the stage file and destination file.
           if (lbSuccess)
           {
-            if (!mrFileSys.swap(lStagePath, lpJob->descriptor().getDestination()))
+            if (!mrFileSys.swap(lStagePath, lpJob->descriptor().getDestination().path))
             {
               log::error("AssemblerThread - "
                          "Failed to swap stage file and destination file.\n");
@@ -76,7 +75,7 @@ void AssemblerThread::run(const bool& bShutdown)
           mSegmentFile.close();
 
           log::error("AssemblerThread - Failed to open stage file for %s\n",
-                     lpJob->descriptor().getDestination().string().c_str());
+                     lpJob->descriptor().getDestination().path.string().c_str());
         }
       }
       else

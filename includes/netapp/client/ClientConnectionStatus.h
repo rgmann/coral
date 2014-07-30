@@ -24,7 +24,8 @@ private:
   Timestamp       mLastKeepaliveSendTime;
 };
 
-}}
+} // End namespace netapp
+} // End namespace liber
 
 #endif // CLIENT_CONNECTION_STATUS_H
 

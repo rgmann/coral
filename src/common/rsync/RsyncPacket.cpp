@@ -24,7 +24,7 @@ RsyncPacket::RsyncPacket(int type, ui32 length, const void* pData)
 
     if (pData)
     {
-      memcpy(data(), pData, length);
+      memcpy(dataPtr(), pData, length);
     }
   }
 }
@@ -37,18 +37,33 @@ RsyncPacket::RsyncPacket(int type, const std::string& rData)
   {
     data()->type = type;
     data()->length = rData.size();
-    log::debug("RsyncPacket::RsyncPacket - type=%d, length=%d\n", type, rData.size());
 
     if (rData.size() > 0)
     {
-      memcpy(data(), rData.data(), rData.size());
+      memcpy(dataPtr(), rData.data(), rData.size());
+    }
+  }
+}
+
+//-----------------------------------------------------------------------------
+RsyncPacket::RsyncPacket(int type, const GenericPacket* pPacket)
+: GenericPacket(sizeof(RsyncPacket::Data), pPacket->allocatedSize())
+{
+  if (isAllocated())
+  {
+    data()->type = type;
+    data()->length = pPacket->allocatedSize();
+
+    if (pPacket->allocatedSize() > 0)
+    {
+      memcpy(dataPtr(), pPacket->basePtr(), pPacket->allocatedSize());
     }
   }
 }
 
 
 //-----------------------------------------------------------------------------
-bool RsyncPacket::allocate(const RsyncPacket::Data& rData)
+/*bool RsyncPacket::allocate(const RsyncPacket::Data& rData)
 {
   bool lbSuccess = GenericPacket::allocate(sizeof(RsyncPacket::Data), 
                                            rData.length);
@@ -60,7 +75,7 @@ bool RsyncPacket::allocate(const RsyncPacket::Data& rData)
   }
 
   return lbSuccess;
-}
+}*/
 
 //-----------------------------------------------------------------------------
 RsyncPacket::Data* const RsyncPacket::data() const
@@ -89,3 +104,24 @@ void RsyncPacket::swap(void* pData, ui32 nSizeBytes)
   }
 }
 
+//-----------------------------------------------------------------------------
+bool RsyncPacket::unpack(const void* pData, ui32 nSizeBytes)
+{
+  bool lbSuccess = inherited::unpack(pData, nSizeBytes);
+
+  if (lbSuccess)
+  {
+    lbSuccess = (allocatedSize() >= sizeof(RsyncPacket::Data));
+
+    if (lbSuccess)
+    {
+      mnDataSizeBytes = sizeof(RsyncPacket::Data);
+    }
+    else
+    {
+      log::error("RsyncPacket::unpack - Received buffer is too small\n");
+    }
+  }
+
+  return lbSuccess;
+}

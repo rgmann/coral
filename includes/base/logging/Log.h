@@ -29,6 +29,8 @@ namespace log    {
     Error,
     Warn,
     Debug,
+    MemDump,
+    Verbose
   };
 
 
@@ -42,6 +44,8 @@ namespace log    {
       case Error:  levelString = "Error";  break;
       case Warn:   levelString = "Warn";   break;
       case Debug:  levelString = "Debug";  break;
+      case MemDump:  levelString = "MemDump";  break;
+      case Verbose:  levelString = "Verbose";  break;
       default: break;
     }
     return levelString;
@@ -61,6 +65,14 @@ namespace log    {
      * The constructor automatically timestamps the message.
      */
     LogMessage(LogLevel level, const std::string& message);
+
+    /**
+     *
+     */
+    LogMessage(LogLevel level,
+               const char* header,
+               const char* pData, ui32 nBytes,
+               ui32 nBytesPerRow);
 
     /**
      * Convert the message to a string. The message formate can be configured.
@@ -181,6 +193,7 @@ namespace log    {
   void error(const char* format, ...);
   void warn(const char* format, ...);
   void debug(const char* format, ...);
+  void mem_dump(const char* header, const char* pData, ui32 nBytes, ui32 nBytesPerRow = 16);
 
 } // End of namespace log
 } // End of namespace liber

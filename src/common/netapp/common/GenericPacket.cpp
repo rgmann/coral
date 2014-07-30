@@ -119,22 +119,10 @@ ui32 GenericPacket::allocatedSize() const
 }
 
 //------------------------------------------------------------------------------
-//ui32 GenericPacket::dataOffset() const
-//{
-//   return 0;
-//}
-
-//------------------------------------------------------------------------------
 ui32 GenericPacket::dataSize() const
 {
    return mnDataSizeBytes;
 }
-
-//------------------------------------------------------------------------------
-//ui32 GenericPacket::inclusiveSize() const
-//{
-//   return 0;
-//}
 
 //------------------------------------------------------------------------------
 void* GenericPacket::basePtr()
@@ -177,30 +165,6 @@ void* const GenericPacket::dataPtr() const
 }
 
 //------------------------------------------------------------------------------
-//void* GenericPacket::dataEndPtr()
-//{
-//   printf("GenericPacket::dataEndPtr\n");
-//   if (isAllocated())
-//   {
-//      return reinterpret_cast<void*>(m_pPkt + dataOffset() + dataSize());
-//   }
-//   
-//   return NULL;
-//}
-
-//------------------------------------------------------------------------------
-//void* const GenericPacket::dataEndPtr() const
-//{
-//   printf("GenericPacket::dataEndPtr\n");
-//   if (isAllocated())
-//   {
-//      return reinterpret_cast<void* const>(m_pPkt + dataOffset() + dataSize());
-//   }
-//   
-//   return NULL;
-//}
-
-//------------------------------------------------------------------------------
 bool GenericPacket::pack(void** pPkt, ui32 &nSizeBytes) const
 {
    //unsigned char* l_pPkt = (unsigned char*)(*pPkt);
@@ -231,28 +195,31 @@ bool GenericPacket::pack(void** pPkt, ui32 &nSizeBytes) const
 //------------------------------------------------------------------------------
 bool GenericPacket::unpack(const void* pPkt, ui32 nSizeBytes)
 {
-   if (pPkt == NULL)
-   {
-      printf("::unpack: NULL\n");
-      return false;
-   }
+  bool lbSuccess = false;
+
+  if (pPkt != NULL)
+  {
+    // Begin by destroying the packet if it is already allocated.
+    destroy();
+
+    // The header size is known since it is supplied...
+    if (allocate(nSizeBytes))
+    {
+      // Copy the packet.
+      memcpy(m_pPkt, pPkt, allocatedSize());
+      lbSuccess = true;
+    }
+    else
+    {
+      log::error("GenericPacket::unpack: Allocation failed\n");
+    }
+  }
+  else
+  {
+    log::error("GenericPacket::unpack: NULL\n");
+  }
    
-   // Begin by destroying the packet if it is already allocated.
-   destroy();
-   
-   // The header size is known since it is supplied...
-   m_nSizeBytes = nSizeBytes;
-   
-   if (!allocate())
-   {
-      printf("GenericPacket::unpack: Allocation failed\n");
-      return false;
-   }
-   
-   // Copy the packet.
-   memcpy(m_pPkt, pPkt, allocatedSize());
-   
-   return true;
+  return lbSuccess;
 }
 
 //------------------------------------------------------------------------------
@@ -272,29 +239,6 @@ GenericPacket& GenericPacket::operator= (const GenericPacket &other)
    }
    
    return *this;
-}
-
-//-----------------------------------------------------------------------------
-void GenericPacket::printDump()
-{
-  if (isAllocated())
-  {
-    log::status("printDump: size = %u\n", allocatedSize());
-    ui32 lnOffset = 0;
-    char* pData = (char*)basePtr();
-    while (lnOffset < allocatedSize())
-    {
-      if (lnOffset % 16 == 0)
-        log::status("[%3d - %3d]: ", lnOffset, lnOffset + 15);
-      log::status("%02X ", (unsigned char)pData[lnOffset++]);
-      if ((lnOffset > 0) && (lnOffset % 16 == 0)) printf("\n");
-    }
-    printf("\n");
-  }
-  else
-  {
-    log::debug("printDebug: Packet not allocated!\n");
-  }
 }
 
 //-----------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 #include <string.h>
 #include "Timestamp.h"
 #include "NetAppPacket.h"
+#include "PacketReceiver.h"
+#include "PacketSubscriber.h"
 #include "ServerPacketRouter.h"
 
 using namespace liber::net;
@@ -9,7 +11,7 @@ using namespace liber::netapp;
 //-----------------------------------------------------------------------------
 ServerPacketRouter::
 ServerPacketRouter(Queue<NetAppPacket*>* pInQueue,
-                   Queue<NetAppPacket*>* pOutQueue)
+                   PacketReceiver* pOutQueue)
 : PacketRouter(pOutQueue)
 , mpInQueue(pInQueue)
 {

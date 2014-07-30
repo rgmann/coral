@@ -3,42 +3,74 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/uuid/uuid.hpp>
 #include "BaseTypes.h"
 #include "PacketHelper.h"
 
 namespace liber {
 namespace rsync {
 
-class JobDescriptor {
+
+class ResourcePath : public liber::netapp::Serializable {
+public:
+
+  ResourcePath();
+  ResourcePath(const boost::filesystem::path&, bool bRemote = false);
+
+  boost::filesystem::path path;
+  bool remote;
+
+protected:
+
+  void pack(liber::netapp::PacketCtor& rCtor);
+  void pack(liber::netapp::PacketCtor& rCtor) const;
+  bool unpack(liber::netapp::PacketDtor& rDtor);
+};
+
+
+class JobDescriptor : public liber::netapp::Serializable {
 public:
 
   JobDescriptor();
-  JobDescriptor(const boost::filesystem::path& path, ui32 nSegmentSizeBytes);
 
-  void setSegmentSize(ui32 nSegmentSizeBytes);
-  ui32 getSegmentSize() const;
+  void  setRemoteRequest();
+  bool  isRemoteRequest() const;
 
-  void setSource(const boost::filesystem::path&, bool bRemote = false);
-  const boost::filesystem::path& getSource() const;
-  bool remote() const;
+  void  setSegmentSize(ui32 nSegmentSizeBytes);
+  ui32  getSegmentSize() const;
 
-  void setDestination(const boost::filesystem::path&);
-  const boost::filesystem::path& getDestination() const;
+  void  setSource(const boost::filesystem::path&, bool bRemote = false);
+  void  setSource(const ResourcePath& path);
+  const boost::filesystem::path& getSourcePath() const;
+  const ResourcePath& getSource() const;
+  ResourcePath& getSource();
 
-  bool isValid() const;
+  void  setDestination(const boost::filesystem::path&, bool bRemote = false);
+  void  setDestination(const ResourcePath& path);
+  const boost::filesystem::path& getDestinationPath() const;
+  const ResourcePath& getDestination() const;
+  ResourcePath& getDestination();
 
-  std::string serialize() const;
+  bool  isValid() const;
 
-  bool deserialize(const std::string& data);
-  bool deserialize(const char* pData, ui32 nSizeBytes);
-  bool deserialize(liber::netapp::PacketDtor&);
+  const boost::uuids::uuid& uuid() const; 
+
+protected:
+
+  void  pack(liber::netapp::PacketCtor& rCtor);
+  void  pack(liber::netapp::PacketCtor& rCtor) const;
+  bool  unpack(liber::netapp::PacketDtor& rDtor);
 
 private:
 
   ui32 mnSegmentSizeBytes;
-  boost::filesystem::path mSourcePath;
-  bool mbRemoteSource;
-  boost::filesystem::path mDestinationPath;
+
+  ResourcePath mSource;
+  ResourcePath mDestination;
+
+  bool mbRemotelyRequested;
+
+  boost::uuids::uuid mUUID;
 };
 
 } // End namespace rsync

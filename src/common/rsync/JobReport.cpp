@@ -1,6 +1,47 @@
+#include "Log.h"
 #include "JobReport.h"
 
+using namespace liber;
 using namespace liber::rsync;
+using namespace liber::netapp;
+
+void serializeTS(PacketCtor& ctor, const Timestamp& ts)
+{
+  ui32 temp = ts.seconds();
+  ctor.write(temp);
+  temp = ts.nanoseconds();
+  ctor.write(temp);
+}
+
+bool deserializeTS(PacketDtor& dtor, Timestamp& ts)
+{
+  ui32 temp = 0;
+  if (dtor.read(temp) == false)
+  {
+    log::error("deserializeTS - Failed deserialize seconds\n");
+    return false;
+  }
+  ts.seconds((time_t)temp);
+
+  if (dtor.read(temp) == false)
+  {
+    log::error("deserializeTS - Failed deserialize seconds\n");
+    return false;
+  }
+  ts.nanoseconds(temp);
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+SegmentationReport::SegmentationReport()
+: Serializable()
+, status(RsyncSuccess)
+, segmentSizeBytes(0)
+, strideSizeBytes(0)
+, segmentCount(0)
+{
+}
 
 //----------------------------------------------------------------------------
 void SegmentationReport::print(std::ostream& stream, ui8 nSpaces) const
@@ -17,6 +58,75 @@ void SegmentationReport::print(std::ostream& stream, ui8 nSpaces) const
 }
 
 //----------------------------------------------------------------------------
+void SegmentationReport::pack(liber::netapp::PacketCtor& ctor)
+{
+  const_cast<const SegmentationReport*>(this)->pack(ctor);
+}
+
+//----------------------------------------------------------------------------
+void SegmentationReport::pack(liber::netapp::PacketCtor& ctor) const
+{
+  ctor.write((ui32)status);
+  ctor.write(segmentSizeBytes);
+  ctor.write(strideSizeBytes);
+  ctor.write(segmentCount);
+  serializeTS(ctor, begin);
+  serializeTS(ctor, end);
+}
+
+//----------------------------------------------------------------------------
+bool SegmentationReport::unpack(PacketDtor& dtor)
+{
+  ui32 tempStatus = 0;
+  if (!dtor.read(tempStatus))
+  {
+    log::error("SegmentationReport::unpack - Failed to read status\n");
+    return false;
+  }
+  status = (RsyncError)tempStatus;
+
+  if (!dtor.read(segmentSizeBytes))
+  {
+    log::error("SegmentationReport::unpack - Failed to read rcv segment size\n");
+    return false;
+  }
+
+  if (!dtor.read(strideSizeBytes))
+  {
+    log::error("SegmentationReport::unpack - Failed to read stride size\n");
+    return false;
+  }
+
+  if (!dtor.read(segmentCount))
+  {
+    log::error("SegmentationReport::unpack - Failed to read segment count\n");
+    return false;
+  }
+
+  if (!deserializeTS(dtor, begin))
+  {
+    log::error("SegmentationReport::unpack - Failed to read hashBegin.mSeconds\n");
+    return false;
+  }
+
+  if (!deserializeTS(dtor, end))
+  {
+    log::error("SegmentationReport::unpack - Failed to read hashEnd.mSeconds\n");
+    return false;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------
+AssemblyReport::AssemblyReport()
+: Serializable()
+, status(RsyncSuccess)
+, segmentCount(0)
+, chunkCount(0)
+{
+}
+
+//----------------------------------------------------------------------------
 void AssemblyReport::print(std::ostream& stream, ui8 nSpaces) const
 {
   char* pSpaces = new char[nSpaces + 1];
@@ -27,6 +137,71 @@ void AssemblyReport::print(std::ostream& stream, ui8 nSpaces) const
   stream << pSpaces << "start time: " << std::fixed << begin.fseconds() << std::endl; 
   stream << pSpaces << "end time: " << std::fixed << end.fseconds() << std::endl; 
   delete[] pSpaces;
+}
+
+//----------------------------------------------------------------------------
+void AssemblyReport::pack(PacketCtor& ctor)
+{
+  const_cast<const AssemblyReport*>(this)->pack(ctor);
+}
+
+//----------------------------------------------------------------------------
+void AssemblyReport::pack(PacketCtor& ctor) const
+{
+  ctor.write((ui32)status);
+  ctor.write(segmentCount);
+  ctor.write(chunkCount);
+  serializeTS(ctor, begin);
+  serializeTS(ctor, end);
+}
+
+//----------------------------------------------------------------------------
+bool AssemblyReport::unpack(PacketDtor& dtor)
+{
+  ui32 tempStatus = 0;
+  if (!dtor.read(tempStatus))
+  {
+    log::error("AssemblyReport::unpack - Failed to read status\n");
+    return false;
+  }
+  status = (RsyncError)tempStatus;
+
+  if (!dtor.read(segmentCount))
+  {
+    log::error("AssemblyReport::unpack - Failed to read rcv segment count\n");
+    return false;
+  }
+
+  if (!dtor.read(chunkCount))
+  {
+    log::error("AssemblyReport::unpack - Failed to read chunk count\n");
+    return false;
+  }
+
+  if (!deserializeTS(dtor, begin))
+  {
+    log::error("AssemblyReport::unpack - Failed to read hashBegin.mSeconds\n");
+    return false;
+  }
+
+  if (!deserializeTS(dtor, end))
+  {
+    log::error("AssemblyReport::unpack - Failed to read hashEnd.mSeconds\n");
+    return false;
+  }
+
+  return true;
+}
+
+
+//----------------------------------------------------------------------------
+AuthorityReport::AuthorityReport()
+: Serializable()
+, status(RsyncSuccess)
+, receivedSegmentCount(0)
+, matchedSegmentCount(0)
+, chunkCount(0)
+{
 }
 
 //----------------------------------------------------------------------------
@@ -45,9 +220,73 @@ void AuthorityReport::print(std::ostream& stream, ui8 nSpaces) const
   delete[] pSpaces;
 }
 
+//----------------------------------------------------------------------------
+void AuthorityReport::pack(PacketCtor& ctor)
+{
+  const_cast<const AuthorityReport*>(this)->pack(ctor);
+}
+
+//----------------------------------------------------------------------------
+void AuthorityReport::pack(PacketCtor& ctor) const
+{
+  ctor.write((ui32)status);
+  ctor.write(receivedSegmentCount);
+  ctor.write(matchedSegmentCount);
+  ctor.write(chunkCount);
+  serializeTS(ctor, hashBegin);
+  serializeTS(ctor, hashEnd);
+  serializeTS(ctor, authBegin);
+  serializeTS(ctor, authEnd);
+}
+
+//----------------------------------------------------------------------------
+bool AuthorityReport::unpack(PacketDtor& dtor)
+{
+  ui32 tempStatus = 0;
+  if (dtor.read(tempStatus) == false)
+  {
+    log::error("AuthorityReport::unpack - Failed to read status\n");
+    return false;
+  }
+  status = (RsyncError)tempStatus;
+
+  if (dtor.read(receivedSegmentCount) == false)
+  {
+    log::error("AuthorityReport::unpack - Failed to read rcv segment count\n");
+    return false;
+  }
+
+  if (dtor.read(matchedSegmentCount) == false)
+  {
+    log::error("AuthorityReport::unpack - Failed to read match segment count\n");
+    return false;
+  }
+
+  if (!dtor.read(chunkCount))
+  {
+    log::error("AuthorityReport::unpack - Failed to read chunk count\n");
+    return false;
+  }
+
+  if (deserializeTS(dtor, hashBegin) == false)
+  {
+    log::error("AuthorityReport::unpack - Failed to read hashBegin\n");
+    return false;
+  }
+
+  if (deserializeTS(dtor, hashEnd) == false)
+  {
+    log::error("AuthorityReport::unpack - Failed to read hashEnd\n");
+    return false;
+  }
+
+  return true;
+}
+
 
 //----------------------------------------------------------------------------
 JobReport::JobReport()
+: Serializable()
 {
 }
 
@@ -56,12 +295,58 @@ void JobReport::print(std::ostream& stream) const
 {
   stream << "RSYNC Job Report:" << std::endl
          << " Destination Segmentation Report:" << std::endl;
-  mDestinationReport.segmentation.print(stream, 2);
+  destination.segmentation.print(stream, 2);
   stream << " Source Segmentation Report:" << std::endl;
-  mSourceReport.segmentation.print(stream, 2);
+  source.segmentation.print(stream, 2);
   stream << " Source Authority Report:" << std::endl;
-  mSourceReport.authority.print(stream, 2);
+  source.authority.print(stream, 2);
   stream << " Destination Assembly Report:" << std::endl;
-  mDestinationReport.assembly.print(stream, 2);
+  destination.assembly.print(stream, 2);
 }
+
+//----------------------------------------------------------------------------
+void JobReport::pack(PacketCtor& ctor)
+{
+  const_cast<const JobReport*>(this)->pack(ctor);
+}
+
+//----------------------------------------------------------------------------
+void JobReport::pack(liber::netapp::PacketCtor& ctor) const
+{
+  destination.segmentation.serialize(ctor);
+  destination.assembly.serialize(ctor);
+  source.segmentation.serialize(ctor);
+  source.authority.serialize(ctor);
+}
+
+//----------------------------------------------------------------------------
+bool JobReport::unpack(liber::netapp::PacketDtor& dtor)
+{
+  if (!destination.segmentation.deserialize(dtor))
+  {
+    log::error("JobReport::deserialize - Failed to deserialize dest seg report\n");
+    return false;
+  }
+
+  if (!destination.assembly.deserialize(dtor))
+  {
+    log::error("JobReport::deserialize - Failed to deserialize dest assembly report\n");
+    return false;
+  }
+
+  if (!source.segmentation.deserialize(dtor))
+  {
+    log::error("JobReport::deserialize - Failed to deserialize source seg report\n");
+    return false;
+  }
+
+  if (!source.authority.deserialize(dtor))
+  {
+    log::error("JobReport::deserialize - Failed to deserialize source auth report\n");
+    return false;
+  }
+
+  return true;
+}
+
 

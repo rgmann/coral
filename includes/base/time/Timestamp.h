@@ -31,6 +31,7 @@ public:
 
   i64  toNanoseconds() const;
   ui32 nanoseconds() const;
+  void nanoseconds(i32 ns);
 
   i64  diffInS(const Timestamp &start);
 

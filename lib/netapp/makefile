@@ -32,6 +32,11 @@ CLIENT_INCLUDES = $(COMMON_INCLUDES) \
 CLIENT_SOURCE = $(COMMON_SOURCE) \
 	$(BASE)/src/common/$(LIBNAME)/client/*.cpp
 
+
+netapp_common:
+	$(CC) $(CFLAGS) $(COMMON_SOURCE) $(COMMON_INCLUDES)
+	ar -cvq lib$@.a *.o
+
 netapp_client:
 	$(CC) $(CFLAGS) $(CLIENT_SOURCE) $(CLIENT_INCLUDES)
 	ar -cvq lib$@.a *.o

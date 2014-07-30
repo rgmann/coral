@@ -12,18 +12,33 @@ public:
 
   enum Type
   {
-    RsyncRemoteJobQuery,
-    RsyncRemoteJobAcknowledgment,
+    RsyncUnknownType,
+    RsyncAuthorityService,
+    RsyncAuthorityInterface,
+    RsyncJobAgent,
 
+    //
+    // To RsyncAuthorityService:
+    //
+    RsyncRemoteAuthQuery,
     RsyncSegment,
 
-    RsyncInstruction
+    //
+    // To RsyncAuthorityInterface:
+    //
+    RsyncRemoteAuthAcknowledgment,
+    RsyncInstruction,
+    RsyncAuthorityReport,
+
+    //
+    // To RsyncJobAgent:
+    //
+    RsyncJobRequest,
+    RsyncJobComplete
   };
 
-  enum { RsyncMarkerSize = 7 };
   struct __attribute ((__packed__)) Data
   {
-    char marker[RsyncMarkerSize];
     ui32 length;
     ui32 type;
   };
@@ -31,13 +46,16 @@ public:
   RsyncPacket();
   RsyncPacket(int type, ui32 nLength, const void* pData = NULL);
   RsyncPacket(int type, const std::string& rData);
+  RsyncPacket(int type, const GenericPacket* pPacket);
    
-  using GenericPacket::allocate; 
-  virtual bool allocate(const Data& rData);
+//  using GenericPacket::allocate; 
+//  virtual bool allocate(const Data& rData);
 
   Data* const data() const;
 
   void swap(void* pData, ui32 nSizeBytes);
+
+  bool unpack(const void* pData, ui32 nSizeBytes);
    
 private:
 

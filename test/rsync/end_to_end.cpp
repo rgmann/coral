@@ -5,8 +5,7 @@
 #include "IntraRouter.h"
 
 #define IMAGE
-#define NODE_LOCAL_ID   1
-#define NODE_SERVICE_ID 2
+#define RSYNC_SUB_ID   1
 
 using namespace liber;
 using namespace liber::rsync;
@@ -15,11 +14,11 @@ using namespace liber::netapp;
 class TestCallback : public RsyncJobCallback {
 public:
 
-  TestCallback() : mSem(0) {};
+  TestCallback(const char* pName) : mSem(0), mpName(pName) {};
 
   void call(const JobDescriptor& job, const JobReport& report)
   {
-    log::status("Completed %s\n", job.getDestination().string().c_str());
+    log::status("%s: Completed %s\n", mpName, job.getDestination().path.string().c_str());
 
     liber::log::flush();
     report.print(std::cout);
@@ -28,11 +27,12 @@ public:
   }
 
   CountingSem mSem;
+  const char* mpName;
 };
 
 int main (int argc, char* argv[])
 {
-  liber::log::level(liber::log::Debug);
+  liber::log::level(liber::log::Verbose);
   liber::log::options(0);
 
   IntraRouter localRouter;
@@ -44,21 +44,52 @@ int main (int argc, char* argv[])
   localRouter.launch();
   remoteRouter.launch();
 
-  TestCallback callback;
+  TestCallback localCallback("Local");
+  TestCallback remoteCallback("Remote");
   RsyncNode local("/Users/vaughanbiker/Development/liber/test/rsync/test_root/client");
   RsyncNode remote("/Users/vaughanbiker/Development/liber/test/rsync/test_root/server");
 
-  if (local.registerSubscribers(localRouter, NODE_LOCAL_ID, NODE_SERVICE_ID) &&
-      remote.registerSubscribers(remoteRouter, NODE_LOCAL_ID, NODE_SERVICE_ID))
+  if (localRouter.addSubscriber(RSYNC_SUB_ID, &local.subscriber()) &&
+      remoteRouter.addSubscriber(RSYNC_SUB_ID, &remote.subscriber()))
   {
-    local.setCompletionCallback(&callback);
-    //local.sync("image.png", "image.png", true);
-    //local.sync("client/file.dat", "server/file.dat");
-    local.sync("instruction_test.cpp", "instruction_test.cpp", true);
+    RsyncError jobStatus = RsyncSuccess;
 
-    callback.mSem.take();
-    //callback.mSem.take();
-    //callback.mSem.take();
+    local.setCallback(&localCallback);
+    remote.setCallback(&remoteCallback);
+    //local.sync("image.png", "image.png", true);
+    jobStatus = local.sync("file.dat", "file.dat", true, false);
+    if (jobStatus == RsyncSuccess)
+    {
+      localCallback.mSem.take();
+      remoteCallback.mSem.take();
+    }
+    else
+    {
+      log::error("RSYNC job failed: %s\n", liber::rsync::errorToString(jobStatus).c_str()); 
+    }
+
+    //jobStatus = local.sync("instruction_test.cpp", "instruction_test.cpp", false, true);
+    jobStatus = local.sync("instruction_test.cpp", "instruction_test.cpp", true, false);
+    if (jobStatus == RsyncSuccess)
+    {
+      localCallback.mSem.take();
+      remoteCallback.mSem.take();
+    }
+    else
+    {
+      log::error("RSYNC job failed: %s\n", liber::rsync::errorToString(jobStatus).c_str()); 
+    }
+
+    jobStatus = local.sync("dfile_0.dat", "dfile_0.dat", false, true);
+    if (jobStatus == RsyncSuccess)
+    {
+      localCallback.mSem.take();
+      //remoteCallback.mSem.take();
+    }
+    else
+    {
+      log::error("RSYNC job failed: %s\n", liber::rsync::errorToString(jobStatus).c_str()); 
+    }
   }
   else
   {

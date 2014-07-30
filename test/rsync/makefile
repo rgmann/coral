@@ -22,9 +22,9 @@ INCLUDES = $(BOOST_INCLUDE)\
 -I$(BASE)/includes/netapp/common \
 
 LIBER_LIBS = \
--L$(BASE)/lib/rsync -lrsync \
 -L$(BASE)/lib/base -lbase \
--L$(BASE)/lib/netapp -lnetapp_client
+-L$(BASE)/lib/netapp -lnetapp_client \
+-L$(BASE)/lib/rsync -lrsync
 LIBS = -lstdc++ -lpthread
 
 BOOST_LIB_DIR = -L/opt/local/lib

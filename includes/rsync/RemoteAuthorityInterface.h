@@ -62,7 +62,8 @@ private:
 
     bool waitJobStart(int nTimeoutMs)
     {
-      return mJobStartSignal.take(nTimeoutMs);
+      Sem::SemStatus lStatus = mJobStartSignal.take(nTimeoutMs);
+      return (lStatus == Sem::SemAcquired);
     }
 
     inline void signalJobEnd()
@@ -72,7 +73,7 @@ private:
 
     inline bool waitJobEnd(int nTimeoutMs)
     {
-      return mJobEndSignal.take(nTimeoutMs);
+      return (mJobEndSignal.take(nTimeoutMs) == Sem::SemAcquired);
     }
 
     bool lockIfActive()

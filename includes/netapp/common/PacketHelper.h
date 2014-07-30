@@ -48,6 +48,7 @@ public:
    PacketDtor(ByteOrder end = HostByteOrder);
 
    void setData(const std::string& data);
+   void setData(const char* data, ui32 nSizeBytes);
 
    bool read(ui8& val);
    bool read(i8& val);
@@ -74,7 +75,32 @@ private:
    ByteOrder mByteOrder;
 };
 
-}}
+class Serializable {
+public:
+
+  Serializable() {};
+  virtual ~Serializable() {};
+
+  std::string serialize() const;
+  void serialize(PacketCtor& ctor) const;
+
+  std::string serialize();
+  void serialize(PacketCtor& ctor);
+
+  bool deserialize(const char* pData, ui32 nSizeBytes);
+  bool deserialize(const std::string& data);
+  bool deserialize(PacketDtor& dtor);
+
+protected:
+
+  virtual void pack(PacketCtor& rCtor) {};
+  virtual void pack(PacketCtor& rCtor) const = 0;
+  virtual bool unpack(PacketDtor& rDtor) = 0;
+
+};
+
+} // End namespace netapp
+} // End namespace liber
 
 #endif // PACKET_HELPER_H
 

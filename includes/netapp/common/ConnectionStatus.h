@@ -2,6 +2,7 @@
 #define CONNECTION_STATUS_H
 
 #include "Timestamp.h"
+#include "GenericPacket.h"
 #include "PacketSubscriber.h"
 
 namespace liber {

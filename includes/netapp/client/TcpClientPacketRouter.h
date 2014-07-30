@@ -47,7 +47,7 @@ public:
 protected:
 
   bool readPacket(NetAppPacket& rPacket, int nTimeoutMs);
-  bool writePacket(const NetAppPacket& rPacket); 
+  bool writePacket(const PacketContainer& rPacket); 
 
 private:
 

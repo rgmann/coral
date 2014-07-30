@@ -15,7 +15,7 @@ public:
   explicit Assembler(SegmentAccessor&);
   ~Assembler();
 
-  bool process(class InstructionQueue& rQueue, struct AssemblyReport& rReport);
+  bool process(class InstructionQueue& rQueue, class AssemblyReport& rReport);
 
   /**
    * Process the next assembly instruction.

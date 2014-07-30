@@ -155,7 +155,7 @@ std::string BeginInstruction::toString() const
   std::stringstream ss;
 
   ss << "BeginInstruction:" << std::endl
-     << "  path: " << mDescriptor.getDestination().generic_string() << std::endl
+     << "  path: " << mDescriptor.getDestination().path.generic_string() << std::endl
      << "  segment size: " << mDescriptor.getSegmentSize() << std::endl;
 
   return ss.str();
@@ -166,7 +166,8 @@ void BeginInstruction::
 execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
 {
   if (ostream.is_open()) return;
-  ostream.open(mDescriptor.getDestination().generic_string(),
+
+  ostream.open(mDescriptor.getDestination().path.string().c_str(),
                std::ofstream::binary);
   if ((ostream.is_open() == false) || ostream.fail())
   {
@@ -176,17 +177,18 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 }
 
 //-----------------------------------------------------------------------------
-void BeginInstruction::serialize(PacketCtor& ctor) const
+void BeginInstruction::pack(PacketCtor& ctor) const
 {
-  ctor.write(mDescriptor.getSegmentSize());
-  ctor.writeCString(mDescriptor.getDestination().generic_string());
+  mDescriptor.serialize(ctor);
+  //ctor.write(mDescriptor.getSegmentSize());
+  //ctor.writeCString(mDescriptor.getDestination().path.generic_string());
 }
 
 //-----------------------------------------------------------------------------
-bool BeginInstruction::deserialize(PacketDtor& dtor)
+bool BeginInstruction::unpack(PacketDtor& dtor)
 {
-  bool lbSuccess = true;
-  std::cout << "BeginInstruction::deserialize " << std::endl;
+/*  bool lbSuccess = true;
+  std::cout << "BeginInstruction::unpack " << std::endl;
 
   ui32 lnSegmentSize;
   lbSuccess &= dtor.read(lnSegmentSize);
@@ -196,7 +198,8 @@ bool BeginInstruction::deserialize(PacketDtor& dtor)
 
   mDescriptor = JobDescriptor(lPath, lnSegmentSize);
 
-  return lbSuccess;
+  return lbSuccess;*/
+  return mDescriptor.deserialize(dtor);
 }
 
 //-----------------------------------------------------------------------------
@@ -252,17 +255,18 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
   else
   {
     rStatus.error = ExecutionStatus::SegmentAccessError;
+    log::error("SegmentInstruction: Failed to access segment.\n");
   }
 }
 
 //-----------------------------------------------------------------------------
-void SegmentInstruction::serialize(PacketCtor& ctor) const
+void SegmentInstruction::pack(PacketCtor& ctor) const
 {
   ctor.write((ui32)mID);
 }
 
 //-----------------------------------------------------------------------------
-bool SegmentInstruction::deserialize(PacketDtor& dtor)
+bool SegmentInstruction::unpack(PacketDtor& dtor)
 {
   bool lbSuccess = true;
   ui32 id;
@@ -360,7 +364,7 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 }
 
 //-----------------------------------------------------------------------------
-void ChunkInstruction::serialize(PacketCtor& ctor) const
+void ChunkInstruction::pack(PacketCtor& ctor) const
 {
   if (mpData)
   {
@@ -371,7 +375,7 @@ void ChunkInstruction::serialize(PacketCtor& ctor) const
 }
 
 //-----------------------------------------------------------------------------
-bool ChunkInstruction::deserialize(PacketDtor& dtor)
+bool ChunkInstruction::unpack(PacketDtor& dtor)
 {
   bool lbSuccess = true;
   std::string data;
@@ -449,14 +453,14 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 }
 
 //-----------------------------------------------------------------------------
-void EndInstruction::serialize(PacketCtor& ctor) const
+void EndInstruction::pack(PacketCtor& ctor) const
 {
   ctor.write(mbCancelled);
   ctor.write(mCancelError);
 }
 
 //-----------------------------------------------------------------------------
-bool EndInstruction::deserialize(PacketDtor& dtor)
+bool EndInstruction::unpack(PacketDtor& dtor)
 {
   bool lbSuccess = true;
   lbSuccess &= dtor.read(mbCancelled);

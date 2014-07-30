@@ -7,6 +7,11 @@ namespace rsync {
 enum RsyncError {
   RsyncSuccess = 0,
 
+  RsyncJobTableInsertionError,
+  RsyncQueueError,
+  RsyncBadDescriptor,
+  RsyncBadRemoteJob,
+
   // Authority timed out waiting for segments from the destination file.
   RsyncDestSegmentTimeout,
 

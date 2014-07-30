@@ -72,7 +72,7 @@ RemoteAuthorityService::
 : PacketSubscriber()
 , mrFileSys(rFileSys)
 , mpUserHandler(NULL)
-, mRequestID(-1)
+, mRequestID(RsyncPacket::RsyncAuthorityInterface)
 , mJobQueue(rFileSys, *this)
 {
   mJobQueue.launch();
@@ -98,11 +98,9 @@ bool RemoteAuthorityService::put(const char* pData, ui32 nLength)
 
   if (lpPacket->unpack(pData, nLength))
   {
-    log::status("RemoteAuthorityService::put - Received packet length=%u\n", lpPacket->allocatedSize());
-    lpPacket->printDump();
     switch (lpPacket->data()->type)
     {
-      case RsyncPacket::RsyncRemoteJobQuery:
+      case RsyncPacket::RsyncRemoteAuthQuery:
         handleRemoteJobRequest(lpPacket->dataPtr(), lpPacket->data()->length);
         lbSuccess = true;
         break;
@@ -131,9 +129,26 @@ void RemoteAuthorityService::call(Instruction* pInstruction)
 {
   if (pInstruction)
   {
+    // If this is the end instruction, send the Authority Report just before
+    // the end instruction.
+    if (pInstruction->type() == EndInstruction::Type)
+    {
+      if (mJobQueue.lockIfActive())
+      {
+        JobReport* pReport = &mJobQueue.activeJob()->report();
+
+        sendPacketTo(mRequestID, 
+                     new RsyncPacket(RsyncPacket::RsyncAuthorityReport,
+                     pReport->source.authority.serialize()));
+
+        mJobQueue.lock().unlock();
+      }
+    }
+
     sendPacketTo(mRequestID,
                  new RsyncPacket(RsyncPacket::RsyncInstruction,
                  InstructionFactory::Serialize(pInstruction)));
+
     delete pInstruction;
   }
 }
@@ -161,9 +176,9 @@ handleRemoteJobRequest(const void* pData, ui32 nLength)
       mJobQueue.push(lpJob);
     }
 
-    RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncRemoteJobAcknowledgment,
-                                            sizeof(lStatus), &lStatus);
-    sendPacketTo(mRequestID, lpPacket);
+    sendPacketTo(mRequestID, 
+                 new RsyncPacket(RsyncPacket::RsyncRemoteAuthAcknowledgment,
+                 sizeof(lStatus), &lStatus));
   }
   else
   {
@@ -177,11 +192,11 @@ defaultQueryHandler(JobDescriptor& rJob)
 {
   RsyncError lStatus = RsyncSuccess;
 
-  if (mrFileSys.exists(rJob.getSource()) == false)
+  if (mrFileSys.exists(rJob.getSource().path) == false)
   {
     lStatus = RsyncSourceFileNotFound;
     liber::log::error("Remote job query failed for %s\n",
-                      rJob.getSource().string().c_str());
+                      rJob.getSource().path.string().c_str());
   }
 
   return lStatus;

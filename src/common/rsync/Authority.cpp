@@ -61,7 +61,6 @@ bool Authority::process(JobDescriptor& rDescriptor, std::istream& istream, Instr
   mpReport->authBegin.sample();
 
   mpReceiver = &rReceiver;
-  log::debug("Authority - receiver type = %s\n", mpReceiver->toString());
 
   mpReceiver->push(new BeginInstruction(rDescriptor));
   bool lbSuccess = mSegmenter.process(istream, *this,

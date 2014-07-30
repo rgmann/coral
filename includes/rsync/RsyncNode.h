@@ -5,18 +5,18 @@
 #include "Queue.h"
 #include "JobDescriptor.h"
 #include "JobReport.h"
+#include "JobAgent.h"
 #include "FileSystemInterface.h"
 #include "SegmenterThread.h"
 #include "AuthorityThread.h"
 #include "AssemblerThread.h"
 #include "RemoteAuthorityService.h"
+#include "RsyncPacketRouter.h"
 
 namespace liber {
 namespace rsync {
 
 class RsyncJob;
-//class JobDescriptor;
-//class JobReport;
 
 class RsyncJobCallback {
 public:
@@ -41,14 +41,15 @@ public:
   RsyncNode(const boost::filesystem::path& root);
   ~RsyncNode();
 
-  void setCompletionCallback(RsyncJobCallback* pCallback);
+  void setCallback(class RsyncJobCallback* pCallback);
+  void unsetCallback();
 
-  bool sync(const boost::filesystem::path& destination,
-            const boost::filesystem::path& source,
-            bool bRemoteSource = false);
+  RsyncError sync(const boost::filesystem::path& destination,
+                  const boost::filesystem::path& source,
+                  bool bRemoteDestination = false,
+                  bool bRemoteSource = false);
 
-  bool registerSubscribers(class liber::netapp::PacketRouter& rRouter,
-                           int nRequestID, int nResponseID);
+  liber::netapp::PacketSubscriber& subscriber();
 
 private:
 
@@ -59,12 +60,14 @@ private:
   Mutex mCallbackLock;
   RsyncJobCallback* mpCallback;
 
-  Queue<RsyncJob*> mPendingJobs;
+//  Queue<RsyncJob*> mPendingJobs;
+  RsyncPacketRouter mRouter;
 
   FileSystemInterface mFileSys;
   SegmenterThread mSegmenter;
   AuthorityThread mAuthority;
   AssemblerThread mAssembler;
+  JobAgent mJobAgent;
 
   RemoteAuthorityService mAuthorityService;
 

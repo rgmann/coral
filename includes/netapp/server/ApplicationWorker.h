@@ -3,11 +3,14 @@
 
 #include "Mutex.h"
 #include "TcpSocket.h"
+#include "PacketQueue.h"
 #include "ServerConnectionStatus.h"
 #include "ServerPacketRouter.h"
 
 namespace liber {
 namespace netapp {
+
+class NetAppPacket;
 
 class ApplicationWorker {
 public:
@@ -82,14 +85,14 @@ private:
   i32 mEnqueueTimeoutMs;
 
   static const i32 DefaultDequeueTimeoutMs = 100;
-  i32 mDequeueTimeoutMs;
+  //i32 mDequeueTimeoutMs;
 
   // ProcessMsg parses and validates the received packet.
   // If the packet is valid it adds it to the IN queue;
-  Queue<liber::netapp::NetAppPacket*> mInQueue;
+  Queue<NetAppPacket*> mInQueue;
 
   // The work method adds packed messages to the output queue.
-  Queue<liber::netapp::NetAppPacket*> mOutQueue;
+  PacketQueue mOutQueue;
 
   ServerConnectionStatus mConnectionStatus;
 };

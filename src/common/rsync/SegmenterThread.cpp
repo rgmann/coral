@@ -38,23 +38,16 @@ void SegmenterThread::run(const bool& bShutdown)
     {
       std::ifstream lInputStream;
 
-      if (mrFileSys.open(lpJob->descriptor().getDestination(), lInputStream))
+      if (mrFileSys.open(lpJob->descriptor().getDestination().path, lInputStream))
       {
-        log::debug("SegmenterThread: Beginning %s\n",
-                   lpJob->descriptor().getDestination().string().c_str());
         bool lbSuccess = mSegmenter.process(lInputStream,
                                             lpJob->segments(),
                                             lpJob->descriptor().getSegmentSize(),
-                                            lpJob->report().destination().segmentation);
-        if (lbSuccess)
+                                            lpJob->report().destination.segmentation);
+        if (lbSuccess == false)
         {
-          log::debug("SegmenterThread: Completed %s successfully.\n",
-                     lpJob->descriptor().getDestination().string().c_str());
-        }
-        else
-        {
-          log::debug("SegmenterThread: Completed %s unsuccessfully.\n",
-                     lpJob->descriptor().getDestination().string().c_str());
+          log::error("SegmenterThread: %s failed\n",
+                     lpJob->descriptor().getDestination().path.string().c_str());
         }
 
         lInputStream.close();
@@ -62,7 +55,7 @@ void SegmenterThread::run(const bool& bShutdown)
       else
       {
         log::debug("SegmenterThread: Failed to open %s\n.",
-                     lpJob->descriptor().getDestination().string().c_str());
+                     lpJob->descriptor().getDestination().path.string().c_str());
       }
     }
   }

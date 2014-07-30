@@ -1,7 +1,9 @@
+#include "Log.h"
 #include "FileSystemInterface.h"
 #include "JobDescriptor.h"
 #include "SegmentFile.h"
 
+using namespace liber;
 using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
@@ -24,7 +26,7 @@ bool SegmentFile::open(const liber::rsync::JobDescriptor& descriptor)
 {
   close();
   mpDescriptor = &descriptor;
-  return mrFileSys.open(descriptor.getDestination(), mIStream);
+  return mrFileSys.open(descriptor.getDestination().path, mIStream);
 }
 
 //-----------------------------------------------------------------------------

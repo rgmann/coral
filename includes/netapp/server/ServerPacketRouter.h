@@ -11,11 +11,13 @@
 namespace liber {
 namespace netapp {
 
+class PacketReceiver;
+
 class ServerPacketRouter : public liber::netapp::PacketRouter {
 public:
 
   ServerPacketRouter(Queue<NetAppPacket*>* pInQueue,
-                     Queue<NetAppPacket*>* pOutQueue);
+                     PacketReceiver* pOutQueue);
   virtual ~ServerPacketRouter();
 
 

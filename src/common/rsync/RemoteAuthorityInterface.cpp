@@ -14,7 +14,7 @@ RemoteAuthorityInterface::RemoteAuthorityInterface()
 : mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
 , mnJobAckTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
 , mnJobCompletionTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
-, mRequestID(-1)
+, mRequestID(RsyncPacket::RsyncAuthorityService)
 {
 }
 
@@ -82,7 +82,7 @@ bool RemoteAuthorityInterface::put(const char* pData, ui32 nLength)
     {
       switch (lpPacket->data()->type)
       {
-        case RsyncPacket::RsyncRemoteJobAcknowledgment:
+        case RsyncPacket::RsyncRemoteAuthAcknowledgment:
           memcpy(&mActiveJob.queryResponse(),
                  lpPacket->dataPtr(),
                  lpPacket->data()->length);
@@ -93,6 +93,14 @@ bool RemoteAuthorityInterface::put(const char* pData, ui32 nLength)
         case RsyncPacket::RsyncInstruction:
           sendAssemblyInstruction(lpPacket->dataPtr(),
                                   lpPacket->data()->length);
+          break;
+
+        case RsyncPacket::RsyncAuthorityReport:
+          if (mActiveJob.lockIfActive())
+          {
+            mActiveJob.job()->report().source.authority.deserialize(pData, nLength);
+            mActiveJob.unlock();
+          }
           break;
 
         default: break;
@@ -169,21 +177,20 @@ startRemoteJob(RsyncJob* pJob)
 {
   RsyncError lQueryStatus = RsyncSuccess;
 
-  RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncRemoteJobQuery,
+  RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncRemoteAuthQuery,
                                           pJob->descriptor().serialize());
-
   mActiveJob.setJob(pJob);
 
   if (sendPacketTo(mRequestID, lpPacket))
   {
     if (mActiveJob.waitJobStart(mnJobAckTimeoutMs))
     {
-      log::error("RemoteAuthorityInterface - RSYNC remote query timeout.\n");
-      lQueryStatus = RsyncRemoteQueryTimeout;
+      lQueryStatus = mActiveJob.queryResponse();
     }
     else
     {
-      lQueryStatus = mActiveJob.queryResponse();
+      log::error("RemoteAuthorityInterface - RSYNC remote query timeout.\n");
+      lQueryStatus = RsyncRemoteQueryTimeout;
     }
   }
   else

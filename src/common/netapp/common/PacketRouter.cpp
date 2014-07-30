@@ -1,17 +1,20 @@
+#include "Log.h"
+#include "PacketSubscriber.h"
 #include "PacketRouter.h"
 
+using namespace liber;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
-PacketRouter::PacketRouter(Queue<NetAppPacket*>* pOutQueue)
-: mpOutQueue(pOutQueue)
+PacketRouter::PacketRouter(PacketReceiver* pReceiver)
+: mpReceiver(pReceiver)
 {
 }
 
 //-----------------------------------------------------------------------------
 PacketRouter::~PacketRouter()
 {
-  mpOutQueue = NULL;
+  mpReceiver = NULL;
 }
 
 //-----------------------------------------------------------------------------
@@ -25,8 +28,8 @@ addSubscriber(int subscriberId, PacketSubscriber* pSubscriber)
   mTableLock.unlock();
   if (!lbSuccess)
   {
-    printf("PacketRouter::addSubscriber: "
-           "Router already has a subcriber with ID = %d\n", subscriberId);
+    log::error("PacketRouter::addSubscriber: "
+               "Router already has a subcriber with ID = %d\n", subscriberId);
   }
 
   lbSuccess &= (pSubscriber != NULL);
@@ -35,8 +38,8 @@ addSubscriber(int subscriberId, PacketSubscriber* pSubscriber)
     lbSuccess = mTableLock.lock();
     if (lbSuccess)
     {
-      pSubscriber->setId(subscriberId);
-      pSubscriber->setOutputQueue(mpOutQueue);
+      pSubscriber->setID(subscriberId);
+      pSubscriber->setReceiver(mpReceiver);
       mSubscriberTable.insert(std::make_pair(subscriberId, pSubscriber));
       lbSuccess = true;
       mTableLock.unlock();

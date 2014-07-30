@@ -49,13 +49,12 @@ void AuthorityThread::run(const bool& bShutdown)
     // Wait for a job. This is also a thread cancellation point.
     if (mJobQueue.pop(lpJob) && lpJob)
     {
-      if (lpJob->descriptor().remote())
+      if (lpJob->descriptor().getSource().remote)
       {
         mRemoteAuthority.process(lpJob);
       }
       else
       {
-        log::status("Beggining local job\n");
         mLocalAuthority.process(lpJob);
       }
     }

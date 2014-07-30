@@ -49,7 +49,7 @@ processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
   int lnReceived = 0;
   RsyncError lStatus = RsyncSuccess;
 
-  pJob->report().source().authority.hashBegin.sample();
+  pJob->report().source.authority.hashBegin.sample();
   while (1)
   {
     Segment* lpSegment = NULL;
@@ -71,13 +71,13 @@ processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
       }
       else if (lpSegment->endOfStream())
       {
-        log::status("AuthorityInterface: END OF STREAM\n");
+//        log::status("AuthorityInterface: END OF STREAM\n");
       }
 
       break;
     }
   }
-  pJob->report().source().authority.hashEnd.sample();
+  pJob->report().source.authority.hashEnd.sample();
 
   if (lStatus == RsyncSuccess)
   {
@@ -85,18 +85,18 @@ processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
     // instructions.
 //    Authority* lpAuthority = new Authority(pJob->descriptor(), mHash, pJob->instructions());
 
-    if (mrFileSys.open(pJob->descriptor().getSource(), file()))
+    if (mrFileSys.open(pJob->descriptor().getSource().path, file()))
     {
       //if (lpAuthority->process(file(), pJob->report().source()))
-      if (mAuthority.process(pJob->descriptor(), file(), rInstructions, pJob->report().source()))
+      if (mAuthority.process(pJob->descriptor(), file(), rInstructions, pJob->report().source))
       {
-        log::debug("AuthorityInterface: Completed instructions for %s\n",
-                   pJob->descriptor().getSource().string().c_str());
+//        log::debug("AuthorityInterface: Completed instructions for %s\n",
+//                   pJob->descriptor().getSource().path.string().c_str());
       }
       else
       {
         log::error("AuthorityInterface: Authoritative processing for %s failed.\n",
-                   pJob->descriptor().getSource().string().c_str());
+                   pJob->descriptor().getSource().path.string().c_str());
       }
 
       file().close();
@@ -104,7 +104,7 @@ processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
     else
     {
       log::error("AuthorityInterface: Failed to open %s\n",
-                 pJob->descriptor().getSource().string().c_str());
+                 pJob->descriptor().getSource().path.string().c_str());
     }
 
 //    delete lpAuthority;

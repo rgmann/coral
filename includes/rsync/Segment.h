@@ -31,7 +31,7 @@ struct Adler32Checksum {
 };
 
 
-class Segment {
+class Segment : public liber::netapp::Serializable {
 public:
 
   typedef i32 ID;
@@ -82,10 +82,11 @@ public:
 
   bool isValid() const;
 
-  std::string serialize();
-  bool deserialize(const std::string& data);
-  bool deserialize(const char* pData, ui32 nSizeBytes);
-  bool deserialize(liber::netapp::PacketDtor& dtor);
+protected:
+
+  void pack(liber::netapp::PacketCtor&) const;
+  void pack(liber::netapp::PacketCtor&);
+  bool unpack(liber::netapp::PacketDtor& dtor);
 
 private:
 

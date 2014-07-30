@@ -4,6 +4,7 @@
 #include "Thread.h"
 #include "Mutex.h"
 #include "Queue.h"
+#include "PacketQueue.h"
 #include "PacketRouter.h"
 #include "ClientConnectionStatus.h"
 
@@ -33,7 +34,7 @@ public:
 protected:
 
   virtual bool readPacket(NetAppPacket& rPacket, int nTimeoutMs) = 0;
-  virtual bool writePacket(const NetAppPacket& rPacket) = 0;
+  virtual bool writePacket(const PacketContainer& rPacket) = 0;
 
   void txThreadRun(ThreadArg*);
   void rxThreadRun(ThreadArg*);
@@ -56,8 +57,8 @@ private:
 
   int mnReadTimeoutMs;
 
-  Queue<netapp::NetAppPacket*> mTxQueue;
-  Queue<netapp::NetAppPacket*> mRxQueue;
+  PacketQueue mTxQueue;
+  Queue<NetAppPacket*> mRxQueue;
 
 //  Mutex mTableLock;
 //  std::map<int, liber::netapp::PacketSubscriber*> mSubscriberTable;

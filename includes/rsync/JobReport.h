@@ -3,18 +3,17 @@
 
 #include <ostream>
 #include "Timestamp.h"
+#include "PacketHelper.h"
+#include "RsyncError.h"
 
 namespace liber {
 namespace rsync {
 
-struct SegmentationReport {
+class SegmentationReport : public liber::netapp::Serializable {
+public:
+  SegmentationReport();
 
-  SegmentationReport()
-  {
-    segmentSizeBytes = 0;
-    strideSizeBytes = 0;
-    segmentCount = 0;
-  }
+  RsyncError status;
 
   Timestamp begin;
   Timestamp end;
@@ -25,15 +24,19 @@ struct SegmentationReport {
   ui32 segmentCount;
 
   void print(std::ostream&, ui8) const;
+
+protected:
+
+  void pack(liber::netapp::PacketCtor&);
+  void pack(liber::netapp::PacketCtor&) const;
+  bool unpack(liber::netapp::PacketDtor&);
 };
 
-struct AssemblyReport {
+class AssemblyReport : public liber::netapp::Serializable {
+public:
+  AssemblyReport();
 
-  AssemblyReport()
-  {
-    segmentCount = 0;
-    chunkCount   = 0;
-  }
+  RsyncError status;
 
   ui32 segmentCount;
   ui32 chunkCount;
@@ -42,16 +45,19 @@ struct AssemblyReport {
   Timestamp end;
 
   void print(std::ostream&, ui8) const;
+
+protected:
+
+  void pack(liber::netapp::PacketCtor&);
+  void pack(liber::netapp::PacketCtor&) const;
+  bool unpack(liber::netapp::PacketDtor&);
 };
 
-struct AuthorityReport {
+class AuthorityReport : public liber::netapp::Serializable {
+public:
+  AuthorityReport();
 
-  AuthorityReport()
-  {
-    receivedSegmentCount = 0;
-    matchedSegmentCount = 0;
-    chunkCount = 0;
-  }
+  RsyncError status;
 
   ui32 receivedSegmentCount;
   ui32 matchedSegmentCount;
@@ -65,33 +71,44 @@ struct AuthorityReport {
   Timestamp authEnd;
 
   void print(std::ostream&, ui8) const;
+
+protected:
+
+  void pack(liber::netapp::PacketCtor& ctor);
+  void pack(liber::netapp::PacketCtor& ctor) const;
+  bool unpack(liber::netapp::PacketDtor& dtor);
 };
 
-class JobReport {
+class JobReport : public liber::netapp::Serializable {
 public:
 
   JobReport();
+
+  RsyncError createJobStatus;
 
   // Destination file segmentation report.
   struct DestinationReport {
     SegmentationReport segmentation;
     AssemblyReport     assembly;
-  };
-  inline DestinationReport& destination() { return mDestinationReport; };
+  } destination;
 
   struct SourceReport {
     SegmentationReport segmentation;
     AuthorityReport   authority;
-  };
-  inline SourceReport& source() { return mSourceReport; };
+  } source;
 
 
+  /**
+   * Indicates whether job was completed successfully.
+   */
+  bool success() const;
   void print(std::ostream&) const;
 
-private:
+protected:
 
-  DestinationReport mDestinationReport;
-  SourceReport      mSourceReport;
+  void pack(liber::netapp::PacketCtor&);
+  void pack(liber::netapp::PacketCtor&) const;
+  bool unpack(liber::netapp::PacketDtor&);
 };
 
 } // End namespace rsync

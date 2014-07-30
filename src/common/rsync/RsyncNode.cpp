@@ -1,4 +1,5 @@
 #include "Log.h"
+#include "RsyncPacket.h"
 #include "RsyncJob.h"
 #include "RsyncNode.h"
 #include "PacketRouter.h"
@@ -14,15 +15,23 @@ RsyncNode::RsyncNode(const boost::filesystem::path& root)
 , mSegmenter(mFileSys)
 , mAuthority(mFileSys)
 , mAssembler(mFileSys)
-, mnSegmentSize(256)
+, mJobAgent(mFileSys, mSegmenter, mAuthority, mAssembler)
 , mAuthorityService(mFileSys)
+, mnSegmentSize(256)
 {
-  mPendingJobs.initialize();
   mFileSys.setRoot(root);
+
+  mRouter.addSubscriber(RsyncPacket::RsyncAuthorityService,
+                        &mAuthorityService);
+  mRouter.addSubscriber(RsyncPacket::RsyncAuthorityInterface,
+                        &mAuthority.getSubscriber());
+  mRouter.addSubscriber(RsyncPacket::RsyncJobAgent,
+                        &mJobAgent);
 
   mSegmenter.launch();
   mAuthority.launch();
   mAssembler.launch();
+
   launch();
 }
 
@@ -34,10 +43,14 @@ RsyncNode::~RsyncNode()
   mSegmenter.cancel(true);
   mAuthority.cancel(true);
   mAssembler.cancel(true);
+
+  mRouter.removeSubscriber(RsyncPacket::RsyncAuthorityService);
+  mRouter.removeSubscriber(RsyncPacket::RsyncAuthorityInterface);
+  mRouter.removeSubscriber(RsyncPacket::RsyncJobAgent);
 }
 
 //----------------------------------------------------------------------------
-void RsyncNode::setCompletionCallback(RsyncJobCallback* pCallback)
+void RsyncNode::setCallback(RsyncJobCallback* pCallback)
 {
   mCallbackLock.lock();
   mpCallback = pCallback;
@@ -45,37 +58,29 @@ void RsyncNode::setCompletionCallback(RsyncJobCallback* pCallback)
 }
 
 //----------------------------------------------------------------------------
-bool RsyncNode::
-sync(const boost::filesystem::path& destination,
-     const boost::filesystem::path& source,
-     bool bRemoteSource)
+void RsyncNode::unsetCallback()
 {
-  RsyncJob* lpJob = new RsyncJob();
-
-  if (lpJob)
-  {
-    lpJob->descriptor().setDestination(destination);
-    lpJob->descriptor().setSource(source, bRemoteSource);
-    lpJob->descriptor().setSegmentSize(mnSegmentSize);
-    mPendingJobs.push(lpJob);
-  }
-
-  return (lpJob != NULL);
+  mCallbackLock.lock();
+  mpCallback = NULL;
+  mCallbackLock.unlock();
 }
 
 //----------------------------------------------------------------------------
-bool RsyncNode::
-registerSubscribers(PacketRouter& rRouter, int nRequestID, int nResponseID)
+RsyncError RsyncNode::
+sync(const boost::filesystem::path& destinationPath,
+     const boost::filesystem::path& sourcePath,
+     bool bRemoteDestination, bool bRemoteSource)
 {
-  bool lbSuccess = true;
+  ResourcePath destination(destinationPath, bRemoteDestination);
+  ResourcePath source(sourcePath, bRemoteSource);
 
-  lbSuccess &= rRouter.addSubscriber(nResponseID, &mAuthority.getSubscriber());
-  mAuthority.setRequestID(nRequestID);
+  return mJobAgent.createJob(destination, source, mnSegmentSize);
+}
 
-  lbSuccess &= rRouter.addSubscriber(nRequestID, &mAuthorityService);
-  mAuthorityService.setRequestID(nResponseID);
-
-  return lbSuccess;
+//----------------------------------------------------------------------------
+PacketSubscriber& RsyncNode::subscriber()
+{
+  return mRouter;
 }
 
 //----------------------------------------------------------------------------
@@ -85,16 +90,12 @@ void RsyncNode::run(const bool& bShutdown)
   {
     RsyncJob* lpJob = NULL;
 
-    if (mPendingJobs.pop(lpJob) && lpJob)
+    if ((lpJob = mJobAgent.nextJob()) != NULL)
     {
-      mSegmenter.addJob(lpJob);
-      mAuthority.addJob(lpJob);
-      mAssembler.addJob(lpJob);
-
       if (lpJob->waitDone() == false)
       {
         log::error("RsyncNode - Timeout waiting for %s job to finish.\n",
-                   lpJob->descriptor().getSource().string().c_str());
+                   lpJob->descriptor().getSource().path.string().c_str());
       }
 
       mCallbackLock.lock();
@@ -104,7 +105,7 @@ void RsyncNode::run(const bool& bShutdown)
       }
       mCallbackLock.unlock();
 
-      delete lpJob;
+      mJobAgent.releaseJob(lpJob);
     }
   }
 }

@@ -1,27 +1,43 @@
 
+verbose = false
+
+ARGV.each do |arg|
+  if arg.downcase == '-v'
+    verbose = true
+  end
+end
+
+left_file = ARGV[-2]
+right_file = ARGV[-1]
+
+unless left_file and File.exist?(left_file)
+  puts "Specify valid left file path"
+  exit
+end
+
+unless right_file and File.exist?(right_file)
+  puts "Specify valid right file path"
+  exit
+end
+
+
 byte_count = 0
 diff_count = 0
 
-def size_of(file)
-  block_size = File.stat(file).blksize
-  block_count = File.stat(file).blocks
-  block_size * block_count
-end
-
-File.open(ARGV[0], 'r') do |left|
-  File.open(ARGV[1], 'r') do |right|
+File.open(left_file, 'r') do |left|
+  File.open(right_file, 'r') do |right|
     while not left.eof? and not right.eof? do
       left_byte = left.read(1)
       right_byte = right.read(1)
 
       if left_byte.nil?
-        puts "left nil at #{byte_count}"
+        puts "left nil at #{byte_count}" if verbose
       elsif right_byte.nil?
-        puts "right nil at #{byte_count}"
+        puts "right nil at #{byte_count}" if verbose
       elsif left_byte != right_byte
         left_byte = left_byte.unpack('C').first
         right_byte = right_byte.unpack('C').first
-        puts "at #{byte_count} left=#{'%02X' % left_byte}, right=#{'%02X' % right_byte}"
+        puts "at #{byte_count} left=#{'%02X' % left_byte}, right=#{'%02X' % right_byte}" if verbose
         diff_count += 1
       else
       end

@@ -3,19 +3,23 @@
 
 #include <map>
 #include "Queue.h"
-#include "PacketSubscriber.h"
+//#include "PacketSubscriber.h"
 
 namespace liber {
 namespace netapp {
 
+class PacketContainer;
+class PacketSubscriber;
+class PacketReceiver;
+
 class PacketRouter {
 public:
 
-  PacketRouter(Queue<liber::netapp::NetAppPacket*>* pOutQueue);
+  PacketRouter(PacketReceiver* pReceiver);
   virtual ~PacketRouter();
 
-  bool addSubscriber(int subscriberId, liber::netapp::PacketSubscriber* pSubscriber);
-  liber::netapp::PacketSubscriber* removeSubscriber(int subscriberId);
+  bool addSubscriber(int subscriberId, PacketSubscriber* pSubscriber);
+  PacketSubscriber* removeSubscriber(int subscriberId);
 
   ui32 count();
   bool empty();
@@ -23,10 +27,10 @@ public:
 protected:
 
   bool hasSubscriber(int subscriberId);
-  liber::netapp::PacketSubscriber* getSubscriber(int subscriberId);
+  PacketSubscriber* getSubscriber(int subscriberId);
 
   //
-  Queue<liber::netapp::NetAppPacket*>* mpOutQueue;
+  PacketReceiver* mpReceiver;
 
 private:
 
@@ -34,7 +38,7 @@ private:
   Mutex mTableLock;
 
   //
-  std::map<int, liber::netapp::PacketSubscriber*> mSubscriberTable;
+  std::map<int, PacketSubscriber*> mSubscriberTable;
 };
 
 }}

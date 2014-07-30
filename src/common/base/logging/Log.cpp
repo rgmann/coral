@@ -18,6 +18,43 @@ LogMessage::LogMessage(LogLevel level, const std::string& message)
 }
 
 //-----------------------------------------------------------------------------
+LogMessage::LogMessage(LogLevel level,
+                       const char* header,
+                       const char* pData, ui32 nBytes,
+                       ui32 nBytesPerRow)
+: mLevel(level)
+, mTimestamp(Timestamp::Now())
+{
+  char rowPrefix[7];
+  std::stringstream stream;
+
+  if (strlen(header) > 0)
+  {
+    stream << header << "\n";
+  }
+
+  ui32 lnOffset = 0;
+  for (; lnOffset < nBytes; lnOffset++)
+  {
+    if (lnOffset % nBytesPerRow == 0)
+    {
+      snprintf(rowPrefix, sizeof(rowPrefix), "%4X: ", lnOffset);
+      stream << rowPrefix;
+    }
+
+    snprintf(rowPrefix, sizeof(rowPrefix), "%02X ", (unsigned char)pData[lnOffset]);
+    stream << rowPrefix;
+    if (lnOffset > 0 && ((lnOffset+1) % nBytesPerRow == 0))
+    {
+      stream << "\n";
+    }
+  }
+  if (lnOffset > 0) stream << "\n";
+
+  mMessage.assign(stream.str());
+}
+
+//-----------------------------------------------------------------------------
 std::string LogMessage::toString(ui32 format) const
 {
   std::stringstream ss;
@@ -290,6 +327,22 @@ void liber::log::debug(const char* format, ...)
     va_start(args, format);
     liber::log::print(Debug, format, args);
     va_end(args);
+  }
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::mem_dump(const char* header, const char* pData, ui32 nBytes, ui32 nBytesPerRow)
+{
+  if ((header != NULL) && (pData != NULL))
+  {
+    try
+    {
+      liber::log::glog.send(LogMessage(MemDump, header, pData, nBytes, nBytesPerRow));
+    }
+    catch (...)
+    {
+      liber::log::error("liber::log::mem_dump - exception while logging dump\n");
+    }
   }
 }
 

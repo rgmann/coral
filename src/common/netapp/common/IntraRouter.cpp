@@ -1,4 +1,6 @@
 #include "Log.h"
+#include "GenericPacket.h"
+#include "PacketSubscriber.h"
 #include "IntraRouter.h"
 
 using namespace liber;
@@ -6,11 +8,10 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 IntraRouter::IntraRouter()
-: PacketRouter(&mOutQueue)
+: PacketRouter(&mReceiver)
 , IThread("IntraRouter")
 , mpCounterpart(NULL)
 {
-  mOutQueue.initialize();
 }
 
 //-----------------------------------------------------------------------------
@@ -29,37 +30,36 @@ void IntraRouter::run(const bool& bShutdown)
 {
   while (!bShutdown)
   {
-    NetAppPacket* lpPacket = NULL;
-
-    if (mOutQueue.pop(lpPacket) && lpPacket)
+    PacketContainer* lpContainer = NULL;
+    if ((lpContainer = mReceiver.pop()) != NULL)
     {
-      log::status("IntraRouter - route\n");
       if (mpCounterpart)
       {
-        mpCounterpart->routePacket(lpPacket);
+        mpCounterpart->routePacket(lpContainer);
       }
       else
       {
         log::error("IntraRouter - no counterpart set\n");
       }
 
-      delete lpPacket;
+      delete lpContainer;
     }
   }
 }
 
 //-----------------------------------------------------------------------------
-void IntraRouter::routePacket(NetAppPacket* pPacket)
+void IntraRouter::routePacket(PacketContainer* pContainer)
 {
-  PacketSubscriber* lpSubscriber = getSubscriber(pPacket->data()->type);
+  PacketSubscriber* lpSubscriber = getSubscriber(pContainer->mDestinationID);
   if (lpSubscriber)
   {
-    log::status("IntraRouter - routePacket to subscriber length=%u\n", pPacket->data()->length);
-    lpSubscriber->put((char*)pPacket->dataPtr(), pPacket->data()->length);
+    lpSubscriber->put((char*)pContainer->mpPacket->basePtr(),
+                      pContainer->mpPacket->allocatedSize());
   }
   else
   {
-    log::status("IntraRouter::routePacket - no subscriber gesters for ID=%d\n", pPacket->data()->type);
+    log::status("IntraRouter::routePacket - no subscriber gesters for ID=%d\n",
+                pContainer->mDestinationID);
   }
 }
 

@@ -1,4 +1,5 @@
 #include "Log.h"
+#include "PacketReceiver.h"
 #include "ApplicationWorker.h"
 
 using namespace liber::net;
@@ -10,7 +11,7 @@ ApplicationWorker::ApplicationWorker()
 , mnLockTimeoutMs(100)
 , mRouter(&mInQueue, &mOutQueue)
 , mEnqueueTimeoutMs(DefaultEnqueueTimeoutMs)
-, mDequeueTimeoutMs(DefaultDequeueTimeoutMs)
+//, mDequeueTimeoutMs(DefaultDequeueTimeoutMs)
 {
 }
 
@@ -25,11 +26,6 @@ bool ApplicationWorker::initialize(TcpSocket* pSocket)
   bool lbSuccess = true;
 
   if (!mInQueue.initialize())
-  {
-    lbSuccess = false;
-  }
-
-  if (!mOutQueue.initialize())
   {
     lbSuccess = false;
   }
@@ -73,10 +69,11 @@ void ApplicationWorker::destroy()
     lpPacket = NULL;
   }
 
-  while (mOutQueue.pop(lpPacket, 5))
+  PacketContainer* lpContainer = NULL;
+  while ((lpContainer = mOutQueue.pop(5)) != NULL)
   {
-    if (lpPacket) delete lpPacket;
-    lpPacket = NULL;
+    if (lpContainer) delete lpContainer;
+    lpContainer = NULL;
   }
 
   // Unregister the keepalive subscriber.
@@ -222,14 +219,21 @@ bool ApplicationWorker::writePacket(int nTimeoutMs)
 
   if (!lbEndOfStream)
   {
-    NetAppPacket* lpPacket = NULL;
-    if (mOutQueue.pop(lpPacket, nTimeoutMs) && lpPacket)
+    PacketContainer* lpContainer = NULL;
+    if ((lpContainer = mOutQueue.pop(nTimeoutMs)) != NULL)
     {
+      NetAppPacket packet(lpContainer->mDestinationID,
+                          lpContainer->mpPacket->allocatedSize());
+
+      memcpy(packet.dataPtr(),
+             lpContainer->mpPacket->basePtr(),
+             lpContainer->mpPacket->allocatedSize());
+
       SocketStatus lStatus;
 
       // Send the message
-      mpSocket->write(lStatus, (char*)lpPacket->basePtr(), lpPacket->allocatedSize());
-      delete lpPacket;
+      mpSocket->write(lStatus, (char*)packet.basePtr(), packet.allocatedSize());
+      delete lpContainer;
 
       if (lStatus.status != SocketOk)
       {

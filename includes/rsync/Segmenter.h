@@ -10,7 +10,7 @@ namespace rsync {
 
 class SegmentReceiver;
 class SegmentHook;
-struct SegmentationReport;
+class SegmentationReport;
 
 class Segmenter {
 public:

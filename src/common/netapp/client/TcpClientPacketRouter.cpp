@@ -93,7 +93,7 @@ setDisconnectCallback(liber::Callback* pCallback)
 }
 
 //-----------------------------------------------------------------------------
-bool TcpClientPacketRouter::writePacket(const NetAppPacket& rPacket)
+bool TcpClientPacketRouter::writePacket(const PacketContainer& rContainer)
 {
   bool lbSuccess = false;
 
@@ -105,12 +105,19 @@ bool TcpClientPacketRouter::writePacket(const NetAppPacket& rPacket)
 
   if (lbSuccess)
   {
+    NetAppPacket packet(rContainer.mDestinationID,
+                        rContainer.mpPacket->allocatedSize());
+
+    memcpy(packet.dataPtr(),
+           rContainer.mpPacket->basePtr(),
+           rContainer.mpPacket->allocatedSize());
+
     SocketStatus lStatus;
-    mSocket.write(lStatus, (char*)rPacket.basePtr(), rPacket.allocatedSize());
+    mSocket.write(lStatus, (char*)packet.basePtr(), packet.allocatedSize());
 
     if ((lbSuccess = (lStatus.status == SocketOk)))
     {
-      lbSuccess = (lStatus.byteCount == rPacket.allocatedSize());
+      lbSuccess = (lStatus.byteCount == packet.allocatedSize());
     }
     else
     {

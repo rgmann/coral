@@ -67,7 +67,7 @@ private:
 };
 
 
-class Instruction {
+class Instruction : public liber::netapp::Serializable {
 public:
 
   Instruction(ui32 type);
@@ -79,8 +79,8 @@ public:
 
   virtual void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&) = 0;
 
-  virtual void serialize(liber::netapp::PacketCtor& ctor) const = 0;
-  virtual bool deserialize(liber::netapp::PacketDtor& dtor) = 0;
+//  virtual void serialize(liber::netapp::PacketCtor& ctor) const = 0;
+//  virtual bool deserialize(liber::netapp::PacketDtor& dtor) = 0;
 
 protected:
 
@@ -103,8 +103,10 @@ public:
 
   void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
-  void serialize(liber::netapp::PacketCtor& ctor) const;
-  bool deserialize(liber::netapp::PacketDtor& dtor);
+protected:
+
+  void pack(liber::netapp::PacketCtor& ctor) const;
+  bool unpack(liber::netapp::PacketDtor& dtor);
 
 private:
 
@@ -126,8 +128,10 @@ public:
   std::string toString() const;
   void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
-  void serialize(liber::netapp::PacketCtor& ctor) const;
-  bool deserialize(liber::netapp::PacketDtor& dtor);
+protected:
+
+  void pack(liber::netapp::PacketCtor& ctor) const;
+  bool unpack(liber::netapp::PacketDtor& dtor);
 
 private:
 
@@ -150,8 +154,10 @@ public:
   std::string toString() const;
   void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
-  void serialize(liber::netapp::PacketCtor& ctor) const;
-  bool deserialize(liber::netapp::PacketDtor& dtor);
+protected:
+
+  void pack(liber::netapp::PacketCtor& ctor) const;
+  bool unpack(liber::netapp::PacketDtor& dtor);
 
 private:
 
@@ -175,8 +181,10 @@ public:
   std::string toString() const;
   void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
 
-  void serialize(liber::netapp::PacketCtor& ctor) const;
-  bool deserialize(liber::netapp::PacketDtor& dtor);
+protected:
+
+  void pack(liber::netapp::PacketCtor& ctor) const;
+  bool unpack(liber::netapp::PacketDtor& dtor);
 
 private:
 

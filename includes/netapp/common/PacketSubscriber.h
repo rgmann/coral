@@ -1,13 +1,13 @@
 #ifndef PACKET_SUBSCRIBER_H
 #define PACKET_SUBSCRIBER_H
 
-#include <utility>
-#include "Queue.h"
-#include "GenericPacket.h"
-#include "NetAppPacket.h"
+//#include "GenericPacket.h"
 
 namespace liber {
 namespace netapp {
+
+class GenericPacket;
+class PacketReceiver;
 
 class PacketSubscriber {
 public:
@@ -15,9 +15,9 @@ public:
    PacketSubscriber();
    virtual ~PacketSubscriber();
 
-   typedef std::pair<int, liber::netapp::GenericPacket*> PacketPair;
-   void setOutputQueue(Queue<NetAppPacket*>* pQueue);
-   void setId(int id);
+   virtual void setReceiver(PacketReceiver* pReceiver);
+
+   virtual void setID(int id);
 
    /**
     * Synchronously process a packet.  If PacketApp does not perform any
@@ -26,8 +26,6 @@ public:
     */
    //virtual void processPacket(const GenericPacket* pPacket) = 0;
 
-   static const i32 QueueTimeoutMs = 500;
-
    /**
     * Add a packet to the end of this PacketApp's input queue (if it has one).
     */
@@ -35,17 +33,18 @@ public:
 
 protected:
 
-   virtual bool sendPacket(liber::netapp::GenericPacket* pPacket, i32 nTimeoutMs = QueueTimeoutMs);
-   bool sendPacketTo(int destinationID, GenericPacket* pPacket, i32 nTimeoutMs = QueueTimeoutMs);
+   virtual bool sendPacket(GenericPacket* pPacket);
+   bool sendPacketTo(int destinationID, GenericPacket* pPacket);
 
 private:
 
    int mSubscriberId;
    // GenericPacket output queue.
-   Queue<NetAppPacket*>* mpOutQueue;
+   PacketReceiver* mpReceiver;
 };
 
-}}
+} // End namespace netapp
+} // End namespace liber
 
 #endif // PACKET_SUBSCRIBER_H
 

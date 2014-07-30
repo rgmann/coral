@@ -27,11 +27,6 @@ bool ClientPacketRouter::start(ui32 txCapacity)
 {
   bool lbSuccess = true;
 
-  if (!mTxQueue.initialize(txCapacity))
-  {
-    lbSuccess = false;
-  }
-
   if (!mRxQueue.initialize(txCapacity))
   {
     lbSuccess = false;
@@ -129,7 +124,7 @@ void ClientPacketRouter::RouterThreadEntry(ThreadArg* pArg)
 //-----------------------------------------------------------------------------
 void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
 {
-  NetAppPacket* lpPacket = NULL;
+  PacketContainer* lpContainer = NULL;
 
   while (!pArg->stopSignalled())
   {
@@ -143,9 +138,9 @@ void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
     }
 
     // TODO: Should this peek or just drop the packet?
-    if (mTxQueue.pop(lpPacket, 100) && lpPacket)
+    if ((lpContainer = mTxQueue.pop(100)) != NULL)
     {
-      if (writePacket(*lpPacket))
+      if (writePacket(*lpContainer))
       {
         // TODO: Increment TX success count.
       }
@@ -156,8 +151,8 @@ void ClientPacketRouter::txThreadRun(ThreadArg* pArg)
                   << std::endl;
       }
 
-      delete lpPacket;
-      lpPacket = NULL;
+      delete lpContainer;
+      lpContainer = NULL;
     }
   }
 }

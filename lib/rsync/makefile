@@ -11,7 +11,9 @@ BOOST_INCLUDE = \
 SOURCE = \
 $(BASE)/src/common/$(LIBNAME)/JobDescriptor.cpp \
 $(BASE)/src/common/$(LIBNAME)/JobReport.cpp \
+$(BASE)/src/common/$(LIBNAME)/RemoteJobResult.cpp \
 $(BASE)/src/common/$(LIBNAME)/FileSystemInterface.cpp \
+$(BASE)/src/common/$(LIBNAME)/RsyncPacketRouter.cpp \
 $(BASE)/src/common/$(LIBNAME)/RsyncJob.cpp \
 $(BASE)/src/common/$(LIBNAME)/Segment.cpp \
 $(BASE)/src/common/$(LIBNAME)/RsyncPacket.cpp \
@@ -37,6 +39,7 @@ $(BASE)/src/common/$(LIBNAME)/SegmentList.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentQueue.cpp \
 $(BASE)/src/common/$(LIBNAME)/SegmentHash.cpp \
 $(BASE)/src/common/$(LIBNAME)/RsyncNode.cpp \
+$(BASE)/src/common/$(LIBNAME)/JobAgent.cpp \
 
 INCLUDES = $(BOOST_INCLUDE) \
 -I$(BASE)/includes/base \

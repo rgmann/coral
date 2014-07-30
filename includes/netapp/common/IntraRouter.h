@@ -3,6 +3,7 @@
 
 #include "IThread.h"
 #include "PacketRouter.h"
+#include "PacketQueue.h"
 
 namespace liber {
 namespace netapp {
@@ -19,14 +20,14 @@ public:
 
 protected:
 
-  void routePacket(NetAppPacket* pPacket);
+  void routePacket(PacketContainer* pContainer);
 
   void run(const bool& bShutdown);
 
 private:
 
   IntraRouter* mpCounterpart;
-  Queue<NetAppPacket*> mOutQueue;
+  PacketQueue mReceiver;
 };
 
 } // End namespace netapp

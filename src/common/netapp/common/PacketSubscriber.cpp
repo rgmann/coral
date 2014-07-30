@@ -1,12 +1,14 @@
 #include <string.h>
 #include "Log.h"
+#include "GenericPacket.h"
+#include "PacketReceiver.h"
 #include "PacketSubscriber.h"
 
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 PacketSubscriber::PacketSubscriber()
-: mpOutQueue(NULL)
+: mpReceiver(NULL)
 {
 }
 
@@ -16,36 +18,43 @@ PacketSubscriber::~PacketSubscriber()
 }
 
 //-----------------------------------------------------------------------------
-void PacketSubscriber::setId(int id)
+void PacketSubscriber::setID(int id)
 {
   mSubscriberId = id;
 }
 
 //-----------------------------------------------------------------------------
-void PacketSubscriber::setOutputQueue(Queue<NetAppPacket*>* pOutQueue)
+void PacketSubscriber::setReceiver(PacketReceiver* pReceiver)
 {
-  mpOutQueue = pOutQueue;
+  mpReceiver = pReceiver;
 }
 
 //-----------------------------------------------------------------------------
-bool PacketSubscriber::sendPacket(GenericPacket* pPacket, i32 nTimeoutMs)
+bool PacketSubscriber::sendPacket(GenericPacket* pPacket)
 {
-  return sendPacketTo(mSubscriberId, pPacket, nTimeoutMs);
+  return sendPacketTo(mSubscriberId, pPacket);
 }
 
 //-----------------------------------------------------------------------------
 bool PacketSubscriber::
-sendPacketTo(int destinationID, GenericPacket* pPacket, i32 nTimeoutMs)
+sendPacketTo(int destinationID, GenericPacket* pPacket)
 {
   bool lbSuccess = false;
 
-  if (mpOutQueue && (mSubscriberId >= 0))
+  if (mpReceiver)
   {
-    NetAppPacket* lpPacket = new NetAppPacket(destinationID,
-                                              pPacket->allocatedSize());
-
-    memcpy(lpPacket->dataPtr(), pPacket->basePtr(), pPacket->allocatedSize());
-    lbSuccess = mpOutQueue->push(lpPacket, nTimeoutMs);
+    if (mSubscriberId >= 0)
+    {
+      lbSuccess = mpReceiver->push(new PacketContainer(destinationID, pPacket));
+    }
+    else
+    {
+      log::error("PacketSubscriber::sendPacketTo - Invalid subscriber ID=%d\n");
+    }
+  }
+  else
+  {
+    log::error("PacketSubscriber::sendPacketTo - Null receiver\n");
   }
 
   return lbSuccess;

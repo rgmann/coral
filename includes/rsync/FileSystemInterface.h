@@ -28,6 +28,7 @@ public:
             const boost::filesystem::path& destination);
 
   bool remove(const boost::filesystem::path& path) const;
+  bool touch(const boost::filesystem::path& path) const;
 
 private:
 
