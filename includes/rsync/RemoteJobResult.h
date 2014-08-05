@@ -2,7 +2,7 @@
 #define REMOTE_JOB_RESULT_H
 
 #include <boost/uuid/uuid.hpp>
-#include "PacketHelper.h"
+#include "Serializable.h"
 #include "JobReport.h"
 
 namespace liber {
@@ -20,9 +20,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor&);
-  void pack(liber::netapp::PacketCtor&) const;
-  bool unpack(liber::netapp::PacketDtor&);
+  void pack(liber::netapp::SerialStream&);
+  void pack(liber::netapp::SerialStream&) const;
+  bool unpack(liber::netapp::SerialStream&);
 
 private:
 

@@ -96,17 +96,17 @@ bool RemoteAuthorityInterface::put(const char* pData, ui32 nLength)
           break;
 
         case RsyncPacket::RsyncAuthorityReport:
-          if (mActiveJob.lockIfActive())
-          {
-            mActiveJob.job()->report().source.authority.deserialize(pData, nLength);
-            mActiveJob.unlock();
-          }
+          setSourceReport(lpPacket->dataPtr(), lpPacket->data()->length);
           break;
 
         default: break;
       }
 
       mActiveJob.unlock();
+    }
+    else
+    {
+      log::error("RemoteAuthorityInterface::put - Failed to lock active job\n");
     }
   }
 
@@ -132,34 +132,34 @@ void RemoteAuthorityInterface::releaseActiveJob()
 
 //-----------------------------------------------------------------------------
 void RemoteAuthorityInterface::
-sendAssemblyInstruction(const void* pData, ui32 nLength)
+sendAssemblyInstruction(const void* pData, ui32 nBytes)
 {
   Instruction* lpInstruction = NULL;
 
   std::string lInstructionData;
-  lInstructionData.assign((const char*)pData, nLength);
+  lInstructionData.assign((const char*)pData, nBytes);
 
   lpInstruction = InstructionFactory::Deserialize(lInstructionData);
 
   if (lpInstruction)
   {
-    // Spy on the instruction type before sending the instruction.
-    ui32 lInstructionType = lpInstruction->type();
-
     // Send the instruction to the assembler.
     mActiveJob.job()->instructions().push(lpInstruction);
-
-    // If this is and end instruction, RemoteAuthorityInterface is finished
-    // with the active job.  Signal completion to the main thread.
-    if (lInstructionType == EndInstruction::Type)
-    {
-      mActiveJob.signalJobEnd();
-    }
   }
   else
   {
     log::error("Failed to derialize instruction.\n");
   }
+}
+
+//-----------------------------------------------------------------------------
+void RemoteAuthorityInterface::setSourceReport(const void* pData, ui32 nBytes)
+{
+  mActiveJob.job()->report().source.deserialize((const char*)pData, nBytes);
+
+  // If this is the source report, RemoteAuthorityInterface is finished
+  // with the active job.  Signal completion to the main thread.
+  mActiveJob.signalJobEnd();
 }
 
 //-----------------------------------------------------------------------------

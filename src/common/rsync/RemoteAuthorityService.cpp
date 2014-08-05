@@ -9,10 +9,11 @@ using namespace liber::rsync;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
-JobQueue::JobQueue(FileSystemInterface& rFileSys, InstructionReceiver& rReceiver)
+JobQueue::JobQueue(FileSystemInterface& rFileSys, InstructionReceiver& rReceiver, JobCompletionHook& rJobHook)
 : IThread("JobQueue")
 , mAuthority(rFileSys)
 , mrReceiver(rReceiver)
+, mrJobHook(rJobHook)
 , mpActiveJob(NULL)
 {
   mJobQueue.initialize();
@@ -57,11 +58,16 @@ void JobQueue::run(const bool& bShutdown)
       mpActiveJob = lpJob;
       mJobLock.unlock();
 
-      mAuthority.process(lpJob, mrReceiver);
+      mAuthority.process(lpJob, mrReceiver);      
 
       mJobLock.lock();
       mpActiveJob = NULL;
       mJobLock.unlock();
+
+      mrJobHook(lpJob);
+
+      // We're done with the job
+      delete lpJob;
     }
   }
 }
@@ -73,9 +79,11 @@ RemoteAuthorityService::
 , mrFileSys(rFileSys)
 , mpUserHandler(NULL)
 , mRequestID(RsyncPacket::RsyncAuthorityInterface)
-, mJobQueue(rFileSys, *this)
+, mSendReportHook(*this)
+, mJobQueue(rFileSys, *this, mSendReportHook)
 {
   mJobQueue.launch();
+  mSendReportHook.setRequestID(mRequestID);
 }
 
 //-----------------------------------------------------------------------------
@@ -88,6 +96,7 @@ RemoteAuthorityService::~RemoteAuthorityService()
 void RemoteAuthorityService::setRequestID(int requestID)
 {
   mRequestID = requestID;
+  mSendReportHook.setRequestID(mRequestID);
 }
 
 //-----------------------------------------------------------------------------
@@ -129,22 +138,6 @@ void RemoteAuthorityService::call(Instruction* pInstruction)
 {
   if (pInstruction)
   {
-    // If this is the end instruction, send the Authority Report just before
-    // the end instruction.
-    if (pInstruction->type() == EndInstruction::Type)
-    {
-      if (mJobQueue.lockIfActive())
-      {
-        JobReport* pReport = &mJobQueue.activeJob()->report();
-
-        sendPacketTo(mRequestID, 
-                     new RsyncPacket(RsyncPacket::RsyncAuthorityReport,
-                     pReport->source.authority.serialize()));
-
-        mJobQueue.lock().unlock();
-      }
-    }
-
     sendPacketTo(mRequestID,
                  new RsyncPacket(RsyncPacket::RsyncInstruction,
                  InstructionFactory::Serialize(pInstruction)));
@@ -157,32 +150,46 @@ void RemoteAuthorityService::call(Instruction* pInstruction)
 void RemoteAuthorityService::
 handleRemoteJobRequest(const void* pData, ui32 nLength)
 {
-  RsyncJob* lpJob = new RsyncJob();
-  if (lpJob->descriptor().deserialize((const char*)pData, nLength))
-  {
-    RsyncError lStatus = RsyncSuccess;
+  RsyncJob* lpJob = NULL;
 
-    if (mpUserHandler)
+  if ((lpJob = new (std::nothrow) RsyncJob()))
+  {
+    JobDescriptor& rDescriptor = lpJob->descriptor();
+
+    if (rDescriptor.deserialize((const char*)pData, nLength))
     {
-      lStatus = mpUserHandler(lpJob->descriptor());
+      RsyncError lStatus = RsyncSuccess;
+
+      if (mpUserHandler)
+      {
+        lStatus = mpUserHandler(rDescriptor);
+      }
+      else
+      {
+        lStatus = defaultQueryHandler(rDescriptor);
+      }
+
+      if (lStatus == RsyncSuccess)
+      {
+        mJobQueue.push(lpJob);
+      }
+
+      sendPacketTo(mRequestID, 
+                   new (std::nothrow) RsyncPacket(
+                   RsyncPacket::RsyncRemoteAuthAcknowledgment,
+                   sizeof(lStatus), &lStatus));
     }
     else
     {
-      lStatus = defaultQueryHandler(lpJob->descriptor());
+      log::error("RemoteAuthorityService::handleRemoteJobRequest - "
+                 "Failed to deserialize JobDescriptor\n");
+      delete lpJob;
     }
-
-    if (lStatus == RsyncSuccess)
-    {
-      mJobQueue.push(lpJob);
-    }
-
-    sendPacketTo(mRequestID, 
-                 new RsyncPacket(RsyncPacket::RsyncRemoteAuthAcknowledgment,
-                 sizeof(lStatus), &lStatus));
   }
   else
   {
-    delete lpJob;
+    log::error("RemoteAuthorityService::handleRemoteJobRequest - "
+               "Failed to allocate RsyncJob\n");
   }
 }
 
@@ -195,8 +202,8 @@ defaultQueryHandler(JobDescriptor& rJob)
   if (mrFileSys.exists(rJob.getSource().path) == false)
   {
     lStatus = RsyncSourceFileNotFound;
-    liber::log::error("Remote job query failed for %s\n",
-                      rJob.getSource().path.string().c_str());
+    log::error("Remote job query failed for %s\n",
+               rJob.getSource().path.string().c_str());
   }
 
   return lStatus;
@@ -223,6 +230,41 @@ void RemoteAuthorityService::pushSegment(const void* pData, ui32 nLength)
   else
   {
     log::error("No job active to receive segment.\n");
+  }
+}
+
+//----------------------------------------------------------------------------
+RemoteAuthorityService::SendReportHook::
+SendReportHook(PacketSubscriber& rSubscriber)
+: mrSubscriber(rSubscriber)
+{
+}
+
+//----------------------------------------------------------------------------
+void RemoteAuthorityService::SendReportHook::
+setRequestID(int requestID)
+{
+  mRequestID = requestID;
+}
+
+//----------------------------------------------------------------------------
+void RemoteAuthorityService::SendReportHook::operator () (RsyncJob* pJob)
+{
+  if (pJob)
+  {
+    JobReport& rReport = pJob->report();
+
+    bool lbSuccess = mrSubscriber.sendPacketTo(mRequestID, new RsyncPacket(
+                                  RsyncPacket::RsyncAuthorityReport,
+                                  rReport.source.serialize()));
+    if (lbSuccess == false)
+    {
+      log::error("SendReportHook - Failed to send report to %d\n", mRequestID);
+    }
+  }
+  else
+  {
+    log::error("SendReportHook - Received NULL job\n");
   }
 }
 

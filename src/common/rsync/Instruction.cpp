@@ -60,7 +60,7 @@ void ExecutionStatus::reset()
 //-----------------------------------------------------------------------------
 std::string InstructionFactory::Serialize(const Instruction* pInstruction)
 {
-  PacketCtor ctor;
+  SerialStream ctor;
 
   ctor.write(pInstruction->type());
   pInstruction->serialize(ctor);
@@ -75,7 +75,7 @@ Instruction* InstructionFactory::Deserialize(const std::string& data)
 {
   Instruction* lpInstruction = NULL;
 
-  PacketDtor dtor;
+  SerialStream dtor;
   dtor.stream.write(data.data(), data.size());
 
   ui32 lType;
@@ -177,7 +177,7 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 }
 
 //-----------------------------------------------------------------------------
-void BeginInstruction::pack(PacketCtor& ctor) const
+void BeginInstruction::pack(SerialStream& ctor) const
 {
   mDescriptor.serialize(ctor);
   //ctor.write(mDescriptor.getSegmentSize());
@@ -185,7 +185,7 @@ void BeginInstruction::pack(PacketCtor& ctor) const
 }
 
 //-----------------------------------------------------------------------------
-bool BeginInstruction::unpack(PacketDtor& dtor)
+bool BeginInstruction::unpack(SerialStream& dtor)
 {
 /*  bool lbSuccess = true;
   std::cout << "BeginInstruction::unpack " << std::endl;
@@ -260,13 +260,13 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 }
 
 //-----------------------------------------------------------------------------
-void SegmentInstruction::pack(PacketCtor& ctor) const
+void SegmentInstruction::pack(SerialStream& ctor) const
 {
   ctor.write((ui32)mID);
 }
 
 //-----------------------------------------------------------------------------
-bool SegmentInstruction::unpack(PacketDtor& dtor)
+bool SegmentInstruction::unpack(SerialStream& dtor)
 {
   bool lbSuccess = true;
   ui32 id;
@@ -364,7 +364,7 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 }
 
 //-----------------------------------------------------------------------------
-void ChunkInstruction::pack(PacketCtor& ctor) const
+void ChunkInstruction::pack(SerialStream& ctor) const
 {
   if (mpData)
   {
@@ -375,7 +375,7 @@ void ChunkInstruction::pack(PacketCtor& ctor) const
 }
 
 //-----------------------------------------------------------------------------
-bool ChunkInstruction::unpack(PacketDtor& dtor)
+bool ChunkInstruction::unpack(SerialStream& dtor)
 {
   bool lbSuccess = true;
   std::string data;
@@ -453,14 +453,14 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 }
 
 //-----------------------------------------------------------------------------
-void EndInstruction::pack(PacketCtor& ctor) const
+void EndInstruction::pack(SerialStream& ctor) const
 {
   ctor.write(mbCancelled);
   ctor.write(mCancelError);
 }
 
 //-----------------------------------------------------------------------------
-bool EndInstruction::unpack(PacketDtor& dtor)
+bool EndInstruction::unpack(SerialStream& dtor)
 {
   bool lbSuccess = true;
   lbSuccess &= dtor.read(mbCancelled);

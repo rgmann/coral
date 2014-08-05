@@ -13,7 +13,6 @@ namespace liber {
 namespace rsync {
 
 class RemoteAuthorityInterface
-//: public AuthorityInterface
 : public liber::netapp::PacketSubscriber {
 public:
 
@@ -29,13 +28,13 @@ public:
 
 private:
 
-//  void processJob(RsyncJob* pJob);
-
   RsyncError waitForEndInstruction(int nTimeoutMs);
 
   void releaseActiveJob();
 
-  void sendAssemblyInstruction(const void* pData, ui32 nLength);
+  void sendAssemblyInstruction(const void* pData, ui32 nBytes);
+
+  void setSourceReport(const void* pData, ui32 nBytes);
 
   void cancelAssembly(InstructionQueue& instructions, RsyncError status);
 

@@ -54,7 +54,8 @@ void Authority::reset()
 }
 
 //-----------------------------------------------------------------------------
-bool Authority::process(JobDescriptor& rDescriptor, std::istream& istream, InstructionReceiver& rReceiver, JobReport::SourceReport& rReport)
+bool Authority::
+process(JobDescriptor& rDescriptor, std::istream& istream, InstructionReceiver& rReceiver, SourceReport& rReport)
 {
   mpReport = &rReport.authority;
   mpReport->receivedSegmentCount = mHash.size();

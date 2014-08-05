@@ -57,6 +57,8 @@ void SegmenterThread::run(const bool& bShutdown)
         log::debug("SegmenterThread: Failed to open %s\n.",
                      lpJob->descriptor().getDestination().path.string().c_str());
       }
+
+      lpJob->signalSegmentationDone();
     }
   }
 }

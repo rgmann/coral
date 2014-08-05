@@ -47,34 +47,32 @@ void LocalAuthorityInterface::
 processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
 {
   int lnReceived = 0;
+  bool lbHashInsertDone = false;
   RsyncError lStatus = RsyncSuccess;
 
   pJob->report().source.authority.hashBegin.sample();
-  while (1)
+  while (lbHashInsertDone == false)
   {
     Segment* lpSegment = NULL;
 
-    if (pJob->segments().pop(&lpSegment, mnSegmentTimeoutMs) && lpSegment && (lpSegment->endOfStream() == false))
+    if (pJob->segments().pop(&lpSegment, mnSegmentTimeoutMs) && lpSegment)
     {
-      lnReceived++;
-      //mHash.insert(lpSegment->getWeak().checksum(), lpSegment);
-      mAuthority.hash().insert(lpSegment->getWeak().checksum(), lpSegment);
+      if (lpSegment->endOfStream() == false)
+      {
+        lnReceived++;
+        mAuthority.hash().insert(lpSegment->getWeak().checksum(), lpSegment);
+      }
+      else
+      {
+        lbHashInsertDone = true;
+      }
     }
     else
     {
-      if (lpSegment == NULL)
-      {
-        // TODO: Best way to handle NULL pointer?
-        log::error("AuthorityInterface: Timed out waiting for segment (%d).\n",
-                   lnReceived);
-        lStatus = RsyncDestSegmentTimeout;
-      }
-      else if (lpSegment->endOfStream())
-      {
-//        log::status("AuthorityInterface: END OF STREAM\n");
-      }
-
-      break;
+      log::error("AuthorityInterface: Timed out waiting for segment (%d).\n",
+                 lnReceived);
+      lStatus = RsyncDestSegmentTimeout;
+      lbHashInsertDone = true;
     }
   }
   pJob->report().source.authority.hashEnd.sample();
@@ -83,19 +81,17 @@ processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
   {
     // Hash has been populated. Now the Authority can begin building the
     // instructions.
-//    Authority* lpAuthority = new Authority(pJob->descriptor(), mHash, pJob->instructions());
-
     if (mrFileSys.open(pJob->descriptor().getSource().path, file()))
     {
-      //if (lpAuthority->process(file(), pJob->report().source()))
-      if (mAuthority.process(pJob->descriptor(), file(), rInstructions, pJob->report().source))
+      bool lbAuthSuccess = mAuthority.process(pJob->descriptor(),
+                                              file(),
+                                              rInstructions,
+                                              pJob->report().source);
+
+      if (lbAuthSuccess == false)
       {
-//        log::debug("AuthorityInterface: Completed instructions for %s\n",
-//                   pJob->descriptor().getSource().path.string().c_str());
-      }
-      else
-      {
-        log::error("AuthorityInterface: Authoritative processing for %s failed.\n",
+        log::error("AuthorityInterface: "
+                   "Authoritative processing for %s failed.\n",
                    pJob->descriptor().getSource().path.string().c_str());
       }
 
@@ -105,19 +101,15 @@ processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
     {
       log::error("AuthorityInterface: Failed to open %s\n",
                  pJob->descriptor().getSource().path.string().c_str());
+      lStatus = RsyncSourceFileNotFound;
     }
-
-//    delete lpAuthority;
   }
-  else
+
+  if (lStatus != RsyncSuccess)
   {
     EndInstruction* lpEnd = new EndInstruction();
     lpEnd->cancel(lStatus);
-    //pJob->instructions().push(lpEnd);
     rInstructions.push(lpEnd);
   }
-
-//  SegmentDestructor destructor;
-//  mHash.clear(destructor);
 }
 

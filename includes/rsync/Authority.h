@@ -33,7 +33,7 @@ public:
    * file to match the authoritative file.
    */
   bool process(JobDescriptor& rDescriptor, std::istream& rInStream,
-               InstructionReceiver& rReceiver, JobReport::SourceReport& rReport);
+               InstructionReceiver& rReceiver, SourceReport& rReport);
 
   liber::HashTable<16, Segment*>& hash();
 

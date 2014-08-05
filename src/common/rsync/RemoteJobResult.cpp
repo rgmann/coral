@@ -33,22 +33,22 @@ JobReport& RemoteJobResult::report()
 }
 
 //----------------------------------------------------------------------------
-void RemoteJobResult::pack(PacketCtor& ctor)
+void RemoteJobResult::pack(SerialStream& ctor)
 {
   const_cast<const RemoteJobResult*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
-void RemoteJobResult::pack(PacketCtor& ctor) const
+void RemoteJobResult::pack(SerialStream& ctor) const
 {
   ctor.write((const char*)mUUID.data, mUUID.size());
   mReport.serialize(ctor);
 }
 
 //----------------------------------------------------------------------------
-bool RemoteJobResult::unpack(PacketDtor& dtor)
+bool RemoteJobResult::unpack(SerialStream& dtor)
 {
-  if (dtor.read((char*)mUUID.data, mUUID.size()) != liber::netapp::PacketDtor::ReadOk)
+  if (dtor.read((char*)mUUID.data, mUUID.size()) != liber::netapp::SerialStream::ReadOk)
   {
     log::error("RemoteJobStatus::unpack - failed to deserialize UUID\n");
     return false;

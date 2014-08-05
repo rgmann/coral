@@ -5,7 +5,7 @@
 #include <istream>
 #include "BaseTypes.h"
 #include "Md5Hash.h"
-#include "PacketHelper.h"
+#include "Serializable.h"
 
 class CircularBuffer;
 
@@ -84,9 +84,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor&) const;
-  void pack(liber::netapp::PacketCtor&);
-  bool unpack(liber::netapp::PacketDtor& dtor);
+  void pack(liber::netapp::SerialStream&) const;
+  void pack(liber::netapp::SerialStream&);
+  bool unpack(liber::netapp::SerialStream& dtor);
 
 private:
 

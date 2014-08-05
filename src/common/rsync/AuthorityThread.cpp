@@ -57,6 +57,8 @@ void AuthorityThread::run(const bool& bShutdown)
       {
         mLocalAuthority.process(lpJob);
       }
+
+      lpJob->signalAuthDone();
     }
   }
 }

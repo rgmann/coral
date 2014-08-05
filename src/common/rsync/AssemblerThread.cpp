@@ -85,7 +85,7 @@ void AssemblerThread::run(const bool& bShutdown)
 
       // When assembly is complete (regardless of whether is was successful),
       // signal that the RSYNC job is done.
-      lpJob->signalDone();
+      lpJob->signalAssemblyDone();
     }
   }
 }

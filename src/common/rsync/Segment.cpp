@@ -3,7 +3,6 @@
 #include <sstream>
 #include "Log.h"
 #include "Segment.h"
-#include "PacketHelper.h"
 #include "CircularBuffer.h"
 
 using namespace liber;
@@ -283,7 +282,7 @@ bool Segment::isValid() const
 }
 
 //------------------------------------------------------------------------------
-void Segment::pack(PacketCtor& ctor) const
+void Segment::pack(SerialStream& ctor) const
 {
 //  ctor.write((ui32)mID);
 //  ctor.write(size());
@@ -296,7 +295,7 @@ void Segment::pack(PacketCtor& ctor) const
 }
 
 //------------------------------------------------------------------------------
-void Segment::pack(PacketCtor& ctor)
+void Segment::pack(SerialStream& ctor)
 {
   ctor.write((ui32)mID);
   ctor.write(size());
@@ -312,34 +311,34 @@ void Segment::pack(PacketCtor& ctor)
 }
 
 //------------------------------------------------------------------------------
-bool Segment::unpack(PacketDtor& dtor)
+bool Segment::unpack(SerialStream& dtor)
 {
-  if (!dtor.read(mID))
+  if (dtor.read(mID) == false)
   {
     log::error("Segment::unpack - Failed to parse segment ID\n");
     return false;
   }
 
-  if (!dtor.read(mnSegmentSize))
+  if (dtor.read(mnSegmentSize) == false)
   {
     log::error("Segment::unpack - Failed to parse segment size\n");
     return false;
   }
 
-  if (!dtor.read(mnOffset))
+  if (dtor.read(mnOffset) == false)
   {
     log::error("Segment::unpack - Failed to parse segment offset\n");
     return false;
   }
 
-  if (!dtor.read(mWeak.s))
+  if (dtor.read(mWeak.s) == false)
   {
     log::error("Segment::unpack - Failed to parse weak hash\n");
     return false;
   }
 
   std::string strongBuffer;
-  if (dtor.read(strongBuffer) != PacketDtor::ReadOk)
+  if (dtor.read(strongBuffer) != SerialStream::ReadOk)
   {
     log::error("Segment::unpack - Failed to parse strong hash\n");
     return false;

@@ -75,6 +75,7 @@ private:
    ByteOrder mByteOrder;
 };
 
+
 class Serializable {
 public:
 

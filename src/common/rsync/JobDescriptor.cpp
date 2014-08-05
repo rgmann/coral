@@ -22,24 +22,24 @@ ResourcePath::ResourcePath(const boost::filesystem::path& rPath, bool bRemote)
 }
 
 //-----------------------------------------------------------------------------
-void ResourcePath::pack(liber::netapp::PacketCtor& rCtor)
+void ResourcePath::pack(liber::netapp::SerialStream& rCtor)
 {
   rCtor.writeCString(path.string());
   rCtor.write(remote);
 }
 
 //-----------------------------------------------------------------------------
-void ResourcePath::pack(liber::netapp::PacketCtor& rCtor) const
+void ResourcePath::pack(liber::netapp::SerialStream& rCtor) const
 {
   rCtor.writeCString(path.string());
   rCtor.write(remote);
 }
 
 //-----------------------------------------------------------------------------
-bool ResourcePath::unpack(liber::netapp::PacketDtor& rDtor)
+bool ResourcePath::unpack(liber::netapp::SerialStream& rDtor)
 {
   std::string lTempString;
-  if (rDtor.readCString(lTempString) != liber::netapp::PacketDtor::ReadOk)
+  if (rDtor.readCString(lTempString) != liber::netapp::SerialStream::ReadOk)
   {
     log::error("ResourcePath::unpack - Failed to read 'path'\n");
     return false;
@@ -169,13 +169,13 @@ const boost::uuids::uuid& JobDescriptor::uuid() const
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::pack(liber::netapp::PacketCtor& ctor)
+void JobDescriptor::pack(liber::netapp::SerialStream& ctor)
 {
   const_cast<const JobDescriptor*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::pack(liber::netapp::PacketCtor& ctor) const
+void JobDescriptor::pack(liber::netapp::SerialStream& ctor) const
 {
   if (isValid())
   {
@@ -191,7 +191,7 @@ void JobDescriptor::pack(liber::netapp::PacketCtor& ctor) const
 }
 
 //-----------------------------------------------------------------------------
-bool JobDescriptor::unpack(liber::netapp::PacketDtor& dtor)
+bool JobDescriptor::unpack(liber::netapp::SerialStream& dtor)
 {
   if (dtor.read(mnSegmentSizeBytes) == false)
   {
@@ -200,7 +200,7 @@ bool JobDescriptor::unpack(liber::netapp::PacketDtor& dtor)
     return false;
   }
 
-  if (dtor.read((char*)mUUID.data, mUUID.size()) != liber::netapp::PacketDtor::ReadOk)
+  if (dtor.read((char*)mUUID.data, mUUID.size()) != liber::netapp::SerialStream::ReadOk)
   {
     log::error("RemoteJobStatus::unpack - failed to deserialize UUID\n");
     return false;

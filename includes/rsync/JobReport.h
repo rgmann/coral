@@ -3,7 +3,7 @@
 
 #include <ostream>
 #include "Timestamp.h"
-#include "PacketHelper.h"
+#include "Serializable.h"
 #include "RsyncError.h"
 
 namespace liber {
@@ -27,9 +27,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor&);
-  void pack(liber::netapp::PacketCtor&) const;
-  bool unpack(liber::netapp::PacketDtor&);
+  void pack(liber::netapp::SerialStream&);
+  void pack(liber::netapp::SerialStream&) const;
+  bool unpack(liber::netapp::SerialStream&);
 };
 
 class AssemblyReport : public liber::netapp::Serializable {
@@ -48,9 +48,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor&);
-  void pack(liber::netapp::PacketCtor&) const;
-  bool unpack(liber::netapp::PacketDtor&);
+  void pack(liber::netapp::SerialStream&);
+  void pack(liber::netapp::SerialStream&) const;
+  bool unpack(liber::netapp::SerialStream&);
 };
 
 class AuthorityReport : public liber::netapp::Serializable {
@@ -74,9 +74,35 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor& ctor);
-  void pack(liber::netapp::PacketCtor& ctor) const;
-  bool unpack(liber::netapp::PacketDtor& dtor);
+  void pack(liber::netapp::SerialStream& ctor);
+  void pack(liber::netapp::SerialStream& ctor) const;
+  bool unpack(liber::netapp::SerialStream& dtor);
+};
+
+class DestinationReport : public liber::netapp::Serializable {
+public:
+
+  SegmentationReport segmentation;
+  AssemblyReport     assembly;
+
+protected:
+
+  void pack(liber::netapp::SerialStream& ctor);
+  void pack(liber::netapp::SerialStream& ctor) const;
+  bool unpack(liber::netapp::SerialStream& dtor);
+};
+
+class SourceReport : public liber::netapp::Serializable {
+public:
+
+  SegmentationReport segmentation;
+  AuthorityReport   authority;
+
+protected:
+
+  void pack(liber::netapp::SerialStream& ctor);
+  void pack(liber::netapp::SerialStream& ctor) const;
+  bool unpack(liber::netapp::SerialStream& dtor);
 };
 
 class JobReport : public liber::netapp::Serializable {
@@ -87,15 +113,8 @@ public:
   RsyncError createJobStatus;
 
   // Destination file segmentation report.
-  struct DestinationReport {
-    SegmentationReport segmentation;
-    AssemblyReport     assembly;
-  } destination;
-
-  struct SourceReport {
-    SegmentationReport segmentation;
-    AuthorityReport   authority;
-  } source;
+  DestinationReport destination;
+  SourceReport      source;
 
 
   /**
@@ -106,9 +125,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor&);
-  void pack(liber::netapp::PacketCtor&) const;
-  bool unpack(liber::netapp::PacketDtor&);
+  void pack(liber::netapp::SerialStream&);
+  void pack(liber::netapp::SerialStream&) const;
+  bool unpack(liber::netapp::SerialStream&);
 };
 
 } // End namespace rsync

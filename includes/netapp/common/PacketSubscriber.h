@@ -1,8 +1,6 @@
 #ifndef PACKET_SUBSCRIBER_H
 #define PACKET_SUBSCRIBER_H
 
-//#include "GenericPacket.h"
-
 namespace liber {
 namespace netapp {
 
@@ -24,23 +22,19 @@ public:
     * synchronous packet processing, simply override with an implementation
     * that does nothing.
     */
-   //virtual void processPacket(const GenericPacket* pPacket) = 0;
-
-   /**
-    * Add a packet to the end of this PacketApp's input queue (if it has one).
-    */
    virtual bool put(const char* pData, ui32 nLength) = 0;
-
-protected:
 
    virtual bool sendPacket(GenericPacket* pPacket);
    bool sendPacketTo(int destinationID, GenericPacket* pPacket);
 
+protected:
+
 private:
 
-   int mSubscriberId;
-   // GenericPacket output queue.
-   PacketReceiver* mpReceiver;
+  int mSubscriberId;
+
+  // Generic packet receiver. Can be a queue, hook, etc.
+  PacketReceiver* mpReceiver;
 };
 
 } // End namespace netapp

@@ -5,7 +5,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/uuid/uuid.hpp>
 #include "BaseTypes.h"
-#include "PacketHelper.h"
+#include "Serializable.h"
 
 namespace liber {
 namespace rsync {
@@ -22,9 +22,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor& rCtor);
-  void pack(liber::netapp::PacketCtor& rCtor) const;
-  bool unpack(liber::netapp::PacketDtor& rDtor);
+  void pack(liber::netapp::SerialStream& rCtor);
+  void pack(liber::netapp::SerialStream& rCtor) const;
+  bool unpack(liber::netapp::SerialStream& rDtor);
 };
 
 
@@ -57,9 +57,9 @@ public:
 
 protected:
 
-  void  pack(liber::netapp::PacketCtor& rCtor);
-  void  pack(liber::netapp::PacketCtor& rCtor) const;
-  bool  unpack(liber::netapp::PacketDtor& rDtor);
+  void  pack(liber::netapp::SerialStream& rCtor);
+  void  pack(liber::netapp::SerialStream& rCtor) const;
+  bool  unpack(liber::netapp::SerialStream& rDtor);
 
 private:
 

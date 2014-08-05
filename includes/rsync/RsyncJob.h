@@ -20,15 +20,21 @@ public:
   JobDescriptor& descriptor();
 
   JobReport& report();
+  void mergeReport(const JobReport& rReport);
 
   SegmentQueue& segments();
 
   InstructionQueue& instructions();
 
-  void signalDone();
+  void signalSegmentationDone();
+  void signalAuthDone();
+  void signalAssemblyDone();
+  void signalAllDone();
+
   bool waitDone(int nTimeoutMs = Sem::SemWaitForever);
 
-private: 
+private:
+ 
   RsyncJob(const RsyncJob&);
   RsyncJob& operator= (const RsyncJob&);
 
@@ -41,11 +47,12 @@ private:
   SegmentQueue mSegments;
   InstructionQueue mInstructions;
 
-  BinarySem mDoneCondition;
+  BinarySem mSegmentationDone;
+  BinarySem mAuthDone;
+  BinarySem mAssemblyDone;
 };
 
 } // End namespace rsync
 } // End namespace liber
 
 #endif // RSYNC_JOB_H
-

@@ -15,10 +15,16 @@ namespace rsync {
 
 class JobDescriptor;
 
+class JobCompletionHook {
+public:
+  virtual ~JobCompletionHook() {};
+  virtual void operator () (RsyncJob* pJob) = 0;
+};
+
 class JobQueue : public liber::concurrency::IThread {
 public:
 
-  JobQueue(FileSystemInterface&, InstructionReceiver&);
+  JobQueue(FileSystemInterface&, InstructionReceiver&, JobCompletionHook&);
 
 
   RsyncJob* activeJob();
@@ -35,6 +41,8 @@ private:
 
   LocalAuthorityInterface mAuthority;
   InstructionReceiver& mrReceiver;
+
+  JobCompletionHook& mrJobHook;
 
   Queue<RsyncJob*> mJobQueue;
 
@@ -74,6 +82,20 @@ private:
   QueryHandler mpUserHandler;
 
   int mRequestID;
+
+
+  class SendReportHook : public JobCompletionHook {
+  public:
+    SendReportHook(liber::netapp::PacketSubscriber& rSubscriber);
+    ~SendReportHook() {};
+
+    void setRequestID(int requestID);
+    void operator () (RsyncJob* pJob);
+
+  private:
+    liber::netapp::PacketSubscriber& mrSubscriber;
+    int mRequestID;
+  } mSendReportHook;
 
   JobQueue mJobQueue;
 };

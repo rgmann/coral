@@ -5,7 +5,7 @@
 #include "JobDescriptor.h"
 #include "Segment.h"
 #include "SegmentAccessor.h"
-#include "PacketHelper.h"
+#include "Serializable.h"
 #include "RsyncError.h"
 
 namespace liber {
@@ -79,8 +79,8 @@ public:
 
   virtual void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&) = 0;
 
-//  virtual void serialize(liber::netapp::PacketCtor& ctor) const = 0;
-//  virtual bool deserialize(liber::netapp::PacketDtor& dtor) = 0;
+//  virtual void serialize(liber::netapp::SerialStream& ctor) const = 0;
+//  virtual bool deserialize(liber::netapp::SerialStream& dtor) = 0;
 
 protected:
 
@@ -105,8 +105,8 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor& ctor) const;
-  bool unpack(liber::netapp::PacketDtor& dtor);
+  void pack(liber::netapp::SerialStream& ctor) const;
+  bool unpack(liber::netapp::SerialStream& dtor);
 
 private:
 
@@ -130,8 +130,8 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor& ctor) const;
-  bool unpack(liber::netapp::PacketDtor& dtor);
+  void pack(liber::netapp::SerialStream& ctor) const;
+  bool unpack(liber::netapp::SerialStream& dtor);
 
 private:
 
@@ -156,8 +156,8 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor& ctor) const;
-  bool unpack(liber::netapp::PacketDtor& dtor);
+  void pack(liber::netapp::SerialStream& ctor) const;
+  bool unpack(liber::netapp::SerialStream& dtor);
 
 private:
 
@@ -183,8 +183,8 @@ public:
 
 protected:
 
-  void pack(liber::netapp::PacketCtor& ctor) const;
-  bool unpack(liber::netapp::PacketDtor& dtor);
+  void pack(liber::netapp::SerialStream& ctor) const;
+  bool unpack(liber::netapp::SerialStream& dtor);
 
 private:
 

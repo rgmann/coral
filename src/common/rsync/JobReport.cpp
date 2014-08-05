@@ -5,7 +5,7 @@ using namespace liber;
 using namespace liber::rsync;
 using namespace liber::netapp;
 
-void serializeTS(PacketCtor& ctor, const Timestamp& ts)
+void serializeTS(SerialStream& ctor, const Timestamp& ts)
 {
   ui32 temp = ts.seconds();
   ctor.write(temp);
@@ -13,7 +13,7 @@ void serializeTS(PacketCtor& ctor, const Timestamp& ts)
   ctor.write(temp);
 }
 
-bool deserializeTS(PacketDtor& dtor, Timestamp& ts)
+bool deserializeTS(SerialStream& dtor, Timestamp& ts)
 {
   ui32 temp = 0;
   if (dtor.read(temp) == false)
@@ -58,13 +58,13 @@ void SegmentationReport::print(std::ostream& stream, ui8 nSpaces) const
 }
 
 //----------------------------------------------------------------------------
-void SegmentationReport::pack(liber::netapp::PacketCtor& ctor)
+void SegmentationReport::pack(liber::netapp::SerialStream& ctor)
 {
   const_cast<const SegmentationReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
-void SegmentationReport::pack(liber::netapp::PacketCtor& ctor) const
+void SegmentationReport::pack(liber::netapp::SerialStream& ctor) const
 {
   ctor.write((ui32)status);
   ctor.write(segmentSizeBytes);
@@ -75,7 +75,7 @@ void SegmentationReport::pack(liber::netapp::PacketCtor& ctor) const
 }
 
 //----------------------------------------------------------------------------
-bool SegmentationReport::unpack(PacketDtor& dtor)
+bool SegmentationReport::unpack(SerialStream& dtor)
 {
   ui32 tempStatus = 0;
   if (!dtor.read(tempStatus))
@@ -140,13 +140,13 @@ void AssemblyReport::print(std::ostream& stream, ui8 nSpaces) const
 }
 
 //----------------------------------------------------------------------------
-void AssemblyReport::pack(PacketCtor& ctor)
+void AssemblyReport::pack(SerialStream& ctor)
 {
   const_cast<const AssemblyReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
-void AssemblyReport::pack(PacketCtor& ctor) const
+void AssemblyReport::pack(SerialStream& ctor) const
 {
   ctor.write((ui32)status);
   ctor.write(segmentCount);
@@ -156,7 +156,7 @@ void AssemblyReport::pack(PacketCtor& ctor) const
 }
 
 //----------------------------------------------------------------------------
-bool AssemblyReport::unpack(PacketDtor& dtor)
+bool AssemblyReport::unpack(SerialStream& dtor)
 {
   ui32 tempStatus = 0;
   if (!dtor.read(tempStatus))
@@ -221,13 +221,13 @@ void AuthorityReport::print(std::ostream& stream, ui8 nSpaces) const
 }
 
 //----------------------------------------------------------------------------
-void AuthorityReport::pack(PacketCtor& ctor)
+void AuthorityReport::pack(SerialStream& ctor)
 {
   const_cast<const AuthorityReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
-void AuthorityReport::pack(PacketCtor& ctor) const
+void AuthorityReport::pack(SerialStream& ctor) const
 {
   ctor.write((ui32)status);
   ctor.write(receivedSegmentCount);
@@ -240,7 +240,7 @@ void AuthorityReport::pack(PacketCtor& ctor) const
 }
 
 //----------------------------------------------------------------------------
-bool AuthorityReport::unpack(PacketDtor& dtor)
+bool AuthorityReport::unpack(SerialStream& dtor)
 {
   ui32 tempStatus = 0;
   if (dtor.read(tempStatus) == false)
@@ -283,6 +283,67 @@ bool AuthorityReport::unpack(PacketDtor& dtor)
   return true;
 }
 
+//----------------------------------------------------------------------------
+void DestinationReport::pack(SerialStream& ctor)
+{
+  const_cast<const DestinationReport*>(this)->pack(ctor);
+}
+
+//----------------------------------------------------------------------------
+void DestinationReport::pack(liber::netapp::SerialStream& ctor) const
+{
+  segmentation.serialize(ctor);
+  assembly.serialize(ctor);
+}
+
+//----------------------------------------------------------------------------
+bool DestinationReport::unpack(liber::netapp::SerialStream& dtor)
+{
+  if (segmentation.deserialize(dtor) == false)
+  {
+    log::error("DestinationReport::deserialize - Failed to deserialize dest seg report\n");
+    return false;
+  }
+
+  if (assembly.deserialize(dtor) == false)
+  {
+    log::error("JobReport::deserialize - Failed to deserialize dest assembly report\n");
+    return false;
+  }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void SourceReport::pack(SerialStream& ctor)
+{
+  const_cast<const SourceReport*>(this)->pack(ctor);
+}
+
+//----------------------------------------------------------------------------
+void SourceReport::pack(liber::netapp::SerialStream& ctor) const
+{
+  segmentation.serialize(ctor);
+  authority.serialize(ctor);
+}
+
+//----------------------------------------------------------------------------
+bool SourceReport::unpack(liber::netapp::SerialStream& dtor)
+{
+  if (segmentation.deserialize(dtor) == false)
+  {
+    log::error("SourceReport::deserialize - Failed to deserialize source seg report\n");
+    return false;
+  }
+
+  if (authority.deserialize(dtor) == false)
+  {
+    log::error("SourceReport::deserialize - Failed to deserialize source auth report\n");
+    return false;
+  }
+
+  return true;
+}
 
 //----------------------------------------------------------------------------
 JobReport::JobReport()
@@ -305,13 +366,13 @@ void JobReport::print(std::ostream& stream) const
 }
 
 //----------------------------------------------------------------------------
-void JobReport::pack(PacketCtor& ctor)
+void JobReport::pack(SerialStream& ctor)
 {
   const_cast<const JobReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
-void JobReport::pack(liber::netapp::PacketCtor& ctor) const
+void JobReport::pack(liber::netapp::SerialStream& ctor) const
 {
   destination.segmentation.serialize(ctor);
   destination.assembly.serialize(ctor);
@@ -320,29 +381,17 @@ void JobReport::pack(liber::netapp::PacketCtor& ctor) const
 }
 
 //----------------------------------------------------------------------------
-bool JobReport::unpack(liber::netapp::PacketDtor& dtor)
+bool JobReport::unpack(liber::netapp::SerialStream& dtor)
 {
-  if (!destination.segmentation.deserialize(dtor))
+  if (destination.deserialize(dtor) == false)
   {
-    log::error("JobReport::deserialize - Failed to deserialize dest seg report\n");
+    log::error("JobReport::deserialize - Failed to deserialize dest report\n");
     return false;
   }
 
-  if (!destination.assembly.deserialize(dtor))
+  if (source.deserialize(dtor) == false)
   {
-    log::error("JobReport::deserialize - Failed to deserialize dest assembly report\n");
-    return false;
-  }
-
-  if (!source.segmentation.deserialize(dtor))
-  {
-    log::error("JobReport::deserialize - Failed to deserialize source seg report\n");
-    return false;
-  }
-
-  if (!source.authority.deserialize(dtor))
-  {
-    log::error("JobReport::deserialize - Failed to deserialize source auth report\n");
+    log::error("JobReport::deserialize - Failed to deserialize source report\n");
     return false;
   }
 

@@ -346,8 +346,8 @@ void JobAgent::finishRemoteJob(const char* pData, ui32 nSizeBytes)
 
       if (jobIterator->second)
       {
-        jobIterator->second->report() = jobResult.report();
-        jobIterator->second->signalDone();
+        jobIterator->second->mergeReport(jobResult.report());
+        jobIterator->second->signalAllDone();
       }
       else
       {

@@ -22,6 +22,7 @@ public:
 
     liber::log::flush();
     report.print(std::cout);
+    std::cout << "\n\n";
 
     mSem.give();
   }
@@ -29,6 +30,11 @@ public:
   CountingSem mSem;
   const char* mpName;
 };
+
+#define LOCAL_TEST
+#define FILE_TEST
+#define REMOTE_SRC_TEST
+#define DFILE_TEST
 
 int main (int argc, char* argv[])
 {
@@ -56,7 +62,20 @@ int main (int argc, char* argv[])
 
     local.setCallback(&localCallback);
     remote.setCallback(&remoteCallback);
-    //local.sync("image.png", "image.png", true);
+
+#ifdef LOCAL_TEST
+    jobStatus = local.sync("d_inst.cpp", "s_inst.cpp");
+    if (jobStatus == RsyncSuccess)
+    {
+      localCallback.mSem.take();
+    }
+    else
+    {
+      log::error("RSYNC job failed: %s\n", liber::rsync::errorToString(jobStatus).c_str()); 
+    }
+#endif
+
+#ifdef FILE_TEST
     jobStatus = local.sync("file.dat", "file.dat", true, false);
     if (jobStatus == RsyncSuccess)
     {
@@ -67,19 +86,21 @@ int main (int argc, char* argv[])
     {
       log::error("RSYNC job failed: %s\n", liber::rsync::errorToString(jobStatus).c_str()); 
     }
+#endif
 
-    //jobStatus = local.sync("instruction_test.cpp", "instruction_test.cpp", false, true);
-    jobStatus = local.sync("instruction_test.cpp", "instruction_test.cpp", true, false);
+#ifdef REMOTE_SRC_TEST
+    jobStatus = local.sync("instruction_test.cpp", "instruction_test.cpp", false, true);
     if (jobStatus == RsyncSuccess)
     {
       localCallback.mSem.take();
-      remoteCallback.mSem.take();
     }
     else
     {
       log::error("RSYNC job failed: %s\n", liber::rsync::errorToString(jobStatus).c_str()); 
     }
+#endif
 
+#ifdef DFILE_TEST
     jobStatus = local.sync("dfile_0.dat", "dfile_0.dat", false, true);
     if (jobStatus == RsyncSuccess)
     {
@@ -90,6 +111,7 @@ int main (int argc, char* argv[])
     {
       log::error("RSYNC job failed: %s\n", liber::rsync::errorToString(jobStatus).c_str()); 
     }
+#endif
   }
   else
   {
