@@ -15,9 +15,9 @@ RpcMarshalledCall::RpcMarshalledCall(const RpcObject &object)
 }
 
 //-----------------------------------------------------------------------------
-void RpcMarshalledCall::getRpcPacket(RpcPacket** pPacket) const
+RpcPacket* RpcMarshalledCall::getRpcPacket() const
 {
-   *pPacket = new RpcPacket(mParamObj);
+   return new (std::nothrow) RpcPacket(mParamObj);
 }
 
 //-----------------------------------------------------------------------------

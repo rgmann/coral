@@ -16,7 +16,7 @@ public:
    
    RpcMarshalledCall(const RpcObject &object);
    
-   void getRpcPacket(RpcPacket** pPacket) const;
+   RpcPacket* getRpcPacket() const;
 
    void getResult(RpcObject &result);
 

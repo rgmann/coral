@@ -10,7 +10,6 @@
 using namespace liber;
 using namespace liber::rsync;
 
-//std::ofstream authLog;
 
 //-----------------------------------------------------------------------------
 Authority::Authority()
@@ -26,7 +25,6 @@ Authority::Authority()
 , mpReceiver(NULL)
 {
   mChunkBuffer.allocate(mnMaxChunkSize);
-//  authLog.open("/Users/vaughanbiker/Development/liber/test/rsync/test_root/auth_log.csv");
 }
 
 //-----------------------------------------------------------------------------
@@ -55,7 +53,10 @@ void Authority::reset()
 
 //-----------------------------------------------------------------------------
 bool Authority::
-process(JobDescriptor& rDescriptor, std::istream& istream, InstructionReceiver& rReceiver, SourceReport& rReport)
+process(JobDescriptor& rDescriptor,
+        std::istream& istream,
+        InstructionReceiver& rReceiver,
+        SourceReport& rReport)
 {
   mpReport = &rReport.authority;
   mpReport->receivedSegmentCount = mHash.size();
@@ -139,14 +140,14 @@ void Authority::call(Segment& rSegment)
 
     Segment* lpMatchSegment = NULL;
     SegmentComparator comparator(&rSegment);
-//    if (mrHash.find(pSegment->getWeak().checksum(), lpMatchSegment, comparator))
+
     if (mHash.remove(rSegment.getWeak().checksum(), lpMatchSegment, comparator))
     {
       // Any data in the buffer when a match occurs should be moved to a chunk
       // instruction and sent before sending the ID of the matched segment.
-      flushChunkBuffer((mBufferStartID == -1) ? FlushAll : (rSegment.getID() - mBufferStartID));
+      flushChunkBuffer((mBufferStartID == -1) ?
+                       FlushAll : (rSegment.getID() - mBufferStartID));
 
-//      log::debug("Match found: %d\n", pSegment->getID());
       // If the Segment exists in the hash, create a Segment instruction.
       if (lpMatchSegment)
       {
@@ -165,7 +166,6 @@ void Authority::call(Segment& rSegment)
       mpReport->matchedSegmentCount++;
       mnSegmentBytes += rSegment.size();
       delete lpMatchSegment;
-//      log::status("Authority: match at %d\n", rSegment.getID());
     }
     else
     {
@@ -178,12 +178,13 @@ void Authority::call(Segment& rSegment)
 
         if (mnBufferedCount == 0)
         {
-//          log::status("Authority: mChunkBuffer.size=%u\n", mChunkBuffer.size());
-          if (mChunkBuffer.isEmpty()) mBufferStartID = rSegment.getID();
-          ui32 lnBytesWritten = mChunkBuffer.write((const char*)rSegment.data(), rSegment.size());
+          if (mChunkBuffer.isEmpty())
+          {
+            mBufferStartID = rSegment.getID();
+          }
+
+          mChunkBuffer.write((const char*)rSegment.data(), rSegment.size());
           mnBufferedCount = rSegment.size() - 1;
-          
-//          log::status("Authority: push back exp=%d bytes, act = %u, size=%u\n", rSegment.size(), lnBytesWritten, mChunkBuffer.size());
         }
         else
         {

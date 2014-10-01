@@ -26,13 +26,24 @@ RpcPacket::RpcPacket(const RpcObject &object)
    std::string lSerialObject;
    
    lSerialObject = object.serialize();
-   
-   if (!lSerialObject.empty() && allocate(sizeof(Data), lSerialObject.size()))
+
+   if (lSerialObject.empty())
    {
-      memcpy(data()->marker, MarkerData, RpcMarkerSize);
-      data()->length = lSerialObject.size();
+     log::error("RpcPacket - Empty RpcObject. No allocation performed.\n");
+   }
+   else
+   {
+     if (allocate(sizeof(Data), lSerialObject.size()))
+     {
+       memcpy(data()->marker, MarkerData, RpcMarkerSize);
+       data()->length = lSerialObject.size();
       
-      memcpy(dataPtr(), lSerialObject.data(), lSerialObject.size());
+       memcpy(dataPtr(), lSerialObject.data(), lSerialObject.size());
+     }
+     else
+     {
+       log::error("RpcPacket - Allocation failed.\n");
+     }
    }
 }
 
@@ -43,11 +54,8 @@ bool RpcPacket::getObject(RpcObject &object) const
    
    if (isAllocated())
    {
-      std::string lSerialObject;
-      lSerialObject.assign((char*)dataPtr(), data()->length);
-
-      lbSuccess = object.deserialize(lSerialObject);
-      if (!lbSuccess)
+      lbSuccess = object.deserialize((char*)dataPtr(), data()->length);
+      if (lbSuccess == false)
       {
          log::error("RpcPacket::getObject: Failed to deserialize.\n");
       }
@@ -103,10 +111,10 @@ void RpcPacket::swap(void* pData, ui32 nSizeBytes)
   {
     RpcPacket::Data* lpData = reinterpret_cast<RpcPacket::Data*>(pData);
 
-    lpData->rpcId = ByteOrder::NetSwap(lpData->rpcId);
-    lpData->length = ByteOrder::NetSwap(lpData->length);
-    lpData->format = ByteOrder::NetSwap(lpData->format);
-    lpData->encoding = ByteOrder::NetSwap(lpData->encoding);
+    liber::netapp::swapInPlace(lpData->rpcId);
+    liber::netapp::swapInPlace(lpData->length);
+    liber::netapp::swapInPlace(lpData->format);
+    liber::netapp::swapInPlace(lpData->encoding);
   }
 }
 

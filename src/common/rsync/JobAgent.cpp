@@ -181,10 +181,8 @@ RsyncError JobAgent::createJob(RsyncJob* pJob)
     if ((lStatus = addActiveJob(pJob)) == RsyncSuccess)
     {
       // If this is a remote job, send the descriptor to the remote node.
-      //if (descriptor.isRemoteRequest())
       if (descriptor.getDestination().remote)
       {
-        //log::debug("JobAgent::createJob - Sending remote job\n");
         lStatus = sendRemoteJob(descriptor);
       }
     }

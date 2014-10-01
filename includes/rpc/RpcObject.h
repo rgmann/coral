@@ -3,6 +3,7 @@
 
 #include <string>
 #include <google/protobuf/message.h>
+#include "Serializable.h"
 #include "RpcException.h"
 
 namespace liber {
@@ -11,7 +12,7 @@ namespace rpc {
 typedef ::google::protobuf::Message PbMessage;
 
 
-class RpcObject {
+class RpcObject : public liber::netapp::Serializable {
 public:
 
    RpcObject();
@@ -42,11 +43,14 @@ public:
    bool getResponse(RpcObject &response, const PbMessage &value) const;
    bool getResponse(RpcObject &response, const std::string &value) const;
 
-   std::string serialize() const;
-   bool deserialize(const std::string& data);
-
-
    std::string  mMessage;
+
+protected:
+
+  void pack(liber::netapp::SerialStream&);
+  void pack(liber::netapp::SerialStream&) const;
+  bool unpack(liber::netapp::SerialStream&);
+
 private:
 
    // Protobuf message serialized to a byte string.

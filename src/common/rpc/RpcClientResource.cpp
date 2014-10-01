@@ -1,3 +1,4 @@
+#include <boost/uuid/nil_generator.hpp>
 #include "Log.h"
 #include "RpcClientResource.h"
 #include "BlockingRpcSupervisor.h"
@@ -49,7 +50,7 @@ bool RpcClientResource::construct()
 
    if (lbSuccess)
    {
-      mUiid = Md5Hash(lSupervisor.response().callInfo().uiid);
+      mUuid = lSupervisor.response().callInfo().uuid;
       log::debug("RpcClientResource::construct: success\n");
    }
    
@@ -72,7 +73,7 @@ bool RpcClientResource::destroy()
 
    if (lbSuccess)
    {
-      mUiid.invalidate();
+      mUuid = boost::uuids::nil_uuid();
    }
    
    return lbSuccess;
@@ -120,7 +121,7 @@ marshallRequest(RpcObject&         requestObject,
                 const PbMessage*   pRequestParameters)
 {
   requestObject.callInfo().resource = mClassname;
-  mUiid.get(&requestObject.callInfo().uiid);
+  requestObject.callInfo().uuid = mUuid;
   requestObject.callInfo().action = methodName;
   if (pRequestParameters) requestObject.setParams(*pRequestParameters);
 }

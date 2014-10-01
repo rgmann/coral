@@ -1,5 +1,5 @@
-#ifndef PACKET_HELPER_H
-#define PACKET_HELPER_H
+#ifndef SERIALIZABLE_H
+#define SERIALIZABLE_H
 
 #include <string>
 #include <iostream>
@@ -106,5 +106,5 @@ protected:
 } // End namespace netapp
 } // End namespace liber
 
-#endif // PACKET_HELPER_H
+#endif // SERIALIZABLE_H
 

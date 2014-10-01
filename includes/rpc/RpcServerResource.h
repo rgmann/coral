@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <boost/uuid/uuid.hpp>
 #include "Queue.h"
 #include "Mutex.h"
 #include "RpcObject.h"
@@ -25,23 +26,22 @@ public:
 
 protected:
 
-   virtual bool isValidInstance(Md5Hash& uiid);
+   virtual bool isValidInstance(boost::uuids::uuid& uuid);
    
    bool construct(RpcObject &input, RpcObject &output);
    
    bool destroy(RpcObject &input, RpcObject &output);
    
-   bool invoke(Md5Hash& instId, RpcObject &input, RpcObject &output);
+   bool invoke(boost::uuids::uuid& uuid, RpcObject &input, RpcObject &output);
       
    void exception(RpcObject&         input,
                   RpcObject&         output,
                   RpcErrorId         eid,
                   const std::string& message = "");
    
-   void createUIID(Md5Hash& hash);
 
    virtual InstanceWrapper* createInstance() = 0;
-   InstanceWrapper* getInstance(Md5Hash& uiid);
+   InstanceWrapper* getInstance(boost::uuids::uuid& uuid);
       
    bool addAction(const std::string &name,
                   InstanceWrapper::Method wrapper);
@@ -58,11 +58,10 @@ private:
    
    std::string mName;
    
-   std::map<Md5Hash, InstanceWrapper*> mInstances;
+   std::map<boost::uuids::uuid, InstanceWrapper*> mInstances;
    
    std::map<std::string, InstanceWrapper::Method> mMethodMap;
    
-   int mnCurrentInstId;
    int mnInstanceCount;
 };
 

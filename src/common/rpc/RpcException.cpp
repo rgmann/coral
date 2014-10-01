@@ -2,8 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <boost/uuid/nil_generator.hpp>
 #include "Log.h"
-#include "PacketHelper.h"
 #include "RpcException.h"
 
 using namespace liber;
@@ -37,37 +37,39 @@ std::string TraceFrame::toString() const
 }
 
 //-----------------------------------------------------------------------------
-std::string TraceFrame::serialize() const
+void TraceFrame::pack(liber::netapp::SerialStream& stream) const
 {
-   PacketCtor lPacket(NetworkByteOrder);
-   lPacket.writeCString(mClassName);
-   lPacket.writeCString(mMethodName);
-   lPacket.writeCString(mFileName);
-   lPacket.write((ui32)mLineNumber);
-   return lPacket.stream.str(); 
+   stream.writeCString(mClassName);
+   stream.writeCString(mMethodName);
+   stream.writeCString(mFileName);
+   stream.write((ui32)mLineNumber);
 }
 
 //-----------------------------------------------------------------------------
-bool TraceFrame::deserialize(const std::string& data)
+void TraceFrame::pack(liber::netapp::SerialStream& stream)
 {
-   PacketDtor lPacket(NetworkByteOrder);
-   lPacket.setData(data);
-   if (lPacket.readCString(mClassName) == PacketDtor::ReadFail)
+  const_cast<const TraceFrame*>(this)->pack(stream);
+}
+
+//-----------------------------------------------------------------------------
+bool TraceFrame::unpack(liber::netapp::SerialStream& stream)
+{
+   if (stream.readCString(mClassName) == liber::netapp::SerialStream::ReadFail)
    {
       log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
-   if (lPacket.readCString(mMethodName) == PacketDtor::ReadFail)
+   if (stream.readCString(mMethodName) == liber::netapp::SerialStream::ReadFail)
    {
       log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
-   if (lPacket.readCString(mFileName) == PacketDtor::ReadFail)
+   if (stream.readCString(mFileName) == liber::netapp::SerialStream::ReadFail)
    {
       log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
-   if (!lPacket.read(mLineNumber))
+   if (stream.read(mLineNumber) == false)
    {
       log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
@@ -120,83 +122,81 @@ void RpcException::reset()
 
   mCallInfo.resource = "";
   mCallInfo.action = "";
-  memset(&mCallInfo.uiid, 0, sizeof(Hash128)); // Unique Instance ID
+  mCallInfo.uuid = boost::uuids::nil_generator()();
   mCallInfo.rpcId = 0;
 
   mTrace.clear();
 }
 
 //-----------------------------------------------------------------------------
-std::string RpcException::serialize() const
+void RpcException::pack(liber::netapp::SerialStream& stream) const
 {
-   PacketCtor lPacket(NetworkByteOrder);
-
-   lPacket.write((ui32)reporter);
-   lPacket.write((ui32)id);
-   lPacket.writeCString(message);
+   stream.write((ui32)reporter);
+   stream.write((ui32)id);
+   stream.writeCString(message);
 
    // Serialize the frame trace only if an exception occurred.
    if (id != NoException)
    {
-      lPacket.write((ui8)mTrace.size());
+      stream.write((ui8)mTrace.size());
 
       std::vector<TraceFrame>::const_iterator lIt = mTrace.begin();
       for (; lIt != mTrace.end(); lIt++)
       {
-         lPacket.write(lIt->serialize());
+         lIt->serialize(stream);
       }
    }
    else
    {
-      lPacket.write((ui8)0);
+      stream.write((ui8)0);
    }
-
-   return lPacket.stream.str();
 }
 
 //-----------------------------------------------------------------------------
-bool RpcException::deserialize(const std::string& data)
+void RpcException::pack(liber::netapp::SerialStream& stream)
 {
-   PacketDtor lPacket(NetworkByteOrder);
-   lPacket.setData(data);
+  const_cast<const RpcException*>(this)->pack(stream);
+}
 
+//-----------------------------------------------------------------------------
+bool RpcException::unpack(liber::netapp::SerialStream& stream)
+{
    i32 tI32Field = -1;
-   if (!lPacket.read(tI32Field))
+   if (stream.read(tI32Field) == false)
    {
       log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
    reporter = (Reporter)tI32Field;
 
-   if (!lPacket.read(tI32Field))
+   if (stream.read(tI32Field) == false)
    {
       log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
    id = (RpcErrorId)tI32Field;
 
-   if (lPacket.readCString(message) == PacketDtor::ReadFail)
+   if (stream.readCString(message) == liber::netapp::SerialStream::ReadFail)
    {
       log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
 
    ui8 lnFrameCount = 0;
-   if (!lPacket.read(lnFrameCount))
+   if (stream.read(lnFrameCount) == false)
    {
       log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;
    }
    for (ui8 lnFrameInd = 0; lnFrameInd < lnFrameCount; lnFrameInd++)
    {
-      std::string lFrameData;
       TraceFrame lFrame;
-      if (lPacket.read(lFrameData) == PacketDtor::ReadFail)
+      if (lFrame.deserialize(stream) == false)
       {
          log::error("RpcException::deserialize failure at %d\n", __LINE__);
          return false;
       }
-      if (!lFrame.deserialize(lFrameData)) return false;
+
       mTrace.push_back(lFrame);
    } 
 

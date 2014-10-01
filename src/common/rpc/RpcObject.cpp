@@ -2,7 +2,6 @@
 #include <iostream>
 #include <sstream>
 #include "Log.h"
-#include "PacketHelper.h"
 #include "RpcObject.h"
 
 using namespace liber;
@@ -105,76 +104,66 @@ bool RpcObject::getResponse(RpcObject &response,
 }
 
 //-----------------------------------------------------------------------------
-std::string RpcObject::serialize() const
+void RpcObject::pack(liber::netapp::SerialStream& stream) const
 {
-   PacketCtor lPacket(NetworkByteOrder);
+   stream.writeCString(callInfo().resource);
+   stream.writeCString(callInfo().action);
 
-   lPacket.writeCString(callInfo().resource);
-   lPacket.writeCString(callInfo().action);
-
-   std::string lUiidData;
-   lUiidData.assign((char*)callInfo().uiid.b, sizeof(Hash128));
-   lPacket.write(lUiidData);
-   lPacket.write((ui64)callInfo().rpcId);
-
-   std::string lError = mException.serialize();
-   lPacket.write(lError);
-
-   lPacket.write(mMessage);
-
-   return lPacket.stream.str();
+   stream.write((const char*)callInfo().uuid.data, callInfo().uuid.size());
+   stream.write((ui64)callInfo().rpcId);
+   mException.serialize(stream);
+   stream.write(mMessage);
 }
 
 //-----------------------------------------------------------------------------
-bool RpcObject::deserialize(const std::string &data)
+void RpcObject::pack(liber::netapp::SerialStream& stream)
 {
-   PacketDtor lPacket(NetworkByteOrder);
-   lPacket.setData(data);
+  const_cast<const RpcObject*>(this)->pack(stream);
+}
 
-   // Read the resource name
-   if (lPacket.readCString(callInfo().resource) == PacketDtor::ReadFail)
-   {
-      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
+//-----------------------------------------------------------------------------
+bool RpcObject::unpack(liber::netapp::SerialStream &stream)
+{
+  // Read the resource name
+  if (stream.readCString(callInfo().resource) == SerialStream::ReadFail)
+  {
+    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+    return false;
+  }
 
-   // Read the action name.
-   if (lPacket.readCString(callInfo().action) == PacketDtor::ReadFail)
-   {
-      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
+  // Read the action name.
+  if (stream.readCString(callInfo().action) == SerialStream::ReadFail)
+  {
+    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+    return false;
+  }
 
-   std::string lUiidData;
-   if (lPacket.read(lUiidData) != PacketDtor::ReadOk)
-   {
-      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   memcpy(callInfo().uiid.b, lUiidData.data(), lUiidData.size());
+  if (stream.read((char*)callInfo().uuid.data, callInfo().uuid.size()) != SerialStream::ReadOk)
+  {
+    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+    return false;
+  }
 
-   if (!lPacket.read(callInfo().rpcId))
-   {
-      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
+  if (stream.read(callInfo().rpcId) == false)
+  {
+    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+    return false;
+  }
 
-   // Read the exception.
-   std::string lException;
-   if (lPacket.read(lException) == PacketDtor::ReadFail)
-   {
-      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   exception().deserialize(lException);
+  // Read the exception.
+  if (exception().deserialize(stream) == false)
+  {
+    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+    return false;
+  }
 
-   // Read the protobuf message.
-   if (lPacket.read(mMessage) == PacketDtor::ReadFail)
-   {
-      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
+  // Read the protobuf message.
+  if (stream.read(mMessage) == SerialStream::ReadFail)
+  {
+    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+    return false;
+  }
 
-   return true;
+  return true;
 }
 

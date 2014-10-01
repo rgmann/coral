@@ -59,7 +59,9 @@ bool Assembler::process(InstructionQueue& rQueue, AssemblyReport& rReport)
       lpInstruction->execute(mStatus, mrAccessor, mOStream);
       if (mStatus.failed())
       {
-        log::error("Assembler::process - Instruction (type=%d) failed with status %d\n", lpInstruction->type(), mStatus.error);
+        log::error("Assembler::process - "
+                   "Instruction (type=%d) failed with status %d\n",
+                   lpInstruction->type(), mStatus.error);
       }
 
       delete lpInstruction;

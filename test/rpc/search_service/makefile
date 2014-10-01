@@ -8,7 +8,7 @@ BOOST_LIB_DIR = -L/opt/local/lib
 BOOST_LIBS = -lboost_system-mt -lboost_filesystem-mt
 BOOST_LIB = $(BOOST_LIB_DIR) $(BOOST_LIBS)
 
-INCLUDE =\
+INCLUDE =$(BOOST_INCLUDE)\
 -I$(BASE)/includes/base \
 -I$(BASE)/includes/base/logging \
 -I$(BASE)/includes/base/concurrency \

@@ -53,6 +53,11 @@ bool RpcServer::processPacket(const RpcPacket* pPacket)
                    
       sendObject(lOutput);
    }
+   else
+   {
+     liber::log::error("RpcServer::processPacket - "
+                       "Failed to deserialize RpcObject\n");
+   }
 
    return lbSuccess;
 }
@@ -65,8 +70,7 @@ bool RpcServer::put(const char* pData, ui32 nLength)
 
   if (pData)
   {
-    lbSuccess = lpPacket->unpack(pData, nLength);
-    if (lbSuccess)
+    if (lpPacket->unpack(pData, nLength))
     {
       lbSuccess = processPacket(lpPacket);
     }

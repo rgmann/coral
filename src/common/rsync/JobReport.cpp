@@ -70,6 +70,7 @@ void SegmentationReport::pack(liber::netapp::SerialStream& ctor) const
   ctor.write(segmentSizeBytes);
   ctor.write(strideSizeBytes);
   ctor.write(segmentCount);
+
   serializeTS(ctor, begin);
   serializeTS(ctor, end);
 }
@@ -78,38 +79,38 @@ void SegmentationReport::pack(liber::netapp::SerialStream& ctor) const
 bool SegmentationReport::unpack(SerialStream& dtor)
 {
   ui32 tempStatus = 0;
-  if (!dtor.read(tempStatus))
+  if (dtor.read(tempStatus) == false)
   {
     log::error("SegmentationReport::unpack - Failed to read status\n");
     return false;
   }
   status = (RsyncError)tempStatus;
 
-  if (!dtor.read(segmentSizeBytes))
+  if (dtor.read(segmentSizeBytes) == false)
   {
     log::error("SegmentationReport::unpack - Failed to read rcv segment size\n");
     return false;
   }
 
-  if (!dtor.read(strideSizeBytes))
+  if (dtor.read(strideSizeBytes) == false)
   {
     log::error("SegmentationReport::unpack - Failed to read stride size\n");
     return false;
   }
 
-  if (!dtor.read(segmentCount))
+  if (dtor.read(segmentCount) == false)
   {
     log::error("SegmentationReport::unpack - Failed to read segment count\n");
     return false;
   }
 
-  if (!deserializeTS(dtor, begin))
+  if (deserializeTS(dtor, begin) == false)
   {
     log::error("SegmentationReport::unpack - Failed to read hashBegin.mSeconds\n");
     return false;
   }
 
-  if (!deserializeTS(dtor, end))
+  if (deserializeTS(dtor, end) == false)
   {
     log::error("SegmentationReport::unpack - Failed to read hashEnd.mSeconds\n");
     return false;
@@ -159,32 +160,32 @@ void AssemblyReport::pack(SerialStream& ctor) const
 bool AssemblyReport::unpack(SerialStream& dtor)
 {
   ui32 tempStatus = 0;
-  if (!dtor.read(tempStatus))
+  if (dtor.read(tempStatus) == false)
   {
     log::error("AssemblyReport::unpack - Failed to read status\n");
     return false;
   }
   status = (RsyncError)tempStatus;
 
-  if (!dtor.read(segmentCount))
+  if (dtor.read(segmentCount) == false)
   {
     log::error("AssemblyReport::unpack - Failed to read rcv segment count\n");
     return false;
   }
 
-  if (!dtor.read(chunkCount))
+  if (dtor.read(chunkCount) == false)
   {
     log::error("AssemblyReport::unpack - Failed to read chunk count\n");
     return false;
   }
 
-  if (!deserializeTS(dtor, begin))
+  if (deserializeTS(dtor, begin) == false)
   {
     log::error("AssemblyReport::unpack - Failed to read hashBegin.mSeconds\n");
     return false;
   }
 
-  if (!deserializeTS(dtor, end))
+  if (deserializeTS(dtor, end) == false)
   {
     log::error("AssemblyReport::unpack - Failed to read hashEnd.mSeconds\n");
     return false;
@@ -252,13 +253,15 @@ bool AuthorityReport::unpack(SerialStream& dtor)
 
   if (dtor.read(receivedSegmentCount) == false)
   {
-    log::error("AuthorityReport::unpack - Failed to read rcv segment count\n");
+    log::error("AuthorityReport::unpack - "
+               "Failed to read rcv segment count\n");
     return false;
   }
 
   if (dtor.read(matchedSegmentCount) == false)
   {
-    log::error("AuthorityReport::unpack - Failed to read match segment count\n");
+    log::error("AuthorityReport::unpack - "
+               "Failed to read match segment count\n");
     return false;
   }
 
@@ -301,13 +304,15 @@ bool DestinationReport::unpack(liber::netapp::SerialStream& dtor)
 {
   if (segmentation.deserialize(dtor) == false)
   {
-    log::error("DestinationReport::deserialize - Failed to deserialize dest seg report\n");
+    log::error("DestinationReport::deserialize - "
+               "Failed to deserialize dest seg report\n");
     return false;
   }
 
   if (assembly.deserialize(dtor) == false)
   {
-    log::error("JobReport::deserialize - Failed to deserialize dest assembly report\n");
+    log::error("JobReport::deserialize - "
+               "Failed to deserialize dest assembly report\n");
     return false;
   }
 
@@ -332,13 +337,15 @@ bool SourceReport::unpack(liber::netapp::SerialStream& dtor)
 {
   if (segmentation.deserialize(dtor) == false)
   {
-    log::error("SourceReport::deserialize - Failed to deserialize source seg report\n");
+    log::error("SourceReport::deserialize - "
+               "Failed to deserialize source seg report\n");
     return false;
   }
 
   if (authority.deserialize(dtor) == false)
   {
-    log::error("SourceReport::deserialize - Failed to deserialize source auth report\n");
+    log::error("SourceReport::deserialize - "
+               "Failed to deserialize source auth report\n");
     return false;
   }
 
@@ -385,13 +392,15 @@ bool JobReport::unpack(liber::netapp::SerialStream& dtor)
 {
   if (destination.deserialize(dtor) == false)
   {
-    log::error("JobReport::deserialize - Failed to deserialize dest report\n");
+    log::error("JobReport::deserialize - "
+               "Failed to deserialize dest report\n");
     return false;
   }
 
   if (source.deserialize(dtor) == false)
   {
-    log::error("JobReport::deserialize - Failed to deserialize source report\n");
+    log::error("JobReport::deserialize - "
+               "Failed to deserialize source report\n");
     return false;
   }
 

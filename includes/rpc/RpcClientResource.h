@@ -6,7 +6,7 @@
 #include "RpcException.h"
 #include "RpcClient.h"
 #include "AsyncRpcSupervisor.h"
-#include "Md5Hash.h"
+#include <boost/uuid/uuid.hpp>
 
 
 namespace liber {
@@ -53,7 +53,7 @@ protected:
    
    std::string mClassname;
    
-   Md5Hash mUiid;
+   boost::uuids::uuid mUuid;
 
    RpcException mLastError;
 

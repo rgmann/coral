@@ -4,7 +4,7 @@
 
 using namespace liber;
 using namespace liber::rsync;
-
+using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 //
@@ -39,7 +39,7 @@ void ResourcePath::pack(liber::netapp::SerialStream& rCtor) const
 bool ResourcePath::unpack(liber::netapp::SerialStream& rDtor)
 {
   std::string lTempString;
-  if (rDtor.readCString(lTempString) != liber::netapp::SerialStream::ReadOk)
+  if (rDtor.readCString(lTempString) != SerialStream::ReadOk)
   {
     log::error("ResourcePath::unpack - Failed to read 'path'\n");
     return false;
@@ -126,7 +126,6 @@ ResourcePath& JobDescriptor::getSource()
 void JobDescriptor::setDestination(const ResourcePath& destination)
 {
   mDestination = destination;
-  //mbRemotelyRequested = mDestination.remote;
 }
 
 //-----------------------------------------------------------------------------
@@ -159,7 +158,8 @@ ResourcePath& JobDescriptor::getDestination()
 //-----------------------------------------------------------------------------
 bool JobDescriptor::isValid() const
 {
-  return ((mDestination.path.empty() == false) && (mSource.path.empty() == false));
+  return ((mDestination.path.empty() == false) &&
+          (mSource.path.empty() == false));
 }
 
 //-----------------------------------------------------------------------------
@@ -200,7 +200,7 @@ bool JobDescriptor::unpack(liber::netapp::SerialStream& dtor)
     return false;
   }
 
-  if (dtor.read((char*)mUUID.data, mUUID.size()) != liber::netapp::SerialStream::ReadOk)
+  if (dtor.read((char*)mUUID.data, mUUID.size()) != SerialStream::ReadOk)
   {
     log::error("RemoteJobStatus::unpack - failed to deserialize UUID\n");
     return false;

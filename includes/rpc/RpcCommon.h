@@ -2,6 +2,7 @@
 #define RPC_COMMON_H
 
 #include <string>
+#include <boost/uuid/uuid.hpp>
 #include "BaseTypes.h"
 #include "CryptoHashTypes.h"
 
@@ -59,7 +60,7 @@ inline std::string ToRpcErrorString(RpcErrorId error)
 struct RpcCallInfo {
    std::string resource;
    std::string action;
-   Hash128     uiid; // Unique Instance ID
+   boost::uuids::uuid uuid; // Unique Instance ID
    i64         rpcId;
 };
 

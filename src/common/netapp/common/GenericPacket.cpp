@@ -199,19 +199,29 @@ bool GenericPacket::unpack(const void* pPkt, ui32 nSizeBytes)
 
   if (pPkt != NULL)
   {
-    // Begin by destroying the packet if it is already allocated.
-    destroy();
+    ui32 lnDataSizeBytes = mnDataSizeBytes;
 
-    // The header size is known since it is supplied...
-    if (allocate(nSizeBytes))
+    if (nSizeBytes >= mnDataSizeBytes)
     {
-      // Copy the packet.
-      memcpy(m_pPkt, pPkt, allocatedSize());
-      lbSuccess = true;
+      // Begin by destroying the packet if it is already allocated.
+      destroy();
+
+      // The header size is known since it is supplied...
+      if (allocate(lnDataSizeBytes, nSizeBytes - lnDataSizeBytes))
+      {
+        // Copy the packet.
+        memcpy(m_pPkt, pPkt, allocatedSize());
+        lbSuccess = true;
+      }
+      else
+      {
+        log::error("GenericPacket::unpack: Allocation failed\n");
+      }
     }
     else
     {
-      log::error("GenericPacket::unpack: Allocation failed\n");
+      log::error("GenericPacket::unpack - "
+                 "Buffer smaller than minimum data size.\n");
     }
   }
   else

@@ -1,8 +1,9 @@
 #include <utility>
 #include <iostream>
 #include <sstream>
+#include <boost/uuid/random_generator.hpp>
 #include "Log.h"
-#include "Md5Hash.h"
+//#include "Md5Hash.h"
 #include "Timestamp.h"
 #include "RpcServerResource.h"
 
@@ -12,7 +13,6 @@ using namespace liber::rpc;
 //------------------------------------------------------------------------------
 RpcServerResource::RpcServerResource(const std::string &name)
 :  mName(name),
-   mnCurrentInstId(0),
    mnInstanceCount(0)
 {
 }
@@ -28,7 +28,7 @@ bool RpcServerResource::unmarshall(RpcObject &input, RpcObject &output)
 {
    bool lbSuccess = true;
    
-   Md5Hash lUiid(input.callInfo().uiid);
+   boost::uuids::uuid lUuid = input.callInfo().uuid;
 
    input.exception().pushFrame(TraceFrame("RpcServerResource", "unmarshall",
                                           __FILE__, __LINE__));
@@ -38,9 +38,6 @@ bool RpcServerResource::unmarshall(RpcObject &input, RpcObject &output)
       exception(input, output, MissingParameters);
       return false;
    }
-
-   log::debug("RpcServerResource::unmarshall: resource = %s, name = %s\n",
-              mName.c_str(), input.callInfo().action.c_str());   
 
    if (input.callInfo().action == "construct")
    {
@@ -52,9 +49,9 @@ bool RpcServerResource::unmarshall(RpcObject &input, RpcObject &output)
    }
    else
    {
-      if (isValidInstance(lUiid))
+      if (isValidInstance(lUuid))
       {
-         lbSuccess = invoke(lUiid, input, output);
+         lbSuccess = invoke(lUuid, input, output);
       }
       else
       {
@@ -69,9 +66,10 @@ bool RpcServerResource::unmarshall(RpcObject &input, RpcObject &output)
 }
 
 //------------------------------------------------------------------------------
-bool RpcServerResource::isValidInstance(Md5Hash& uiid)
+//bool RpcServerResource::isValidInstance(Md5Hash& uiid)
+bool RpcServerResource::isValidInstance(boost::uuids::uuid& uuid)
 {
-   return (getInstance(uiid) != NULL);
+   return (getInstance(uuid) != NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -83,10 +81,9 @@ bool RpcServerResource::construct(RpcObject &input, RpcObject &output)
    input.exception().pushFrame(TraceFrame("RpcServerResource", "construct",
                                            __FILE__, __LINE__));
 
-   Md5Hash lUiid; 
-   createUIID(lUiid);
+   boost::uuids::uuid lUUID = boost::uuids::random_generator()();
    
-   if (mInstances.count(lUiid) != 0)
+   if (mInstances.count(lUUID) != 0)
    {
       exception(input, output, UIIDAssignmentErr);
       return false;
@@ -103,13 +100,13 @@ bool RpcServerResource::construct(RpcObject &input, RpcObject &output)
       return false;
    }
 
-   mInstances.insert(std::make_pair(lUiid, lpWrapper));
+   mInstances.insert(std::make_pair(lUUID, lpWrapper));
 
    lbSuccess = lpWrapper->initialize(lParamList);
    tugCtorHook(lpWrapper);
  
    input.getResponse(output);
-   lUiid.get(&output.callInfo().uiid);
+   output.callInfo().uuid = lUUID;
 
    mnInstanceCount++;
 
@@ -119,7 +116,7 @@ bool RpcServerResource::construct(RpcObject &input, RpcObject &output)
 }
 
 //------------------------------------------------------------------------------
-bool RpcServerResource::invoke(Md5Hash&   uiid,
+bool RpcServerResource::invoke(boost::uuids::uuid&   uuid,
                                RpcObject& input,
                                RpcObject& output)
 {
@@ -139,7 +136,7 @@ bool RpcServerResource::invoke(Md5Hash&   uiid,
       wrapper = mMethodMap.find(input.callInfo().action)->second;
       if (wrapper)
       {
-         wrapper(getInstance(uiid), lInParams, lOutParams, input.exception());
+         wrapper(getInstance(uuid), lInParams, lOutParams, input.exception());
          input.getResponse(output, lOutParams);
       }
       else
@@ -167,8 +164,8 @@ bool RpcServerResource::destroy(RpcObject &input, RpcObject &output)
    input.exception().pushFrame(TraceFrame("RpcServerResource", "destroy",
                                            __FILE__, __LINE__));
 
-   Md5Hash lUiid(input.callInfo().uiid);
-   if (mInstances.count(lUiid) == 0)
+   boost::uuids::uuid lUuid = input.callInfo().uuid;
+   if (mInstances.count(lUuid) == 0)
    {
       exception(input, output, InvalidUIID, "Invalid instance UIID");
       return false;
@@ -177,7 +174,7 @@ bool RpcServerResource::destroy(RpcObject &input, RpcObject &output)
    std::string lInParams;
    input.getParams(lInParams);
 
-   InstanceWrapper* lpWrapper = mInstances.find(lUiid)->second;
+   InstanceWrapper* lpWrapper = mInstances.find(lUuid)->second;
 
    if (lpWrapper == NULL)
    {
@@ -189,7 +186,7 @@ bool RpcServerResource::destroy(RpcObject &input, RpcObject &output)
    lpWrapper->destroy(lInParams);
 
    delete lpWrapper;
-   mInstances.erase(lUiid);
+   mInstances.erase(lUuid);
    
    input.getResponse(output);
    mnInstanceCount--;
@@ -200,13 +197,13 @@ bool RpcServerResource::destroy(RpcObject &input, RpcObject &output)
 }
 
 //------------------------------------------------------------------------------
-InstanceWrapper* RpcServerResource::getInstance(Md5Hash& uiid)
+InstanceWrapper* RpcServerResource::getInstance(boost::uuids::uuid& uuid)
 {
    InstanceWrapper* lpInstance = NULL;
    
-   if (mInstances.count(uiid) != 0)
+   if (mInstances.count(uuid) != 0)
    {
-      lpInstance = mInstances.find(uiid)->second;
+      lpInstance = mInstances.find(uuid)->second;
    }
    
    return lpInstance;
@@ -240,7 +237,7 @@ void RpcServerResource::exception(RpcObject&         request,
 }
 
 //------------------------------------------------------------------------------
-void RpcServerResource::createUIID(Md5Hash& hash)
+/*void RpcServerResource::createUIID(Md5Hash& hash)
 {
    std::stringstream stream;
 
@@ -249,5 +246,5 @@ void RpcServerResource::createUIID(Md5Hash& hash)
    std::string lUiidBlock = stream.str();
 
    hash.hashify((ui8*)lUiidBlock.data(), lUiidBlock.size());
-}
+}*/
 

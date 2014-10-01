@@ -69,7 +69,8 @@ processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
     }
     else
     {
-      log::error("AuthorityInterface: Timed out waiting for segment (%d).\n",
+      log::error("AuthorityInterface::processJob - "
+                 "Timed out waiting for segment (%d).\n",
                  lnReceived);
       lStatus = RsyncDestSegmentTimeout;
       lbHashInsertDone = true;

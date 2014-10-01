@@ -22,13 +22,19 @@ namespace rpc {
 class InstanceWrapper {
 public:
 
-   typedef void (*Method)(InstanceWrapper*, const std::string&, std::string&, RpcException&);
+  typedef void (*Method)(InstanceWrapper*, const std::string&, std::string&, RpcException&);
    
-   InstanceWrapper(){};
-   virtual ~InstanceWrapper(){};
+  InstanceWrapper(){};
+  virtual ~InstanceWrapper(){};
    
-   virtual bool initialize(const std::string &params) = 0;
-   virtual bool destroy(const std::string &params) = 0;
+  virtual bool initialize(const std::string &params) = 0;
+  virtual bool destroy(const std::string &params) = 0;
+
+  const boost::uuids::uuid& uuid();
+
+private:
+
+  boost::uuids::uuid mUUID;
 };
 
 }}

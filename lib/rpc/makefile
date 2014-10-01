@@ -4,6 +4,9 @@ FLAG = -Wall -c -g
 LIBNAME = rpc
 BASE = ../..
 
+BOOST_INCLUDE = \
+-I/opt/local/include \
+
 SOURCE = \
 $(BASE)/src/common/$(LIBNAME)/RpcClient.cpp \
 $(BASE)/src/common/$(LIBNAME)/RpcClientResource.cpp \
@@ -17,7 +20,7 @@ $(BASE)/src/common/$(LIBNAME)/RpcSupervisor.cpp \
 $(BASE)/src/common/$(LIBNAME)/BlockingRpcSupervisor.cpp \
 $(BASE)/src/common/$(LIBNAME)/AsyncRpcSupervisor.cpp \
 
-INCLUDES = \
+INCLUDES = $(BOOST_INCLUDE) \
 -I$(BASE)/includes/base \
 -I$(BASE)/includes/base/crypto \
 -I$(BASE)/includes/base/net \

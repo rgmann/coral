@@ -34,18 +34,31 @@ RpcClient::~RpcClient()
 //-----------------------------------------------------------------------------
 RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
 {
-  RpcMarshalledCall* lpCall = new RpcMarshalledCall(object);
+  RpcMarshalledCall* lpCall = new (std::nothrow) RpcMarshalledCall(object);
 
-  if (mRpcMap.count(lpCall->getRpcId()) == 0)
+  if (lpCall)
   {
-    mRpcMutex.lock();
-    mRpcMap.insert(std::make_pair(lpCall->getRpcId(), lpCall));
-    mRpcMutex.unlock();
+    if (mRpcMap.count(lpCall->getRpcId()) == 0)
+    {
+      mRpcMutex.lock();
+      mRpcMap.insert(std::make_pair(lpCall->getRpcId(), lpCall));
+      mRpcMutex.unlock();
       
-    RpcPacket* lpPacket = NULL;
-    lpCall->getRpcPacket(&lpPacket);
+      RpcPacket* lpPacket = lpCall->getRpcPacket();
 
-    sendPacket(lpPacket);
+      // The RPC client and server always have the same subscriber ID,
+      // so there is no need to send the packet to a particular subscriber ID.
+      sendPacket(lpPacket);
+    }
+    else
+    {
+      log::error("RpcClient::invokeRpc - "
+                 "RPC call with same UUID already exists\n");
+    }
+  }
+  else
+  {
+    log::error("RpcClient::invokeRpc - Failed to create RpcMarshalledCall\n");
   }
 
   return lpCall;

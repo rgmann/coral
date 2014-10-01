@@ -3,12 +3,13 @@
 
 #include <string>
 #include <vector>
+#include "Serializable.h"
 #include "RpcCommon.h"
 
 namespace liber {
 namespace rpc {
 
-class TraceFrame {
+class TraceFrame : public liber::netapp::Serializable {
 public:
 
    std::string mClassName;
@@ -23,10 +24,14 @@ public:
 
    std::string toString() const;
 
+
+protected:
+
    /**
     * Serialize the Trace Frame to a binary string.
     */
-   std::string serialize() const;
+   void pack(liber::netapp::SerialStream&);
+   void pack(liber::netapp::SerialStream&) const;
 
    /**
     * Deserialize a Trace Frame from a binary string.
@@ -34,11 +39,11 @@ public:
     *
     * @return bool True if successful; false otherwise.
     */
-   bool deserialize(const std::string& data);
+   bool unpack(liber::netapp::SerialStream&);
 };
 
 
-class RpcException {
+class RpcException : public liber::netapp::Serializable {
 public:
 
    RpcException();
@@ -58,9 +63,6 @@ public:
 
    std::string toString() const;
 
-   std::string serialize() const;
-   bool deserialize(const std::string& data);
-
    bool valid() const;
 
    void pushFrame(const TraceFrame& frame);
@@ -72,6 +74,12 @@ public:
    bool pushTrace(const RpcException& other);
 
    void reset();
+
+protected:
+
+  void pack(liber::netapp::SerialStream&);
+  void pack(liber::netapp::SerialStream&) const;
+  bool unpack(liber::netapp::SerialStream&);
 
 private:
 

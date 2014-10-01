@@ -137,7 +137,7 @@ SerialStream::ReadStatus SerialStream::readCString(std::string& val)
 {
    ui32 lnLength = 0;
 
-   if (!SerialStream::read(lnLength))
+   if (SerialStream::read(lnLength) == false)
    {
      log::error("SerialStream::readCString - Failed to read string length\n");
      return ReadFail;
@@ -149,12 +149,18 @@ SerialStream::ReadStatus SerialStream::readCString(std::string& val)
      return ReadEmpty;
    }
 
+
    char* lpBuffer = new char[lnLength];
    stream.read(lpBuffer, lnLength);
-   if (!stream.fail())
+   if (stream.fail())
+   {
+     log::error("SerialStream::readCString - stream.fail=true\n");
+   }
+   else
    {
       val.assign(lpBuffer);
    }
+
    delete[] lpBuffer;
    return stream.fail() ? ReadFail : ReadOk;
 }

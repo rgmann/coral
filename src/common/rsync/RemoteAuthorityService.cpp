@@ -9,7 +9,10 @@ using namespace liber::rsync;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
-JobQueue::JobQueue(FileSystemInterface& rFileSys, InstructionReceiver& rReceiver, JobCompletionHook& rJobHook)
+JobQueue::
+JobQueue(FileSystemInterface& rFileSys,
+         InstructionReceiver& rReceiver,
+         JobCompletionHook& rJobHook)
 : IThread("JobQueue")
 , mAuthority(rFileSys)
 , mrReceiver(rReceiver)
@@ -241,8 +244,7 @@ SendReportHook(PacketSubscriber& rSubscriber)
 }
 
 //----------------------------------------------------------------------------
-void RemoteAuthorityService::SendReportHook::
-setRequestID(int requestID)
+void RemoteAuthorityService::SendReportHook::setRequestID(int requestID)
 {
   mRequestID = requestID;
 }

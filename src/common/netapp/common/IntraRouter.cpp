@@ -58,7 +58,7 @@ void IntraRouter::routePacket(PacketContainer* pContainer)
   }
   else
   {
-    log::status("IntraRouter::routePacket - no subscriber gesters for ID=%d\n",
+    log::status("IntraRouter::routePacket - no subscriber registered with ID=%d\n",
                 pContainer->mDestinationID);
   }
 }
