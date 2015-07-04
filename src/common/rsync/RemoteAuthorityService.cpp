@@ -52,10 +52,11 @@ bool JobQueue::push(RsyncJob* pJob)
 //-----------------------------------------------------------------------------
 void JobQueue::run(const bool& bShutdown)
 {
-  while (!bShutdown)
+  while ( !bShutdown )
   {
     RsyncJob* lpJob = NULL;
-    if (mJobQueue.pop(lpJob) && lpJob)
+
+    if ( mJobQueue.pop(lpJob) && lpJob )
     {
       mJobLock.lock();
       mpActiveJob = lpJob;
@@ -170,6 +171,7 @@ handleRemoteJobRequest(const void* pData, ui32 nLength)
       else
       {
         lStatus = defaultQueryHandler(rDescriptor);
+        log::status("REMOTE_AUTH_SERVICE: %s, %d\n", rDescriptor.getSourcePath().c_str(), lStatus);
       }
 
       if (lStatus == RsyncSuccess)

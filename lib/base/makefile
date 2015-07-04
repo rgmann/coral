@@ -1,5 +1,6 @@
 
 CC = g++
+# CC = clang++
 FLAG = -Wall -c -g
 LIBDIR = base
 BASE = ../..
@@ -35,7 +36,7 @@ $(BASE)/src/common/$(LIBDIR)/file_system/*.cpp \
 $(BASE)/src/common/$(LIBDIR)/net/*.cpp
 
 all:
-	$(CC) $(FLAG) $(INCLUDES) $(SOURCE)
+	$(CC) $(FLAG) $(INCLUDES) $(SOURCE) -std=c++11 -stdlib=libc++
 	ar -cvq libbase.a *.o
 
 clean:

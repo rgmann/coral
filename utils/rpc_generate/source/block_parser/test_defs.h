@@ -28,7 +28,7 @@ struct test_struct {
   };
   inner_struct def;
 
-  struct {
+  struct __attribute__ ((packed)) {
     char a;
     char b;
   } d, r;
@@ -38,6 +38,16 @@ struct test_struct {
 
 class TestClass {
 public:
+
+  // Comment with a {
+  //
+  //
+  // } in it.
+
+  virtual int method(const test_struct& p1, bool p2)
+  {
+    // Do some stuff in here.
+  }
 };
 
 resource Service {
@@ -45,3 +55,8 @@ resource Service {
   void method(int param1, float param2);
 };
 
+
+int main(int argc, char* argv[])
+{
+  return 0;
+}

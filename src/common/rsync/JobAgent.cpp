@@ -40,13 +40,16 @@ JobAgent::~JobAgent()
 RsyncJob* JobAgent::nextJob()
 {
   RsyncJob* lpJob = NULL;
-  mReadyJobs.pop(lpJob);
+  // mReadyJobs.pop( lpJob, 100 );
+  mReadyJobs.pop( lpJob );
   return lpJob;
 }
 
 //----------------------------------------------------------------------------
-RsyncError JobAgent::
-createJob(const ResourcePath& destination, const ResourcePath& source, ui32 nSegmentSize)
+RsyncError JobAgent::createJob(
+  const ResourcePath& destination,
+  const ResourcePath& source,
+  ui32 nSegmentSize)
 {
   RsyncError lStatus = RsyncSuccess;
   RsyncJob*  lpJob   = NULL;

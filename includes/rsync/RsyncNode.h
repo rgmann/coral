@@ -37,7 +37,6 @@ public:
 class RsyncNode : public liber::concurrency::IThread {
 public:
 
-  //RsyncNode(netapp::PacketRouter& rRouter);
   RsyncNode(const boost::filesystem::path& root);
   ~RsyncNode();
 
@@ -60,7 +59,6 @@ private:
   Mutex mCallbackLock;
   RsyncJobCallback* mpCallback;
 
-//  Queue<RsyncJob*> mPendingJobs;
   RsyncPacketRouter mRouter;
 
   FileSystemInterface mFileSys;

@@ -56,6 +56,8 @@ private:
 
   int mnLastSwapFileIndex;
   int mnLastStageFileIndex;
+
+  friend class RsyncNode;
 };
 
 } // End namespace rsync

@@ -42,12 +42,12 @@ void AuthorityThread::setRequestID(int requestID)
 //----------------------------------------------------------------------------
 void AuthorityThread::run(const bool& bShutdown)
 {
-  while (!bShutdown)
+  while ( !bShutdown )
   {
     RsyncJob* lpJob = NULL;
 
     // Wait for a job. This is also a thread cancellation point.
-    if (mJobQueue.pop(lpJob) && lpJob)
+    if ( mJobQueue.pop( lpJob ) && lpJob )
     {
       if (lpJob->descriptor().getSource().remote)
       {

@@ -4,10 +4,14 @@ CFLAGS = -Wall -c -g
 LIBNAME = netapp
 BASE = ../..
 
+BOOST_INCLUDE = \
+-I/opt/local/include
+
 COMMON_SOURCE = \
 $(BASE)/src/common/$(LIBNAME)/common/*.cpp \
 
 COMMON_INCLUDES = \
+$(BOOST_INCLUDE) \
 -I$(BASE)/includes/base \
 -I$(BASE)/includes/base/crypto \
 -I$(BASE)/includes/base/file_system \

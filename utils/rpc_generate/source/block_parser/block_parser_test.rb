@@ -10,8 +10,8 @@ end
 allow_anonymous = true
 collection = BlockParser.parse(ARGV[0], allow_anonymous: allow_anonymous)
 #filter = {:type => 'resource'}
-filter = {:depth => 0}
-#filter = {}
+#filter = {:depth => ARGV[1].to_i}
+filter = {}
 collection.select(filter) do |block|
   puts block.mangle
 #  next unless block.name == "global"

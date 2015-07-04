@@ -68,15 +68,14 @@ toContainer(const char* pData, ui32 nSizeBytes)
   PacketContainer* lpContainer = NULL;
 
   RsyncPacket* lpPacket = new RsyncPacket();
-  if (lpPacket->unpack(pData, nSizeBytes))
+  if ( lpPacket->unpack( pData, nSizeBytes ) )
   {
     lpContainer = new PacketContainer();
     lpContainer->mDestinationID = lpPacket->data()->type;
-//    log::debug("toContainer: type=%d, as=%u, ds=%u\n", lpPacket->data()->type, lpPacket->allocatedSize(), lpPacket->dataSize());
-    //lpContainer->mpPacket = lpPacket;
 
     RsyncPacket* lpPayload = new RsyncPacket();
-    if (lpPayload->unpack(lpPacket->dataPtr(), lpPacket->data()->length))
+
+    if ( lpPayload->unpack( lpPacket->dataPtr(), lpPacket->data()->length ) )
     {
       lpContainer = new PacketContainer();
       lpContainer->mDestinationID = lpPacket->data()->type;
@@ -87,10 +86,6 @@ toContainer(const char* pData, ui32 nSizeBytes)
       log::error("toContainer - Failed to unpack payload\n");
       delete lpPayload;
     }
-//    log::debug("toContainer - nSizeBytes=%u, sp: t=%d, s=%u, as=%u\n", nSizeBytes,
-//               lpPayload->data()->type,
-//               lpPayload->data()->length,
-//               lpPayload->allocatedSize());
   }
   else
   {

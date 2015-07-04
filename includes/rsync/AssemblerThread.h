@@ -23,6 +23,7 @@ private:
 
   void run(const bool& bShutdown);
 
+
 private:
 
   Queue<RsyncJob*> mJobQueue;

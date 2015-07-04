@@ -11,7 +11,7 @@ class FileSystemHelper
 {
 public:
    
-   static bool FileExists(const std::string &path);
+   static bool FileExists(const std::string &path, bool bAllowDir = true );
    
    static bool Move(const std::string &src,
                     const std::string &dst,

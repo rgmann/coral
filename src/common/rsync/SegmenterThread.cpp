@@ -30,10 +30,11 @@ void SegmenterThread::addJob(RsyncJob* pJob)
 //----------------------------------------------------------------------------
 void SegmenterThread::run(const bool& bShutdown)
 {
-  while (!bShutdown)
+  while ( !bShutdown )
   {
     RsyncJob* lpJob = NULL;
 
+    // if (mJobQueue.pop(lpJob, 100) && lpJob)
     if (mJobQueue.pop(lpJob) && lpJob)
     {
       std::ifstream lInputStream;

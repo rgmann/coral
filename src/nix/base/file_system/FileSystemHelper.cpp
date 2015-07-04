@@ -1,21 +1,25 @@
-#include "FileSystemHelper.h"
 #include <iostream>
 #include <fstream>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include "FileSystemHelper.h"
 
 //------------------------------------------------------------------------------
-bool FileSystemHelper::FileExists(const std::string &path)
+bool FileSystemHelper::FileExists(const std::string &path, bool bAllowDir )
 {
-   bool l_bExists = false;
-   std::fstream fs;
+   bool bExists = true;
+   struct stat statResults;
+
+   bExists &= ( stat( path.c_str(), &statResults ) == 0 );
+
+   if ( bExists && !bAllowDir )
+   {
+      bExists &= S_ISDIR( statResults.st_mode );
+   }
    
-   fs.open(path.c_str());
-   l_bExists = fs.good();
-   fs.close();
-   
-   return l_bExists;
+   return bExists;
 }
 
 //------------------------------------------------------------------------------

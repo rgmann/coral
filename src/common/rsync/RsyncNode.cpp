@@ -10,7 +10,7 @@ using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
 RsyncNode::RsyncNode(const boost::filesystem::path& root)
-: IThread("RsyncNode")
+: IThread( "RsyncNode" )
 , mpCallback(NULL)
 , mSegmenter(mFileSys)
 , mAuthority(mFileSys)
@@ -86,26 +86,26 @@ PacketSubscriber& RsyncNode::subscriber()
 //----------------------------------------------------------------------------
 void RsyncNode::run(const bool& bShutdown)
 {
-  while (!bShutdown)
+  while ( !bShutdown )
   {
     RsyncJob* lpJob = NULL;
 
-    if ((lpJob = mJobAgent.nextJob()) != NULL)
+    if ( ( lpJob = mJobAgent.nextJob() ) != NULL )
     {
-      if (lpJob->waitDone() == false)
+      if ( lpJob->waitDone() == false )
       {
         log::error("RsyncNode - Timeout waiting for %s job to finish.\n",
                    lpJob->descriptor().getSource().path.string().c_str());
       }
 
       mCallbackLock.lock();
-      if (mpCallback)
+      if ( mpCallback )
       {
-        mpCallback->call(lpJob->descriptor(), lpJob->report());
+        mpCallback->call( lpJob->descriptor(), lpJob->report() );
       }
       mCallbackLock.unlock();
 
-      mJobAgent.releaseJob(lpJob);
+      mJobAgent.releaseJob( lpJob );
     }
   }
 }

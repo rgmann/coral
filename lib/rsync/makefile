@@ -1,5 +1,6 @@
 SHELL = /bin/bash
 CC = g++
+# CC = clang++
 CFLAGS = -Wall -c -g
 LIBNAME = rsync
 BASE = ../..
@@ -57,7 +58,7 @@ INCLUDES = $(BOOST_INCLUDE) \
 
 
 $(LIBNAME):
-	$(CC) $(CFLAGS) $(SOURCE) $(INCLUDES)
+	$(CC) $(CFLAGS) $(SOURCE) $(INCLUDES) -std=c++11 -stdlib=libc++
 	ar -cvq lib$(LIBNAME).a *.o
 
 all: $(LIBNAME)

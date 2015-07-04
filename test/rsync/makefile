@@ -1,12 +1,16 @@
 
 CC = c++
-CFLAGS = -Wall -g
+# CC = clang++
+CFLAGS = -Wall -g -o2
 BASE = ../..
 
 BOOST_INCLUDE = \
 -I/opt/local/include
 
-INCLUDES = $(BOOST_INCLUDE)\
+GTEST_INCLUDE = \
+-I../../third_party/gtest-1.7.0/include
+
+INCLUDES = $(BOOST_INCLUDE) $(GTEST_INCLUDE)\
 -I$(BASE)/includes/base \
 -I$(BASE)/includes/base/cli \
 -I$(BASE)/includes/base/hash \
@@ -25,11 +29,18 @@ LIBER_LIBS = \
 -L$(BASE)/lib/base -lbase \
 -L$(BASE)/lib/netapp -lnetapp_client \
 -L$(BASE)/lib/rsync -lrsync
-LIBS = -lstdc++ -lpthread
+LIBS = -std=c++11 -stdlib=libc++ -lc++ -lpthread
 
 BOOST_LIB_DIR = -L/opt/local/lib
-BOOST_LIBS = -lboost_system-mt -lboost_filesystem-mt
+BOOST_LIBS = -lboost_system-mt -lboost_filesystem-mt -lboost_thread-mt
 BOOST_LIB = $(BOOST_LIB_DIR) $(BOOST_LIBS)
+
+GTEST_LIB_DIR = ../../third_party/gtest-1.7.0
+GTEST_LIB = libgtest.a
+
+gtest_lib:
+	$(CC) -isystem ${GTEST_LIB_DIR}/include -I${GTEST_LIB_DIR} -pthread -c ${GTEST_LIB_DIR}/src/gtest-all.cc
+	ar -rv libgtest.a gtest-all.o
 
 segment_test:
 	$(CC) $(CFLAGS) -o segment_test segment_test.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
@@ -43,6 +54,9 @@ node_test:
 end_to_end:
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
+rsync_test_suite: gtest_lib
+	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB) $(GTEST_LIB)
+
 seg_time:
 	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
@@ -51,6 +65,9 @@ fs_test:
 
 inst_test:
 	$(CC) $(CFLAGS) -o inst_test instruction_test.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
+
+basic_test:
+	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBER_LIBS) $(LIBS) $(BOOST_LIB)
 
 clean:
 	rm -rf *.dSYM  *.o
@@ -61,4 +78,6 @@ clean:
 	rm -f job_test
 	rm -f fs_test
 	rm -f inst_test
+	rm -f rsync_test_suite
+	rm -f basic_test
 

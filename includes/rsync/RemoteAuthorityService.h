@@ -37,6 +37,7 @@ private:
 
   void run(const bool& bShutdown);
 
+
 private:
 
   LocalAuthorityInterface mAuthority;

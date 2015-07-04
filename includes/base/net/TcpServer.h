@@ -3,10 +3,11 @@
 
 #include <netinet/in.h>
 #include <sys/select.h>
-#include "TcpSocket.h"
 
 namespace liber {
 namespace net {
+
+class TcpSocket;
 
 class TcpServer {
 public:

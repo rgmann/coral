@@ -2,3 +2,4 @@
 *.a
 *.dSYM
 .DS_Store
+*.sublime-*
