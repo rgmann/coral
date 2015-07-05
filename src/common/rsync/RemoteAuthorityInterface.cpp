@@ -9,6 +9,18 @@
 using namespace liber;
 using namespace liber::rsync;
 
+
+void RemoteAuthorityInterface::ActiveJob::pushInstruction( Instruction* pInstruction )
+{
+  if ( pInstruction && mpJob )
+  {
+    mpJob->instructions().push( pInstruction );
+
+    // Update last receive timestamp.
+    mLastInstructionTime = boost::posix_time::microsec_clock::local_time();
+  }
+}
+
 //----------------------------------------------------------------------------
 RemoteAuthorityInterface::RemoteAuthorityInterface()
 : mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
@@ -116,7 +128,22 @@ bool RemoteAuthorityInterface::put(const char* pData, ui32 nLength)
 //-----------------------------------------------------------------------------
 RsyncError RemoteAuthorityInterface::waitForEndInstruction(int nTimeoutMs)
 {
-  return mActiveJob.waitJobEnd(nTimeoutMs) ? RsyncSuccess : RsyncRemoteJobTimeout;
+  RsyncError status = RsyncSuccess;
+
+  while ( true )
+  {
+    if ( mActiveJob.waitJobEnd( 100 ) )
+    {
+      break;
+    }
+    else if ( mActiveJob.timeout() )
+    {
+      status = RsyncRemoteJobTimeout;
+      break;
+    }
+  }
+
+  return status;
 }
 
 //-----------------------------------------------------------------------------
@@ -144,7 +171,7 @@ sendAssemblyInstruction(const void* pData, ui32 nBytes)
   if (lpInstruction)
   {
     // Send the instruction to the assembler.
-    mActiveJob.job()->instructions().push(lpInstruction);
+    mActiveJob.pushInstruction( lpInstruction );
   }
   else
   {

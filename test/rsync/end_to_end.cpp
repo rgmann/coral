@@ -203,26 +203,26 @@ public:
 
     void TearDown()
     {
-      liber::log::status("Cancel threads\n");
+      // liber::log::status("Cancel threads\n");
       mLocalRouter.cancel(true);
       mRemoteRouter.cancel(true);
 
-      liber::log::status("Remove subscribers\n");
+      // liber::log::status("Remove subscribers\n");
       mLocalRouter.removeSubscriber( RSYNC_SUB_ID );
       mRemoteRouter.removeSubscriber( RSYNC_SUB_ID );
 
-      liber::log::status("Unset callbacks\n");
+      // liber::log::status("Unset callbacks\n");
       mLocalNode->unsetCallback();
       mRemoteNode->unsetCallback();
 
-      liber::log::status("DELETE REMOTE\n");
+      // liber::log::status("DELETE REMOTE\n");
       delete mRemoteNode;
-      liber::log::status("DELETE LOCAL\n");
+      // liber::log::status("DELETE LOCAL\n");
       delete mLocalNode;
 
-      liber::log::status("flush\n");
-      liber::log::flush();
-      liber::log::status("DONE\n");
+      // liber::log::status("flush\n");
+      // liber::log::flush();
+      // liber::log::status("DONE\n");
     }
 
     IntraRouter mLocalRouter;

@@ -2,6 +2,7 @@
 #define RSYNC_REMOTE_AUTHORITY_INTERFACE_H
 
 #include <fstream>
+#include "boost/date_time/posix_time/posix_time.hpp"
 #include "BinarySem.h"
 #include "AuthorityInterface.h"
 #include "RsyncError.h"
@@ -47,9 +48,14 @@ private:
   class ActiveJob {
   public:
 
+    static const i64 JOB_TIMEOUT_MS = 2000;
+
     ActiveJob() : mpJob(NULL), mQueryResponse(RsyncSuccess) {}
 
-    inline void setJob(RsyncJob* pJob) { mpJob = pJob; };
+    inline void setJob(RsyncJob* pJob) {
+      mpJob = pJob;
+      mLastInstructionTime = boost::posix_time::microsec_clock::local_time();
+    };
     inline RsyncJob* job() { return mpJob; };
 
     inline RsyncError& queryResponse() { return mQueryResponse; }
@@ -85,6 +91,15 @@ private:
 
     inline void unlock() { mJobLock.unlock(); };
 
+    void pushInstruction( Instruction* pInstruction );
+
+    bool timeout()
+    {
+      boost::posix_time::time_duration deltaTime =
+        boost::posix_time::microsec_clock::local_time() - mLastInstructionTime;
+      return ( deltaTime.total_milliseconds() >= JOB_TIMEOUT_MS );
+    }
+
   private:
 
     RsyncJob* mpJob;
@@ -95,6 +110,7 @@ private:
     BinarySem mJobEndSignal;
 
     RsyncError mQueryResponse;
+    boost::posix_time::ptime mLastInstructionTime;
   } mActiveJob;
 
   int mnSegmentTimeoutMs;

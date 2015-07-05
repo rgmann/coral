@@ -258,9 +258,13 @@ void RemoteAuthorityService::SendReportHook::operator () (RsyncJob* pJob)
   {
     JobReport& rReport = pJob->report();
 
-    bool lbSuccess = mrSubscriber.sendPacketTo(mRequestID, new RsyncPacket(
-                                  RsyncPacket::RsyncAuthorityReport,
-                                  rReport.source.serialize()));
+    bool lbSuccess = mrSubscriber.sendPacketTo(
+      mRequestID,
+      new RsyncPacket(
+        RsyncPacket::RsyncAuthorityReport,
+        rReport.source.serialize()
+    ));
+
     if (lbSuccess == false)
     {
       log::error("SendReportHook - Failed to send report to %d\n", mRequestID);

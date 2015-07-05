@@ -39,7 +39,6 @@ void AssemblerThread::run(const bool& bShutdown)
   {
     RsyncJob* lpJob = NULL;
 
-    // if (mJobQueue.pop(lpJob, 100) && lpJob)
     if (mJobQueue.pop(lpJob) && lpJob)
     {
       if (mSegmentFile.open(lpJob->descriptor()))
