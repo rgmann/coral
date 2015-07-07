@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 CC = g++
 # CC = clang++
-CFLAGS = -Wall -c -g
+CFLAGS = -Wall -Wno-deprecated-register -c -g -O1
 LIBNAME = rsync
 BASE = ../..
 

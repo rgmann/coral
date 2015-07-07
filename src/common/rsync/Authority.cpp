@@ -125,23 +125,26 @@ void Authority::flushChunkBuffer(int nFlushCount)
 }
 
 //-----------------------------------------------------------------------------
-void Authority::call(Segment& rSegment)
+void Authority::call( Segment& rSegment )
 {
-  Timestamp time;
-
-  if (rSegment.endOfStream())
+  if ( rSegment.endOfStream() )
   {
     // Make sure all chunk data has been sent.
     flushChunkBuffer();
   }
   else if (mnSegmentSkipCount == 0)
   {
-    time.sample();
+    Segment* match_segment = NULL;
+    SegmentComparator comparator( &rSegment );
 
-    Segment* lpMatchSegment = NULL;
-    SegmentComparator comparator(&rSegment);
+    bool segment_found = mHash.remove(
+      rSegment.getWeak().checksum(),
+      match_segment,
+      comparator
+    );
 
-    if (mHash.remove(rSegment.getWeak().checksum(), lpMatchSegment, comparator))
+    // if (mHash.remove(rSegment.getWeak().checksum(), match_segment, comparator))
+    if ( segment_found )
     {
       // Any data in the buffer when a match occurs should be moved to a chunk
       // instruction and sent before sending the ID of the matched segment.
@@ -149,9 +152,9 @@ void Authority::call(Segment& rSegment)
                        FlushAll : (rSegment.getID() - mBufferStartID));
 
       // If the Segment exists in the hash, create a Segment instruction.
-      if (lpMatchSegment)
+      if (match_segment)
       {
-        mpReceiver->push(new SegmentInstruction(lpMatchSegment->getID()));
+        mpReceiver->push(new SegmentInstruction(match_segment->getID()));
       }
       else
       {
@@ -165,20 +168,28 @@ void Authority::call(Segment& rSegment)
 
       mpReport->matchedSegmentCount++;
       mnSegmentBytes += rSegment.size();
-      delete lpMatchSegment;
+      delete match_segment;
     }
     else
     {
       if (rSegment.data())
       {
-        if ((mBufferStartID != -1) && ((rSegment.getID() - mBufferStartID) >= mnMaxChunkSize))
+        bool flush_buffer = (
+          // The buffer contains a valid chunk data and...
+          ( mBufferStartID != -1 ) &&
+
+          // the size of the chunk is at least the minimum configured chunk size.
+          ( ( rSegment.getID() - mBufferStartID ) >= mnMaxChunkSize )
+        );
+
+        if ( flush_buffer )
         {
           flushChunkBuffer();
         }
 
         if (mnBufferedCount == 0)
         {
-          if (mChunkBuffer.isEmpty())
+          if ( mChunkBuffer.isEmpty() )
           {
             mBufferStartID = rSegment.getID();
           }

@@ -4,14 +4,12 @@
 #include <stdio.h>
 #include <cmath>
 #include <vector>
+#include <list>
 #include <utility>
 #include <string>
 #include <fstream>
 #include "Timestamp.h"
 
-#define DISABLED  0
-#define ENABLED   1
-#define PROFILE DISABLED
 
 namespace liber {
 
@@ -39,19 +37,21 @@ public:
   /**
    * Get the number of items stored in the HashTable.
    */
-  inline size_t size() const { return mnItemCount; };
+  inline size_t size() const { return item_count_; };
 
-  inline size_t buckets() const { return mnBucketCount; };
+  inline size_t buckets() const { return bucket_coount_; };
+
+  void histogram( std::ostream& stream );
 
 private:
 
   typedef std::pair<int, Type> Item;
-  typedef std::vector<Item> Bucket;
+  typedef std::list<Item> Bucket;
 
   /**
    * Extremely simple hash function.
    */
-  size_t hash(int key) { return (size_t)(key % mnBucketCount); };
+  size_t hash(int key) { return (size_t)(key % bucket_coount_); };
 
   /**
    * Access an item by item by key and comparison functor.
@@ -69,52 +69,44 @@ private:
   template<typename Comparator>
   std::pair<size_t, typename Bucket::iterator> get(int, Type& value, Comparator&);
 
-  std::ofstream mLog;
 
 private:
 
   // Hash table bucket count.
-  size_t mnBucketCount;
+  size_t bucket_coount_;
 
   // The hash table is a vector of vectors.
-  std::vector<Bucket> mBuckets;
+  std::vector<Bucket> buckets_;
 
   // Number of items currently stored in the hash table.
-  size_t mnItemCount;
+  size_t item_count_;
 };
 
 //----------------------------------------------------------------------------
 template<int KeySize, typename Type>
 HashTable<KeySize, Type>::HashTable()
-: mnItemCount(0)
+: item_count_(0)
 {
-  mnBucketCount = (int)std::pow(2, KeySize);
+  bucket_coount_ = (int)std::pow(2, KeySize);
 
-  for (int nBucket = 0; nBucket < mnBucketCount; nBucket++)
+  for (int nBucket = 0; nBucket < bucket_coount_; nBucket++)
   {
-    mBuckets.push_back(Bucket());
+    buckets_.push_back(Bucket());
   }
-
-#if PROFILE == ENABLED
-  mLog.open("/Users/vaughanbiker/Development/liber/test/rsync/test_root/hash_log.csv");
-#endif
 }
 
 //----------------------------------------------------------------------------
 template<int KeySize, typename Type>
 HashTable<KeySize, Type>::~HashTable()
 {
-#if PROFILE == ENABLED
-  mLog.close();
-#endif
 }
 
 //----------------------------------------------------------------------------
 template<int KeySize, typename Type>
 void HashTable<KeySize, Type>::insert(int key, Type value)
 {
-  mBuckets.at(hash(key)).push_back(std::make_pair(key, value));
-  mnItemCount++;
+  buckets_.at( hash( key ) ).push_back( std::make_pair( key, value ) );
+  item_count_++;
 }
 
 //----------------------------------------------------------------------------
@@ -122,20 +114,13 @@ template<int KeySize, typename Type> template<typename Comparator>
 bool HashTable<KeySize, Type>::remove(int key, Type& value, Comparator& comp)
 {
   std::pair<size_t, typename HashTable<KeySize, Type>::Bucket::iterator> location;
-  Timestamp begin, end;
 
-  begin.sample();
   location = get(key, value, comp);
-  end.sample();
 
-#if PROFILE == ENABLED
-  mLog << key << "," << hash(key) << "," << mBuckets.at(hash(key)).size() << "," << (end - begin).fseconds() << "\n";
-#endif
-
-  if (location.first != std::string::npos)
+  if ( location.first != std::string::npos )
   {
-    mBuckets.at(location.first).erase(location.second);
-    mnItemCount--;
+    buckets_.at( location.first ).erase( location.second );
+    item_count_--;
   }
 
   return (location.first != std::string::npos);
@@ -146,11 +131,9 @@ template<int KeySize, typename Type> template<typename Comparator>
 bool HashTable<KeySize, Type>::find(int key, Type& item, Comparator& comp)
 {
   std::pair<size_t, typename HashTable<KeySize, Type>::Bucket::iterator> location;
-//  Timestamp begin, end;
-//  begin.sample();
+
   location = get(key, item, comp);
-//  end.sample();
-//  mLog << key << "," << hash(key) << "," << mBuckets.at(hash(key)).size() << "," << (end - begin).fseconds() << "\n";
+
   return (location.first != std::string::npos);
 }
 
@@ -158,32 +141,32 @@ bool HashTable<KeySize, Type>::find(int key, Type& item, Comparator& comp)
 template<int KeySize, typename Type>
 void HashTable<KeySize, Type>::clear()
 {
-  for (size_t lnBucket = 0; lnBucket < mnBucketCount; lnBucket++)
+  for (size_t bucket_index = 0; bucket_index < bucket_coount_; bucket_index++)
   {
-    mBuckets.at(lnBucket).clear();
+    buckets_.at( bucket_index ).clear();
   }
 
-  mnItemCount = 0;
+  item_count_ = 0;
 }
 
 //----------------------------------------------------------------------------
 template<int KeySize, typename Type> template<typename Destroyer>
 void HashTable<KeySize, Type>::clear(Destroyer& destroy)
 {
-  for (size_t lnBucket = 0; lnBucket < mnBucketCount; lnBucket++)
+  for (size_t bucket_index = 0; bucket_index < bucket_coount_; bucket_index++)
   {
-    typename HashTable<KeySize, Type>::Bucket& lrBucket = mBuckets.at(lnBucket);
-    typename Bucket::iterator item = lrBucket.begin();
+    typename HashTable<KeySize, Type>::Bucket& bucket = buckets_.at(bucket_index);
+    typename Bucket::iterator item = bucket.begin();
 
-    for (; item != lrBucket.end(); ++item)
+    for (; item != bucket.end(); ++item)
     {
-      destroy(item->second);
+      destroy( item->second );
     }
 
-    lrBucket.clear();
+    bucket.clear();
   }
 
-  mnItemCount = 0;
+  item_count_ = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -191,21 +174,37 @@ template<int KeySize, typename Type> template<typename Comparator>
 std::pair<size_t, typename HashTable<KeySize, Type>::Bucket::iterator>
 HashTable<KeySize, Type>::get(int key, Type& value, Comparator& comp)
 {
-  size_t lnBucket = std::string::npos;
+  size_t hashed_key   = hash(key);
+  size_t bucket_index = std::string::npos;
 
-  typename HashTable<KeySize, Type>::Bucket& lrBucket = mBuckets.at(hash(key));
-  typename Bucket::iterator item = lrBucket.begin();
-  for (; item != lrBucket.end(); ++item)
+  typename HashTable<KeySize, Type>::Bucket& bucket = buckets_.at( hashed_key );
+  typename Bucket::iterator item = bucket.begin();
+  for (; item != bucket.end(); ++item)
   {
-    if ((item->first == key) && comp(item->second))
+    if ( item->first == key )
     {
-      value = item->second;
-      lnBucket = hash(key);
-      break;
+      if ( comp( item->second ) )
+      {
+        value = item->second;
+        bucket_index = hashed_key;
+        break;
+      }
     }
   }
 
-  return std::make_pair(lnBucket, item);
+  return std::make_pair( bucket_index, item );
+}
+
+//----------------------------------------------------------------------------
+template<int KeySize, typename Type>
+void HashTable<KeySize, Type>::histogram( std::ostream& stream )
+{
+  typename std::vector<Bucket>::iterator bucket_iterator = buckets_.begin();
+  size_t bucket_index = 0;
+  for ( ; bucket_iterator != buckets_.end(); bucket_iterator++ )
+  {
+    stream << bucket_index++ << "," << bucket_iterator->size() << "\n";
+  }
 }
 
 }

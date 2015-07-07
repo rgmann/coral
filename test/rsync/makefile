@@ -1,7 +1,7 @@
 
 CC = c++
 # CC = clang++
-CFLAGS = -Wall -g -o2
+CFLAGS = -Wall -Wno-deprecated-register -g -O1
 BASE = ../..
 
 BOOST_INCLUDE = \

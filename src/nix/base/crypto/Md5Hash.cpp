@@ -86,7 +86,13 @@ Md5Hash& Md5Hash::operator=(const Md5Hash &rhs)
 //------------------------------------------------------------------------------
 bool Md5Hash::operator == (const Md5Hash& other) const
 {
-   return (memcmp(m_Hash.b, other.m_Hash.b, sizeof(Hash128)) == 0);
+   // return (memcmp(m_Hash.b, other.m_Hash.b, sizeof(Hash128)) == 0);
+   for ( int position = 0; position < sizeof(Hash128); position++ )
+   {
+      if ( m_Hash.b[ position ] != other.m_Hash.b[ position ] ) return false;
+   }
+
+   return true;
 }
 
 //------------------------------------------------------------------------------

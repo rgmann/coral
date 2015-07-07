@@ -1,6 +1,7 @@
 #ifndef RSYNC_SEGMENT_HASH_H
 #define RSYNC_SEGMENT_HASH_H
 
+#include <fstream>
 #include "Segment.h"
 #include "SimpleHashTable.h"
 

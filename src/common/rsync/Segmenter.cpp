@@ -131,8 +131,6 @@ processEveryOffset(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegm
   ui32 lnReadLen = nSegmentSizeBytes;
   while ((istream.eof() == false) || (lCircularBuff.isEmpty() == false))
   {
-//    log::status("segmenter: offset=%u\n", lnOffset);
-
     // Compute the number of bytes that should be read.
     // If the stride is one, the first read will read the full segment size, but all
     // following reads will read only one byte.
@@ -144,7 +142,6 @@ processEveryOffset(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegm
     // Read the data into the buffer.
     if (istream.eof() == false)
     {
-      //lCircularBuff.write(istream, lnReadLen);
       if ((lCircularBuff.write(istream, lnReadLen) != lnReadLen) && !istream.eof())
       {
         log::error("Segmenter: Failed to write to circular buffer\n");
@@ -153,8 +150,6 @@ processEveryOffset(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegm
 
     // Create the new segment.  The segment will compute its weak checksum.
     // The Segment always defers its MD5 computation.
-    //printf("every_offset: ID=%d, seg_size=%d, seg_len=%d, d[0]=%02X\n",
-    //           lnSegId, nSegmentSizeBytes, lnSegmentLength, lpReadBuffer[0]);
     lSegment.setID(lnSegId++);
     lSegment.setOffset(lnOffset);
     lSegment.setData(lCircularBuff,
@@ -191,3 +186,103 @@ processEveryOffset(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegm
 
   return true;
 }
+
+//-----------------------------------------------------------------------------
+// bool Segmenter::processEveryOffset(
+//   std::istream& istream, 
+//   SegmentReceiver& rReceiver, 
+//   ui32 nSegmentSizeBytes,
+//   SegmentationReport& rReport)
+// {
+//   static const size_t BLOCK_READ_SIZE = 1024;
+
+//   ui8*  lpTempBuffer = NULL;
+
+//   Segment::ID segment_id = 0;
+
+//   Segment segment( nSegmentSizeBytes );
+
+//   // Offset, in bytes, from the beginning of the file.
+//   ui32 segment_offset = 0;
+
+//   Adler32Checksum   oldweaksum;
+//   CircularBuffer    circular_buffer;
+
+//   if (istream.bad())
+//   {
+//     return false;
+//   }
+
+//   // Allocated the buffer to the segment length.
+//   if ( !circular_buffer.allocate( BLOCK_READ_SIZE ) )
+//   {
+//     return false;
+//   }
+
+//   lpTempBuffer = new ui8[nSegmentSizeBytes];
+//   if (lpTempBuffer == NULL)
+//   {
+//     return false;
+//   }
+
+//   // Capture the start time.
+//   rReport.segmentCount = 0;
+//   rReport.begin.sample();
+
+//   // Record the stride size and segment size;
+//   rReport.strideSizeBytes  = 1;
+//   rReport.segmentSizeBytes = nSegmentSizeBytes;
+
+//   // ui32 lnReadLen = nSegmentSizeBytes;
+//   while ((istream.eof() == false) || (circular_buffer.isEmpty() == false))
+//   {
+//     if ( circular_buffer.size() < nSegmentSizeBytes )
+//     {
+//       circular_buffer.write( istream, BLOCK_READ_SIZE );
+//     }
+
+//     if ( circular_buffer.isEmpty() == false )
+//     {
+//       // Create the new segment.  The segment will compute its weak checksum.
+//       // The Segment always defers its MD5 computation.
+//       segment.setID( segment_id++ );
+//       segment.setOffset( segment_offset );
+//       segment.setData(
+//         circular_buffer,
+//         nSegmentSizeBytes,
+//         ( segment_offset > 0 ) ? &oldweaksum : NULL
+//       );
+
+
+//       // Get the weak checksum for the next iteration just in case
+//       // checksum rolling is enabled.
+//       oldweaksum = segment.getWeak();
+
+//       // Add the segment to the segment list vector.
+//       rReceiver.push( segment );
+//       rReport.segmentCount++;
+
+//       if (circular_buffer.read((char*)lpTempBuffer, 1) != 1)
+//       {
+//         log::error("Segmenter: Failed to read from circular buffer\n");
+//       }
+
+//       // Move to the next byte.
+//       segment_offset += 1;
+//     }
+//   }
+
+//   // Push an empty segment to mark the end of the stream.
+//   segment.setID( Segment::EndOfStream );
+//   rReceiver.push( segment );
+
+//   // Capture the segmentation end time.
+//   rReport.end.sample();
+
+//   // Delete all heap allocations. If we got to this point, we know that the
+//   // buffers were successfully allocated.
+//   delete[] lpTempBuffer;
+
+//   return true;
+// }
+

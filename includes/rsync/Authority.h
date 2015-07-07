@@ -8,7 +8,6 @@
 #include "SegmentHook.h"
 #include "Segmenter.h"
 #include "CircularBuffer.h"
-//#include "NullInstructionReceiver.h"
 
 namespace liber {
 namespace rsync {
@@ -20,9 +19,7 @@ class JobDescriptor;
 class Authority : public SegmentHook {
 public:
 
-//  Authority(JobDescriptor&,
-//            liber::HashTable<16, Segment*>&,
-//            InstructionReceiver&);
+
   Authority();
   ~Authority();
 
@@ -48,7 +45,6 @@ private:
 
 private:
 
-//  JobDescriptor& mrDescriptor;
   liber::HashTable<16, Segment*>  mHash;
 
   Segmenter mSegmenter;
@@ -66,8 +62,8 @@ private:
 
   AuthorityReport* mpReport;
 
-//  NullInstructionReceiver mNullReceiver;
   InstructionReceiver*  mpReceiver;
+
 };
 
 } // End namespace rsync
