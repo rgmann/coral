@@ -110,6 +110,9 @@ private:
     BinarySem mJobEndSignal;
 
     RsyncError mQueryResponse;
+
+    // In order to detect a timeout, keep track of when the last instruction
+    // was received.
     boost::posix_time::ptime mLastInstructionTime;
   } mActiveJob;
 

@@ -203,26 +203,17 @@ public:
 
     void TearDown()
     {
-      // liber::log::status("Cancel threads\n");
       mLocalRouter.cancel(true);
       mRemoteRouter.cancel(true);
 
-      // liber::log::status("Remove subscribers\n");
       mLocalRouter.removeSubscriber( RSYNC_SUB_ID );
       mRemoteRouter.removeSubscriber( RSYNC_SUB_ID );
 
-      // liber::log::status("Unset callbacks\n");
       mLocalNode->unsetCallback();
       mRemoteNode->unsetCallback();
 
-      // liber::log::status("DELETE REMOTE\n");
       delete mRemoteNode;
-      // liber::log::status("DELETE LOCAL\n");
       delete mLocalNode;
-
-      // liber::log::status("flush\n");
-      // liber::log::flush();
-      // liber::log::status("DONE\n");
     }
 
     IntraRouter mLocalRouter;
@@ -273,18 +264,18 @@ public:
 // Synchronize two images where the destination is remote and the source is
 // local.
 //
-// TEST_F( EndToEndTest, RemoteDestImageTest ) {
-//   boost::filesystem::path source( "image.png" );
-//   boost::filesystem::path destination( "image.png" );
+TEST_F( EndToEndTest, RemoteDestImageTest ) {
+  boost::filesystem::path source( "image.png" );
+  boost::filesystem::path destination( "image.png" );
 
-//   EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
-//   EXPECT_EQ( true, mLocalCallback.mSem.take() );
-//   EXPECT_EQ( true, mRemoteCallback.mSem.take() );
+  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
+  EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  EXPECT_EQ( true, mRemoteCallback.mSem.take() );
 
-//   EXPECT_EQ( true, CheckEqual(
-//     boost::filesystem::path( REMOTE_ROOT ) / destination,
-//     boost::filesystem::path( LOCAL_ROOT ) / source ) );
-// }
+  EXPECT_EQ( true, CheckEqual(
+    boost::filesystem::path( REMOTE_ROOT ) / destination,
+    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+}
 
 //
 // Synchronize two files where the source is remote and the destination is

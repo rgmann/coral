@@ -43,8 +43,8 @@ public:
   Segment(const Segment&);
   ~Segment();
 
-  inline void setID(ID id) { mID = id; };
-  inline void setOffset(ui32 offset) { mnOffset = offset; };
+  inline void setID(ID id) { segment_id_ = id; };
+  inline void setOffset(ui32 offset) { offset_ = offset; };
 
   void setData(const ui8* pData, ui32 nVSegmentSize, ui32 nSegmentSize, const Adler32Checksum* pPrev = NULL);
   void setData(CircularBuffer& buffer, ui32 nVSegmentSize, const Adler32Checksum* pPrev = NULL);
@@ -84,11 +84,15 @@ public:
 
 protected:
 
+  bool resize( ui32 virtual_segment_size );
+
   void pack(liber::netapp::SerialStream&) const;
   void pack(liber::netapp::SerialStream&);
   bool unpack(liber::netapp::SerialStream& dtor);
 
 private:
+
+  void computeWeak( const Adler32Checksum* previous_weak_checksum_ptr );
 
   void computeWeak(Adler32Checksum &next, 
                           ui32 nOffset,
@@ -102,38 +106,52 @@ private:
 
 private:
 
-  ID mID;
+  ID segment_id_;
 
-  Adler32Checksum mWeak;
+  // Small, inexpensive-to-compute, rolling checksum for first-lay segment
+  // matching.
+  Adler32Checksum weak_checksum_;
 
-  Md5Hash mStrong;
+  // 128-bit strong checksum is much more expensive to compute, but will
+  // encounter virtually zero collisions. This checksum is used for second-
+  // layer segment matching.
+  Md5Hash strong_checksum_;
 
-  ui8* mpData;
-  ui32 mnSegmentSize;  // Actual segment size
-  ui32 mnOffset; 
+  // Pointer to segment data.
+  ui8* data_ptr_;
 
-  // For efficient memory re-use, the buffer is allocated to configured
-  // segment size.
-  ui32 mnVSegmentSize;
+  // Actual segment size in bytes. This may be less than the number of bytes
+  // allocated (see virtual_segment_size_).
+  ui32 segment_size_;
+
+  // Offset of this segment within the file, in bytes.
+  ui32 offset_; 
+
+  // All segments are the same size, except at the end of a file.  If the
+  // segment size is large and/or segmentation is being performed at every
+  // offset, this can result in many segments with different sizes. To
+  // eliminate the need for re-allocation on each, each Segment has an
+  // actual size and an allocated/virtual size.
+  ui32 virtual_segment_size_;
 };
 
 
 class SegmentComparator {
 public:
 
-  SegmentComparator(Segment* pSegment);
+  SegmentComparator( Segment* segment_ptr );
 
-  bool operator() (Segment* pSegment);
+  bool operator() ( Segment* segment_ptr );
 
 private:
 
-  Segment* mpSegment;
+  Segment* segment_ptr_;
 };
 
 
 class SegmentDestructor {
 public:
-  void operator() (Segment*& pSegment);
+  void operator() ( Segment*& segment_ptr );
 };
 
 

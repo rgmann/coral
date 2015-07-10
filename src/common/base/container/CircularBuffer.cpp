@@ -65,35 +65,42 @@ unsigned int CircularBuffer::write(const char* pData, unsigned int nBytes)
 //------------------------------------------------------------------------------
 unsigned int CircularBuffer::write(std::istream& stream, unsigned int nBytes)
 {
-   unsigned int lnBytesWritten = 0;
+   unsigned int total_bytes_written = 0;
+   unsigned int count = 0;
 
    if (mpBuffer)
    {
-     while (!isFull() && (lnBytesWritten < nBytes))
+     while ( !isFull() && ( total_bytes_written < nBytes ) )
      {
-       unsigned int lnBytesToWrite = linearFreeSize();
-//       log::status("write: lnBytesToWrite=%u, nBytes=%u, lnBytesWritten=%u, mnHead=%u, mnTail=%u\n", lnBytesToWrite, nBytes, lnBytesWritten, mnHead, mnTail);
+       unsigned int bytes_to_write = linearFreeSize();
+       // log::status("write(%d): free_size=%u, mnHead=%u, mnTail=%u\n", count, bytes_to_write, mnHead, mnTail);
 
-       if (lnBytesToWrite > (nBytes - lnBytesWritten))
+       if ( bytes_to_write > ( nBytes - total_bytes_written ) )
        {
-          lnBytesToWrite = (nBytes - lnBytesWritten);
+          bytes_to_write = (nBytes - total_bytes_written );
        }
 
-       stream.read(&mpBuffer[mnHead], lnBytesToWrite);
-       add(mnHead, stream.gcount());
-       lnBytesWritten += stream.gcount();
-       if (stream.eof())
+       size_t bytes_read = stream.read( &mpBuffer[mnHead], bytes_to_write ).gcount();
+
+       add( mnHead, bytes_read );
+       total_bytes_written += bytes_read;
+
+       // log::status("write(%d): lnBytesToWrite=%u, nBytes=%u, lnBytesWritten=%u, mnHead=%u, mnTail=%u, bytesRead=%d\n",
+       //  count++, bytes_to_write, nBytes, total_bytes_written, mnHead, mnTail, bytes_read);
+
+       if ( stream.eof() )
        {
          break;
        }
        if (stream.fail())
        {
-         log::error("write: stream read failure - attempted %u, atual %u\n", lnBytesToWrite, stream.gcount());
+         log::error("write: stream read failure - attempted %u, atual %u\n",
+          total_bytes_written, bytes_read);
        }
      }
    }
 
-   return lnBytesWritten;
+   return total_bytes_written;
 }
 
 //------------------------------------------------------------------------------
@@ -209,6 +216,11 @@ unsigned int CircularBuffer::linearFreeSize()
   if (mnTail <= mnHead)
   {
     lnFree = allocatedSize() - mnHead;
+
+    unsigned int next_head = mnHead;
+    add( next_head, lnFree );
+
+    if ( ( next_head == mnTail ) && (lnFree > 0) ) lnFree--;
   }
   else
   {
