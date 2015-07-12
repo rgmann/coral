@@ -11,10 +11,11 @@ using namespace liber;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-LocalAuthorityInterface::
-  LocalAuthorityInterface(FileSystemInterface& rFileSystemInterface)
-: mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
-, mrFileSys(rFileSystemInterface)
+LocalAuthorityInterface::LocalAuthorityInterface(
+  FileSystemInterface& file_sys_interface
+)
+: segment_timeout_ms_( DEFAULT_SEGMENT_TIMEOUT_MS )
+, file_sys_interface_( file_sys_interface )
 {
 }
 
@@ -26,91 +27,117 @@ LocalAuthorityInterface::~LocalAuthorityInterface()
 //----------------------------------------------------------------------------
 std::ifstream& LocalAuthorityInterface::file()
 {
-  return mAuthFile;
+  return authoritative_file_;
 }
 
 //----------------------------------------------------------------------------
-void LocalAuthorityInterface::process(RsyncJob* pJob)
+void LocalAuthorityInterface::process( RsyncJob* job_ptr )
 {
-  processJob(pJob, pJob->instructions());
+  processJob( job_ptr, job_ptr->instructions() );
 }
 
 //----------------------------------------------------------------------------
-void LocalAuthorityInterface::
-process(RsyncJob* pJob, InstructionReceiver& rInstructions)
+void LocalAuthorityInterface::process(
+  RsyncJob*             job_ptr,
+  InstructionReceiver&  instruction_receiver
+)
 {
-  processJob(pJob, rInstructions);
+  processJob( job_ptr, instruction_receiver );
 }
 
 //----------------------------------------------------------------------------
-void LocalAuthorityInterface::
-processJob(RsyncJob* pJob, InstructionReceiver& rInstructions)
+void LocalAuthorityInterface::processJob(
+  RsyncJob*             job_ptr,
+  InstructionReceiver&  instruction_receiver
+)
 {
-  int lnReceived = 0;
-  bool lbHashInsertDone = false;
-  RsyncError lStatus = RsyncSuccess;
+  int  received_segment_count = 0;
+  bool hash_insert_done       = false;
 
-  pJob->report().source.authority.hashBegin.sample();
-  while (lbHashInsertDone == false)
+  RsyncError job_status = RsyncSuccess;
+
+  job_ptr->report().source.authority.hashBegin.sample();
+  while ( hash_insert_done == false )
   {
-    Segment* lpSegment = NULL;
+    Segment* segment_ptr = NULL;
 
-    if (pJob->segments().pop(&lpSegment, mnSegmentTimeoutMs) && lpSegment)
+    bool received_segment = job_ptr->segments().pop(
+      &segment_ptr,
+      segment_timeout_ms_
+    );
+
+    if ( received_segment && ( segment_ptr != NULL ) )
     {
-      if (lpSegment->endOfStream() == false)
+      hash_insert_done = segment_ptr->endOfStream();
+
+      if ( hash_insert_done == false )
       {
-        lnReceived++;
-        mAuthority.hash().insert(lpSegment->getWeak().checksum(), lpSegment);
-      }
-      else
-      {
-        lbHashInsertDone = true;
+        received_segment_count++;
+
+        authority_.hash().insert(
+          segment_ptr->getWeak().checksum(),
+          segment_ptr
+        );
       }
     }
     else
     {
       log::error("AuthorityInterface::processJob - "
                  "Timed out waiting for segment (%d).\n",
-                 lnReceived);
-      lStatus = RsyncDestSegmentTimeout;
-      lbHashInsertDone = true;
+                 received_segment_count);
+      job_status = RsyncDestSegmentTimeout;
+
+      // Stop the hash-insert loop as no more segments will be received.
+      hash_insert_done = true;
     }
   }
-  pJob->report().source.authority.hashEnd.sample();
+  job_ptr->report().source.authority.hashEnd.sample();
 
-  if (lStatus == RsyncSuccess)
+  if ( job_status == RsyncSuccess )
   {
     // Hash has been populated. Now the Authority can begin building the
     // instructions.
-    if (mrFileSys.open(pJob->descriptor().getSource().path, file()))
-    {
-      bool lbAuthSuccess = mAuthority.process(pJob->descriptor(),
-                                              file(),
-                                              rInstructions,
-                                              pJob->report().source);
+    bool auth_success = file_sys_interface_.open(
+      job_ptr->descriptor().getSource().path,
+      file()
+    );
 
-      if (lbAuthSuccess == false)
+    if ( auth_success )
+    {
+      auth_success = authority_.process(
+        job_ptr->descriptor(),
+        file(),
+        instruction_receiver,
+        job_ptr->report().source
+      );
+
+      if ( auth_success == false )
       {
-        log::error("AuthorityInterface: "
-                   "Authoritative processing for %s failed.\n",
-                   pJob->descriptor().getSource().path.string().c_str());
+        log::error(
+          "AuthorityInterface: "
+          "Authoritative processing for %s failed.\n",
+          job_ptr->descriptor().getSource().path.string().c_str()
+        );
       }
 
       file().close();
     }
     else
     {
-      log::error("AuthorityInterface: Failed to open %s\n",
-                 pJob->descriptor().getSource().path.string().c_str());
-      lStatus = RsyncSourceFileNotFound;
+      log::error(
+        "AuthorityInterface: Failed to open %s\n",
+        job_ptr->descriptor().getSource().path.string().c_str()
+      );
+
+      job_status = RsyncSourceFileNotFound;
     }
   }
 
-  if (lStatus != RsyncSuccess)
+  if ( job_status != RsyncSuccess )
   {
-    EndInstruction* lpEnd = new EndInstruction();
-    lpEnd->cancel(lStatus);
-    rInstructions.push(lpEnd);
+    EndInstruction* end_instruction_ptr = new EndInstruction();
+    end_instruction_ptr->cancel( job_status );
+    instruction_receiver.push( end_instruction_ptr );
   }
 }
 

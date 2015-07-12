@@ -8,12 +8,11 @@ using namespace liber::rsync;
 using namespace liber::concurrency;
 
 //----------------------------------------------------------------------------
-SegmenterThread::SegmenterThread(FileSystemInterface& rFileSystemInterface)
+SegmenterThread::SegmenterThread(FileSystemInterface& file_sys_interface )
 : IThread("SegmenterThread")
-, mrFileSys(rFileSystemInterface)
-, mSegmenter(Segmenter::FullStride)
+, file_sys_interface_( file_sys_interface )
 {
-  mJobQueue.initialize();
+  job_queue_.initialize();
 }
 
 //----------------------------------------------------------------------------
@@ -22,9 +21,9 @@ SegmenterThread::~SegmenterThread()
 }
 
 //----------------------------------------------------------------------------
-void SegmenterThread::addJob(RsyncJob* pJob)
+void SegmenterThread::addJob( RsyncJob* job_ptr )
 {
-  mJobQueue.push(pJob);
+  job_queue_.push( job_ptr );
 }
 
 //----------------------------------------------------------------------------
@@ -32,34 +31,40 @@ void SegmenterThread::run(const bool& bShutdown)
 {
   while ( !bShutdown )
   {
-    RsyncJob* lpJob = NULL;
+    RsyncJob* job_ptr = NULL;
 
-    // if (mJobQueue.pop(lpJob, 100) && lpJob)
-    if (mJobQueue.pop(lpJob) && lpJob)
+    if ( job_queue_.pop( job_ptr ) && job_ptr )
     {
-      std::ifstream lInputStream;
+      std::ifstream input_file;
 
-      if (mrFileSys.open(lpJob->descriptor().getDestination().path, lInputStream))
+      bool segment_success = file_sys_interface_.open(
+        job_ptr->descriptor().getDestination().path,
+        input_file
+      );
+
+      if ( segment_success )
       {
-        bool lbSuccess = mSegmenter.process(lInputStream,
-                                            lpJob->segments(),
-                                            lpJob->descriptor().getSegmentSize(),
-                                            lpJob->report().destination.segmentation);
-        if (lbSuccess == false)
+        segment_success = Segmenter::processFullStride(
+          input_file,
+          job_ptr->segments(),
+          job_ptr->descriptor().getSegmentSize(),
+          job_ptr->report().destination.segmentation);
+        
+        if ( segment_success == false )
         {
           log::error("SegmenterThread: %s failed\n",
-                     lpJob->descriptor().getDestination().path.string().c_str());
+                     job_ptr->descriptor().getDestination().path.string().c_str());
         }
 
-        lInputStream.close();
+        input_file.close();
       }
       else
       {
         log::debug("SegmenterThread: Failed to open %s\n.",
-                     lpJob->descriptor().getDestination().path.string().c_str());
+                     job_ptr->descriptor().getDestination().path.string().c_str());
       }
 
-      lpJob->signalSegmentationDone();
+      job_ptr->signalSegmentationDone();
     }
   }
 }

@@ -11,40 +11,18 @@ using namespace liber;
 using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
-// Class: Segmenter
-//-----------------------------------------------------------------------------
-Segmenter::Segmenter(Segmenter::SegmentDistance distance)
-: mDistance(distance)
+bool Segmenter::processFullStride(
+  std::istream&       istream,
+  SegmentReceiver&    segment_receiver,
+  ui32                segment_size_bytes,
+  SegmentationReport& report
+)
 {
-}
-
-//-----------------------------------------------------------------------------
-bool Segmenter::
-process(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegmentSizeBytes, SegmentationReport& rReport)
-{
-  bool lbSuccess = false;
-
-  if (mDistance == FullStride)
-  {
-    lbSuccess = processFullStride(istream, rReceiver, nSegmentSizeBytes, rReport);
-  }
-  else
-  {
-    lbSuccess = processEveryOffset(istream, rReceiver, nSegmentSizeBytes, rReport);
-  }
-
-  return lbSuccess;
-}
-
-//-----------------------------------------------------------------------------
-bool Segmenter::
-processFullStride(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegmentSizeBytes, SegmentationReport& rReport)
-{
-  Segment::ID lnSegId = 0;
-  Segment lSegment(nSegmentSizeBytes);
+  Segment::ID segment_id = 0;
+  Segment segment( segment_size_bytes );
 
   // Offset, in bytes, from the beginning of the file.
-  ui32 lnOffset = 0;
+  ui32 segment_offset = 0;
 
   if (istream.bad())
   {
@@ -52,50 +30,50 @@ processFullStride(std::istream& istream, SegmentReceiver& rReceiver, ui32 nSegme
   }
 
   // Capture the start time.
-  rReport.segmentCount = 0;
-  rReport.begin.sample();
+  report.segmentCount = 0;
+  report.begin.sample();
 
-  ui32 lnStrideSizeBytes = nSegmentSizeBytes;
+  ui32 stride_size_bytes = segment_size_bytes;
 
   // Record the stride size and segment size;
-  rReport.strideSizeBytes  = lnStrideSizeBytes;
-  rReport.segmentSizeBytes = nSegmentSizeBytes;
+  report.strideSizeBytes  = stride_size_bytes;
+  report.segmentSizeBytes = segment_size_bytes;
 
-  while (istream.eof() == false)
+  while ( istream.eof() == false )
   {
     // Create the new segment.  The segment will compute its weak checksum.
     // The Segment always defers its MD5 computation.
-    lSegment.setID(lnSegId++);
-    lSegment.setOffset(lnOffset);
-    lSegment.setData(istream, nSegmentSizeBytes, NULL);
+    segment.setID( segment_id++ );
+    segment.setOffset( segment_offset );
+    segment.setData( istream, segment_size_bytes, NULL );
  
     // Add the segment to the segment list vector.
-    rReceiver.push(lSegment);
-    rReport.segmentCount++;
+    segment_receiver.push( segment );
+    report.segmentCount++;
 
     // Move to the next byte.
-    lnOffset += lnStrideSizeBytes;
+    segment_offset += stride_size_bytes;
   }
 
   // Push an empty segment to mark the end of the stream.
-  lSegment.setID(Segment::EndOfStream);
-  rReceiver.push(lSegment);
+  segment.setID( Segment::EndOfStream );
+  segment_receiver.push( segment );
 
   // Capture the segmentation end time.
-  rReport.end.sample();
+  report.end.sample();
 
   return true;
 }
 
 //-----------------------------------------------------------------------------
 bool Segmenter::processEveryOffset(
-  std::istream& istream, 
-  SegmentReceiver& segment_receiver, 
-  ui32 segment_size_bytes,
+  std::istream&       istream, 
+  SegmentReceiver&    segment_receiver, 
+  ui32                segment_size_bytes,
   SegmentationReport& report
 )
 {
-  static const size_t BLOCK_READ_SIZE = 512;
+  static const size_t BLOCK_READ_SIZE = 1024;
 
   ui8*  temp_buffer_ptr = NULL;
 
@@ -160,7 +138,7 @@ bool Segmenter::processEveryOffset(
 
       // Add the segment to the segment list vector.
       segment_receiver.push( segment );
-      rReport.segmentCount++;
+      report.segmentCount++;
 
       // Remove one character from the front of the buffer.
       if ( circular_buffer.read( (char*)temp_buffer_ptr, 1 ) != 1 )

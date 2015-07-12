@@ -12,41 +12,22 @@ class SegmentReceiver;
 class SegmentHook;
 class SegmentationReport;
 
-class Segmenter {
-public:
+namespace Segmenter {
+  
+  bool processFullStride(
+    std::istream&       istream,
+    SegmentReceiver&    segment_receiver,
+    ui32                segment_size_bytes,
+    SegmentationReport& report
+  );
 
-  enum SegmentDistance {
+  bool processEveryOffset(
+    std::istream&       istream,
+    SegmentReceiver&    segment_receiver,
+    ui32                segment_size_bytes,
+    SegmentationReport& report);
 
-    // The requester does not overlap.
-    FullStride,
-
-    // The Authority creates a segment for every offset.
-    EveryOffset
-  };
-
-  explicit Segmenter(SegmentDistance distance = FullStride);
-
-  bool process(std::istream& istream,
-               SegmentReceiver& rReceiver,
-               ui32 nSegmentSizeBytes,
-               SegmentationReport& rReport);
-
-private:
-
-  bool processFullStride(std::istream& istream,
-               SegmentReceiver& rReceiver,
-               ui32 nSegmentSizeBytes,
-               SegmentationReport& rReport);
-
-  bool processEveryOffset(std::istream& istream,
-               SegmentReceiver& rReceiver,
-               ui32 nSegmentSizeBytes,
-               SegmentationReport& rReport);
-
-private:
-
-  SegmentDistance mDistance;
-};
+} // End namespace Segmenter
 
 } // End namespace rsync
 } // End namespace liber

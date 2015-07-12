@@ -2,9 +2,7 @@
 #define RSYNC_LOCAL_AUTHORITY_INTERFACE_H
 
 #include <fstream>
-#include "HashTable.h"
-//#include "AuthorityInterface.h"
-//#include "FileSystemInterface.h"
+#include <boost/filesystem.hpp>
 #include "Authority.h"
 
 namespace liber {
@@ -13,21 +11,25 @@ namespace rsync {
 class Segment;
 class FileSystemInterface;
 class RsyncJob;
-//class InstructionReceiver;
 
-//class LocalAuthorityInterface : public AuthorityInterface {
 class LocalAuthorityInterface {
 public:
 
-  explicit LocalAuthorityInterface(FileSystemInterface&);
+  explicit LocalAuthorityInterface( FileSystemInterface& );
   ~LocalAuthorityInterface();
 
-  void process(RsyncJob* pJob);
-  void process(RsyncJob* pJob, InstructionReceiver& rInstructions);
+  void process( RsyncJob* job_ptr );
+  void process( RsyncJob* job_ptr, InstructionReceiver& instruction_receiver );
 
 private:
 
-  void processJob(RsyncJob* pJob, InstructionReceiver& rInstructions);
+  LocalAuthorityInterface( const LocalAuthorityInterface& );
+  LocalAuthorityInterface& operator= ( const LocalAuthorityInterface& );
+
+  void processJob(
+    RsyncJob* job_ptr,
+    InstructionReceiver& instruction_receiver
+  );
 
   bool open(const boost::filesystem::path& path);
   void close();
@@ -35,13 +37,12 @@ private:
 
 private:
 
-  int mnSegmentTimeoutMs;
+  int segment_timeout_ms_;
 
-  FileSystemInterface& mrFileSys;
-  std::ifstream mAuthFile;
+  FileSystemInterface& file_sys_interface_;
+  std::ifstream authoritative_file_;
 
-//  liber::HashTable<16, Segment*> mHash;
-  Authority mAuthority;
+  Authority authority_;
 };
 
 } // End namespace rsync

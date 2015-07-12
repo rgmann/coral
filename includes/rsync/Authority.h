@@ -6,7 +6,7 @@
 #include "HashTable.h"
 #include "JobReport.h"
 #include "SegmentHook.h"
-#include "Segmenter.h"
+// #include "Segmenter.h"
 #include "CircularBuffer.h"
 
 namespace liber {
@@ -45,24 +45,24 @@ private:
 
 private:
 
-  liber::HashTable<16, Segment*>  mHash;
+  liber::HashTable<16, Segment*>  segment_hash_;
 
-  Segmenter mSegmenter;
+  // Segmenter mSegmenter;
 
-  ui32 mnSegmentSkipCount;
-  CircularBuffer mChunkBuffer;
+  ui32 segment_skip_count_;
+  CircularBuffer chunk_buffer_;
 
-  ui32 mnMaxChunkSize;
-  ui32 mnBufferedCount;
-  Segment::ID mBufferStartID;
+  ui32 max_chunk_size_bytes_;
+  ui32 buffered_segment_count_;
+  Segment::ID buffer_first_segment_id_;
 
-  ui32 mnTotalSegmentBytes;
-  ui32 mnSegmentBytes;
-  ui32 mnChunkBytes;
+  ui32 total_segment_bytes_;
+  ui32 segment_bytes_;
+  ui32 chunk_bytes_;
 
-  AuthorityReport* mpReport;
+  AuthorityReport* authority_report_ptr_;
 
-  InstructionReceiver*  mpReceiver;
+  InstructionReceiver*  instruction_receiver_ptr;
 
 };
 

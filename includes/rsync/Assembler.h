@@ -2,41 +2,42 @@
 #define RSYNC_ASSEMBLER_H
 
 #include <fstream>
-//#include "InstructionQueue.h"
-#include "SegmentAccessor.h"
 
 namespace liber {
 namespace rsync {
 
+class SegmentAccessor;
+class InstructionQueue;
+class AssemblyReport;
 
 class Assembler {
 public:
 
-  explicit Assembler(SegmentAccessor&);
+  Assembler( SegmentAccessor& segment_accessor );
   ~Assembler();
 
-  bool process(class InstructionQueue& rQueue, class AssemblyReport& rReport);
+  bool process( InstructionQueue& instruction_queue, AssemblyReport& report );
 
-  /**
-   * Process the next assembly instruction.
-   */
-  //bool execute(Instruction* pInstruction);
-
-  /**
-   *
-   */
+  //
+  // Get assembly status for the last completed job.
+  //
   const ExecutionStatus& status() const;
 
   std::ofstream& outputStream();
 
 private:
 
-  liber::rsync::SegmentAccessor& mrAccessor;
-  std::ofstream mOStream;
+  Assembler( const Assembler& );
+  Assembler& operator= ( const Assembler& );
 
-  ExecutionStatus mStatus;
+private:
 
-  int mnInstructionTimeoutMs;
+  SegmentAccessor&  segment_accessor_;
+  std::ofstream output_stream_;
+
+  ExecutionStatus assembly_status_;
+
+  int instruction_timeout_ms_;
 };
 
 

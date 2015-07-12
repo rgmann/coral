@@ -10,27 +10,30 @@ namespace liber {
 namespace rsync {
 
 class RsyncJob;
+class FileSystemInterface;
 
 class AssemblerThread : public liber::concurrency::IThread {
 public:
 
-  explicit AssemblerThread(class FileSystemInterface&);
+  AssemblerThread( FileSystemInterface& file_sys_interface );
   ~AssemblerThread();
 
-  void addJob(RsyncJob* pJob);
+  void addJob( RsyncJob* job_ptr );
 
 private:
+
+  AssemblerThread( const AssemblerThread& );
+  AssemblerThread& operator= ( const AssemblerThread& );
 
   void run(const bool& bShutdown);
 
-
 private:
 
-  Queue<RsyncJob*> mJobQueue;
+  Queue<RsyncJob*> job_queue_;
 
-  class FileSystemInterface& mrFileSys;
-  SegmentFile          mSegmentFile;
-  Assembler            mAssembler;
+  class FileSystemInterface& file_sys_interface_;
+  SegmentFile          segment_file_;
+  Assembler            assembler_;
 
 };
 

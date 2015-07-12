@@ -10,13 +10,13 @@ using namespace liber::concurrency;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-AssemblerThread::AssemblerThread(FileSystemInterface& rFileSystemInterface)
+AssemblerThread::AssemblerThread( FileSystemInterface& file_sys_interface )
 : IThread("AssemblerThread")
-, mrFileSys(rFileSystemInterface)
-, mSegmentFile(rFileSystemInterface)
-, mAssembler(mSegmentFile)
+, file_sys_interface_ ( file_sys_interface )
+, segment_file_       ( file_sys_interface )
+, assembler_          ( segment_file_ )
 {
-  mJobQueue.initialize();
+  job_queue_.initialize();
 }
 
 //----------------------------------------------------------------------------
@@ -25,45 +25,61 @@ AssemblerThread::~AssemblerThread()
 }
 
 //----------------------------------------------------------------------------
-void AssemblerThread::addJob(RsyncJob* pJob)
+void AssemblerThread::addJob( RsyncJob* job_ptr )
 {
-  mJobQueue.push(pJob);
+  job_queue_.push( job_ptr );
 }
 
 //----------------------------------------------------------------------------
 void AssemblerThread::run(const bool& bShutdown)
 {
-  boost::filesystem::path lStagePath;
+  boost::filesystem::path stage_path_;
 
   while (!bShutdown)
   {
-    RsyncJob* lpJob = NULL;
+    RsyncJob* job_ptr = NULL;
 
-    if (mJobQueue.pop(lpJob) && lpJob)
+    if ( job_queue_.pop( job_ptr) && job_ptr )
     {
-      if (mSegmentFile.open(lpJob->descriptor()))
+      if ( segment_file_.open( job_ptr->descriptor() ) )
       {
-        if (mrFileSys.stage(lpJob->descriptor().getDestination().path,
-                            lStagePath,
-                            mAssembler.outputStream()))
+        bool stage_success = file_sys_interface_.stage(
+          job_ptr->descriptor().getDestination().path,
+          stage_path_,
+          assembler_.outputStream()
+        );
+
+        if ( stage_success )
         {
-          bool lbSuccess = mAssembler.process(lpJob->instructions(),
-                                              lpJob->report().destination.assembly);
-          if (lbSuccess == false)
+          bool assembly_success = assembler_.process(
+            job_ptr->instructions(),
+            job_ptr->report().destination.assembly
+          );
+
+          if ( assembly_success == false )
           {
-            log::error("AssemblerThread - Assembly failed for %s: %s\n",
-                       lpJob->descriptor().getDestination().path.string().c_str(),
-                       ExecutionStatus::ErrorDescription(mAssembler.status().error).c_str());
+            log::error(
+              "AssemblerThread - Assembly failed for %s: %s\n",
+              job_ptr->descriptor().getDestination().path.string().c_str(),
+              ExecutionStatus::ErrorDescription(
+                assembler_.status().error
+              ).c_str()
+            );
           }
 
           // Close the segment file.
-          mSegmentFile.close();
+          segment_file_.close();
 
           // If assembly completed successfully,
           // swap the stage file and destination file.
-          if (lbSuccess)
+          if ( assembly_success )
           {
-            if (!mrFileSys.swap(lStagePath, lpJob->descriptor().getDestination().path))
+            bool swap_success = file_sys_interface_.swap(
+              stage_path_,
+              job_ptr->descriptor().getDestination().path
+            );
+
+            if ( swap_success == false )
             {
               log::error("AssemblerThread - "
                          "Failed to swap stage file and destination file.\n");
@@ -72,10 +88,11 @@ void AssemblerThread::run(const bool& bShutdown)
         }
         else
         {
-          mSegmentFile.close();
+          segment_file_.close();
 
-          log::error("AssemblerThread - Failed to open stage file for %s\n",
-                     lpJob->descriptor().getDestination().path.string().c_str());
+          log::error(
+            "AssemblerThread - Failed to open stage file for %s\n",
+            job_ptr->descriptor().getDestination().path.string().c_str());
         }
       }
       else
@@ -85,7 +102,7 @@ void AssemblerThread::run(const bool& bShutdown)
 
       // When assembly is complete (regardless of whether is was successful),
       // signal that the RSYNC job is done.
-      lpJob->signalAssemblyDone();
+      job_ptr->signalAssemblyDone();
     }
   }
 }
