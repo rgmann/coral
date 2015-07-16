@@ -9,11 +9,11 @@ using namespace liber::netapp;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-AuthorityThread::AuthorityThread(FileSystemInterface& rFileSystemInterface)
-: IThread("AuthorityThread")
-, mLocalAuthority(rFileSystemInterface)
+AuthorityThread::AuthorityThread( FileSystemInterface& file_sys_interface )
+: IThread         ( "AuthorityThread" )
+, local_authority_( file_sys_interface )
 {
-  mJobQueue.initialize();
+  job_queue_.initialize();
 }
 
 //----------------------------------------------------------------------------
@@ -22,21 +22,24 @@ AuthorityThread::~AuthorityThread()
 }
 
 //----------------------------------------------------------------------------
-void AuthorityThread::addJob(RsyncJob* pJob)
+void AuthorityThread::addJob( RsyncJob* job_ptr )
 {
-  if (pJob) mJobQueue.push(pJob);
+  if ( job_ptr )
+  {
+    job_queue_.push( job_ptr );
+  }
 }
 
 //----------------------------------------------------------------------------
 PacketSubscriber& AuthorityThread::getSubscriber()
 {
-  return mRemoteAuthority;
+  return remote_authority_;
 }
 
 //----------------------------------------------------------------------------
-void AuthorityThread::setRequestID(int requestID)
+void AuthorityThread::setRequestID( int request_id )
 {
-  mRemoteAuthority.setRequestID(requestID);
+  remote_authority_.setRequestID( request_id );
 }
 
 //----------------------------------------------------------------------------
@@ -44,21 +47,21 @@ void AuthorityThread::run(const bool& bShutdown)
 {
   while ( !bShutdown )
   {
-    RsyncJob* lpJob = NULL;
+    RsyncJob* job_ptr = NULL;
 
     // Wait for a job. This is also a thread cancellation point.
-    if ( mJobQueue.pop( lpJob ) && lpJob )
+    if ( job_queue_.pop( job_ptr ) && job_ptr )
     {
-      if (lpJob->descriptor().getSource().remote)
+      if ( job_ptr->descriptor().getSource().remote )
       {
-        mRemoteAuthority.process(lpJob);
+        remote_authority_.process( job_ptr );
       }
       else
       {
-        mLocalAuthority.process(lpJob);
+        local_authority_.process( job_ptr );
       }
 
-      lpJob->signalAuthDone();
+      job_ptr->signalAuthDone();
     }
   }
 }

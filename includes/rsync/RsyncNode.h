@@ -17,6 +17,7 @@ namespace liber {
 namespace rsync {
 
 class RsyncJob;
+class RsyncJobCallback;
 
 class RsyncJobCallback {
 public:
@@ -24,7 +25,7 @@ public:
   RsyncJobCallback() {};
   virtual ~RsyncJobCallback() {};
 
-  virtual void call(const JobDescriptor& job, const JobReport& report) = 0;
+  virtual void call( const JobDescriptor& job, const JobReport& report ) = 0;
 
 };
 
@@ -37,39 +38,39 @@ public:
 class RsyncNode : public liber::concurrency::IThread {
 public:
 
-  RsyncNode(const boost::filesystem::path& root);
+  RsyncNode( const boost::filesystem::path& root );
   ~RsyncNode();
 
-  void setCallback(class RsyncJobCallback* pCallback);
+  void setCallback( RsyncJobCallback* callback_ptr );
   void unsetCallback();
 
   RsyncError sync(const boost::filesystem::path& destination,
                   const boost::filesystem::path& source,
-                  bool bRemoteDestination = false,
-                  bool bRemoteSource = false);
+                  bool remote_destination = false,
+                  bool remote_source = false);
 
   liber::netapp::PacketSubscriber& subscriber();
 
 private:
 
-  void run(const bool& bShutdown);
+  void run( const bool& bShutdown );
 
 private:
 
-  Mutex mCallbackLock;
-  RsyncJobCallback* mpCallback;
+  Mutex callback_lock_;
+  RsyncJobCallback* callback_ptr_;
 
-  RsyncPacketRouter mRouter;
+  RsyncPacketRouter router_;
 
-  FileSystemInterface mFileSys;
-  SegmenterThread mSegmenter;
-  AuthorityThread mAuthority;
-  AssemblerThread mAssembler;
-  JobAgent mJobAgent;
+  FileSystemInterface file_sys_interface_;
+  SegmenterThread segmenter_;
+  AuthorityThread authority_;
+  AssemblerThread assembler_;
+  JobAgent        job_agent_;
 
-  RemoteAuthorityService mAuthorityService;
+  RemoteAuthorityService authority_service_;
 
-  ui32 mnSegmentSize;
+  ui32 segment_size_;
 };
 
 } // End namespace rsync

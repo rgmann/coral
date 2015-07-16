@@ -35,11 +35,11 @@ void AssemblerThread::run(const bool& bShutdown)
 {
   boost::filesystem::path stage_path_;
 
-  while (!bShutdown)
+  while ( !bShutdown )
   {
     RsyncJob* job_ptr = NULL;
 
-    if ( job_queue_.pop( job_ptr) && job_ptr )
+    if ( job_queue_.pop( job_ptr ) && job_ptr )
     {
       if ( segment_file_.open( job_ptr->descriptor() ) )
       {

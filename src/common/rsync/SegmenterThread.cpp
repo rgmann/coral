@@ -8,7 +8,7 @@ using namespace liber::rsync;
 using namespace liber::concurrency;
 
 //----------------------------------------------------------------------------
-SegmenterThread::SegmenterThread(FileSystemInterface& file_sys_interface )
+SegmenterThread::SegmenterThread( FileSystemInterface& file_sys_interface )
 : IThread("SegmenterThread")
 , file_sys_interface_( file_sys_interface )
 {
@@ -48,13 +48,14 @@ void SegmenterThread::run(const bool& bShutdown)
           input_file,
           job_ptr->segments(),
           job_ptr->descriptor().getSegmentSize(),
-          job_ptr->report().destination.segmentation);
+          job_ptr->report().destination.segmentation
+        );
         
         if ( segment_success == false )
         {
           log::error("SegmenterThread: %s failed\n",
                      job_ptr->descriptor().getDestination().path.string().c_str());
-        }
+        } else liber::log::status("SegmenterThread: Finished segmenting %s\n", job_ptr->descriptor().getDestination().path.string().c_str());
 
         input_file.close();
       }

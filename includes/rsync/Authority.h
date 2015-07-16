@@ -6,7 +6,6 @@
 #include "HashTable.h"
 #include "JobReport.h"
 #include "SegmentHook.h"
-// #include "Segmenter.h"
 #include "CircularBuffer.h"
 
 namespace liber {
@@ -29,8 +28,12 @@ public:
    * in the Segment Hash.  Generates a set for instructions for updating the hashed
    * file to match the authoritative file.
    */
-  bool process(JobDescriptor& rDescriptor, std::istream& rInStream,
-               InstructionReceiver& rReceiver, SourceReport& rReport);
+  bool process(
+    JobDescriptor&        job_descriptor,
+    std::istream&         istream,
+    InstructionReceiver&  instruction_receiver,
+    SourceReport&         report
+  );
 
   liber::HashTable<16, Segment*>& hash();
 
@@ -38,16 +41,14 @@ private:
 
   void reset();
 
-  void call(Segment& rSegment);
+  void call( Segment& segment );
 
-  enum { FlushAll = -1 };
-  void flushChunkBuffer(int nFlushCount = FlushAll);
+  enum { kFlushAll = -1 };
+  void flushChunkBuffer( int nFlushCount = kFlushAll );
 
 private:
 
   liber::HashTable<16, Segment*>  segment_hash_;
-
-  // Segmenter mSegmenter;
 
   ui32 segment_skip_count_;
   CircularBuffer chunk_buffer_;

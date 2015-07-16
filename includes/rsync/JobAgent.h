@@ -17,47 +17,50 @@ class AssemblerThread;
 class JobAgent : public liber::netapp::PacketSubscriber {
 public:
 
-  JobAgent(FileSystemInterface& rFileSys,
-           SegmenterThread& rSegmenter,
-           AuthorityThread& rAuthority,
-           AssemblerThread& rAssembler);
+  JobAgent( FileSystemInterface& file_sys_interface,
+            SegmenterThread&     segmenter,
+            AuthorityThread&     authority,
+            AssemblerThread&     assembler );
   ~JobAgent();
 
-  RsyncError createJob(const ResourcePath& destination, const ResourcePath& source, ui32 nSegmentSize);
+  RsyncError createJob(
+    const ResourcePath& destination,
+    const ResourcePath& source,
+    ui32 segment_size );
 
-  void releaseJob(RsyncJob* pJob);
+  void releaseJob( RsyncJob* job_ptr );
 
   RsyncJob* nextJob();
 
-  bool put(const char* pData, ui32 nSizeBytes);
+  bool put( const char* data_ptr, ui32 size_bytes );
 
 private:
 
-  bool validate(const JobDescriptor& rDescriptor);
+  bool validate( const JobDescriptor& descriptor );
 
-  RsyncError createJob(RsyncJob* pJob);
-  RsyncError createJob(const char* pData, ui32 nSizeBytes);
+  RsyncError createJob( RsyncJob* job_ptr );
+  RsyncError createJob( const char* data_ptr, ui32 size_bytes );
 
-  RsyncError sendRemoteJob(const JobDescriptor& descriptor);
+  RsyncError sendRemoteJob( const JobDescriptor& descriptor );
 
-  RsyncError error(RsyncJob* pJob, RsyncError error);
+  RsyncError error( RsyncJob* job_ptr, RsyncError error );
 
-  void finishRemoteJob(const char* pData, ui32 nSizeBytes);
+  void finishRemoteJob(const char* data_ptr, ui32 size_bytes );
 
-  RsyncError addActiveJob(RsyncJob* pJob);
-  void removeActiveJob(RsyncJob* pJob);
+  RsyncError addActiveJob( RsyncJob* job_ptr );
+  void removeActiveJob( RsyncJob* job_ptr );
 
 private:
 
-  std::map<boost::uuids::uuid, RsyncJob*> mActiveJobs;
-  Queue<RsyncJob*> mReadyJobs;
+  std::map<boost::uuids::uuid, RsyncJob*> active_jobs_;
+  Queue<RsyncJob*> ready_jobs_;
 
-  FileSystemInterface& mrFileSys;
-  SegmenterThread& mrSegmenter;
-  AuthorityThread& mrAuthority;
-  AssemblerThread& mrAssembler;
+  FileSystemInterface& file_sys_interface_;
+  SegmenterThread& segmenter_;
+  AuthorityThread& authority_;
+  AssemblerThread& assembler_;
 
-  bool mbCreateDestStub;
+  bool create_destination_stub_;
 };
 
 } // End namespace rsync

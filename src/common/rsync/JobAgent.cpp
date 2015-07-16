@@ -17,18 +17,20 @@ typedef boost::uuids::uuid buuid;
 
 //----------------------------------------------------------------------------
 JobAgent::
-JobAgent(FileSystemInterface& rFileSys, 
-         SegmenterThread& rSegmenter,
-         AuthorityThread& rAuthority,
-         AssemblerThread& rAssembler)
+JobAgent(
+  FileSystemInterface& file_sys_interface, 
+  SegmenterThread& segmenter,
+  AuthorityThread& authority,
+  AssemblerThread& assembler
+)
 : PacketSubscriber()
-, mrFileSys(rFileSys)
-, mrSegmenter(rSegmenter)
-, mrAuthority(rAuthority)
-, mrAssembler(rAssembler)
-, mbCreateDestStub(true)
+, file_sys_interface_ (file_sys_interface)
+, segmenter_          ( segmenter )
+, authority_          ( authority )
+, assembler_          ( assembler )
+, create_destination_stub_( true )
 {
-  mReadyJobs.initialize();
+  ready_jobs_.initialize();
 }
 
 //----------------------------------------------------------------------------
@@ -39,32 +41,32 @@ JobAgent::~JobAgent()
 //----------------------------------------------------------------------------
 RsyncJob* JobAgent::nextJob()
 {
-  RsyncJob* lpJob = NULL;
-  // mReadyJobs.pop( lpJob, 100 );
-  mReadyJobs.pop( lpJob );
-  return lpJob;
+  RsyncJob* job_ptr = NULL;
+  ready_jobs_.pop( job_ptr );
+  return job_ptr;
 }
 
 //----------------------------------------------------------------------------
 RsyncError JobAgent::createJob(
   const ResourcePath& destination,
   const ResourcePath& source,
-  ui32 nSegmentSize)
+  ui32 segment_size
+)
 {
-  RsyncError lStatus = RsyncSuccess;
-  RsyncJob*  lpJob   = NULL;
+  RsyncError job_create_status = RsyncBadDescriptor;
+  RsyncJob*  job_ptr   = NULL;
 
-  if ((lpJob = new (std::nothrow) RsyncJob()))
+  if ( (job_ptr = new (std::nothrow) RsyncJob() ) )
   {
-    JobDescriptor& rDesc = lpJob->descriptor();
+    JobDescriptor& descriptor = job_ptr->descriptor();
 
-    rDesc.setDestination(destination);
-    rDesc.setSource(source);
-    rDesc.setSegmentSize(nSegmentSize);
+    descriptor.setDestination( destination );
+    descriptor.setSource( source );
+    descriptor.setSegmentSize( segment_size );
 
-    if ((lStatus = createJob(lpJob)) != RsyncSuccess)
+    if ( ( job_create_status = createJob( job_ptr ) ) != RsyncSuccess )
     {
-      delete lpJob;
+      delete job_ptr;
     }
   }
   else
@@ -72,23 +74,23 @@ RsyncError JobAgent::createJob(
     log::error("JobAgent::createJob - Failed to allocated RsyncJob\n");
   }
 
-  return lStatus;
+  return job_create_status;
 }
 
 //----------------------------------------------------------------------------
-RsyncError JobAgent::createJob(const char* pData, ui32 nSizeBytes)
+RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
 {
-  RsyncError lStatus = RsyncSuccess;
-  RsyncJob*  lpJob   = NULL;
+  RsyncError job_create_status = RsyncSuccess;
+  RsyncJob*  job_ptr   = NULL;
 
-  if ((lpJob = new (std::nothrow) RsyncJob()))
+  if ( ( job_ptr = new (std::nothrow) RsyncJob() ) )
   {
-    JobDescriptor& rDesc = lpJob->descriptor();
+    JobDescriptor& descriptor = job_ptr->descriptor();
 
-    if (rDesc.deserialize(pData, nSizeBytes))
+    if ( descriptor.deserialize( data_ptr, size_bytes ) )
     {
       // Indicate that the job was remotely requested.
-      rDesc.setRemoteRequest();
+      descriptor.setRemoteRequest();
 
       // Received jobs can only specify the following combinations (table is
       // from the perspective of the RsyncNode::sync call):
@@ -99,30 +101,30 @@ RsyncError JobAgent::createJob(const char* pData, ui32 nSizeBytes)
       // remote | local  | Not allowed; performed locally.
       // local  | remote | Tell remote not to synchronize its resource to local resource.
       // local  | local  | Not allowed; performed locally.
-      if (rDesc.getDestination().remote)
+      if ( descriptor.getDestination().remote )
       {
-        rDesc.getDestination().remote = false;
+        descriptor.getDestination().remote = false;
 
         // If a remote JobAgent specifies a remote source, the source is now
         // local (and vice versa).
-        rDesc.getSource().remote = (rDesc.getSource().remote == false);
+        descriptor.getSource().remote = (descriptor.getSource().remote == false);
 
         // Create the job.
-        if ((lStatus = createJob(lpJob)) != RsyncSuccess)
+        if ( ( job_create_status = createJob( job_ptr ) ) != RsyncSuccess)
         {
-          delete lpJob;
+          delete job_ptr;
         }
       }
       else
       {
         log::error("JobAgent::createJob - Bad remote job\n");
-        lStatus = error(lpJob, RsyncBadRemoteJob);
+        job_create_status = error(job_ptr, RsyncBadRemoteJob);
       }
     }
     else
     {
       log::error("JobAgent::createJob - Bad descriptor\n");
-      lStatus = error(lpJob, RsyncBadDescriptor);
+      job_create_status = error(job_ptr, RsyncBadDescriptor);
     }
   }
   else
@@ -130,121 +132,121 @@ RsyncError JobAgent::createJob(const char* pData, ui32 nSizeBytes)
     log::error("JobAgent::createJob - Failed to allocate RsyncJob\n");
   }
 
-  return lStatus;
+  return job_create_status;
 }
 
 //---------------------------------------------------------------------------
-RsyncError JobAgent::createJob(RsyncJob* pJob)
+RsyncError JobAgent::createJob( RsyncJob* job_ptr )
 {
-  RsyncError lStatus = RsyncSuccess;
+  RsyncError job_create_status = RsyncSuccess;
 
-  JobDescriptor& descriptor = pJob->descriptor();
+  JobDescriptor& descriptor = job_ptr->descriptor();
 
   // If the source is local, verify that it exists.  If it does not, job
   // creation failed.
-  if (descriptor.getSource().remote == false)
+  if ( descriptor.getSource().remote == false )
   {
-    if (mrFileSys.exists(descriptor.getSourcePath()) == false)
+    if ( file_sys_interface_.exists( descriptor.getSourcePath() ) == false )
     {
       log::error("JobAgent::createJob - Source resource not found\n");
-      lStatus = error(pJob, RsyncSourceFileNotFound);
+      job_create_status = error( job_ptr, RsyncSourceFileNotFound );
     }
   }
 
   // If the destination is local, verify that it exists. If it does not, but
   // stub creation is enabled, attempt to create it with touch. If stub
   // creation is not enabled, job creation failed.
-  if (lStatus == RsyncSuccess)
+  if ( job_create_status == RsyncSuccess )
   {
-    if (descriptor.getDestination().remote == false)
+    if ( descriptor.getDestination().remote == false )
     {
       // If the destination file does not exist, create it (if so configured).
-      if (mbCreateDestStub)
+      if ( create_destination_stub_ )
       {
-        if (mrFileSys.touch(descriptor.getDestinationPath()) == false)
+        if ( file_sys_interface_.touch( descriptor.getDestinationPath() ) == false )
         {
           log::error("JobAgent::createJob - Failed to touch destination resource\n");
-          lStatus = error(pJob, RsyncDestinationFileNotFound);
+          job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
         }
       }
       else
       {
         // If the destination still does not exist, the job cannot be performed.
-        if (mrFileSys.exists(descriptor.getDestinationPath()) == false)
+        if ( file_sys_interface_.exists( descriptor.getDestinationPath() ) == false )
         {
           log::error("JobAgent::createJob - Destination resource not found\n");
-          lStatus = error(pJob, RsyncDestinationFileNotFound);
+          job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
         }
       }
     }
   }
 
-  if (lStatus == RsyncSuccess)
+  if ( job_create_status == RsyncSuccess )
   {
-    if ((lStatus = addActiveJob(pJob)) == RsyncSuccess)
+    if ( ( job_create_status = addActiveJob( job_ptr ) ) == RsyncSuccess )
     {
       // If this is a remote job, send the descriptor to the remote node.
-      if (descriptor.getDestination().remote)
+      if ( descriptor.getDestination().remote )
       {
-        lStatus = sendRemoteJob(descriptor);
+        job_create_status = sendRemoteJob( descriptor );
       }
     }
   }
 
-  lStatus = error(pJob, lStatus);
+  job_create_status = error( job_ptr, job_create_status );
 
-  return lStatus;
+  return job_create_status;
 }
 
 //----------------------------------------------------------------------------
-RsyncError JobAgent::addActiveJob(RsyncJob* pJob)
+RsyncError JobAgent::addActiveJob(RsyncJob* job_ptr)
 {
-  RsyncError lStatus = RsyncSuccess;
+  RsyncError job_create_status = RsyncSuccess;
 
-  std::pair<std::map<buuid, RsyncJob*>::iterator,bool> insertStatus;
-  std::pair<buuid, RsyncJob*> jobPair;
+  std::pair<std::map<buuid, RsyncJob*>::iterator,bool> insert_status;
+  std::pair<buuid, RsyncJob*> job_pair;
 
-  jobPair = std::make_pair(pJob->descriptor().uuid(), pJob);
-  insertStatus = mActiveJobs.insert(jobPair);
+  job_pair = std::make_pair( job_ptr->descriptor().uuid(), job_ptr );
+  insert_status = active_jobs_.insert( job_pair );
 
   // If the job was successfully added to the active-job table,
   // add the job to the ready job queue.
-  if (insertStatus.second)
+  if ( insert_status.second )
   {
-    if (pJob->descriptor().getDestination().remote == false)
+    if ( job_ptr->descriptor().getDestination().remote == false )
     {
       // If the job was successfully created, and the destination file is
       // not remote, add the job to the local pipeline.
-      mrSegmenter.addJob(pJob);
-      mrAuthority.addJob(pJob);
-      mrAssembler.addJob(pJob);
+      segmenter_.addJob( job_ptr );
+      authority_.addJob( job_ptr );
+      assembler_.addJob( job_ptr );
     }
 
-    lStatus = mReadyJobs.push(pJob) ? RsyncSuccess : RsyncQueueError;
+    job_create_status = ready_jobs_.push( job_ptr ) ? RsyncSuccess : RsyncQueueError;
 
-    if (lStatus != RsyncSuccess)
+    if ( job_create_status != RsyncSuccess )
     {
       log::error("JobAgent::addActiveJob - Failed to add job to queue\n");
-      mActiveJobs.erase(insertStatus.first);
+      active_jobs_.erase( insert_status.first );
     }
   }
   else
   {
     log::error("JobAgent::addActiveJob - "
                    "Failed to add job to active job table\n");
-    lStatus = RsyncJobTableInsertionError;
+    job_create_status = RsyncJobTableInsertionError;
   }
 
-  return lStatus;
+  return job_create_status;
 }
 
 //----------------------------------------------------------------------------
-void JobAgent::removeActiveJob(RsyncJob* pJob)
+void JobAgent::removeActiveJob( RsyncJob* job_ptr )
 {
   // Remote the job from the active job table.
-  if (mActiveJobs.count(pJob->descriptor().uuid()) > 0)
+  if ( active_jobs_.count( job_ptr->descriptor().uuid() ) > 0 )
   {
-    mActiveJobs.erase(pJob->descriptor().uuid());
+    active_jobs_.erase( job_ptr->descriptor().uuid() );
   }
   else
   {
@@ -256,99 +258,102 @@ void JobAgent::removeActiveJob(RsyncJob* pJob)
 RsyncError JobAgent::sendRemoteJob(const JobDescriptor& descriptor)
 {
   // Send the remote job request.
-  sendPacketTo(RsyncPacket::RsyncJobAgent,
-               new RsyncPacket(RsyncPacket::RsyncJobRequest,
-               descriptor.serialize()));
+  sendPacketTo(
+    RsyncPacket::RsyncJobAgent,
+    new RsyncPacket( RsyncPacket::RsyncJobRequest, descriptor.serialize() )
+  );
 
   return RsyncSuccess;
 }
 
 //----------------------------------------------------------------------------
-RsyncError JobAgent::error(RsyncJob* pJob, RsyncError error)
+RsyncError JobAgent::error( RsyncJob* job_ptr, RsyncError error )
 {
-  pJob->report().createJobStatus = error;
+  job_ptr->report().createJobStatus = error;
 
   // 
-  if (pJob->descriptor().isRemoteRequest() && (error != RsyncSuccess))
+  if ( job_ptr->descriptor().isRemoteRequest() && ( error != RsyncSuccess ) )
   {
-    RemoteJobResult result(pJob->descriptor().uuid(), pJob->report());
+    RemoteJobResult result( job_ptr->descriptor().uuid(), job_ptr->report() );
 
-    sendPacketTo(RsyncPacket::RsyncJobAgent, 
-                 new RsyncPacket(RsyncPacket::RsyncJobComplete,
-                 result.serialize()));
+    sendPacketTo(
+      RsyncPacket::RsyncJobAgent, 
+      new RsyncPacket( RsyncPacket::RsyncJobComplete, result.serialize() )
+    );
   }
 
   return error;
 }
 
 //----------------------------------------------------------------------------
-void JobAgent::releaseJob(RsyncJob* pJob)
+void JobAgent::releaseJob( RsyncJob* job_ptr )
 {
-  JobDescriptor& rDescriptor = pJob->descriptor();
+  JobDescriptor& descriptor = job_ptr->descriptor();
 
   // Notify the remote node that a job has been completed.
-  if (rDescriptor.isRemoteRequest())
+  if ( descriptor.isRemoteRequest() )
   {
-    RemoteJobResult result(rDescriptor.uuid(), pJob->report());
+    RemoteJobResult result( descriptor.uuid(), job_ptr->report() );
 
-    sendPacketTo(RsyncPacket::RsyncJobAgent,
-                 new RsyncPacket(RsyncPacket::RsyncJobComplete,
-                 result.serialize()));
+    sendPacketTo(
+      RsyncPacket::RsyncJobAgent,
+      new RsyncPacket( RsyncPacket::RsyncJobComplete, result.serialize() )
+    );
   }
 
   // Remote the job from the active job table.
-  removeActiveJob(pJob);
+  removeActiveJob( job_ptr );
 
   // Delete the job.
-  delete pJob;
-  pJob = NULL;
+  delete job_ptr;
+  job_ptr = NULL;
 }
 
 //----------------------------------------------------------------------------
-bool JobAgent::put(const char* pData, ui32 nSizeBytes)
+bool JobAgent::put( const char* data_ptr, ui32 size_bytes )
 {
-  bool lbSuccess = true;
+  bool route_success = true;
 
   RsyncPacket packet;
 
-  if (packet.unpack(pData, nSizeBytes))
+  if ( packet.unpack( data_ptr, size_bytes ) )
   {
-    switch (packet.data()->type)
+    switch ( packet.data()->type )
     {
     case RsyncPacket::RsyncJobRequest:
-      createJob((const char*)packet.dataPtr(), packet.data()->length);
+      createJob( (const char*)packet.dataPtr(), packet.data()->length );
       break;
 
     case RsyncPacket::RsyncJobComplete:
-      finishRemoteJob((const char*)packet.dataPtr(), packet.data()->length);
+      finishRemoteJob( (const char*)packet.dataPtr(), packet.data()->length );
       break;
 
     default:
       log::error("JobAgent - Unrecognized packet type");
-      lbSuccess = false;
+      route_success = false;
       break;
     }
   }
 
-  return lbSuccess;
+  return route_success;
 }
 
 //----------------------------------------------------------------------------
-void JobAgent::finishRemoteJob(const char* pData, ui32 nSizeBytes)
+void JobAgent::finishRemoteJob( const char* data_ptr, ui32 size_bytes )
 {
-  RemoteJobResult jobResult;
+  RemoteJobResult job_result;
 
-  if (jobResult.deserialize(pData,  nSizeBytes))
+  if ( job_result.deserialize( data_ptr,  size_bytes ) )
   {
-    if (mActiveJobs.count(jobResult.uuid()) > 0)
+    if ( active_jobs_.count( job_result.uuid() ) > 0 )
     {
-      std::map<buuid, RsyncJob*>::iterator jobIterator;
-      jobIterator = mActiveJobs.find(jobResult.uuid());
+      std::map<buuid, RsyncJob*>::iterator job_iterator;
+      job_iterator = active_jobs_.find( job_result.uuid() );
 
-      if (jobIterator->second)
+      if ( job_iterator->second )
       {
-        jobIterator->second->mergeReport(jobResult.report());
-        jobIterator->second->signalAllDone();
+        job_iterator->second->mergeReport(job_result.report());
+        job_iterator->second->signalAllDone();
       }
       else
       {

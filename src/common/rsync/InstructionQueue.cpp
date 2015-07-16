@@ -17,11 +17,14 @@ InstructionQueue::~InstructionQueue()
 }
 
 //----------------------------------------------------------------------------
-void InstructionQueue::push(Instruction* const pInstruction)
+void InstructionQueue::push( Instruction* const instruction_ptr )
 {
-  if (pInstruction)
+  if ( instruction_ptr )
   {
-    mInstructions.push(pInstruction);
+    if ( mInstructions.push( instruction_ptr ) == false )
+    {
+      log::status("InstructionQueue::push: Failed to push\n");
+    }
   }
   else
   {
@@ -30,10 +33,10 @@ void InstructionQueue::push(Instruction* const pInstruction)
 }
 
 //----------------------------------------------------------------------------
-Instruction* InstructionQueue::pop(int nTimeoutMs)
+Instruction* InstructionQueue::pop( int timeout_ms )
 {
-  Instruction* lpInstruction = NULL;
-  mInstructions.pop(lpInstruction, nTimeoutMs);
-  return lpInstruction;
+  Instruction* instruction_ptr = NULL;
+  mInstructions.pop( instruction_ptr, timeout_ms );
+  return instruction_ptr;
 }
 

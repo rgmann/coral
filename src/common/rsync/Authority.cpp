@@ -23,7 +23,7 @@ Authority::Authority()
 , chunk_bytes_(0)
 , instruction_receiver_ptr(NULL)
 {
-  chunk_buffer_.allocate(max_chunk_size_bytes_);
+  chunk_buffer_.allocate( max_chunk_size_bytes_ );
 }
 
 //-----------------------------------------------------------------------------
@@ -46,8 +46,9 @@ void Authority::reset()
 
   instruction_receiver_ptr = NULL;
 
+  // Delete all Segments remaining in the Segment hash.
   SegmentDestructor destructor;
-  segment_hash_.clear(destructor);
+  segment_hash_.clear( destructor );
 }
 
 //-----------------------------------------------------------------------------
@@ -63,9 +64,9 @@ bool Authority::process(
 
   instruction_receiver_ptr = &instruction_receiver;
 
-  instruction_receiver_ptr->push(new BeginInstruction(job_descriptor));
+  instruction_receiver_ptr->push( new BeginInstruction( job_descriptor ) );
   
-  bool lbSuccess = Segmenter::processEveryOffset(
+  bool segmentation_success = Segmenter::processEveryOffset(
     istream,
     *this,
     job_descriptor.getSegmentSize(),
@@ -73,14 +74,14 @@ bool Authority::process(
   );
   
   authority_report_ptr_->authEnd.sample();
-  instruction_receiver_ptr->push(new EndInstruction());
+  instruction_receiver_ptr->push( new EndInstruction() );
 
-  authority_report_ptr_ = NULL;
+  authority_report_ptr_    = NULL;
   instruction_receiver_ptr = NULL;
   
   reset();
 
-  return lbSuccess;
+  return segmentation_success;
 }
 
 //-----------------------------------------------------------------------------
@@ -90,23 +91,32 @@ HashTable<16, Segment*>& Authority::hash()
 }
 
 //-----------------------------------------------------------------------------
-void Authority::flushChunkBuffer(int nFlushCount)
+void Authority::flushChunkBuffer( int chunk_flush_count )
 {
   if (!chunk_buffer_.isEmpty())
   {
     // Determine how many bytes to send in the chunk instruction. If the 
-    // caller specifies 'FlushAll', all bytes are sent.  Otherwise only the
-    // first 'nFlushCount' bytes are sent in the chunk and the remainder are
-    // thrown away.
-    ui32 lnChunkSize = (nFlushCount == FlushAll) ? chunk_buffer_.size() :
-                                                   (ui32)nFlushCount;
+    // caller specifies 'kFlushAll', all bytes are sent.  Otherwise only the
+    // first 'chunk_flush_count' bytes are sent in the chunk and the remainder
+    // are thrown away.
+    ui32 chunk_size_bytes = chunk_flush_count;
+
+    if ( chunk_flush_count == kFlushAll )
+    {
+      chunk_size_bytes = chunk_buffer_.size();
+    }
 
     // Allocate the chunk instruction and move the specified number of bytes
     // from the chunk buffer to the chunk instruction.
-    ChunkInstruction* instruction_ptr = new ChunkInstruction(lnChunkSize);
-    if (instruction_ptr->data())
+    ChunkInstruction* instruction_ptr = new ChunkInstruction( chunk_size_bytes );
+    if ( instruction_ptr->data() )
     {
-      if (chunk_buffer_.read((char*)instruction_ptr->data(), lnChunkSize) != lnChunkSize)
+      ui32 chunk_buffer_bytes_read = chunk_buffer_.read(
+        (char*)instruction_ptr->data(),
+        chunk_size_bytes
+      );
+
+      if ( chunk_buffer_bytes_read != chunk_size_bytes )
       {
         log::error("Authority: Failed to read from chunk buffer\n");
       }
@@ -114,7 +124,7 @@ void Authority::flushChunkBuffer(int nFlushCount)
       // Reset the chunk buffer.
       chunk_buffer_.clear();
 
-      chunk_bytes_ += lnChunkSize;
+      chunk_bytes_ += chunk_size_bytes;
     }
 
     // Send the chunk instruction to the instruction receiver.
@@ -136,14 +146,14 @@ void Authority::call( Segment& segment )
     // Make sure all chunk data has been sent.
     flushChunkBuffer();
   }
-  else if (segment_skip_count_ == 0)
+  else if ( segment_skip_count_ == 0 )
   {
-    Segment* match_segment = NULL;
+    Segment* match_segment_ptr = NULL;
     SegmentComparator comparator( &segment );
 
     bool segment_found = segment_hash_.remove(
       segment.getWeak().checksum(),
-      match_segment,
+      match_segment_ptr,
       comparator
     );
 
@@ -152,14 +162,14 @@ void Authority::call( Segment& segment )
       // Any data in the buffer when a match occurs should be moved to a chunk
       // instruction and sent before sending the ID of the matched segment.
       flushChunkBuffer(( buffer_first_segment_id_ == Segment::EndOfStream ) ?
-                       FlushAll : (segment.getID() - buffer_first_segment_id_));
+                       kFlushAll : (segment.getID() - buffer_first_segment_id_));
 
       // If the Segment exists in the hash, create a Segment instruction.
-      if (match_segment)
+      if ( match_segment_ptr )
       {
         instruction_receiver_ptr->push(
-          new SegmentInstruction(match_segment->getID())
-        );
+          new SegmentInstruction( match_segment_ptr->getID() )
+        ); 
       }
       else
       {
@@ -173,7 +183,7 @@ void Authority::call( Segment& segment )
 
       authority_report_ptr_->matchedSegmentCount++;
       segment_bytes_ += segment.size();
-      delete match_segment;
+      delete match_segment_ptr;
     }
     else
     {

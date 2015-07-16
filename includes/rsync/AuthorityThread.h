@@ -17,13 +17,13 @@ class RsyncJob;
 class AuthorityThread : public liber::concurrency::IThread {
 public:
 
-  explicit AuthorityThread(FileSystemInterface&);
+  explicit AuthorityThread( FileSystemInterface& );
   ~AuthorityThread();
 
-  void addJob(RsyncJob* pJob);
+  void addJob( RsyncJob* job_ptr );
 
   liber::netapp::PacketSubscriber& getSubscriber();
-  void setRequestID(int requestID);
+  void setRequestID( int request_id );
 
 private:
 
@@ -32,10 +32,10 @@ private:
 
 private:
 
-  Queue<RsyncJob*> mJobQueue;
+  Queue<RsyncJob*> job_queue_;
 
-  RemoteAuthorityInterface mRemoteAuthority;
-  LocalAuthorityInterface  mLocalAuthority;
+  RemoteAuthorityInterface remote_authority_;
+  LocalAuthorityInterface  local_authority_;
 };
 
 } // End namespace rsync
