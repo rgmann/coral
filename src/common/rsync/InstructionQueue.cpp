@@ -8,7 +8,7 @@ using namespace liber::rsync;
 InstructionQueue::InstructionQueue()
 : InstructionReceiver()
 {
-  mInstructions.initialize();
+  instructions_.initialize();
 }
 
 //----------------------------------------------------------------------------
@@ -17,11 +17,11 @@ InstructionQueue::~InstructionQueue()
 }
 
 //----------------------------------------------------------------------------
-void InstructionQueue::push( Instruction* const instruction_ptr )
+void InstructionQueue::push( Instruction* instruction_ptr )
 {
   if ( instruction_ptr )
   {
-    if ( mInstructions.push( instruction_ptr ) == false )
+    if ( instructions_.push( instruction_ptr ) == false )
     {
       log::status("InstructionQueue::push: Failed to push\n");
     }
@@ -36,7 +36,7 @@ void InstructionQueue::push( Instruction* const instruction_ptr )
 Instruction* InstructionQueue::pop( int timeout_ms )
 {
   Instruction* instruction_ptr = NULL;
-  mInstructions.pop( instruction_ptr, timeout_ms );
+  instructions_.pop( instruction_ptr, timeout_ms );
   return instruction_ptr;
 }
 

@@ -11,20 +11,18 @@ class InstructionHook : public liber::rsync::InstructionReceiver {
 public:
 
   InstructionHook();
-  ~InstructionHook();
+  virtual ~InstructionHook();
 
   /**
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  void push(Instruction* pInstruction);
+  void push( Instruction* instruction_ptr );
 
-  virtual void call(Instruction* pInstruction) = 0;
 
-  const char* toString() const
-  {
-    return "InstructionHook";
-  }
+protected:
+
+  virtual void call( Instruction* instruction_ptr ) = 0;
 };
 
 } // End namespace rsync

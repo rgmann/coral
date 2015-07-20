@@ -2,9 +2,10 @@
 #define RSYNC_REMOTE_AUTHORITY_INTERFACE_H
 
 #include <fstream>
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/thread/mutex.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "BinarySem.h"
-#include "AuthorityInterface.h"
+// #include "AuthorityInterface.h"
 #include "RsyncError.h"
 #include "PacketSubscriber.h"
 #include "InstructionQueue.h"
@@ -13,8 +14,7 @@
 namespace liber {
 namespace rsync {
 
-class RemoteAuthorityInterface
-: public liber::netapp::PacketSubscriber {
+class RemoteAuthorityInterface : public liber::netapp::PacketSubscriber {
 public:
 
   RemoteAuthorityInterface();
@@ -83,13 +83,13 @@ private:
 
     bool lockIfActive()
     {
-      mJobLock.lock();
+      job_lock_.lock();
       bool lbActive = (mpJob != NULL);
-      if (!lbActive) mJobLock.unlock();
+      if (!lbActive) job_lock_.unlock();
       return lbActive;
     }
 
-    inline void unlock() { mJobLock.unlock(); };
+    inline void unlock() { job_lock_.unlock(); };
 
     void pushInstruction( Instruction* pInstruction );
 
@@ -104,7 +104,7 @@ private:
 
     RsyncJob* mpJob;
 
-    Mutex mJobLock;
+    boost::mutex job_lock_;
 
     BinarySem mJobStartSignal;
     BinarySem mJobEndSignal;

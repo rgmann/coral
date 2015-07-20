@@ -59,6 +59,7 @@ bool Authority::process(
   SourceReport& report)
 {
   authority_report_ptr_ = &report.authority;
+  
   authority_report_ptr_->receivedSegmentCount = segment_hash_.size();
   authority_report_ptr_->authBegin.sample();
 

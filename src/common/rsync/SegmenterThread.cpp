@@ -55,7 +55,7 @@ void SegmenterThread::run(const bool& bShutdown)
         {
           log::error("SegmenterThread: %s failed\n",
                      job_ptr->descriptor().getDestination().path.string().c_str());
-        } else liber::log::status("SegmenterThread: Finished segmenting %s\n", job_ptr->descriptor().getDestination().path.string().c_str());
+        }
 
         input_file.close();
       }

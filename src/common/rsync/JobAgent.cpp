@@ -243,7 +243,7 @@ RsyncError JobAgent::addActiveJob(RsyncJob* job_ptr)
 //----------------------------------------------------------------------------
 void JobAgent::removeActiveJob( RsyncJob* job_ptr )
 {
-  // Remote the job from the active job table.
+  // Remove the job from the active job table.
   if ( active_jobs_.count( job_ptr->descriptor().uuid() ) > 0 )
   {
     active_jobs_.erase( job_ptr->descriptor().uuid() );

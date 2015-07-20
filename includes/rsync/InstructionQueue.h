@@ -17,23 +17,18 @@ public:
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  void push(Instruction* pInstruction);
+  void push( Instruction* instruction_ptr );
 
   Instruction* pop(int nTimeoutMs);
-
-  const char* toString() const
-  {
-    return "InstructionQueue";
-  }
   
 private:
 
-  InstructionQueue(const InstructionQueue&);
-  InstructionQueue& operator= (const InstructionQueue&);
+  InstructionQueue( const InstructionQueue& );
+  InstructionQueue& operator= ( const InstructionQueue& );
 
 private:
 
-  Queue<Instruction*> mInstructions;
+  Queue<Instruction*> instructions_;
 
 };
 

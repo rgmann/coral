@@ -6,6 +6,7 @@
 namespace liber {
 namespace rsync {
 
+class JobDescriptor;
 class SegmentAccessor;
 class InstructionQueue;
 class AssemblyReport;
@@ -16,12 +17,10 @@ public:
   Assembler( SegmentAccessor& segment_accessor );
   ~Assembler();
 
-  bool process( InstructionQueue& instruction_queue, AssemblyReport& report );
-
-  //
-  // Get assembly status for the last completed job.
-  //
-  const ExecutionStatus& status() const;
+  bool process(
+    JobDescriptor&    job_descriptor,
+    InstructionQueue& instruction_queue,
+    AssemblyReport&   report );
 
   std::ofstream& outputStream();
 
@@ -32,10 +31,8 @@ private:
 
 private:
 
-  SegmentAccessor&  segment_accessor_;
-  std::ofstream output_stream_;
-
-  ExecutionStatus assembly_status_;
+  // ExecutionStatus assembly_status_;
+  AssemblerState assembler_state_;
 
   int instruction_timeout_ms_;
 };

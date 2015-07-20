@@ -1,11 +1,12 @@
 #ifndef RSYNC_REMOTE_AUTHORITY_SERVICE_H
 #define RSYNC_REMOTE_AUTHORITY_SERVICE_H
 
+#include <boost/thread/mutex.hpp>
 #include "IThread.h"
 #include "Queue.h"
 #include "RsyncError.h"
 #include "PacketSubscriber.h"
-#include "AuthorityInterface.h"
+// #include "AuthorityInterface.h"
 #include "FileSystemInterface.h"
 #include "LocalAuthorityInterface.h"
 #include "InstructionHook.h"
@@ -28,7 +29,7 @@ public:
 
 
   RsyncJob* activeJob();
-  Mutex& lock();
+  boost::mutex& lock();
   bool lockIfActive();
 
   bool push(RsyncJob* pJob);
@@ -48,7 +49,7 @@ private:
   Queue<RsyncJob*> mJobQueue;
 
   RsyncJob* mpActiveJob;
-  Mutex mJobLock;
+  boost::mutex job_lock_;
 };
 
 class RemoteAuthorityService

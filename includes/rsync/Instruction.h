@@ -11,19 +11,17 @@
 namespace liber {
 namespace rsync {
 
-class ExecutionStatus {
+
+class AssemblerState {
 public:
 
-  enum ExecuteError {
-    NoError,
-    DeserializeError,
-    SegmentAccessError,
-    IoError,
-    CancelError
-  } error;
+  AssemblerState( SegmentAccessor& accessor );
 
-  ExecutionStatus();
-  ~ExecutionStatus();
+  std::ofstream& stream();
+
+  SegmentAccessor& segmentAccessor();
+
+  JobDescriptor&   jobDescriptor();
 
   /**
    * Returns true if execution of an instruction failed or if the instruction
@@ -46,24 +44,18 @@ public:
    */
   void reset();
 
-  static inline std::string ErrorDescription(ExecuteError e)
-  {
-    switch (e)
-    {
-      case NoError: return "No error";
-      case DeserializeError: return "Deserialize error";
-      case SegmentAccessError: return "Segment access error";
-      case IoError: return "IO error";
-      case CancelError: return "Cancel error";
-      default: return "Unknown error";
-    }
-  }
+
+  RsyncError  status_;
+
+  bool done_;
 
 private:
 
-  bool mbDone;
+  std::ofstream     stream_;
 
-  friend class EndInstruction;
+  SegmentAccessor&  segment_accessor_;
+
+  JobDescriptor     job_descriptor_;
 };
 
 
@@ -77,10 +69,7 @@ public:
 
   virtual std::string toString() const = 0;
 
-  virtual void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&) = 0;
-
-//  virtual void serialize(liber::netapp::SerialStream& ctor) const = 0;
-//  virtual bool deserialize(liber::netapp::SerialStream& dtor) = 0;
+  virtual void execute( AssemblerState& state ) = 0;
 
 protected:
 
@@ -101,7 +90,7 @@ public:
 
   std::string toString() const;
 
-  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
+  void execute( AssemblerState& state );
 
 protected:
 
@@ -126,7 +115,7 @@ public:
   liber::rsync::Segment::ID getSegmentId() const;
 
   std::string toString() const;
-  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
+  void execute( AssemblerState& state );
 
 protected:
 
@@ -152,7 +141,7 @@ public:
   ui32 size() const;
 
   std::string toString() const;
-  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
+  void execute( AssemblerState& state );
 
 protected:
 
@@ -161,8 +150,8 @@ protected:
 
 private:
 
-  ui8* mpData;
-  ui32 mnSizeBytes;
+  ui8* chunk_data_ptr_;
+  ui32 chunk_size_bytes_;
 };
 
 
@@ -179,7 +168,7 @@ public:
   RsyncError error() const;
 
   std::string toString() const;
-  void execute(ExecutionStatus&, SegmentAccessor&, std::ofstream&);
+  void execute( AssemblerState& state );
 
 protected:
 

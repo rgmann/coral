@@ -18,44 +18,6 @@ void dump_buffer(const char* pBuffer, ui32 nBytes)
 }
 
 //-----------------------------------------------------------------------------
-// Class: ExecutionStatus
-//-----------------------------------------------------------------------------
-ExecutionStatus::ExecutionStatus()
-{
-  reset();
-}
-
-//-----------------------------------------------------------------------------
-ExecutionStatus::~ExecutionStatus()
-{
-}
-
-//-----------------------------------------------------------------------------
-bool ExecutionStatus::failed() const
-{
-  return (error != NoError);
-}
-
-//-----------------------------------------------------------------------------
-bool ExecutionStatus::cancelled() const
-{
-  return (error == CancelError);
-}
-
-//-----------------------------------------------------------------------------
-bool ExecutionStatus::done() const
-{
-  return mbDone;
-}
-
-//-----------------------------------------------------------------------------
-void ExecutionStatus::reset()
-{
-  error = ExecutionStatus::NoError;
-  mbDone = false;
-}
-
-//-----------------------------------------------------------------------------
 // Class: Instruction
 //-----------------------------------------------------------------------------
 std::string InstructionFactory::Serialize(const Instruction* pInstruction)
@@ -73,7 +35,7 @@ std::string InstructionFactory::Serialize(const Instruction* pInstruction)
 //-----------------------------------------------------------------------------
 Instruction* InstructionFactory::Deserialize(const std::string& data)
 {
-  Instruction* lpInstruction = NULL;
+  Instruction* instruction_ptr = NULL;
 
   SerialStream dtor;
   dtor.stream.write(data.data(), data.size());
@@ -86,27 +48,76 @@ Instruction* InstructionFactory::Deserialize(const std::string& data)
 
   switch (lType)
   {
-  case BeginInstruction::Type:
-    lpInstruction = new BeginInstruction();
-    break;
-  case SegmentInstruction::Type:
-    lpInstruction = new SegmentInstruction();
-    break;
-  case ChunkInstruction::Type:
-    lpInstruction = new ChunkInstruction();
-    break;
-  case EndInstruction::Type:
-    lpInstruction = new EndInstruction();
-    break;
-  default: break;
+    case BeginInstruction::Type:
+      instruction_ptr = new BeginInstruction();
+      break;
+    case SegmentInstruction::Type:
+      instruction_ptr = new SegmentInstruction();
+      break;
+    case ChunkInstruction::Type:
+      instruction_ptr = new ChunkInstruction();
+      break;
+    case EndInstruction::Type:
+      instruction_ptr = new EndInstruction();
+      break;
+    default: break;
   }
 
-  if (lpInstruction)
+  if (instruction_ptr)
   {
-    lpInstruction->deserialize(dtor);
+    instruction_ptr->deserialize(dtor);
   }
 
-  return lpInstruction;
+  return instruction_ptr;
+}
+
+//-----------------------------------------------------------------------------
+AssemblerState::AssemblerState( SegmentAccessor& accessor )
+: segment_accessor_( accessor )
+{
+}
+
+//-----------------------------------------------------------------------------
+std::ofstream& AssemblerState::stream()
+{
+  return stream_;
+}
+
+//-----------------------------------------------------------------------------
+SegmentAccessor& AssemblerState::segmentAccessor()
+{
+  return segment_accessor_;
+}
+
+//-----------------------------------------------------------------------------
+JobDescriptor& AssemblerState::jobDescriptor()
+{
+  return job_descriptor_;
+}
+
+//-----------------------------------------------------------------------------
+bool AssemblerState::failed() const
+{
+  return (status_ != RsyncSuccess);
+}
+
+//-----------------------------------------------------------------------------
+bool AssemblerState::cancelled() const
+{
+  return (status_ == kRsyncJobCanceled);
+}
+
+//-----------------------------------------------------------------------------
+bool AssemblerState::done() const
+{
+  return done_;
+}
+
+//-----------------------------------------------------------------------------
+void AssemblerState::reset()
+{
+  status_ = RsyncSuccess;
+  done_ = false;
 }
 
 //-----------------------------------------------------------------------------
@@ -162,17 +173,13 @@ std::string BeginInstruction::toString() const
 }
 
 //-----------------------------------------------------------------------------
-void BeginInstruction::
-execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
+void BeginInstruction::execute( AssemblerState& state )
+// execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
 {
-  if (ostream.is_open()) return;
-
-  ostream.open(mDescriptor.getDestination().path.string().c_str(),
-               std::ofstream::binary);
-  if ((ostream.is_open() == false) || ostream.fail())
+  if ( mDescriptor.getDestination().path != 
+       state.jobDescriptor().getDestination().path )
   {
-    rStatus.error = ExecutionStatus::IoError;
-    log::error("BeginInstruction: Failed ostream or not open.\n");
+    state.status_ = kRsyncInvalidJob;
   }
 }
 
@@ -180,25 +187,11 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 void BeginInstruction::pack(SerialStream& ctor) const
 {
   mDescriptor.serialize(ctor);
-  //ctor.write(mDescriptor.getSegmentSize());
-  //ctor.writeCString(mDescriptor.getDestination().path.generic_string());
 }
 
 //-----------------------------------------------------------------------------
 bool BeginInstruction::unpack(SerialStream& dtor)
 {
-/*  bool lbSuccess = true;
-  std::cout << "BeginInstruction::unpack " << std::endl;
-
-  ui32 lnSegmentSize;
-  lbSuccess &= dtor.read(lnSegmentSize);
-
-  std::string lPath;
-  lbSuccess &= dtor.readCString(lPath);
-
-  mDescriptor = JobDescriptor(lPath, lnSegmentSize);
-
-  return lbSuccess;*/
   return mDescriptor.deserialize(dtor);
 }
 
@@ -234,27 +227,28 @@ std::string SegmentInstruction::toString() const
 }
 
 //-----------------------------------------------------------------------------
-void SegmentInstruction::
-execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
+void SegmentInstruction::execute( AssemblerState& state )
 {
-  Segment* lpSegment = rAccessor.getSegment(mID);
-  if (lpSegment)
-  {
-    ostream.write((char*)lpSegment->data(), lpSegment->size());
+  Segment* segment_ptr = state.segmentAccessor().getSegment( mID );
 
-    if (ostream.fail())
+  if ( segment_ptr != NULL )
+  {
+    state.stream().write( (char*)segment_ptr->data(), segment_ptr->size() );
+
+    if ( state.stream().fail() )
     {
-      rStatus.error = ExecutionStatus::IoError;
+      state.status_ = kRsyncIoError;
       log::error("SegmentInstruction: Failed to write segment to ostream.\n");
     }
 #ifdef DEBUG_RSYNC_INSTRUCTIONS
     log::debug("Executing SegmentInstruction:\n%s\n",
-               lpSegment->debugDump().c_str());
+               segment_ptr->debugDump().c_str());
 #endif
   }
   else
   {
-    rStatus.error = ExecutionStatus::SegmentAccessError;
+    // rStatus.error = ExecutionStatus::SegmentAccessError;
+    state.status_ = kRsyncSegmentAccessError;
     log::error("SegmentInstruction: Failed to access segment.\n");
   }
 }
@@ -279,44 +273,44 @@ bool SegmentInstruction::unpack(SerialStream& dtor)
 // Class: SegmentInstruction
 //-----------------------------------------------------------------------------
 ChunkInstruction::ChunkInstruction()
-: Instruction(ChunkInstruction::Type)
-, mpData(NULL)
-, mnSizeBytes(0)
+: Instruction( ChunkInstruction::Type )
+, chunk_data_ptr_   ( NULL )
+, chunk_size_bytes_ ( 0 )
 {
 }
 
 //-----------------------------------------------------------------------------
-ChunkInstruction::ChunkInstruction(ui32 nSizeBytes)
-: Instruction(ChunkInstruction::Type)
-, mpData(NULL)
-, mnSizeBytes(nSizeBytes)
+ChunkInstruction::ChunkInstruction( ui32 chunk_size_bytes )
+: Instruction( ChunkInstruction::Type )
+, chunk_data_ptr_   ( NULL )
+, chunk_size_bytes_ ( chunk_size_bytes )
 {
-  if (nSizeBytes > 0)
+  if ( chunk_size_bytes > 0 )
   {
-    mpData = new ui8[mnSizeBytes];
+    chunk_data_ptr_ = new ui8[ chunk_size_bytes_ ];
   }
 }
 
 //-----------------------------------------------------------------------------
 ChunkInstruction::~ChunkInstruction()
 {
-  if (mpData)
+  if ( chunk_data_ptr_ )
   {
-    delete[] mpData;
-    mpData = NULL;
+    delete[] chunk_data_ptr_;
+    chunk_data_ptr_ = NULL;
   }
 }
 
 //-----------------------------------------------------------------------------
 ui8* const ChunkInstruction::data()
 {
-  return mpData;
+  return chunk_data_ptr_;
 }
 
 //-----------------------------------------------------------------------------
 ui32 ChunkInstruction::size() const
 {
-  return mnSizeBytes;
+  return chunk_size_bytes_;
 }
 
 //-----------------------------------------------------------------------------
@@ -325,11 +319,11 @@ std::string ChunkInstruction::toString() const
   std::stringstream ss;
 
   ss << "ChunkInstruction:" << std::endl
-     << "  chunk size: " << mnSizeBytes << std::endl;
+     << "  chunk size: " << chunk_size_bytes_ << std::endl;
 #ifdef DEBUG_RSYNC_INSTRUCTIONS
-  for (int nByte = 0; nByte < mnSizeBytes; nByte++)
+  for (int nByte = 0; nByte < chunk_size_bytes_; nByte++)
   {
-    printf(" %02X", mpData[nByte]);
+    printf(" %02X", chunk_data_ptr_[nByte]);
     if (nByte > 0 && (nByte % 16 == 0)) printf("\n");
   }
   printf("\n");
@@ -339,26 +333,40 @@ std::string ChunkInstruction::toString() const
 }
 
 //-----------------------------------------------------------------------------
-void ChunkInstruction::
-execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
+void ChunkInstruction::execute( AssemblerState& state )
 {
-  if (mpData && (mnSizeBytes > 0))
+  if ( chunk_data_ptr_ )
   {
-    ostream.write((char*)mpData, mnSizeBytes);
-#ifdef DEBUG_RSYNC_INSTRUCTIONS
-    log::debug("Executing ChunkInstruction:\n");
-    for (int ind = 0; ind < mnSizeBytes; ind++)
-    {
-      printf("0x%02X ", mpData[ind]);
-      if ((ind > 0) && (ind % 16 == 0)) printf("\n");
-    }
-    printf("\n");
-#endif
-  }
 
-  if ((mpData == NULL) || ostream.fail())
+    // Validate the chunk size
+    if ( ( chunk_size_bytes_ > 0 ) &&
+         ( chunk_size_bytes_ <= state.jobDescriptor().getMaximumChunkSize() ) )
+    {
+      state.stream().write( (char*)chunk_data_ptr_, chunk_size_bytes_ );
+
+#ifdef DEBUG_RSYNC_INSTRUCTIONS
+      log::debug("Executing ChunkInstruction:\n");
+      for (int ind = 0; ind < chunk_size_bytes_; ind++)
+      {
+        printf("0x%02X ", chunk_data_ptr_[ind]);
+        if ((ind > 0) && (ind % 16 == 0)) printf("\n");
+      }
+      printf("\n");
+#endif
+
+      if ( state.stream().fail() )
+      {
+        state.status_ = kRsyncIoError;
+      }
+    }
+    else
+    {
+      state.status_ = kRsyncAssemblerInvalidChunkSize;
+    }
+  }
+  else
   {
-    rStatus.error = ExecutionStatus::IoError;
+    state.status_ = kRsyncIoError;
     log::error("ChunkInstruction: NULL data or failed ostream.\n");
   }
 }
@@ -366,10 +374,10 @@ execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ost
 //-----------------------------------------------------------------------------
 void ChunkInstruction::pack(SerialStream& ctor) const
 {
-  if (mpData)
+  if (chunk_data_ptr_)
   {
     std::string data;
-    data.assign((char*)mpData, mnSizeBytes);
+    data.assign((char*)chunk_data_ptr_, chunk_size_bytes_);
     ctor.write(data);
   }
 }
@@ -382,15 +390,15 @@ bool ChunkInstruction::unpack(SerialStream& dtor)
   lbSuccess &= dtor.read(data);
   if (data.size() > 0)
   {
-    if (mpData)
+    if (chunk_data_ptr_)
     {
-      delete[] mpData;
-      mpData = NULL;
+      delete[] chunk_data_ptr_;
+      chunk_data_ptr_ = NULL;
     }
 
-    mpData = new ui8[data.size()];
-    mnSizeBytes = data.size();
-    memcpy(mpData, data.data(), data.size());
+    chunk_data_ptr_ = new ui8[data.size()];
+    chunk_size_bytes_ = data.size();
+    memcpy(chunk_data_ptr_, data.data(), data.size());
   }
   return lbSuccess;
 }
@@ -437,19 +445,18 @@ std::string EndInstruction::toString() const
 }
 
 //-----------------------------------------------------------------------------
-void EndInstruction::
-execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
+void EndInstruction::execute( AssemblerState& state )
 {
   if (mbCancelled)
   {
-    rStatus.error = ExecutionStatus::CancelError;
+    state.status_ = kRsyncJobCanceled;
   }
   else
   {
-    rStatus.mbDone = true;
+    state.done_ = true;
   }
 
-  ostream.close();
+  state.stream().close();
 }
 
 //-----------------------------------------------------------------------------

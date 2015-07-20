@@ -17,10 +17,8 @@ public:
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  virtual void push(Instruction* const pInstruction) = 0;
+  virtual void push( Instruction* instruction_ptr ) = 0;
 
-
-  virtual const char* toString() const = 0;
 };
 
 } // End namespace rsync

@@ -52,26 +52,16 @@ void AssemblerThread::run(const bool& bShutdown)
         if ( stage_success )
         {
           bool assembly_success = assembler_.process(
+            job_ptr->descriptor(),
             job_ptr->instructions(),
             job_ptr->report().destination.assembly
           );
 
-          if ( assembly_success == false )
-          {
-            log::error(
-              "AssemblerThread - Assembly failed for %s: %s\n",
-              job_ptr->descriptor().getDestination().path.string().c_str(),
-              ExecutionStatus::ErrorDescription(
-                assembler_.status().error
-              ).c_str()
-            );
-          }
-
           // Close the segment file.
           segment_file_.close();
 
-          // If assembly completed successfully,
-          // swap the stage file and destination file.
+          // If assembly completed successfully, swap the stage file and
+          // destination file.
           if ( assembly_success )
           {
             bool swap_success = file_sys_interface_.swap(

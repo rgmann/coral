@@ -48,9 +48,19 @@ private:
 
 private:
 
+  //
+  // Hash of segments received from the Segmenter
+  //
   liber::HashTable<16, Segment*>  segment_hash_;
 
+  //
+  // Number of skipped Segments
+  //
   ui32 segment_skip_count_;
+
+  //
+  // Buffer of chunk data
+  //
   CircularBuffer chunk_buffer_;
 
   ui32 max_chunk_size_bytes_;

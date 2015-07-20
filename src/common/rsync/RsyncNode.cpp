@@ -52,17 +52,15 @@ RsyncNode::~RsyncNode()
 //----------------------------------------------------------------------------
 void RsyncNode::setCallback( RsyncJobCallback* callback_ptr )
 {
-  callback_lock_.lock();
+  boost::mutex::scoped_lock guard( callback_lock_ );
   callback_ptr_ = callback_ptr;
-  callback_lock_.unlock();
 }
 
 //----------------------------------------------------------------------------
 void RsyncNode::unsetCallback()
 {
-  callback_lock_.lock();
+  boost::mutex::scoped_lock guard( callback_lock_ );
   callback_ptr_ = NULL;
-  callback_lock_.unlock();
 }
 
 //----------------------------------------------------------------------------
@@ -100,12 +98,15 @@ void RsyncNode::run(const bool& bShutdown)
                    job_ptr->descriptor().getSource().path.string().c_str());
       }
 
-      callback_lock_.lock();
-      if ( callback_ptr_ )
+
       {
-        callback_ptr_->call( job_ptr->descriptor(), job_ptr->report() );
+        boost::mutex::scoped_lock guard( callback_lock_ );
+
+        if ( callback_ptr_ )
+        {
+          callback_ptr_->call( job_ptr->descriptor(), job_ptr->report() );
+        }
       }
-      callback_lock_.unlock();
 
       job_agent_.releaseJob( job_ptr );
     }

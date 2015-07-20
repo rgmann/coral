@@ -9,14 +9,15 @@ using namespace liber;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-FileSystemInterface::
-FileSystemInterface(const boost::filesystem::path& swapPath,
-                    const boost::filesystem::path& stagePath)
-: mbRootExists(false)
-, mSwapPath(swapPath)
-, mStagePath(stagePath)
-, mnLastSwapFileIndex(0)
-, mnLastStageFileIndex(0)
+FileSystemInterface::FileSystemInterface(
+  const boost::filesystem::path& swap_path,
+  const boost::filesystem::path& stage_path
+)
+: root_exists_( false )
+, swap_path_  ( swap_path )
+, stage_path_ ( stage_path )
+, last_swap_file_index_(0)
+, last_stage_file_index_(0)
 {
 }
 
@@ -26,117 +27,127 @@ FileSystemInterface::~FileSystemInterface()
 }
 
 //----------------------------------------------------------------------------
-bool FileSystemInterface::setRoot(const path& rootPath)
+bool FileSystemInterface::setRoot( const path& root_path )
 {
-  bool lbSuccess = false;
-  boost::system::error_code lErrorCode;
+  bool status = false;
+  boost::system::error_code file_sys_error;
 
-  mbRootExists = boost::filesystem::exists(rootPath, lErrorCode);
+  root_exists_ = boost::filesystem::exists( root_path, file_sys_error );
 
-  if (mbRootExists)
+  if ( root_exists_ )
   {
-    mRootPath = rootPath;
-    //mSwapPath = mRootPath / mSwapPath;
-    //mStagePath = mRootPath / mStagePath;
+    root_path_ = root_path;
+    //swap_path_ = root_path_ / swap_path_;
+    //stage_path_ = root_path_ / stage_path_;
 
     // Check that the swap directory exists.  If not, create it.
-    bool lbExists = boost::filesystem::exists(absolutePath(mSwapPath), lErrorCode);
-    if (lErrorCode.value() != boost::system::errc::success)
+    bool path_exists = boost::filesystem::exists(absolutePath(swap_path_), file_sys_error);
+    if ( file_sys_error.value() != boost::system::errc::success )
     {
       log::debug("FileSystemInterface::setPath: %s - %s\n",
-                 mSwapPath.string().c_str(),
-                 lErrorCode.message().c_str());
+                 swap_path_.string().c_str(),
+                 file_sys_error.message().c_str());
     }
-    if (lbExists == false)
+    if ( path_exists == false )
     {
-      log::debug("Creating %s\n", mSwapPath.string().c_str());
-      lbSuccess = create_directory(absolutePath(mSwapPath), lErrorCode);
-      if (lErrorCode.value() != boost::system::errc::success)
+      log::debug("Creating %s\n", swap_path_.string().c_str());
+      status = create_directory(absolutePath(swap_path_), file_sys_error);
+      if (file_sys_error.value() != boost::system::errc::success)
       {
         log::error("FileSystemInterface::setPath: Error - %s\n",
-                   lErrorCode.message().c_str());
+                   file_sys_error.message().c_str());
       }
     }
 
     // Check that the stage directory exists.  If not, create it.
-    lbExists = boost::filesystem::exists(absolutePath(mStagePath), lErrorCode);
-    if (lErrorCode.value() != boost::system::errc::success)
+    path_exists = boost::filesystem::exists(absolutePath(stage_path_), file_sys_error);
+    if (file_sys_error.value() != boost::system::errc::success)
     {
       log::debug("FileSystemInterface::setPath: %s - %s\n",
-                 mStagePath.string().c_str(),
-                 lErrorCode.message().c_str());
+                 stage_path_.string().c_str(),
+                 file_sys_error.message().c_str());
     }
-    if (lbExists == false)
+    if (path_exists == false)
     {
-      lbSuccess = create_directory(absolutePath(mStagePath), lErrorCode);
-      if (lErrorCode.value() != boost::system::errc::success)
+      status = create_directory(absolutePath(stage_path_), file_sys_error);
+      if (file_sys_error.value() != boost::system::errc::success)
       {
         log::error("FileSystemInterface::setPath: Error - %s\n",
-                   lErrorCode.message().c_str());
+                   file_sys_error.message().c_str());
       }
     }
   }
   else
   {
     log::error("FileSystemInterface::setPath: %s\n",
-               lErrorCode.message().c_str());
+               file_sys_error.message().c_str());
   }
 
-  return lbSuccess;
+  return status;
 }
 
 //----------------------------------------------------------------------------
-bool FileSystemInterface::exists(const boost::filesystem::path& path) const
+bool FileSystemInterface::exists( const boost::filesystem::path& path ) const
 {
-  bool lbPathExists = false;
-  boost::system::error_code lErrorCode;
+  bool path_exists = false;
+  boost::system::error_code file_sys_error;
 
-  if (validate())
+  if ( validate() )
   {
-    lbPathExists = boost::filesystem::exists(absolutePath(path), lErrorCode);
+    path_exists = boost::filesystem::exists(
+      absolutePath( path ),
+      file_sys_error
+    );
   }
 
-  return lbPathExists;
+  return path_exists;
 }
 
 //----------------------------------------------------------------------------
-bool FileSystemInterface::
-open(const boost::filesystem::path& path, std::ofstream& stream) const
+bool FileSystemInterface::open(
+  const boost::filesystem::path& path,
+  std::ofstream& stream
+) const
 {
-  bool lbSuccess = false;
+  bool status = false;
 
   if (validate())
   {
-    stream.open(absolutePath(path).string().c_str(),
-                std::ofstream::binary);
+    stream.open(
+      absolutePath( path ).string().c_str(),
+      std::ofstream::binary
+    );
 
-    if (stream.fail())
+    if ( stream.fail() )
     {
       log::debug("FileSystemInterface::open: Failed to open output stream at %s\n",
                  path.string().c_str());
     }
 
-    lbSuccess = stream.is_open();
+    status = stream.is_open();
   }
 
-  return lbSuccess;
+  return status;
 }
 
 //----------------------------------------------------------------------------
-bool FileSystemInterface::
-open(const boost::filesystem::path& path, std::ifstream& stream) const
+bool FileSystemInterface::open(
+  const boost::filesystem::path& path,
+  std::ifstream& stream
+) const
 {
-  bool lbSuccess = false;
+  bool status = false;
 
-  if (validate())
+  if ( validate() )
   {
-    if (exists(path))
+    if ( exists( path ) )
     {
-      stream.open(absolutePath(path).string().c_str(),
-                  std::ofstream::binary);
+      stream.open(
+        absolutePath( path ).string().c_str(),
+        std::ofstream::binary
+      );
 
-      lbSuccess = stream.is_open() && stream.good();
-      if (!lbSuccess)
+      if ( ( status = ( stream.is_open() && stream.good() ) ) == false )
       {
         log::error("FileSystemInterface::open: Failed to open output stream at %s\n",
                    path.string().c_str());
@@ -148,85 +159,104 @@ open(const boost::filesystem::path& path, std::ifstream& stream) const
     }
   }
 
-  return lbSuccess;
+  return status;
 }
 
 //----------------------------------------------------------------------------
-bool FileSystemInterface::
-stage(const boost::filesystem::path& destination,
-            boost::filesystem::path& stagePath,
-            std::ofstream& stream)
+bool FileSystemInterface::stage(
+  const boost::filesystem::path&  destination,
+  boost::filesystem::path&        stage_path,
+  std::ofstream&                  stream
+)
 {
-  bool lbSuccess = false;
+  bool status = false;
 
-  if (validate())
+  if ( validate() )
   {
-    std::stringstream lStageFilename;
-    lStageFilename << ++mnLastSwapFileIndex << "_stage." 
+    std::stringstream stage_filename;
+
+    stage_filename << ++last_swap_file_index_ << "_stage." 
                    << destination.filename().string();
-    stagePath = mStagePath / lStageFilename.str();
+
+    stage_path = stage_path_ / stage_filename.str();
     
-    lbSuccess = open(stagePath, stream);
+    status = open( stage_path, stream );
   }
 
-  return lbSuccess;
+  return status;
 }
 
 //----------------------------------------------------------------------------
-bool FileSystemInterface::
-swap(const boost::filesystem::path& source,
+bool FileSystemInterface::swap(
+  const boost::filesystem::path& source,
      const boost::filesystem::path& destination)
 {
-  bool lbSuccess = false;
+  bool status = false;
 
-  if (validate())
+  if ( validate() )
   {
     // Source and destination must exist.
-    if (exists(source) && exists(destination))
+    if ( exists( source ) && exists( destination ) )
     {
-      std::stringstream lSwapFileName;
-      lSwapFileName << ++mnLastSwapFileIndex << "_swap."
+      std::stringstream swap_filename;
+
+      swap_filename << ++last_swap_file_index_ << "_swap."
                     << destination.filename().string();
 
-      boost::system::error_code lErrorCode;
-      path lSwapPath = mSwapPath / lSwapFileName.str();
+      boost::system::error_code file_sys_error;
+      boost::filesystem::path swap_path = swap_path_ / swap_filename.str();
 
-      rename(absolutePath(destination), absolutePath(lSwapPath), lErrorCode);
-      lbSuccess = (lErrorCode.value() == boost::system::errc::success);
-      if (!lbSuccess)
+      boost::filesystem::rename(
+        absolutePath( destination ),
+        absolutePath( swap_path ),
+        file_sys_error
+      );
+
+      status = ( file_sys_error.value() == boost::system::errc::success );
+      if ( !status )
       {
         log::error("FileSystemInterface::swap: "
                    "Error renaming %s to %s - %s\n",
                    destination.string().c_str(),
-                   lSwapPath.string().c_str(),
-                   lErrorCode.message().c_str());
+                   swap_path.string().c_str(),
+                   file_sys_error.message().c_str());
       }
 
-      if (lbSuccess)
+      if ( status )
       {
-        rename(absolutePath(source), absolutePath(destination), lErrorCode);
-        lbSuccess = (lErrorCode.value() == boost::system::errc::success);
-        if (!lbSuccess)
+        boost::filesystem::rename(
+          absolutePath( source ),
+          absolutePath( destination ),
+          file_sys_error
+        );
+
+        status = (file_sys_error.value() == boost::system::errc::success);
+        if (!status)
         {
           log::error("FileSystemInterface::swap: "
                      "Error renaming %s to %s - %s\n",
                      source.string().c_str(),
                      destination.string().c_str(),
-                     lErrorCode.message().c_str());
+                     file_sys_error.message().c_str());
         }
       }
 
-      if (lbSuccess)
+      if (status)
       {
-        rename(absolutePath(lSwapPath), absolutePath(source), lErrorCode);
-        lbSuccess = (lErrorCode.value() == boost::system::errc::success);
-        if (!lbSuccess)
+        boost::filesystem::rename(
+          absolutePath( swap_path ),
+          absolutePath( source ),
+          file_sys_error
+        );
+
+        status = (file_sys_error.value() == boost::system::errc::success);
+        if (!status)
         {
           log::error("FileSystemInterface::swap: "
                      "Error renaming %s to %s - %s\n",
-                     lSwapPath.string().c_str(),
+                     swap_path.string().c_str(),
                      source.string().c_str(),
-                     lErrorCode.message().c_str());
+                     file_sys_error.message().c_str());
         }
       }
     }
@@ -237,26 +267,30 @@ swap(const boost::filesystem::path& source,
     }
   }
 
-  return lbSuccess;
+  return status;
 }
 
 //----------------------------------------------------------------------------
 bool FileSystemInterface::remove(const boost::filesystem::path& path) const
 {
-  bool lbSuccess = false;
+  bool status = false;
 
   if (validate())
   {
     if (exists(absolutePath(path)))
     {
-      boost::system::error_code lErrorCode;
-      lbSuccess = boost::filesystem::remove(absolutePath(path), lErrorCode);
+      boost::system::error_code file_sys_error;
 
-      lbSuccess = (lErrorCode.value() == boost::system::errc::success);
-      if (!lbSuccess)
+      status = boost::filesystem::remove(
+        absolutePath( path ),
+        file_sys_error
+      );
+
+      status = ( file_sys_error.value() == boost::system::errc::success );
+      if (!status)
       {
         log::error("FileSystemInterface::remove: %s\n",
-                   lErrorCode.message().c_str());
+                   file_sys_error.message().c_str());
       }
     }
     else
@@ -266,47 +300,48 @@ bool FileSystemInterface::remove(const boost::filesystem::path& path) const
     }
   }
 
-  return lbSuccess;
+  return status;
 }
 
 //----------------------------------------------------------------------------
 bool FileSystemInterface::touch(const boost::filesystem::path& path) const
 {
-  bool lbSuccess = false;
+  bool status = false;
 
-  if (validate())
+  if ( validate() )
   {
-    if ((lbSuccess = exists(path)) == false)
+    if ( ( status = exists( path ) ) == false )
     {
-      std::ofstream fs(absolutePath(path).string().c_str(),
-                       std::ofstream::binary);
+      std::ofstream fs( absolutePath( path ).string().c_str(),
+                       std::ofstream::binary );
 
-      lbSuccess = fs.is_open() && fs.good();
+      status = ( fs.is_open() && fs.good() );
 
       fs.close();
 
-      lbSuccess = (lbSuccess && exists(path));
+      status = ( status && exists( path ) );
     }
   }
 
-  return lbSuccess;
+  return status;
 }
 
 //----------------------------------------------------------------------------
 bool FileSystemInterface::validate() const
 {
-  if (!mbRootExists)
+  if ( root_exists_ == false )
   {
     log::debug("FileSystemInterface: Root not set.\n");
   }
 
-  return mbRootExists;
+  return root_exists_;
 }
 
 //----------------------------------------------------------------------------
-boost::filesystem::path FileSystemInterface::
-absolutePath(const boost::filesystem::path& relativePath) const
+boost::filesystem::path FileSystemInterface::absolutePath(
+  const boost::filesystem::path& relative_path
+) const
 {
-  return mRootPath / relativePath;
+  return root_path_ / relative_path;
 }
 

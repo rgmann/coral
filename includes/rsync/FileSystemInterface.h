@@ -13,22 +13,54 @@ public:
                       const boost::filesystem::path& stagePath = ".rsync_stage");
   ~FileSystemInterface();
 
-  bool setRoot(const boost::filesystem::path& root);
+  //
+  // Set the RsyncNode root directory. Files cannot be accessed above this
+  // directory. If the path does not exist, false is returned.
+  //
+  bool setRoot( const boost::filesystem::path& root );
 
-  bool exists(const boost::filesystem::path& path) const;
+  //
+  // Check whether the specified file exists.
+  //
+  bool exists( const boost::filesystem::path& path ) const;
 
-  bool open(const boost::filesystem::path& path, std::ofstream& stream) const;
-  bool open(const boost::filesystem::path& path, std::ifstream& stream) const;
+  //
+  // Open a file for writing. Returns false if the path does not exist or on
+  // failure to open the file stream.
+  //
+  bool open( const boost::filesystem::path& path, std::ofstream& stream ) const;
 
+  //
+  // Open a file for reading. Returns false if the path does not exist or on
+  // failure to open the file stream.
+  //
+  bool open( const boost::filesystem::path& path, std::ifstream& stream ) const;
+
+  //
+  // Rather than writing directly into the destination file, we minimize
+  // the chance for a write conflict by writing to a stage file and then 
+  // swapping the inodes.
+  //
   bool stage(const boost::filesystem::path& destination,
              boost::filesystem::path& stagePath,
              std::ofstream& stream);
 
+  //
+  // Swap the paths for two inodes.
+  //
   bool swap(const boost::filesystem::path& source,
             const boost::filesystem::path& destination);
 
-  bool remove(const boost::filesystem::path& path) const;
-  bool touch(const boost::filesystem::path& path) const;
+  //
+  // Delete a file within the root heirarchy. The path is relative to
+  // configured root.
+  //
+  bool remove( const boost::filesystem::path& path ) const;
+
+  //
+  // 
+  //
+  bool touch( const boost::filesystem::path& path ) const;
 
 private:
 
@@ -44,18 +76,18 @@ private:
 
 private:
 
-  bool mbRootExists;
+  bool root_exists_;
 
-  boost::filesystem::path mSwapPath;
+  boost::filesystem::path swap_path_;
 
-  boost::filesystem::path mStagePath;
+  boost::filesystem::path stage_path_;
 
   // Absolute path to rsync root directory.  Rsync does not know about
   // anything outside this path.
-  boost::filesystem::path mRootPath;
+  boost::filesystem::path root_path_;
 
-  int mnLastSwapFileIndex;
-  int mnLastStageFileIndex;
+  int last_swap_file_index_;
+  int last_stage_file_index_;
 
   friend class RsyncNode;
 };

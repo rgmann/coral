@@ -11,7 +11,7 @@ using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
 Assembler::Assembler( SegmentAccessor& segment_accessor )
-: segment_accessor_       ( segment_accessor )
+: assembler_state_        ( segment_accessor )
 , instruction_timeout_ms_ ( DEFAULT_INST_TIMEOUT_MS )
 {
 }
@@ -23,14 +23,16 @@ Assembler::~Assembler()
 
 //-----------------------------------------------------------------------------
 bool Assembler::process(
+  JobDescriptor& job_descriptor,
   InstructionQueue& instruction_queue,
   AssemblyReport&   report
 )
 {
-  assembly_status_.reset();
+  assembler_state_.reset();
+  assembler_state_.jobDescriptor() = job_descriptor;
 
-  while ( ( assembly_status_.done() == false ) &&
-          ( assembly_status_.failed() == false ) )
+  while ( ( assembler_state_.done() == false ) &&
+          ( assembler_state_.failed() == false ) )
   {
     Instruction* instruction_ptr = instruction_queue.pop(
       instruction_timeout_ms_
@@ -63,18 +65,16 @@ bool Assembler::process(
       }
 
       instruction_ptr->execute(
-        assembly_status_,
-        segment_accessor_,
-        output_stream_
+        assembler_state_
       );
 
-      if ( assembly_status_.failed() )
+      if ( assembler_state_.failed() )
       {
         log::error(
           "Assembler::process - "
           "Instruction (type=%d) failed with status %d\n",
           instruction_ptr->type(),
-          assembly_status_.error
+          assembler_state_.status_
         );
       }
 
@@ -86,18 +86,14 @@ bool Assembler::process(
     }
   }
 
-  return ( assembly_status_.failed() == false );
-}
+  report.status = assembler_state_.status_;
 
-//-----------------------------------------------------------------------------
-const ExecutionStatus& Assembler::status() const
-{
-  return assembly_status_;
+  return ( assembler_state_.failed() == false );
 }
 
 //-----------------------------------------------------------------------------
 std::ofstream& Assembler::outputStream()
 {
-  return output_stream_;
+  return assembler_state_.stream();
 }
 

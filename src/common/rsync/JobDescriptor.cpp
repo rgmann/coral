@@ -15,9 +15,9 @@ ResourcePath::ResourcePath()
 }
 
 //-----------------------------------------------------------------------------
-ResourcePath::ResourcePath(const boost::filesystem::path& rPath, bool bRemote)
-: path(rPath)
-, remote(bRemote)
+ResourcePath::ResourcePath( const boost::filesystem::path& path, bool remote )
+: path(path)
+, remote(remote)
 {
 }
 
@@ -60,112 +60,125 @@ bool ResourcePath::unpack(liber::netapp::SerialStream& rDtor)
 //
 //-----------------------------------------------------------------------------
 JobDescriptor::JobDescriptor()
-: mnSegmentSizeBytes(0)
-, mbRemotelyRequested(false)
-, mUUID(boost::uuids::random_generator()())
+: segment_size_bytes_(0)
+, maximum_chunk_size_( 1024 )
+, remotely_requested_(false)
+, uuid_(boost::uuids::random_generator()())
 {
 }
 
 //-----------------------------------------------------------------------------
 void JobDescriptor::setRemoteRequest()
 {
-  mbRemotelyRequested = true;
+  remotely_requested_ = true;
 }
 
 //-----------------------------------------------------------------------------
 bool JobDescriptor::isRemoteRequest() const
 {
-  return mbRemotelyRequested;
+  return remotely_requested_;
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::setSegmentSize(ui32 nSegmentSizeBytes)
+void JobDescriptor::setSegmentSize( ui32 segment_size_bytes )
 {
-  mnSegmentSizeBytes = nSegmentSizeBytes;
+  segment_size_bytes_ = segment_size_bytes;
 }
 
 //-----------------------------------------------------------------------------
 ui32 JobDescriptor::getSegmentSize() const
 {
-  return mnSegmentSizeBytes;
+  return segment_size_bytes_;
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::
-setSource(const boost::filesystem::path& sourcePath, bool bRemote)
+void JobDescriptor::setSource(
+  const boost::filesystem::path& source_path,
+  bool remote
+)
 {
-  mSource.path = sourcePath;
-  mSource.remote = bRemote;
+  source_path_.path   = source_path;
+  source_path_.remote = remote;
 }
 
 //-----------------------------------------------------------------------------
 void JobDescriptor::setSource(const ResourcePath& path)
 {
-  mSource = path;
+  source_path_ = path;
 }
 
 //-----------------------------------------------------------------------------
 const boost::filesystem::path& JobDescriptor::getSourcePath() const
 {
-  return mSource.path;
+  return source_path_.path;
 }
 
 //-----------------------------------------------------------------------------
 const ResourcePath& JobDescriptor::getSource() const
 {
-  return mSource;
+  return source_path_;
 }
 
 //-----------------------------------------------------------------------------
 ResourcePath& JobDescriptor::getSource()
 {
-  return mSource;
+  return source_path_;
 }
 
 //-----------------------------------------------------------------------------
 void JobDescriptor::setDestination(const ResourcePath& destination)
 {
-  mDestination = destination;
+  destination_path_ = destination;
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::
-setDestination(const boost::filesystem::path& path, bool bRemote)
+void JobDescriptor::setDestination(
+  const boost::filesystem::path& path,
+  bool remote
+)
 {
-  mDestination.path = path;
-  mDestination.remote = bRemote;
-  mbRemotelyRequested = mDestination.remote;
+  destination_path_.path = path;
+  destination_path_.remote = remote;
+  remotely_requested_ = destination_path_.remote;
 }
 
 //-----------------------------------------------------------------------------
 const boost::filesystem::path& JobDescriptor::getDestinationPath() const
 {
-  return mDestination.path;
+  return destination_path_.path;
 }
 
 //-----------------------------------------------------------------------------
 const ResourcePath& JobDescriptor::getDestination() const
 {
-  return mDestination;
+  return destination_path_;
 }
 
 //-----------------------------------------------------------------------------
 ResourcePath& JobDescriptor::getDestination()
 {
-  return mDestination;
+  return destination_path_;
 }
 
 //-----------------------------------------------------------------------------
 bool JobDescriptor::isValid() const
 {
-  return ((mDestination.path.empty() == false) &&
-          (mSource.path.empty() == false));
+  return (
+    ( destination_path_.path.empty() == false ) &&
+    ( source_path_.path.empty() == false )
+  );
 }
 
 //-----------------------------------------------------------------------------
 const boost::uuids::uuid& JobDescriptor::uuid() const
 {
-  return mUUID;
+  return uuid_;
+}
+
+//-----------------------------------------------------------------------------
+ui32 JobDescriptor::getMaximumChunkSize() const
+{
+  return maximum_chunk_size_;
 }
 
 //-----------------------------------------------------------------------------
@@ -179,10 +192,10 @@ void JobDescriptor::pack(liber::netapp::SerialStream& ctor) const
 {
   if (isValid())
   {
-    ctor.write(mnSegmentSizeBytes);
-    ctor.write((const char*)mUUID.data, mUUID.size());
-    mSource.serialize(ctor);
-    mDestination.serialize(ctor);
+    ctor.write(segment_size_bytes_);
+    ctor.write((const char*)uuid_.data, uuid_.size());
+    source_path_.serialize(ctor);
+    destination_path_.serialize(ctor);
   }
   else
   {
@@ -193,27 +206,27 @@ void JobDescriptor::pack(liber::netapp::SerialStream& ctor) const
 //-----------------------------------------------------------------------------
 bool JobDescriptor::unpack(liber::netapp::SerialStream& dtor)
 {
-  if (dtor.read(mnSegmentSizeBytes) == false)
+  if (dtor.read(segment_size_bytes_) == false)
   {
     log::error("JobDescriptor::unpack: "
                "Failed to deserialize segment size.\n");
     return false;
   }
 
-  if (dtor.read((char*)mUUID.data, mUUID.size()) != SerialStream::ReadOk)
+  if (dtor.read((char*)uuid_.data, uuid_.size()) != SerialStream::ReadOk)
   {
     log::error("RemoteJobStatus::unpack - failed to deserialize UUID\n");
     return false;
   }
 
-  if (mSource.deserialize(dtor) == false)
+  if (source_path_.deserialize(dtor) == false)
   {
     log::error("JobDescriptor::unpack: "
                "Failed to deserialize source path.\n");
     return false;
   }
 
-  if (mDestination.deserialize(dtor) == false)
+  if (destination_path_.deserialize(dtor) == false)
   {
     log::error("JobDescriptor::unpack: "
                "Failed to deserialize mbRemote.\n");

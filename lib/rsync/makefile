@@ -8,7 +8,6 @@ BASE = ../..
 BOOST_INCLUDE = \
 -I/opt/local/include \
 
-#$(BASE)/src/common/$(LIBNAME)/AuthorityInterface.cpp
 SOURCE = \
 $(BASE)/src/common/$(LIBNAME)/JobDescriptor.cpp \
 $(BASE)/src/common/$(LIBNAME)/JobReport.cpp \

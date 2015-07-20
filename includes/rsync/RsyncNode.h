@@ -1,6 +1,7 @@
 #ifndef RSYNC_CLIENT_H
 #define RSYNC_CLIENT_H
 
+#include <boost/thread/mutex.hpp>
 #include "IThread.h"
 #include "Queue.h"
 #include "JobDescriptor.h"
@@ -57,7 +58,7 @@ private:
 
 private:
 
-  Mutex callback_lock_;
+  boost::mutex callback_lock_;
   RsyncJobCallback* callback_ptr_;
 
   RsyncPacketRouter router_;

@@ -53,7 +53,10 @@ public:
 
   bool  isValid() const;
 
-  const boost::uuids::uuid& uuid() const; 
+  const boost::uuids::uuid& uuid() const;
+
+  ui32 getMaximumChunkSize() const;
+
 
 protected:
 
@@ -63,14 +66,15 @@ protected:
 
 private:
 
-  ui32 mnSegmentSizeBytes;
+  ui32 segment_size_bytes_;
+  ui32 maximum_chunk_size_;
 
-  ResourcePath mSource;
-  ResourcePath mDestination;
+  ResourcePath source_path_;
+  ResourcePath destination_path_;
 
-  bool mbRemotelyRequested;
+  bool remotely_requested_;
 
-  boost::uuids::uuid mUUID;
+  boost::uuids::uuid uuid_;
 };
 
 } // End namespace rsync

@@ -14,8 +14,8 @@ InstructionHook::~InstructionHook()
 }
 
 //-----------------------------------------------------------------------------
-void InstructionHook::push(Instruction* pInstruction)
+void InstructionHook::push( Instruction* instruction_ptr )
 {
-  call(pInstruction);
+  call( instruction_ptr );
 }
 

@@ -9,10 +9,10 @@ using namespace liber::rsync;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
-JobQueue::
-JobQueue(FileSystemInterface& rFileSys,
-         InstructionReceiver& rReceiver,
-         JobCompletionHook& rJobHook)
+JobQueue::JobQueue(
+  FileSystemInterface& rFileSys,
+  InstructionReceiver& rReceiver,
+  JobCompletionHook& rJobHook)
 : IThread("JobQueue")
 , mAuthority(rFileSys)
 , mrReceiver(rReceiver)
@@ -29,17 +29,18 @@ RsyncJob* JobQueue::activeJob()
 }
 
 //-----------------------------------------------------------------------------
-Mutex& JobQueue::lock()
+// Mutex& JobQueue::lock()
+boost::mutex& JobQueue::lock()
 {
-  return mJobLock;
+  return job_lock_;
 }
 
 //-----------------------------------------------------------------------------
 bool JobQueue::lockIfActive()
 {
-  mJobLock.lock();
+  job_lock_.lock();
   bool lbIsActive = (mpActiveJob != NULL);
-  if (!lbIsActive) mJobLock.unlock();
+  if (!lbIsActive) job_lock_.unlock();
   return lbIsActive;
 }
 
@@ -58,15 +59,15 @@ void JobQueue::run(const bool& bShutdown)
 
     if ( mJobQueue.pop(lpJob) && lpJob )
     {
-      mJobLock.lock();
+      job_lock_.lock();
       mpActiveJob = lpJob;
-      mJobLock.unlock();
+      job_lock_.unlock();
 
-      mAuthority.process(lpJob, mrReceiver);      
+      mAuthority.process( lpJob, mrReceiver );      
 
-      mJobLock.lock();
+      job_lock_.lock();
       mpActiveJob = NULL;
-      mJobLock.unlock();
+      job_lock_.unlock();
 
       mrJobHook(lpJob);
 
@@ -171,7 +172,6 @@ handleRemoteJobRequest(const void* pData, ui32 nLength)
       else
       {
         lStatus = defaultQueryHandler(rDescriptor);
-        log::status("REMOTE_AUTH_SERVICE: %s, %d\n", rDescriptor.getSourcePath().c_str(), lStatus);
       }
 
       if (lStatus == RsyncSuccess)

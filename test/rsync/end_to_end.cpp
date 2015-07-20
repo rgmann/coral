@@ -23,8 +23,8 @@ public:
     liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path.string().c_str());
     liber::log::flush();
 
-    report.print(std::cout);
-    std::cout << "\n\n";
+    // report.print(std::cout);
+    // std::cout << "\n\n";
 
     mSem.give();
   }
@@ -264,86 +264,86 @@ TEST_F( EndToEndTest, LocalToLocal ) {
 // Synchronize two images where the destination is remote and the source is
 // local.
 //
-// TEST_F( EndToEndTest, RemoteDestImageTest ) {
-//   boost::filesystem::path source( "image.png" );
-//   boost::filesystem::path destination( "image.png" );
+TEST_F( EndToEndTest, RemoteDestImageTest ) {
+  boost::filesystem::path source( "image.png" );
+  boost::filesystem::path destination( "image.png" );
 
-//   EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
-//   EXPECT_EQ( true, mLocalCallback.mSem.take() );
-//   EXPECT_EQ( true, mRemoteCallback.mSem.take() );
+  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
+  EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  EXPECT_EQ( true, mRemoteCallback.mSem.take() );
 
-//   EXPECT_EQ( true, CheckEqual(
-//     boost::filesystem::path( REMOTE_ROOT ) / destination,
-//     boost::filesystem::path( LOCAL_ROOT ) / source ) );
-// }
+  EXPECT_EQ( true, CheckEqual(
+    boost::filesystem::path( REMOTE_ROOT ) / destination,
+    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+}
 
 //
 // Synchronize two files where the source is remote and the destination is
 // local.
 //
-// TEST_F( EndToEndTest, RemoteSourceTest ) {
-//   boost::filesystem::path source( "instruction_test.cpp" );
-//   boost::filesystem::path destination( "instruction_test.cpp" );
+TEST_F( EndToEndTest, RemoteSourceTest ) {
+  boost::filesystem::path source( "instruction_test.cpp" );
+  boost::filesystem::path destination( "instruction_test.cpp" );
 
-//   EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, false, true ) );
-//   EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, false, true ) );
+  EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
-//   EXPECT_EQ( true, CheckEqual(
-//     boost::filesystem::path( REMOTE_ROOT ) / destination,
-//     boost::filesystem::path( LOCAL_ROOT ) / source ) );
-// }
+  EXPECT_EQ( true, CheckEqual(
+    boost::filesystem::path( REMOTE_ROOT ) / destination,
+    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+}
 
 //
 // Test creating a local file from a remote source when local version does
 // not exist.
 //
-// TEST_F( EndToEndTest, RemoteSourceCopy ) {
-//   boost::filesystem::path source( "dfile_0.dat" );
-//   boost::filesystem::path destination( "dfile_0.dat" );
+TEST_F( EndToEndTest, RemoteSourceCopy ) {
+  boost::filesystem::path source( "dfile_0.dat" );
+  boost::filesystem::path destination( "dfile_0.dat" );
 
-//   EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, false, true ) );
-//   EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, false, true ) );
+  EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
-//   EXPECT_EQ( true, CheckEqual(
-//     boost::filesystem::path( REMOTE_ROOT ) / destination,
-//     boost::filesystem::path( LOCAL_ROOT ) / source ) );
-// }
+  EXPECT_EQ( true, CheckEqual(
+    boost::filesystem::path( REMOTE_ROOT ) / destination,
+    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+}
 
-// typedef struct op_attrs {
-//   boost::filesystem::path path;
-//   RsyncError status;
-// } op_attrs_t;
-// TEST_F( EndToEndTest, PipelineTest ) {
+typedef struct op_attrs {
+  boost::filesystem::path path;
+  RsyncError status;
+} op_attrs_t;
+TEST_F( EndToEndTest, PipelineTest ) {
 
-//   std::vector<op_attrs_t> operations;
+  std::vector<op_attrs_t> operations;
 
-//   op_attrs_t path;
-//   path.status = RsyncSuccess;
+  op_attrs_t path;
+  path.status = RsyncSuccess;
 
-//   // path.path = "instruction_test.cpp";
-//   // operations.push_back( path );
-//   // path.path = "dfile_0.dat";
-//   // operations.push_back( path );
-//   path.path = "screenshot.png";
-//   operations.push_back( path );
+  path.path = "instruction_test.cpp";
+  operations.push_back( path );
+  path.path = "dfile_0.dat";
+  operations.push_back( path );
+  path.path = "screenshot.png";
+  operations.push_back( path );
   
-//   std::vector<op_attrs_t>::iterator pathIt = operations.begin();
-//   for (; pathIt != operations.end(); pathIt++ )
-//   {
-//     pathIt->status = mLocalNode->sync( pathIt->path, pathIt->path, false, true );
-//     EXPECT_EQ( RsyncSuccess, pathIt->status );
-//   }
+  std::vector<op_attrs_t>::iterator pathIt = operations.begin();
+  for (; pathIt != operations.end(); pathIt++ )
+  {
+    pathIt->status = mLocalNode->sync( pathIt->path, pathIt->path, false, true );
+    EXPECT_EQ( RsyncSuccess, pathIt->status );
+  }
 
-//   pathIt = operations.begin();
-//   for (; pathIt != operations.end(); pathIt++ )
-//   {
-//     std::cout << "Waiting for " << pathIt->path << std::endl;
-//     if ( pathIt->status == RsyncSuccess ) EXPECT_EQ( true, mLocalCallback.mSem.take() );
-//     std::cout << "Checking " << pathIt->path << std::endl;
-//     EXPECT_EQ( true, CheckEqual(
-//       boost::filesystem::path( REMOTE_ROOT ) / pathIt->path,
-//       boost::filesystem::path( LOCAL_ROOT ) / pathIt->path ) );
+  pathIt = operations.begin();
+  for (; pathIt != operations.end(); pathIt++ )
+  {
+    std::cout << "Waiting for " << pathIt->path << std::endl;
+    if ( pathIt->status == RsyncSuccess ) EXPECT_EQ( true, mLocalCallback.mSem.take() );
+    std::cout << "Checking " << pathIt->path << std::endl;
+    EXPECT_EQ( true, CheckEqual(
+      boost::filesystem::path( REMOTE_ROOT ) / pathIt->path,
+      boost::filesystem::path( LOCAL_ROOT ) / pathIt->path ) );
 
-//     std::cout << "Done checking " << pathIt->path << std::endl;
-//   }
-// }
+    std::cout << "Done checking " << pathIt->path << std::endl;
+  }
+}
