@@ -3,7 +3,7 @@ project( rsync_server )
 
 cmake_policy(SET CMP0015 NEW)
 
-find_package( Boost 1.48 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
+find_package( Boost 1.46 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 
 set( BASE_DIR ../../../.. )
 set( INCLUDE_BASE "${BASE_DIR}/includes" )

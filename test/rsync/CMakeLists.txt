@@ -3,7 +3,7 @@ project( rsync_test )
 
 cmake_policy(SET CMP0015 NEW)
 
-find_package( Boost 1.48 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
+find_package( Boost 1.46 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 
 set( INCLUDE_BASE "../../includes" )
 include_directories( ${Boost_INCLUDE_DIRS} )

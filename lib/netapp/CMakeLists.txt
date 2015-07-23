@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project( libnetapp )
 
-find_package( Boost 1.48 REQUIRED )
+find_package( Boost 1.46 REQUIRED )
 
 #
 # Common include paths
