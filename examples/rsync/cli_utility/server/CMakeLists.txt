@@ -1,0 +1,38 @@
+cmake_minimum_required(VERSION 2.8)
+project( rsync_server )
+
+cmake_policy(SET CMP0015 NEW)
+
+find_package( Boost 1.48 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
+
+set( BASE_DIR ../../../.. )
+set( INCLUDE_BASE "${BASE_DIR}/includes" )
+include_directories( ${Boost_INCLUDE_DIRS} )
+include_directories( "../../third_party/gtest-1.7.0/include" )
+include_directories( "${INCLUDE_BASE}/base" )
+include_directories( "${INCLUDE_BASE}/base/crypto" )
+include_directories( "${INCLUDE_BASE}/base/file_system" )
+include_directories( "${INCLUDE_BASE}/base/cli" )
+include_directories( "${INCLUDE_BASE}/base/helpers" )
+include_directories( "${INCLUDE_BASE}/base/container" )
+include_directories( "${INCLUDE_BASE}/base/concurrency" )
+include_directories( "${INCLUDE_BASE}/base/time" )
+include_directories( "${INCLUDE_BASE}/base/logging" )
+include_directories( "${INCLUDE_BASE}/base/net" )
+include_directories( "${INCLUDE_BASE}/netapp/common" )
+include_directories( "${INCLUDE_BASE}/netapp/client" )
+include_directories( "${INCLUDE_BASE}/rsync" )
+
+link_directories( ${BASE_DIR}/lib/base )
+link_directories( ${BASE_DIR}/lib/netapp )
+link_directories( ${BASE_DIR}/lib/rsync )
+link_directories( ${BASE_DIR}/third_party/gtest-1.7.0/ )
+
+add_executable( rsync_server rsync_server.cpp )
+
+target_link_libraries( rsync_server ${Boost_LIBRARIES})
+target_link_libraries( rsync_server base )
+#target_link_libraries( rsync_server netapp_common )
+target_link_libraries( rsync_server netapp_client )
+target_link_libraries( rsync_server rsync )
+target_link_libraries( rsync_server gtest )

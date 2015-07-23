@@ -42,10 +42,10 @@ EQUALS = =
 CMAKE_EDIT_COMMAND = /opt/local/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/liber/examples/rsync/cli_utility/client
+CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/liber/third_party/gtest-1.7.0
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/liber/examples/rsync/cli_utility/client
+CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/liber/third_party/gtest-1.7.0
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -72,9 +72,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/examples/rsync/cli_utility/client/CMakeFiles /Users/vaughanbiker/Development/liber/examples/rsync/cli_utility/client/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/third_party/gtest-1.7.0/CMakeFiles /Users/vaughanbiker/Development/liber/third_party/gtest-1.7.0/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/examples/rsync/cli_utility/client/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/third_party/gtest-1.7.0/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -102,41 +102,78 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named rsync_client
+# Target rules for targets named gtest
 
 # Build rule for target.
-rsync_client: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 rsync_client
-.PHONY : rsync_client
+gtest: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 gtest
+.PHONY : gtest
 
 # fast build rule for target.
-rsync_client/fast:
-	$(MAKE) -f CMakeFiles/rsync_client.dir/build.make CMakeFiles/rsync_client.dir/build
-.PHONY : rsync_client/fast
+gtest/fast:
+	$(MAKE) -f CMakeFiles/gtest.dir/build.make CMakeFiles/gtest.dir/build
+.PHONY : gtest/fast
 
-rsync_client.o: rsync_client.cpp.o
-.PHONY : rsync_client.o
+#=============================================================================
+# Target rules for targets named gtest_main
+
+# Build rule for target.
+gtest_main: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 gtest_main
+.PHONY : gtest_main
+
+# fast build rule for target.
+gtest_main/fast:
+	$(MAKE) -f CMakeFiles/gtest_main.dir/build.make CMakeFiles/gtest_main.dir/build
+.PHONY : gtest_main/fast
+
+src/gtest-all.o: src/gtest-all.cc.o
+.PHONY : src/gtest-all.o
 
 # target to build an object file
-rsync_client.cpp.o:
-	$(MAKE) -f CMakeFiles/rsync_client.dir/build.make CMakeFiles/rsync_client.dir/rsync_client.cpp.o
-.PHONY : rsync_client.cpp.o
+src/gtest-all.cc.o:
+	$(MAKE) -f CMakeFiles/gtest.dir/build.make CMakeFiles/gtest.dir/src/gtest-all.cc.o
+.PHONY : src/gtest-all.cc.o
 
-rsync_client.i: rsync_client.cpp.i
-.PHONY : rsync_client.i
+src/gtest-all.i: src/gtest-all.cc.i
+.PHONY : src/gtest-all.i
 
 # target to preprocess a source file
-rsync_client.cpp.i:
-	$(MAKE) -f CMakeFiles/rsync_client.dir/build.make CMakeFiles/rsync_client.dir/rsync_client.cpp.i
-.PHONY : rsync_client.cpp.i
+src/gtest-all.cc.i:
+	$(MAKE) -f CMakeFiles/gtest.dir/build.make CMakeFiles/gtest.dir/src/gtest-all.cc.i
+.PHONY : src/gtest-all.cc.i
 
-rsync_client.s: rsync_client.cpp.s
-.PHONY : rsync_client.s
+src/gtest-all.s: src/gtest-all.cc.s
+.PHONY : src/gtest-all.s
 
 # target to generate assembly for a file
-rsync_client.cpp.s:
-	$(MAKE) -f CMakeFiles/rsync_client.dir/build.make CMakeFiles/rsync_client.dir/rsync_client.cpp.s
-.PHONY : rsync_client.cpp.s
+src/gtest-all.cc.s:
+	$(MAKE) -f CMakeFiles/gtest.dir/build.make CMakeFiles/gtest.dir/src/gtest-all.cc.s
+.PHONY : src/gtest-all.cc.s
+
+src/gtest_main.o: src/gtest_main.cc.o
+.PHONY : src/gtest_main.o
+
+# target to build an object file
+src/gtest_main.cc.o:
+	$(MAKE) -f CMakeFiles/gtest_main.dir/build.make CMakeFiles/gtest_main.dir/src/gtest_main.cc.o
+.PHONY : src/gtest_main.cc.o
+
+src/gtest_main.i: src/gtest_main.cc.i
+.PHONY : src/gtest_main.i
+
+# target to preprocess a source file
+src/gtest_main.cc.i:
+	$(MAKE) -f CMakeFiles/gtest_main.dir/build.make CMakeFiles/gtest_main.dir/src/gtest_main.cc.i
+.PHONY : src/gtest_main.cc.i
+
+src/gtest_main.s: src/gtest_main.cc.s
+.PHONY : src/gtest_main.s
+
+# target to generate assembly for a file
+src/gtest_main.cc.s:
+	$(MAKE) -f CMakeFiles/gtest_main.dir/build.make CMakeFiles/gtest_main.dir/src/gtest_main.cc.s
+.PHONY : src/gtest_main.cc.s
 
 # Help Target
 help:
@@ -145,11 +182,15 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... gtest"
+	@echo "... gtest_main"
 	@echo "... rebuild_cache"
-	@echo "... rsync_client"
-	@echo "... rsync_client.o"
-	@echo "... rsync_client.i"
-	@echo "... rsync_client.s"
+	@echo "... src/gtest-all.o"
+	@echo "... src/gtest-all.i"
+	@echo "... src/gtest-all.s"
+	@echo "... src/gtest_main.o"
+	@echo "... src/gtest_main.i"
+	@echo "... src/gtest_main.s"
 .PHONY : help
 
 

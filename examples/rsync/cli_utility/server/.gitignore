@@ -1,6 +1,5 @@
-*.o
 *.dSYM
-*.cmake
 CMakeCache.txt
+*.cmake
 CMakeFiles/
 Makefile

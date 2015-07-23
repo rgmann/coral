@@ -224,7 +224,7 @@ openLogFile(const std::string& path, const std::string& suffix)
   boost::filesystem::path lPath(path);
   lPath /= ss.str();
 
-  mFile.open(lPath.generic_string());
+  mFile.open( lPath.string().c_str(), std::ofstream::out );
 }
 
 Logger liber::log::glog;

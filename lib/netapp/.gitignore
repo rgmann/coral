@@ -1,3 +1,7 @@
 *.dSYM
 *.o
 *.a
+CMakeCache.txt
+CMakeFiles/
+*.cmake
+Makefile
