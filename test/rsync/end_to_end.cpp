@@ -122,9 +122,9 @@ public:
       bool bEqual = true;
 
       std::ifstream sourceStream(
-        rSource.string(), std::ifstream::in | std::ifstream::binary );
+        rSource.string().c_str(), std::ifstream::in | std::ifstream::binary );
       std::ifstream destinationStream(
-        rDestination.string(), std::ifstream::in | std::ifstream::binary );
+        rDestination.string().c_str(), std::ifstream::in | std::ifstream::binary );
 
       if ( sourceStream.is_open() && destinationStream.is_open() )
       {
