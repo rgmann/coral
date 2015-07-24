@@ -31,7 +31,7 @@ public:
   void signalAssemblyDone();
   void signalAllDone();
 
-  bool waitDone(int nTimeoutMs = Sem::SemWaitForever);
+  bool waitDone(int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
 
 private:
  

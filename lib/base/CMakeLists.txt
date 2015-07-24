@@ -30,6 +30,7 @@ file( GLOB SOURCES
 "${SOURCE_BASE}/common/base/logging/*.cpp"
 "${SOURCE_BASE}/common/base/file_system/*.cpp"
 "${SOURCE_BASE}/common/base/net/*.cpp"
+"${SOURCE_BASE}/common/base/concurrency/*.cpp"
 )
 
 add_library( base STATIC ${SOURCES} )

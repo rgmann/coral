@@ -67,8 +67,8 @@ private:
 
     bool waitJobStart(int nTimeoutMs)
     {
-      Sem::SemStatus lStatus = mJobStartSignal.take(nTimeoutMs);
-      return (lStatus == Sem::SemAcquired);
+      liber::thread::Semaphore::SemStatus lStatus = mJobStartSignal.take(nTimeoutMs);
+      return (lStatus == liber::thread::Semaphore::SemAcquired);
     }
 
     inline void signalJobEnd()
@@ -78,7 +78,7 @@ private:
 
     inline bool waitJobEnd(int nTimeoutMs)
     {
-      return (mJobEndSignal.take(nTimeoutMs) == Sem::SemAcquired);
+      return (mJobEndSignal.take(nTimeoutMs) == liber::thread::Semaphore::SemAcquired);
     }
 
     bool lockIfActive()

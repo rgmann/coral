@@ -14,7 +14,7 @@ public:
   virtual ~PacketQueue();
 
   bool push(PacketContainer* pContainer);
-  PacketContainer* pop(int nTimeoutMs = Sem::SemWaitForever);
+  PacketContainer* pop(int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
 
 private:
 

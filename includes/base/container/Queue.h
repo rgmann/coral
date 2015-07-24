@@ -9,8 +9,7 @@
 #include "Mutex.h"
 
 template <class T>
-class Queue
-{
+class Queue {
 public:
    
    static const ui32 InfiniteQueue = 0;
@@ -21,9 +20,9 @@ public:
    
    bool  initialize(ui32 nMaxElements = InfiniteQueue);
    
-   bool  push(const T &item, int nTimeoutMs = Sem::SemWaitForever);
+   bool  push(const T &item, int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
    
-   bool  pop(T &item, int nTimeoutMs = Sem::SemWaitForever);
+   bool  pop(T &item, int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
    
    bool  peek(T &item);
    
@@ -112,7 +111,7 @@ bool Queue<T>::push(const T &item, int nTimeoutMs)
    bool  l_bSuccess = false;
       
    // The producer that acquires the push lock now needs to wait for room.
-   if (!m_bIsInfinite && (m_pPopSem->take(nTimeoutMs) != Sem::SemAcquired))
+   if (!m_bIsInfinite && (m_pPopSem->take(nTimeoutMs) != liber::thread::Semaphore::SemAcquired))
    {
       return false;
    }
@@ -138,7 +137,7 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
 {
    bool  l_bSuccess = false;
       
-   if (m_pPushSem->take(nTimeoutMs) == Sem::SemAcquired)
+   if (m_pPushSem->take(nTimeoutMs) == liber::thread::Semaphore::SemAcquired)
    {
       m_queueLock.lock();
       item = m_queue.front();
