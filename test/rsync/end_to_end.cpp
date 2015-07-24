@@ -243,12 +243,15 @@ TEST_F( EndToEndTest, LocalToLocal ) {
 
   RsyncError sync_status = mLocalNode->sync( destination, source );
   EXPECT_EQ( RsyncSuccess, sync_status );
-  if ( sync_status == RsyncSuccess ) EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  if ( sync_status == RsyncSuccess )
+  {
+    EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
-  EXPECT_EQ( true, CheckEqual(
-    boost::filesystem::path( LOCAL_ROOT ) / destination,
-    boost::filesystem::path( LOCAL_ROOT ) / source
-  ));
+    EXPECT_EQ( true, CheckEqual(
+      boost::filesystem::path( LOCAL_ROOT ) / destination,
+      boost::filesystem::path( LOCAL_ROOT ) / source
+    ));
+  }
 }
 
 //
@@ -259,13 +262,17 @@ TEST_F( EndToEndTest, RemoteDestSmallTest ) {
   boost::filesystem::path source( "file.dat" );
   boost::filesystem::path destination( "file.dat" );
 
-  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
-  EXPECT_EQ( true, mLocalCallback.mSem.take() );
-  EXPECT_EQ( true, mRemoteCallback.mSem.take() );
+  RsyncError sync_status = mLocalNode->sync(destination, source, true, false );
+  EXPECT_EQ( RsyncSuccess, sync_status );
+  if ( sync_status == RsyncSuccess )
+  {
+    EXPECT_EQ( true, mLocalCallback.mSem.take() );
+    EXPECT_EQ( true, mRemoteCallback.mSem.take() );
 
-  EXPECT_EQ( true, CheckEqual(
-    boost::filesystem::path( REMOTE_ROOT ) / destination,
-    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+    EXPECT_EQ( true, CheckEqual(
+      boost::filesystem::path( REMOTE_ROOT ) / destination,
+      boost::filesystem::path( LOCAL_ROOT ) / source ) );
+  }
 }
 
 //
@@ -276,13 +283,17 @@ TEST_F( EndToEndTest, RemoteDestImageTest ) {
   boost::filesystem::path source( "image.png" );
   boost::filesystem::path destination( "image.png" );
 
-  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
-  EXPECT_EQ( true, mLocalCallback.mSem.take() );
-  EXPECT_EQ( true, mRemoteCallback.mSem.take() );
+  RsyncError sync_status = mLocalNode->sync(destination, source, true, false );
+  EXPECT_EQ( RsyncSuccess, sync_status );
+  if ( sync_status == RsyncSuccess )
+  {
+    EXPECT_EQ( true, mLocalCallback.mSem.take() );
+    EXPECT_EQ( true, mRemoteCallback.mSem.take() );
 
-  EXPECT_EQ( true, CheckEqual(
-    boost::filesystem::path( REMOTE_ROOT ) / destination,
-    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+    EXPECT_EQ( true, CheckEqual(
+      boost::filesystem::path( REMOTE_ROOT ) / destination,
+      boost::filesystem::path( LOCAL_ROOT ) / source ) );
+  }
 }
 
 //
@@ -293,12 +304,16 @@ TEST_F( EndToEndTest, RemoteSourceTest ) {
   boost::filesystem::path source( "instruction_test.cpp" );
   boost::filesystem::path destination( "instruction_test.cpp" );
 
-  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, false, true ) );
-  EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  RsyncError sync_status = mLocalNode->sync(destination, source, false, true );
+  EXPECT_EQ( RsyncSuccess, sync_status );
+  if ( sync_status == RsyncSuccess )
+  {
+    EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
-  EXPECT_EQ( true, CheckEqual(
-    boost::filesystem::path( REMOTE_ROOT ) / destination,
-    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+    EXPECT_EQ( true, CheckEqual(
+      boost::filesystem::path( REMOTE_ROOT ) / destination,
+      boost::filesystem::path( LOCAL_ROOT ) / source ) );
+  }
 }
 
 //
@@ -309,12 +324,16 @@ TEST_F( EndToEndTest, RemoteSourceCopy ) {
   boost::filesystem::path source( "dfile_0.dat" );
   boost::filesystem::path destination( "dfile_0.dat" );
 
-  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, false, true ) );
-  EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  RsyncError sync_status = mLocalNode->sync(destination, source, false, true );
+  EXPECT_EQ( RsyncSuccess, sync_status );
+  if ( sync_status == RsyncSuccess )
+  {
+    EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
-  EXPECT_EQ( true, CheckEqual(
-    boost::filesystem::path( REMOTE_ROOT ) / destination,
-    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+    EXPECT_EQ( true, CheckEqual(
+      boost::filesystem::path( REMOTE_ROOT ) / destination,
+      boost::filesystem::path( LOCAL_ROOT ) / source ) );
+  }
 }
 
 typedef struct op_attrs {
