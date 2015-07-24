@@ -6,8 +6,8 @@
 #include "gtest/gtest.h"
 
 
-#define  LOCAL_ROOT    ((const char*)"/Users/vaughanbiker/Development/liber/test/rsync/test_root/client")
-#define  REMOTE_ROOT   ((const char*)"/Users/vaughanbiker/Development/liber/test/rsync/test_root/server")
+// #define  LOCAL_ROOT    ((const char*)"/Users/vaughanbiker/Development/liber/test/rsync/test_root/client")
+// #define  REMOTE_ROOT   ((const char*)"/Users/vaughanbiker/Development/liber/test/rsync/test_root/server")
 #define  RSYNC_SUB_ID  ( 1 )
 
 using namespace liber::netapp;
@@ -43,7 +43,12 @@ public:
     , mLocalCallback( "Local" )
     , mRemoteCallback( "Remote" )
     {
+      LOCAL_ROOT = boost::filesystem::current_path() / "test_root/client";
+      REMOTE_ROOT = boost::filesystem::current_path() / "test_root/server";
     }
+
+    boost::filesystem::path LOCAL_ROOT;
+    boost::filesystem::path REMOTE_ROOT;
 
   protected:
 
@@ -236,8 +241,9 @@ TEST_F( EndToEndTest, LocalToLocal ) {
   boost::filesystem::path source( "s_inst.cpp" );
   boost::filesystem::path destination( "d_inst.cpp" );;
 
-  EXPECT_EQ( RsyncSuccess, mLocalNode->sync( destination, source ) );
-  EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  RsyncError sync_status = mLocalNode->sync( destination, source );
+  EXPECT_EQ( RsyncSuccess, sync_status );
+  if ( sync_status == RsyncSuccess ) EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
   EXPECT_EQ( true, CheckEqual(
     boost::filesystem::path( LOCAL_ROOT ) / destination,
@@ -249,18 +255,18 @@ TEST_F( EndToEndTest, LocalToLocal ) {
 // Synchronize two files where the destination is remote and the source is
 // local. Note: Source file is smaller than destination.
 //
-// TEST_F( EndToEndTest, RemoteDestSmallTest ) {
-//   boost::filesystem::path source( "file.dat" );
-//   boost::filesystem::path destination( "file.dat" );
+TEST_F( EndToEndTest, RemoteDestSmallTest ) {
+  boost::filesystem::path source( "file.dat" );
+  boost::filesystem::path destination( "file.dat" );
 
-//   EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
-//   EXPECT_EQ( true, mLocalCallback.mSem.take() );
-//   EXPECT_EQ( true, mRemoteCallback.mSem.take() );
+  EXPECT_EQ( RsyncSuccess, mLocalNode->sync(destination, source, true, false) );
+  EXPECT_EQ( true, mLocalCallback.mSem.take() );
+  EXPECT_EQ( true, mRemoteCallback.mSem.take() );
 
-//   EXPECT_EQ( true, CheckEqual(
-//     boost::filesystem::path( REMOTE_ROOT ) / destination,
-//     boost::filesystem::path( LOCAL_ROOT ) / source ) );
-// }
+  EXPECT_EQ( true, CheckEqual(
+    boost::filesystem::path( REMOTE_ROOT ) / destination,
+    boost::filesystem::path( LOCAL_ROOT ) / source ) );
+}
 
 //
 // Synchronize two images where the destination is remote and the source is
