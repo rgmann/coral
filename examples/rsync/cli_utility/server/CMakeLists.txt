@@ -20,7 +20,7 @@ include_directories( "${INCLUDE_BASE}/base/time" )
 include_directories( "${INCLUDE_BASE}/base/logging" )
 include_directories( "${INCLUDE_BASE}/base/net" )
 include_directories( "${INCLUDE_BASE}/netapp/common" )
-include_directories( "${INCLUDE_BASE}/netapp/client" )
+include_directories( "${INCLUDE_BASE}/netapp/server" )
 include_directories( "${INCLUDE_BASE}/rsync" )
 
 link_directories( ${BASE_DIR}/lib/base )
@@ -30,9 +30,15 @@ link_directories( ${BASE_DIR}/third_party/gtest-1.7.0/ )
 
 add_executable( rsync_server rsync_server.cpp )
 
-target_link_libraries( rsync_server ${Boost_LIBRARIES})
-target_link_libraries( rsync_server base )
-#target_link_libraries( rsync_server netapp_common )
-target_link_libraries( rsync_server netapp_client )
+
 target_link_libraries( rsync_server rsync )
+target_link_libraries( rsync_server base )
+target_link_libraries( rsync_server netapp_server )
+target_link_libraries( rsync_server ${Boost_LIBRARIES})
 target_link_libraries( rsync_server gtest )
+target_link_libraries( rsync_test_suite pthread )
+
+if(APPLE)
+elseif(UNIX)
+  target_link_libraries( rsync_test_suite rt )
+endif()
