@@ -78,6 +78,24 @@ RsyncError RsyncNode::sync(
 }
 
 //----------------------------------------------------------------------------
+RsyncError RsyncNode::push( const boost::filesystem::path& filepath )
+{
+  ResourcePath destination( filepath, true );
+  ResourcePath source( filepath, false );
+
+  return job_agent_.createJob( destination, source, segment_size_ );
+}
+
+//----------------------------------------------------------------------------
+RsyncError RsyncNode::pull( const boost::filesystem::path& filepath )
+{
+  ResourcePath destination( filepath, false );
+  ResourcePath source( filepath, true );
+
+  return job_agent_.createJob( destination, source, segment_size_ );
+}
+
+//----------------------------------------------------------------------------
 PacketSubscriber& RsyncNode::subscriber()
 {
   return router_;

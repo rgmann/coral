@@ -50,6 +50,10 @@ public:
                   bool remote_destination = false,
                   bool remote_source = false);
 
+  RsyncError push( const boost::filesystem::path& filepath );
+
+  RsyncError pull( const boost::filesystem::path& filepath );
+
   liber::netapp::PacketSubscriber& subscriber();
 
 private:

@@ -9,15 +9,16 @@
 #include "NetAppPacket.h"
 #include "PacketQueue.h"
 #include "RsyncNode.h"
+#include "InteractiveCommandRouter.h"
 
 
 using boost::asio::ip::tcp;
 using namespace liber::netapp;
 using namespace liber::rsync;
+using namespace liber::cli;
 
 typedef std::deque<NetAppPacket*> packet_queue;
 
-#define  LOCAL_ROOT    ((const char*)"/Users/vaughanbiker/Development/liber/examples/rsync/cli_utility/client/rsync_client_root")
 #define  RSYNC_SUB_ID  ( 1 )
 
 class AsioTcpPacketRouter : 
@@ -248,7 +249,7 @@ private:
 class CompletionCallback : public RsyncJobCallback {
 public:
 
-  CompletionCallback(const char* pName) : mSem(0), mpName(pName) {};
+  CompletionCallback(const char* pName, CountingSem& semaphore ) : semaphore_(semaphore), mpName(pName) {};
 
   void call(const JobDescriptor& job, const JobReport& report)
   {
@@ -258,19 +259,92 @@ public:
     report.print(std::cout);
     std::cout << "\n\n";
 
-    mSem.give();
+    semaphore_.give();
   }
 
-  CountingSem mSem;
+  CountingSem& semaphore_;
   const char* mpName;
 };
+
+class ClientAttributes {
+public:
+  ClientAttributes( RsyncNode* node_ptr )
+  : node_ptr_ ( node_ptr )
+  , semaphore_( 0 )
+  , callback_ ( "job_callback", semaphore_ )
+  {
+    node_ptr_->setCallback( &callback_ );
+  }
+  ~ClientAttributes() {
+  }
+
+  bool is_connected() const
+  {
+    return true;
+  }
+
+  RsyncNode*  node_ptr_;
+  CountingSem semaphore_;
+  CompletionCallback callback_;
+};
+
+class PushCommand : public InteractiveCommand {
+public:
+
+  PushCommand( ClientAttributes& attributes )
+  : InteractiveCommand( "push", "Push a file to the server" )
+  , attributes_( attributes ) {};
+
+  void process(const liber::cli::ArgumentList& args) {
+    if ( attributes_.is_connected() ) {
+      if ( attributes_.node_ptr_->push( args[ 0 ] ) == RsyncSuccess ) {
+        attributes_.semaphore_.take();
+        liber::log::status("Done\n");
+      } else {
+        liber::log::status("Failed\n");
+      }
+    } else {
+      liber::log::status("Push failed: client is not connected\n");
+    }
+  }
+
+private:
+
+  ClientAttributes& attributes_;
+};
+
+class PullCommand : public InteractiveCommand {
+public:
+
+  PullCommand( ClientAttributes& attributes )
+  : InteractiveCommand( "pull", "Push a file to the server" )
+  , attributes_( attributes ) {};
+
+  void process(const liber::cli::ArgumentList& args) {
+    if ( attributes_.is_connected() ) {
+      if ( attributes_.node_ptr_->push( args[ 0 ] ) == RsyncSuccess ) {
+        attributes_.semaphore_.take();
+        liber::log::status("Done\n");
+      } else {
+        liber::log::status("Failed\n");
+      }
+    } else {
+      liber::log::status("Pull failed: client is not connected\n");
+    }
+  }
+
+private:
+
+  ClientAttributes& attributes_;
+};
+
 
 int main(int argc, char* argv[])
 {
   liber::log::level( liber::log::Verbose );
   try
   {
-    if (argc != 5)
+    if (argc != 3)
     {
       std::cerr << "Usage: rsync_client <host> <port> <push|pull> <path>\n";
       return 1;
@@ -286,38 +360,21 @@ int main(int argc, char* argv[])
 
     boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
 
-    CompletionCallback rsync_job_callback( "JOB" );
-
-    RsyncNode* rsync_node_ptr = new RsyncNode( LOCAL_ROOT );
-    rsync_node_ptr->setCallback( &rsync_job_callback );
+    RsyncNode* rsync_node_ptr = new RsyncNode( boost::filesystem::current_path() / "rsync_client_root" );
+    ClientAttributes attributes( rsync_node_ptr );
 
     router.addSubscriber(RSYNC_SUB_ID, &rsync_node_ptr->subscriber());
     router.launch();
 
-    boost::filesystem::path filepath( argv[4] );
+    PushCommand push_command( attributes );
+    PullCommand pull_command( attributes );
 
-    bool remote_dest = false;
-    bool remote_source = true;
+    InteractiveCommandRouter command_router;
+    command_router.add( &push_command );
+    command_router.add( &pull_command );
 
-    liber::log::status("action = %s\n", argv[3]);
-    if ( strcmp( argv[3], "push" ) == 0) {
-      remote_dest = true;
-      remote_source = false;
-      liber::log::status("PUSHING %s\n", filepath.string().c_str());
-    }
-    else
-    {
-      liber::log::status("PULLING %s\n", filepath.string().c_str());
-    }
+    command_router.run();
 
-    if ( rsync_node_ptr->sync( filepath, filepath, remote_dest, remote_source ) == RsyncSuccess )
-    {
-      rsync_job_callback.mSem.take();
-    }
-    else
-    {
-      liber::log::error("SYNC failed\n");
-    }
 
     router.removeSubscriber( RSYNC_SUB_ID );
 

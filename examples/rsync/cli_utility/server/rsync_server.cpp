@@ -29,6 +29,8 @@ public:
 
   virtual ~AsioRsyncClient(){};
 
+  virtual void push_file( const boost::filesystem::path& path ) = 0;
+
 };
 
 typedef boost::shared_ptr<AsioRsyncClient> AsioRsyncClientPtr;
@@ -41,6 +43,8 @@ public:
   {
     liber::log::status("JOINED\n");
     clients_.insert( client );
+    std::for_each(recent_pushes_.begin(), recent_pushes_.end(),
+        boost::bind( &AsioRsyncClient::push_file, client, _1 ));
   }
 
   void leave( AsioRsyncClientPtr client )
@@ -49,13 +53,43 @@ public:
     clients_.erase( client );
   }
 
+  void push_file( const boost::filesystem::path& path )
+  {
+    recent_pushes_.push_back( path );
+
+    std::for_each( clients_.begin(), clients_.end(),
+      boost::bind( &AsioRsyncClient::push_file, _1, boost::ref( path )));
+  }
+
 private:
 
   std::set<AsioRsyncClientPtr> clients_;
+  std::deque<boost::filesystem::path> recent_pushes_;
+};
+
+class JobCallback : public RsyncJobCallback {
+public:
+
+  JobCallback( AsioRsyncClientManager& client_manager ) : client_manager_(client_manager){};
+
+  void call(const JobDescriptor& job, const JobReport& report)
+  {
+    // liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path.string().c_str());
+    // liber::log::flush();
+
+    // report.print(std::cout);
+    // std::cout << "\n\n";
+
+    if ( job.getDestination().remote == true )
+    {
+      client_manager_.push_file( job.getDestinationPath() );
+    }
+  }
+
+  AsioRsyncClientManager& client_manager_;
 };
 
 //----------------------------------------------------------------------
-
 class AsioRsyncServerSession :
 public AsioRsyncClient,
 public PacketRouter,
@@ -70,12 +104,16 @@ public:
   , socket_(io_service)
   , client_manager_(client_manager)
   , rsync_node_( boost::filesystem::current_path() / "rsync_server_root" )
+  , callback_( client_manager )
   {
     addSubscriber( RSYNC_SUB_ID, &rsync_node_.subscriber() );
+
+    rsync_node_.setCallback( &callback_ );
   }
 
   ~AsioRsyncServerSession()
   {
+    rsync_node_.unsetCallback();
     cancel(true);
     removeSubscriber( RSYNC_SUB_ID );
   }
@@ -104,19 +142,14 @@ public:
     );
   }
 
-  // void deliver(const chat_message& msg)
-  // {
-  //   bool write_in_progress = !write_packets_.empty();
-  //   write_packets_.push_back(msg);
-  //   if (!write_in_progress)
-  //   {
-  //     boost::asio::async_write(socket_,
-  //         boost::asio::buffer(write_packets_.front().data(),
-  //           write_packets_.front().length()),
-  //         boost::bind(&chat_session::handle_write, shared_from_this(),
-  //           boost::asio::placeholders::error));
-  //   }
-  // }
+  void push_file( const boost::filesystem::path& path )
+  {
+    if ( rsync_node_.push( path ) != RsyncSuccess )
+    {
+      liber::log::status( "Failed to push file: %s\n", path.string().c_str() );
+    }
+  }
+
   void write_packet( const PacketContainer* container_ptr )
   {
     NetAppPacket* packet_ptr = new NetAppPacket(
@@ -279,6 +312,7 @@ private:
   PacketQueue             packet_receiver_;
 
   RsyncNode               rsync_node_;
+  JobCallback             callback_;
 };
 
 typedef boost::shared_ptr<AsioRsyncServerSession> AsioRsyncServerSessionPtr;
