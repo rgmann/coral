@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <boost/thread/thread_time.hpp>
-// #include <boost/thread/lock_types.hpp>
 #include <boost/thread/locks.hpp> 
 #include "CountingSem.h"
 

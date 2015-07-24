@@ -193,13 +193,17 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
     }
   }
 
-  job_create_status = error( job_ptr, job_create_status );
+  //
+  // Update status on the the job.
+  //
+  // job_create_status = error( job_ptr, job_create_status );
+  error( job_ptr, job_create_status );
 
   return job_create_status;
 }
 
 //----------------------------------------------------------------------------
-RsyncError JobAgent::addActiveJob(RsyncJob* job_ptr)
+RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
 {
   RsyncError job_create_status = RsyncSuccess;
 
@@ -215,18 +219,21 @@ RsyncError JobAgent::addActiveJob(RsyncJob* job_ptr)
   {
     if ( job_ptr->descriptor().getDestination().remote == false )
     {
-      // If the job was successfully created, and the destination file is
-      // not remote, add the job to the local pipeline.
+      // If the job was successfully created, and the destination path is
+      // local, add the job to the local pipeline.
       segmenter_.addJob( job_ptr );
       authority_.addJob( job_ptr );
       assembler_.addJob( job_ptr );
     }
 
-    job_create_status = ready_jobs_.push( job_ptr ) ? RsyncSuccess : RsyncQueueError;
+    if ( ready_jobs_.push( job_ptr ) == false )
+    {
+      log::error("JobAgent::addActiveJob - Failed to add job to queue\n");
+      job_create_status = RsyncQueueError;
+    }
 
     if ( job_create_status != RsyncSuccess )
     {
-      log::error("JobAgent::addActiveJob - Failed to add job to queue\n");
       active_jobs_.erase( insert_status.first );
     }
   }
