@@ -14,7 +14,6 @@
 #include "PacketQueue.h"
 #include "RsyncNode.h"
 
-#define  SERVER_ROOT    ((const char*)"/Users/vaughanbiker/Development/liber/examples/rsync/cli_utility/server/rsync_server_root")
 #define  RSYNC_SUB_ID  ( 1 )
 
 using boost::asio::ip::tcp;
@@ -70,7 +69,7 @@ public:
   , io_service_( io_service )
   , socket_(io_service)
   , client_manager_(client_manager)
-  , rsync_node_( SERVER_ROOT )
+  , rsync_node_( boost::filesystem::current_path() / "rsync_server_root" )
   {
     addSubscriber( RSYNC_SUB_ID, &rsync_node_.subscriber() );
   }
@@ -333,6 +332,7 @@ typedef std::list<AsioRsyncServerPtr> AsioRsyncServerList;
 
 int main(int argc, char* argv[])
 {
+  liber::log::level( liber::log::Verbose );
   try
   {
     if (argc < 2)
