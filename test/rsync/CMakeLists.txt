@@ -28,8 +28,10 @@ link_directories( "../../third_party/gtest-1.7.0/" )
 
 add_executable( rsync_test_suite rsync_test_suite.cpp )
 
-target_link_libraries( rsync_test_suite ${Boost_LIBRARIES})
+target_link_libraries( rsync_test_suite rsync )
 target_link_libraries( rsync_test_suite base )
 target_link_libraries( rsync_test_suite netapp_common )
-target_link_libraries( rsync_test_suite rsync )
 target_link_libraries( rsync_test_suite gtest )
+target_link_libraries( rsync_test_suite ${Boost_LIBRARIES} )
+target_link_libraries( rsync_test_suite pthread )
+target_link_libraries( rsync_test_suite rt )

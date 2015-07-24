@@ -79,7 +79,8 @@ bool FileSystemInterface::setRoot( const path& root_path )
   }
   else
   {
-    log::error("FileSystemInterface::setPath: %s\n",
+    log::error("FileSystemInterface::setPath: %s - %s\n",
+               root_path.string().c_str(),
                file_sys_error.message().c_str());
   }
 
