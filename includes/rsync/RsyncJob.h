@@ -22,8 +22,7 @@ public:
   JobReport& report();
   void mergeReport(const JobReport& rReport);
 
-  // SegmentQueue& segments(){ return mSegments; };
-  SegmentHook& segments(){ return segment_hook_ };
+  SegmentQueue& segments();
 
   InstructionQueue& instructions();
 

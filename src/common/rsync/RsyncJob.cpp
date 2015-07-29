@@ -41,10 +41,10 @@ void RsyncJob::mergeReport(const JobReport& rReport)
 }
 
 //-----------------------------------------------------------------------------
-// SegmentQueue& RsyncJob::segments()
-// {
-//   return mSegments;
-// }
+SegmentQueue& RsyncJob::segments()
+{
+  return mSegments;
+}
 
 //-----------------------------------------------------------------------------
 InstructionQueue& RsyncJob::instructions()
