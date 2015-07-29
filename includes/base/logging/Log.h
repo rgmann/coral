@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <string>
 #include <fstream>
+#include <boost/thread/mutex.hpp>
 #include "Queue.h"
 #include "IThread.h"
 #include "Timestamp.h"
@@ -25,6 +26,7 @@ namespace log    {
   // messages, regardless of level, are written to the log file.
   enum LogLevel {
     Supress = 0,
+    Raw,
     Status,
     Error,
     Warn,
@@ -40,6 +42,7 @@ namespace log    {
     std::string levelString = "Unknown";
     switch (level)
     {
+      case Raw: levelString = ""; break;
       case Status: levelString = "Status"; break;
       case Error:  levelString = "Error";  break;
       case Warn:   levelString = "Warn";   break;
@@ -144,7 +147,7 @@ namespace log    {
 
     bool mbAllowMessages;
 
-    Mutex mFileAttrLock;
+    boost::mutex file_attribute_lock_;
     bool mbLogFileEnabled;
     std::string   mPath;
     std::string   mSuffix;
@@ -189,6 +192,7 @@ namespace log    {
   void flush();
 
   void print(LogLevel level, const char* format, va_list arg);
+  void raw(const char* format, ...);
   void status(const char* format, ...);
   void error(const char* format, ...);
   void warn(const char* format, ...);

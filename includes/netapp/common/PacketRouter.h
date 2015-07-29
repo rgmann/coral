@@ -35,7 +35,8 @@ protected:
 private:
 
   //
-  Mutex mTableLock;
+  // Mutex mTableLock;
+  boost::mutex table_lock_;
 
   //
   std::map<int, PacketSubscriber*> mSubscriberTable;

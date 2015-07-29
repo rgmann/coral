@@ -27,10 +27,10 @@ bool ClientPacketRouter::start(ui32 txCapacity)
 {
   bool lbSuccess = true;
 
-  if (!mRxQueue.initialize(txCapacity))
-  {
-    lbSuccess = false;
-  }
+  // if (!mRxQueue.initialize(txCapacity))
+  // {
+  //   lbSuccess = false;
+  // }
 
   // Register the connection status subscriber.
   lbSuccess &= addSubscriber(ConnectionStatus::SubscriberId,

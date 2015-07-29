@@ -25,11 +25,6 @@ bool ApplicationWorker::initialize(TcpSocket* pSocket)
 {
   bool lbSuccess = true;
 
-  if (!mInQueue.initialize())
-  {
-    lbSuccess = false;
-  }
-
   // Store the socket pointer. 
   mpSocket = pSocket;
 

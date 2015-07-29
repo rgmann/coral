@@ -1,7 +1,7 @@
 #include "Authority.h"
 #include "Log.h"
 #include "LocalAuthorityInterface.h"
-#include "SegmentHash.h"
+// #include "SegmentHash.h"
 #include "RsyncJob.h"
 #include "FileSystemInterface.h"
 

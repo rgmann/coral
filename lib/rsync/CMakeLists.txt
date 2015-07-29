@@ -50,7 +50,6 @@ set( SOURCES
 "${SOURCE_BASE}/src/common/${LIBNAME}/SegmentFile.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/SegmentList.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/SegmentQueue.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmentHash.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RsyncNode.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/JobAgent.cpp"
 )

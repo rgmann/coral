@@ -8,7 +8,7 @@ using namespace netapp;
 WorkerNodeManager::WorkerNodeManager()
 : IThread("WorkerNodeManager")
 {
-  mBalanceQueue.initialize();
+  // mBalanceQueue.initialize();
 }
 
 //-----------------------------------------------------------------------------

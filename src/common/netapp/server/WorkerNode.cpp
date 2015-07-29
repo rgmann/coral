@@ -9,7 +9,7 @@ using namespace liber::netapp;
 WorkerNode::WorkerNode()
 : IThread("WorkerNode")
 {
-  mNewWorkers.initialize();
+  // mNewWorkers.initialize();
 }
 
 //-----------------------------------------------------------------------------

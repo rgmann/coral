@@ -19,7 +19,6 @@ JobQueue::JobQueue(
 , mrJobHook(rJobHook)
 , mpActiveJob(NULL)
 {
-  mJobQueue.initialize();
 }
 
 //-----------------------------------------------------------------------------
@@ -29,7 +28,6 @@ RsyncJob* JobQueue::activeJob()
 }
 
 //-----------------------------------------------------------------------------
-// Mutex& JobQueue::lock()
 boost::mutex& JobQueue::lock()
 {
   return job_lock_;
@@ -155,40 +153,42 @@ void RemoteAuthorityService::call(Instruction* pInstruction)
 void RemoteAuthorityService::
 handleRemoteJobRequest(const void* pData, ui32 nLength)
 {
-  RsyncJob* lpJob = NULL;
+  RsyncJob* job_ptr = NULL;
 
-  if ((lpJob = new (std::nothrow) RsyncJob()))
+  if ( ( job_ptr = new (std::nothrow) RsyncJob() ) )
   {
-    JobDescriptor& rDescriptor = lpJob->descriptor();
+    JobDescriptor& descriptor = job_ptr->descriptor();
 
-    if (rDescriptor.deserialize((const char*)pData, nLength))
+    if (descriptor.deserialize((const char*)pData, nLength))
     {
-      RsyncError lStatus = RsyncSuccess;
+      RsyncError status = RsyncSuccess;
 
       if (mpUserHandler)
       {
-        lStatus = mpUserHandler(rDescriptor);
+        status = mpUserHandler(descriptor);
       }
       else
       {
-        lStatus = defaultQueryHandler(rDescriptor);
+        status = defaultQueryHandler(descriptor);
       }
 
-      if (lStatus == RsyncSuccess)
+      //
+      // If a job was successfully created, add it to the job queue.
+      if (status == RsyncSuccess)
       {
-        mJobQueue.push(lpJob);
+        mJobQueue.push(job_ptr);
       }
 
       sendPacketTo(mRequestID, 
                    new (std::nothrow) RsyncPacket(
                    RsyncPacket::RsyncRemoteAuthAcknowledgment,
-                   sizeof(lStatus), &lStatus));
+                   sizeof(status), &status));
     }
     else
     {
       log::error("RemoteAuthorityService::handleRemoteJobRequest - "
                  "Failed to deserialize JobDescriptor\n");
-      delete lpJob;
+      delete job_ptr;
     }
   }
   else

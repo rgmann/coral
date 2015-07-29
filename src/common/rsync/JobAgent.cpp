@@ -30,7 +30,6 @@ JobAgent(
 , assembler_          ( assembler )
 , create_destination_stub_( true )
 {
-  ready_jobs_.initialize();
 }
 
 //----------------------------------------------------------------------------

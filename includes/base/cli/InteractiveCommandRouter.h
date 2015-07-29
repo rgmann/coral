@@ -12,23 +12,38 @@ namespace cli {
 class InteractiveCommandRouter {
 public:
 
-  InteractiveCommandRouter();
+  //
+  // Create an interactive command.
+  //
+  InteractiveCommandRouter( const std::string& prompt = ">" );
   ~InteractiveCommandRouter();
 
+  //
+  // Run the interactive command router.
+  //
   void run();
 
-  void setLineDelimeter(const std::string& lineDelimeter);
+  //
+  // Register a command with the router. The command name cannot be among the
+  // the protected, including 'list', 'guit', and 'exit'.
+  //
+  bool add( InteractiveCommand* command_ptr );
 
-  bool add(InteractiveCommand* pCommand);
-
-  InteractiveCommand* remove(const std::string& command);
+  //
+  // Remove a command by name.
+  //
+  InteractiveCommand* remove( const std::string& command );
 
 private:
 
-  std::string mLineDelimeter;
-  std::map<std::string, InteractiveCommand*> mCommands;
+  // Command prompt
+  std::string prompt_;
 
-  bool mbQuitSignalled;
+  // Map from command/alias name to command object
+  std::map<std::string, InteractiveCommand*> commands_;
+
+  // Quit signal
+  bool quit_signalled_;
 };
 
 }}

@@ -8,7 +8,7 @@ using namespace liber::rsync;
 SegmentQueue::SegmentQueue()
 : SegmentReceiver()
 {
-  mSegments.initialize();
+  // mSegments.initialize();
 }
 
 //----------------------------------------------------------------------------

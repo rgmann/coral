@@ -4,6 +4,8 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/thread/locks.hpp>
 #include "IThread.h"
 #include "Log.h"
 #include "NetAppPacket.h"
@@ -20,17 +22,17 @@ using namespace liber::cli;
 typedef std::deque<NetAppPacket*> packet_queue;
 
 #define  RSYNC_SUB_ID  ( 1 )
-
+//public liber::concurrency::IThread,
 class AsioTcpPacketRouter : 
-public liber::concurrency::IThread,
-public liber::netapp::PacketRouter {
+public liber::netapp::PacketRouter,
+public liber::netapp::PacketReceiver {
 public:
 
   AsioTcpPacketRouter(
     boost::asio::io_service& io_service,
     tcp::resolver::iterator endpoint_iterator)
-  : IThread("asio_tcp_packet_router")
-  , PacketRouter  ( &mReceiver )
+  //: IThread("asio_tcp_packet_router")
+  : PacketRouter  ( this )//( &mReceiver )
   , io_service_   ( io_service )
   , socket_       ( io_service )
   {
@@ -54,6 +56,21 @@ public:
 
 
 protected:
+
+  bool push( PacketContainer* container_ptr )
+  {
+    boost::mutex::scoped_lock guard( lock_ );
+
+    bool push_success = false;
+    if ( container_ptr )
+    {
+      write_packet( container_ptr );
+      delete container_ptr;
+      push_success = true;
+    }
+
+    return push_success;
+  }
 
   void handle_connect(const boost::system::error_code& error)
   {
@@ -159,18 +176,18 @@ protected:
     io_service_.post( boost::bind( &AsioTcpPacketRouter::do_write, this, packet_ptr ) );
   }
 
-  void run( const bool& shutdown )
-  {
-    while ( !shutdown ) {
-      PacketContainer* container_ptr = NULL;
-      if ( ( container_ptr = mReceiver.pop() ) != NULL) {
+  // void run( const bool& shutdown )
+  // {
+  //   while ( !shutdown ) {
+  //     PacketContainer* container_ptr = NULL;
+  //     if ( ( container_ptr = mReceiver.pop() ) != NULL) {
 
-        write_packet( container_ptr );
+  //       write_packet( container_ptr );
 
-        delete container_ptr;
-      }
-    }
-  }
+  //       delete container_ptr;
+  //     }
+  //   }
+  // }
 
   void do_write( NetAppPacket* packet_ptr )
   {
@@ -244,6 +261,7 @@ private:
   NetAppPacket read_packet_;
   packet_queue write_packets_;
   PacketQueue mReceiver;
+  boost::mutex lock_;
 };
 
 class CompletionCallback : public RsyncJobCallback {
@@ -322,7 +340,7 @@ public:
 
   void process(const liber::cli::ArgumentList& args) {
     if ( attributes_.is_connected() ) {
-      if ( attributes_.node_ptr_->push( args[ 0 ] ) == RsyncSuccess ) {
+      if ( attributes_.node_ptr_->pull( args[ 0 ] ) == RsyncSuccess ) {
         attributes_.semaphore_.take();
         liber::log::status("Done\n");
       } else {
@@ -364,7 +382,7 @@ int main(int argc, char* argv[])
     ClientAttributes attributes( rsync_node_ptr );
 
     router.addSubscriber(RSYNC_SUB_ID, &rsync_node_ptr->subscriber());
-    router.launch();
+    // router.launch();
 
     PushCommand push_command( attributes );
     PullCommand pull_command( attributes );
@@ -379,7 +397,7 @@ int main(int argc, char* argv[])
     router.removeSubscriber( RSYNC_SUB_ID );
 
     router.close();
-    router.cancel(true);
+    // router.cancel(true);
     t.join();
 
     rsync_node_ptr->unsetCallback();

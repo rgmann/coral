@@ -16,7 +16,6 @@ AssemblerThread::AssemblerThread( FileSystemInterface& file_sys_interface )
 , segment_file_       ( file_sys_interface )
 , assembler_          ( segment_file_ )
 {
-  job_queue_.initialize();
 }
 
 //----------------------------------------------------------------------------

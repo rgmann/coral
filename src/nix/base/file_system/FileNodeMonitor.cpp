@@ -7,9 +7,6 @@ FileNodeMonitor::FileNodeMonitor()
 {
    m_IgnoreList.push_back(".");
    m_IgnoreList.push_back("..");
-   
-   // Initialize the queue.
-   m_deltaQueue.initialize();
 }
 
 //------------------------------------------------------------------------------

@@ -23,9 +23,9 @@ addSubscriber(int subscriberId, PacketSubscriber* pSubscriber)
 {
   bool lbSuccess = true;
 
-  mTableLock.lock();
+  table_lock_.lock();
   lbSuccess = (mSubscriberTable.count(subscriberId) == 0);
-  mTableLock.unlock();
+  table_lock_.unlock();
   if (!lbSuccess)
   {
     log::error("PacketRouter::addSubscriber: "
@@ -35,14 +35,15 @@ addSubscriber(int subscriberId, PacketSubscriber* pSubscriber)
   lbSuccess &= (pSubscriber != NULL);
   if (lbSuccess)
   {
-    lbSuccess = mTableLock.lock();
+    // lbSuccess = table_lock_.lock();
+    table_lock_.lock();
     if (lbSuccess)
     {
       pSubscriber->setID(subscriberId);
       pSubscriber->setReceiver(mpReceiver);
       mSubscriberTable.insert(std::make_pair(subscriberId, pSubscriber));
       lbSuccess = true;
-      mTableLock.unlock();
+      table_lock_.unlock();
     }
   }
 
@@ -58,13 +59,14 @@ PacketSubscriber* PacketRouter::removeSubscriber(int subscriberId)
   lbSuccess &= (lpSubscriber != NULL);
   if (lbSuccess)
   {
-    lbSuccess = mTableLock.lock();
+    // lbSuccess = table_lock_.lock();
+    table_lock_.lock();
     if (lbSuccess)
     {
       lpSubscriber = mSubscriberTable.find(subscriberId)->second;
       mSubscriberTable.erase(subscriberId);
       lbSuccess = true;
-      mTableLock.unlock();
+      table_lock_.unlock();
     }
   }
 
@@ -86,9 +88,9 @@ bool PacketRouter::empty()
 //-----------------------------------------------------------------------------
 bool PacketRouter::hasSubscriber(int subscriberId)
 {
-  mTableLock.lock();
+  table_lock_.lock();
   bool lbExists = (mSubscriberTable.count(subscriberId) != 0);
-  mTableLock.unlock();
+  table_lock_.unlock();
   return lbExists;
 }
 
@@ -97,12 +99,12 @@ PacketSubscriber* PacketRouter::getSubscriber(int subscriberId)
 {
   PacketSubscriber* lpSubscriber = NULL;
 
-  mTableLock.lock();
+  table_lock_.lock();
   if (mSubscriberTable.count(subscriberId) != 0)
   {
     lpSubscriber = mSubscriberTable.find(subscriberId)->second;
   }
-  mTableLock.unlock();
+  table_lock_.unlock();
 
   return lpSubscriber;
 }

@@ -3,13 +3,14 @@
 using namespace liber::cli;
 
 //-----------------------------------------------------------------------------
-InteractiveCommand::
-InteractiveCommand(const std::string& command,
-                   const std::string& brief,
-                   const std::string& alias)
-: mCommand(command)
-, mBrief(brief)
-, mAlias(alias)
+InteractiveCommand::InteractiveCommand(
+  const std::string& command,
+  const std::string& brief,
+  const std::string& alias
+)
+: command_( command )
+, brief_( brief )
+, alias_( alias )
 {
 }
 
@@ -19,24 +20,24 @@ InteractiveCommand::~InteractiveCommand() {}
 //-----------------------------------------------------------------------------
 const std::string& InteractiveCommand::command() const
 {
-  return mCommand;
+  return command_;
 }
 
 //-----------------------------------------------------------------------------
 const std::string& InteractiveCommand::alias() const
 {
-  return mAlias;
+  return alias_;
 }
 
 //-----------------------------------------------------------------------------
 bool InteractiveCommand::hasAlias() const
 {
-  return (mAlias.empty() == false);
+  return ( alias_.empty() == false );
 }
 
 //-----------------------------------------------------------------------------
 std::string& InteractiveCommand::brief()
 {
-  return mBrief;
+  return brief_;
 }
 

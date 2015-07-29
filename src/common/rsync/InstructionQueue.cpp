@@ -8,7 +8,7 @@ using namespace liber::rsync;
 InstructionQueue::InstructionQueue()
 : InstructionReceiver()
 {
-  instructions_.initialize();
+  // instructions_.initialize();
 }
 
 //----------------------------------------------------------------------------

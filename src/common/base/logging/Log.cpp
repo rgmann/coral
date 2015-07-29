@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <boost/filesystem.hpp>
+#include <boost/thread/locks.hpp>
 #include "Log.h"
 #include "Date.h"
 
@@ -66,7 +67,9 @@ std::string LogMessage::toString(ui32 format) const
 
   if (format & log::DisplayLogLevel)
   {
-    ss << LogLevelToString(mLevel) << ": ";
+    ss << LogLevelToString(mLevel) ;
+    if ( mLevel != Raw ) ss << ":";
+    ss << " ";
   }
 
   ss << mMessage;
@@ -86,7 +89,6 @@ Logger::Logger()
 , mSuffix("")
 , mnFileSizeBytes(0)
 {
-  mMessages.initialize();
   launch();
 }
 
@@ -106,17 +108,15 @@ void Logger::setLogFileEnabled(bool bEnable)
 //-----------------------------------------------------------------------------
 void Logger::setPath(const std::string& path)
 {
-  mFileAttrLock.lock();
+  boost::mutex::scoped_lock guard( file_attribute_lock_ );
   mPath = path;
-  mFileAttrLock.unlock();
 }
 
 //-----------------------------------------------------------------------------
 void Logger::setSuffix(const std::string& suffix)
 {
-  mFileAttrLock.lock();
+  boost::mutex::scoped_lock guard( file_attribute_lock_ );
   mSuffix = suffix;
-  mFileAttrLock.unlock();
 }
 
 //-----------------------------------------------------------------------------
@@ -169,10 +169,11 @@ void Logger::run(const bool& bShutdown)
 
       if (mbLogFileEnabled)
       {
-        mFileAttrLock.lock();
-        lPath = mPath;
-        lSuffix = mSuffix;
-        mFileAttrLock.unlock();
+        {
+          boost::mutex::scoped_lock guard( file_attribute_lock_ );
+          lPath = mPath;
+          lSuffix = mSuffix;
+        }
 
         if (!mFile.is_open())
         {
@@ -274,11 +275,23 @@ void liber::log::flush()
 //-----------------------------------------------------------------------------
 void liber::log::print(LogLevel level, const char* format, va_list args)
 {
-  static char lBuffer[MAX_MESSAGE_LEN_BYTES];
+  static char message_buffer[MAX_MESSAGE_LEN_BYTES];
   if (format)
   {
-    vsnprintf(lBuffer, sizeof(lBuffer), format, args);
-    liber::log::glog.send(LogMessage(level, std::string(lBuffer)));
+    vsnprintf( message_buffer, sizeof( message_buffer ), format, args );
+    liber::log::glog.send( LogMessage( level, std::string( message_buffer ) ) );
+  }
+}
+
+//-----------------------------------------------------------------------------
+void liber::log::raw(const char* format, ...)
+{
+  if (format)
+  {
+    va_list args;
+    va_start(args, format);
+    liber::log::print(Raw, format, args);
+    va_end(args);
   }
 }
 

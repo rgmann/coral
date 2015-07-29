@@ -12,7 +12,6 @@ SegmenterThread::SegmenterThread( FileSystemInterface& file_sys_interface )
 : IThread("SegmenterThread")
 , file_sys_interface_( file_sys_interface )
 {
-  job_queue_.initialize();
 }
 
 //----------------------------------------------------------------------------

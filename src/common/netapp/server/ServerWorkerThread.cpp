@@ -8,7 +8,7 @@ using namespace liber::netapp;
 //-----------------------------------------------------------------------------
 WorkerRemovalAgent::WorkerRemovalAgent()
 {
-  mWorkersToRemove.initialize();
+  // mWorkersToRemove.initialize();
 }
 
 //-----------------------------------------------------------------------------
@@ -96,7 +96,6 @@ Worker& Worker::operator-- (int unused)
 ServerWorkerThread::ServerWorkerThread(const std::string& name)
 : IThread(name)
 {
-  mWorkers.initialize();
 }
 
 //-----------------------------------------------------------------------------

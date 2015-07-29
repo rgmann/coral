@@ -13,7 +13,6 @@ AuthorityThread::AuthorityThread( FileSystemInterface& file_sys_interface )
 : IThread         ( "AuthorityThread" )
 , local_authority_( file_sys_interface )
 {
-  job_queue_.initialize();
 }
 
 //----------------------------------------------------------------------------

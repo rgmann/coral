@@ -1,188 +1,201 @@
 #include <utility>
 #include <iostream>
 #include <iomanip>
+#include "Log.h"
 #include "InteractiveCommandRouter.h"
 #include "StringHelper.h"
 
 using namespace liber::cli;
+using namespace liber::log;
 
 class QuitCommand : public InteractiveCommand {
 public:
 
-  QuitCommand(bool& rQuitSignal)
-  : liber::cli::InteractiveCommand("quit", "Exit the terminal", "exit")
-  , mrQuitSignal(rQuitSignal)
+  QuitCommand( bool& quit_signalled )
+  : liber::cli::InteractiveCommand( "quit", "Exit the terminal", "exit" )
+  , quit_signalled_( quit_signalled )
   {
   };
 
   ~QuitCommand() {};
 
-  void process(const liber::cli::ArgumentList& args)
+  void process( const liber::cli::ArgumentList& args )
   {
-    mrQuitSignal = true;
-    std::cout << "bye" << std::endl;
+    quit_signalled_ = true;
+    raw( "bye\n" );
   };
 
 private:
 
-  bool& mrQuitSignal;
+  bool& quit_signalled_;
 };
 
 class ListCommand : public InteractiveCommand {
 public:
 
-  ListCommand(const std::map<std::string, InteractiveCommand*>& rCommandMap)
-  : liber::cli::InteractiveCommand("list", "List supported commands")
-  , mrCommandMap(rCommandMap)
+  ListCommand( const std::map<std::string, InteractiveCommand*>& command_map )
+  : liber::cli::InteractiveCommand( "list", "List supported commands" )
+  , command_map_( command_map )
   {
-  };
+  }
 
   ~ListCommand() {};
 
   void process(const liber::cli::ArgumentList& args)
   {
-    std::map<std::string, InteractiveCommand*>::const_iterator lIt;
+    std::map<std::string, InteractiveCommand*>::const_iterator
+      command_iterator = command_map_.begin();
 
-    std::cout << "Command List:" << std::endl;
-    for (lIt = mrCommandMap.begin(); lIt != mrCommandMap.end(); ++lIt)
+    raw("Command List:\n");
+
+    for (; command_iterator != command_map_.end(); ++command_iterator )
     {
-      if (lIt->first != lIt->second->alias())
+      if ( command_iterator->first != command_iterator->second->alias() )
       {
-        std::cout << "  ";
+        char command_name_buffer[21];
 
-        if (lIt->second->hasAlias())
+        if ( command_iterator->second->hasAlias() )
         {
-          std::cout << std::left << lIt->first << "/"
-                    << std::setw(16 - lIt->first.length() - 1)
-                    << std::left << lIt->second->alias();
+          snprintf(
+            command_name_buffer, sizeof(command_name_buffer), "%s[%s]",
+            command_iterator->first.c_str(),
+            command_iterator->second->alias().c_str()
+          );
         }
         else
         {
-          std::cout << std::setw(16) << std::left << lIt->first;
+          snprintf(
+            command_name_buffer, sizeof(command_name_buffer), "%s",
+            command_iterator->first.c_str()
+          );
         }
 
-        std::cout << "   "
-                  << lIt->second->brief()
-                  << std::endl;
+        raw( "  %-20s   %s\n",
+          command_name_buffer,
+          command_iterator->second->brief().c_str()
+        );
       }
     }
   };
 
 private:
 
-  const std::map<std::string, InteractiveCommand*>& mrCommandMap;
+  const std::map<std::string, InteractiveCommand*>& command_map_;
 };
 
 //-----------------------------------------------------------------------------
-InteractiveCommandRouter::InteractiveCommandRouter()
-: mLineDelimeter(">")
-, mbQuitSignalled(false)
+InteractiveCommandRouter::InteractiveCommandRouter( const std::string& prompt )
+: prompt_( prompt )
+, quit_signalled_(false)
 {
-  add(new ListCommand(mCommands));
-  add(new QuitCommand(mbQuitSignalled));
+  add( new ListCommand( commands_ ) );
+  add( new QuitCommand( quit_signalled_ ) );
 }
 
 //-----------------------------------------------------------------------------
 InteractiveCommandRouter::~InteractiveCommandRouter()
 {
-  InteractiveCommand* lpCommand = NULL;
+  InteractiveCommand* command_ptr = NULL;
 
-  lpCommand = remove("list");
-  if (lpCommand)
+  command_ptr = remove("list");
+  if (command_ptr)
   {
-    delete lpCommand;
-    lpCommand = NULL;
+    delete command_ptr;
+    command_ptr = NULL;
   }
 
-  lpCommand = remove("quit");
-  if (lpCommand)
+  command_ptr = remove("quit");
+  if (command_ptr)
   {
-    delete lpCommand;
-    lpCommand = NULL;
+    delete command_ptr;
+    command_ptr = NULL;
   }
 }
 
 //-----------------------------------------------------------------------------
-bool InteractiveCommandRouter::add(InteractiveCommand* pCommand)
+bool InteractiveCommandRouter::add( InteractiveCommand* command_ptr )
 {
-  bool lbSuccess = false;
+  bool add_success = false;
 
-  if (pCommand)
+  if ( command_ptr )
   {
-    lbSuccess = (mCommands.count(pCommand->command()) == 0);
+    add_success = ( commands_.count( command_ptr->command() ) == 0 );
 
-    if (pCommand->hasAlias())
+    if ( command_ptr->hasAlias() )
     {
-      lbSuccess &= (mCommands.count(pCommand->alias()) == 0);
+      add_success &= ( commands_.count( command_ptr->alias() ) == 0) ;
     }
 
-    if (lbSuccess)
+    if ( add_success )
     {
-      mCommands.insert(std::make_pair(pCommand->command(), pCommand));
-      mCommands.insert(std::make_pair(pCommand->alias(), pCommand));
+      commands_.insert( std::make_pair( command_ptr->command(), command_ptr ) );
+      commands_.insert( std::make_pair( command_ptr->alias(), command_ptr ) );
     }
   }
 
-  return lbSuccess;
+  return add_success;
 }
 
 //-----------------------------------------------------------------------------
-InteractiveCommand* InteractiveCommandRouter::
-remove(const std::string& command)
+InteractiveCommand* InteractiveCommandRouter::remove( const std::string& command )
 {
-  InteractiveCommand* lpCommand = NULL;
+  InteractiveCommand* command_ptr = NULL;
 
-  if (mCommands.count(command) > 0)
+  if ( commands_.count( command ) > 0 )
   {
-    lpCommand = mCommands.find(command)->second;
+    command_ptr = commands_.find( command )->second;
     
     // Remove the main command.
-    mCommands.erase(lpCommand->command());
+    commands_.erase( command_ptr->command() );
 
     // If the command has an alias, remove the alias.
-    if (lpCommand->hasAlias())
+    if ( command_ptr->hasAlias() )
     {
-      mCommands.erase(lpCommand->alias());
+      commands_.erase( command_ptr->alias() );
     }
   }
 
-  return lpCommand;
+  return command_ptr;
 }
 
 //-----------------------------------------------------------------------------
 void InteractiveCommandRouter::run()
 {
-  std::string lCommand;
+  std::string command;
 
-  while (!mbQuitSignalled)
+  while (!quit_signalled_)
   {
-    std::cout << mLineDelimeter << " ";
+    raw( "%s ", prompt_.c_str() );
+    liber::log::flush();
 
-    std::getline(std::cin, lCommand);
-    if (!std::cin.fail() && lCommand.size() > 0)
+    std::getline(std::cin, command);
+    if (!std::cin.fail() && command.size() > 0)
     {
       // Split the command string on spaces.
-      std::vector<std::string> lvArgs = StringHelper::Split(lCommand, ' ');
+      std::vector<std::string> command_args = StringHelper::Split(command, ' ');
 
       // The command name is always the first token.
       // The remaining tokens are arguments to the command.
-      std::string lCommandName = lvArgs.front();
-      lvArgs.erase(lvArgs.begin());
+      std::string command_name = command_args.front();
+      command_args.erase(command_args.begin());
 
-      if (mCommands.count(lCommandName) > 0)
+      if (commands_.count(command_name) > 0)
       {
-        if (mCommands.find(lCommandName)->second)
+        InteractiveCommand* command_ptr = commands_.find( command_name )->second;
+
+        if ( command_ptr )
         {
-          mCommands.find(lCommandName)->second->process(lvArgs);
+          command_ptr->process( command_args );
         }
       }
       else
       {
-        std::cout << "Error: Unknown command \""
-                  << lCommandName << "\"." << std::endl;
+        error( "Unknown command \"%s\"\n", command_name.c_str() );
       }
     }
   }
+
+  liber::log::flush();
 }
 
 

@@ -6,8 +6,6 @@
 #include "gtest/gtest.h"
 
 
-// #define  LOCAL_ROOT    ((const char*)"/Users/vaughanbiker/Development/liber/test/rsync/test_root/client")
-// #define  REMOTE_ROOT   ((const char*)"/Users/vaughanbiker/Development/liber/test/rsync/test_root/server")
 #define  RSYNC_SUB_ID  ( 1 )
 
 using namespace liber::netapp;
@@ -23,8 +21,8 @@ public:
     liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path.string().c_str());
     liber::log::flush();
 
-    // report.print(std::cout);
-    // std::cout << "\n\n";
+    report.print(std::cout);
+    std::cout << "\n\n";
 
     mSem.give();
   }

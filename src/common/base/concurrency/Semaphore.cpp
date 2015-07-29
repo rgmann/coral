@@ -1,5 +1,5 @@
 #include <boost/thread/thread_time.hpp>
-#include <boost/thread/locks.hpp> 
+#include <boost/thread/locks.hpp>
 #include "Semaphore.h"
 
 using namespace liber::thread;

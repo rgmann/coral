@@ -3,10 +3,9 @@
 
 #include <string>
 #include <queue>
-#include <stdio.h>
+#include <boost/thread/mutex.hpp>
 #include "BaseTypes.h"
 #include "CountingSem.h"
-#include "Mutex.h"
 
 template <class T>
 class Queue {
@@ -14,12 +13,10 @@ public:
    
    static const ui32 InfiniteQueue = 0;
    
-   Queue();
+   Queue( ui32 max_elements = InfiniteQueue );
    
    ~Queue();
-   
-   bool  initialize(ui32 nMaxElements = InfiniteQueue);
-   
+      
    bool  push(const T &item, int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
    
    bool  pop(T &item, int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
@@ -38,156 +35,119 @@ private:
    
 private:
    
-   ui32  m_nMaxSize;
-   bool  m_bIsInfinite;
+   ui32  max_elements_;
+   bool  infinite_queue_;
    
-   std::queue<T>  m_queue;
+   std::queue<T>  queue_;
    
-   CountingSem* m_pPushSem;
+   CountingSem  push_semaphore_;
    
-   CountingSem* m_pPopSem;
+   CountingSem  pop_semaphore_;
 
-   Mutex m_queueLock;
+   boost::mutex queue_lock_;
 };
 
 
 //------------------------------------------------------------------------------
 template <class T>
-Queue<T>::Queue()
+Queue<T>::Queue( ui32 max_elements )
+: max_elements_( max_elements )
+, infinite_queue_( ( max_elements_ == InfiniteQueue ) )
+, push_semaphore_( 0 )
+, pop_semaphore_( max_elements_ )
 {
-   m_nMaxSize = 0;
-   m_bIsInfinite = false;
-   
-   m_pPushSem = NULL;
-   m_pPopSem = NULL;
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 Queue<T>::~Queue()
-{   
-   if (m_pPushSem)
-   {
-      delete m_pPushSem;
-      m_pPushSem = NULL;
-   }
-   
-   if (m_pPopSem)
-   {
-      delete m_pPopSem;
-      m_pPopSem = NULL;
-   }
+{
 }
 
 //------------------------------------------------------------------------------
 template <class T>
-bool Queue<T>::initialize(ui32 nMaxElements)
+bool Queue<T>::push( const T &item, int nTimeoutMs )
 {
-   m_nMaxSize = nMaxElements;
-   
-   m_pPushSem = new CountingSem(0);
-   if (m_pPushSem == NULL)
-   {
-      return false;
-   }
-   
-   m_pPopSem = new CountingSem(m_nMaxSize);
-   if (m_pPopSem == NULL)
-   {
-      delete m_pPushSem;
-      return false;
-   }
-   
-   // If this is an "infinite" queue, we simply don't use the pop semaphore.
-   m_bIsInfinite = (nMaxElements == InfiniteQueue);
-   
-   return true;
-}
+   bool can_push = true;
 
-//------------------------------------------------------------------------------
-template <class T>
-bool Queue<T>::push(const T &item, int nTimeoutMs)
-{
-   bool  l_bSuccess = false;
+   if ( !infinite_queue_ )
+   {
+      can_push = (
+         pop_semaphore_.take( nTimeoutMs ) != liber::thread::Semaphore::SemAcquired
+      );
+   }
       
    // The producer that acquires the push lock now needs to wait for room.
-   if (!m_bIsInfinite && (m_pPopSem->take(nTimeoutMs) != liber::thread::Semaphore::SemAcquired))
+   if ( can_push )
    {
-      return false;
-   }
-//   if (m_pPopSem->take(nTimeoutMs) == Sem::SemAcquired)
-//   {
-      l_bSuccess = true;
-      
-      // Otherwise, the item can pushed onto the end of the queue.
-      m_queueLock.lock();
-      m_queue.push(item);
-      m_queueLock.unlock();
+      {
+         // Otherwise, the item can pushed onto the end of the queue.
+         boost::mutex::scoped_lock guard( queue_lock_ );
+         queue_.push( item );
+      }
       
       // Post the push semaphore
-      m_pPushSem->give();      
-//   }
+      push_semaphore_.give();      
+  }
    
-   return l_bSuccess;
+   return can_push;
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 bool Queue<T>::pop(T &item, int nTimeoutMs)
 {
-   bool  l_bSuccess = false;
+   bool pop_success = false;
       
-   if (m_pPushSem->take(nTimeoutMs) == liber::thread::Semaphore::SemAcquired)
+   if ( push_semaphore_.take( nTimeoutMs ) == liber::thread::Semaphore::SemAcquired )
    {
-      m_queueLock.lock();
-      item = m_queue.front();
-      m_queue.pop();
-      m_queueLock.unlock();
+      {
+         boost::mutex::scoped_lock guard( queue_lock_ );
+         item = queue_.front();
+         queue_.pop();
+      }
       
-//      m_pPopSem->give();
-      if (!m_bIsInfinite) m_pPopSem->give();
+      if ( !infinite_queue_ )
+      {
+         pop_semaphore_.give();
+      }
       
-      l_bSuccess = true;
+      pop_success = true;
    }
    
-   return l_bSuccess;
+   return pop_success;
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 bool Queue<T>::peek(T &item)
 {
-   bool l_bSuccess = false;
+   boost::mutex::scoped_lock guard( queue_lock_ );
+   bool peek_success = false;
    
-   if (!isEmpty())
+   if ( queue_.empty() == false )
    {
-      m_queueLock.lock();
-      item = m_queue.front();
-      m_queueLock.unlock();
-      l_bSuccess = true;
+      item = queue_.front();
+      peek_success = true;
    }
    
-   return l_bSuccess;
+   return peek_success;
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 bool Queue<T>::isEmpty()
 {
-   m_queueLock.lock();
-   bool l_bEmpty = m_queue.empty();
-   m_queueLock.unlock();
-   return l_bEmpty;
+   boost::mutex::scoped_lock guard( queue_lock_ );
+   return queue_.empty();
 }
 
 //------------------------------------------------------------------------------
 template <class T>
 ui32 Queue<T>::size()
 {
-   m_queueLock.lock();
-   ui32 l_nSize = m_queue.size();
-   m_queueLock.unlock();
-   return l_nSize;
+   boost::mutex::scoped_lock guard( queue_lock_ );
+   return queue_.size();
 }
 
 #endif // QUEUE_H

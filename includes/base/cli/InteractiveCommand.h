@@ -9,6 +9,9 @@ namespace cli {
 
 typedef std::vector<std::string> ArgumentList;
 
+//
+// InteractiveCommand abstract base class.
+//
 class InteractiveCommand {
 public:
 
@@ -17,7 +20,7 @@ public:
                      const std::string& alias = "");
   virtual ~InteractiveCommand();
 
-  virtual void process(const ArgumentList& args) = 0;
+  virtual void process( const ArgumentList& args ) = 0;
 
   const std::string& command() const;
 
@@ -28,9 +31,9 @@ public:
 
 private:
 
-  std::string mCommand;
-  std::string mBrief;
-  std::string mAlias;
+  std::string command_;
+  std::string brief_;
+  std::string alias_;
 };
 
 }}
