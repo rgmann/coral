@@ -1,7 +1,10 @@
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include "Log.h"
 #include "RsyncJob.h"
 #include "RsyncPacket.h"
 #include "Segment.h"
+#include "RsyncQueryResponse.h"
 #include "RemoteAuthorityService.h"
 
 using namespace liber;
@@ -174,15 +177,17 @@ handleRemoteJobRequest(const void* pData, ui32 nLength)
 
       //
       // If a job was successfully created, add it to the job queue.
-      if (status == RsyncSuccess)
+      if ( status == RsyncSuccess )
       {
-        mJobQueue.push(job_ptr);
+        mJobQueue.push( job_ptr );
       }
 
-      sendPacketTo(mRequestID, 
-                   new (std::nothrow) RsyncPacket(
-                   RsyncPacket::RsyncRemoteAuthAcknowledgment,
-                   sizeof(status), &status));
+      RsyncQueryResponse response( descriptor.uuid(), status );
+
+      sendPacketTo( mRequestID, new (std::nothrow) RsyncPacket(
+        RsyncPacket::RsyncRemoteAuthAcknowledgment,
+        response.serialize()
+      ));
     }
     else
     {

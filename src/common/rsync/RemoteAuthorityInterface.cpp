@@ -42,26 +42,29 @@ void RemoteAuthorityInterface::setRequestID(int requestID)
 }
 
 //----------------------------------------------------------------------------
-void RemoteAuthorityInterface::process(RsyncJob* pJob)
+void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
 {
   // Send the JobDescriptor and then wait for an acknowledgement from the
   // RsyncService.  The RsyncService may send an acknowledgement saying that
   // it cannot handle the request. In this case, we drain the segments and
   // send an end instruction to the Assembler. A timeout is handled in the
   // same way, but different status is reported.
-  RsyncError lStatus = startRemoteJob(pJob);
+  RsyncError process_status = startRemoteJob( job_ptr );
 
   // Read all segments as they become available from the SegmentQueue. If the
   // remote job was not successfully started, this will simply delete the
   // segments. If this remote job was successfully started, flushSegments will
   // send the segments before deleting them.
-  flushSegments(pJob->segments(), (lStatus == RsyncSuccess));
+  if ( flushSegments( job_ptr->segments(), ( process_status == RsyncSuccess ) ) == false )
+  {
+    process_status = kRsyncCommError;
+  }
 
   // If the remote Authority job was successfully started,
   // wait until End instruction is received from the remote job.
-  if (lStatus == RsyncSuccess)
+  if ( process_status == RsyncSuccess )
   {
-    lStatus = waitForEndInstruction(mnJobCompletionTimeoutMs);
+    process_status = waitForEndInstruction( mnJobCompletionTimeoutMs );
   }
 
   // Regardles of success or failure, release the active job. The active job
@@ -74,41 +77,38 @@ void RemoteAuthorityInterface::process(RsyncJob* pJob)
   // If the remote job failed to start for some reason, or if an error, such
   // as a timeout, occurred while waiting for the End instruction, create
   // an End instruction that notifies the Assembler of the error.
-  if (lStatus != RsyncSuccess)
+  if ( process_status != RsyncSuccess )
   {
-    cancelAssembly(pJob->instructions(), lStatus);
+    cancelAssembly( job_ptr->instructions(), process_status );
   }
 }
 
 //-----------------------------------------------------------------------------
-bool RemoteAuthorityInterface::put(const char* pData, ui32 nLength)
+bool RemoteAuthorityInterface::put( const char* data_ptr, ui32 length )
 {
-  bool lbSuccess = false;
-  RsyncPacket* lpPacket = new RsyncPacket();
+  bool put_success = false;
+  RsyncPacket* packet_ptr = new RsyncPacket();
 
-  if (lpPacket->unpack(pData, nLength))
+  if ( packet_ptr->unpack( data_ptr, length ) )
   {
     // Lock the job state mutex so that the main thread cannot create or
     // delete the RsyncJobState member.
-    if (mActiveJob.lockIfActive())
+    if ( mActiveJob.lockIfActive() )
     {
-      switch (lpPacket->data()->type)
+      switch ( packet_ptr->data()->type )
       {
         case RsyncPacket::RsyncRemoteAuthAcknowledgment:
-          memcpy(&mActiveJob.queryResponse(),
-                 lpPacket->dataPtr(),
-                 lpPacket->data()->length);
-
-          mActiveJob.signalJobStart();
+          mActiveJob.setQueryResponse(
+            packet_ptr->dataPtr(), packet_ptr->data()->length );
           break;
 
         case RsyncPacket::RsyncInstruction:
-          sendAssemblyInstruction(lpPacket->dataPtr(),
-                                  lpPacket->data()->length);
+          sendAssemblyInstruction(
+            packet_ptr->dataPtr(), packet_ptr->data()->length );
           break;
 
         case RsyncPacket::RsyncAuthorityReport:
-          setSourceReport(lpPacket->dataPtr(), lpPacket->data()->length);
+          setSourceReport( packet_ptr->dataPtr(), packet_ptr->data()->length );
           break;
 
         default: break;
@@ -122,7 +122,7 @@ bool RemoteAuthorityInterface::put(const char* pData, ui32 nLength)
     }
   }
 
-  return lbSuccess;
+  return put_success;
 }
 
 //-----------------------------------------------------------------------------
@@ -199,25 +199,27 @@ cancelAssembly(InstructionQueue& instructions, RsyncError status)
 }
 
 //-----------------------------------------------------------------------------
-RsyncError RemoteAuthorityInterface::
-startRemoteJob(RsyncJob* pJob)
+RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
 {
-  RsyncError lQueryStatus = RsyncSuccess;
+  RsyncError query_status = RsyncSuccess;
 
-  RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncRemoteAuthQuery,
-                                          pJob->descriptor().serialize());
-  mActiveJob.setJob(pJob);
+  RsyncPacket* lpPacket = new RsyncPacket(
+    RsyncPacket::RsyncRemoteAuthQuery,
+    job_ptr->descriptor().serialize()
+  );
 
-  if (sendPacketTo(mRequestID, lpPacket))
+  mActiveJob.setJob( job_ptr );
+
+  if ( sendPacketTo( mRequestID, lpPacket ) )
   {
     if (mActiveJob.waitJobStart(mnJobAckTimeoutMs))
     {
-      lQueryStatus = mActiveJob.queryResponse();
+      query_status = mActiveJob.queryResponse();
     }
     else
     {
       log::error("RemoteAuthorityInterface - RSYNC remote query timeout.\n");
-      lQueryStatus = RsyncRemoteQueryTimeout;
+      query_status = RsyncRemoteQueryTimeout;
     }
   }
   else
@@ -227,39 +229,51 @@ startRemoteJob(RsyncJob* pJob)
 
   delete lpPacket;
 
-  return lQueryStatus;
+  return query_status;
 }
 
 //-----------------------------------------------------------------------------
-void RemoteAuthorityInterface::
-flushSegments(SegmentQueue& rSegments, bool bSend)
+bool RemoteAuthorityInterface::flushSegments(
+  SegmentQueue& segments,
+  bool          send_segments
+)
 {
-  bool lbEndOfStream = false;
-  while (lbEndOfStream == false)
+  bool flush_success = true;
+  bool end_of_stream = false;
+
+  while ( end_of_stream == false )
   {
-    Segment* lpSegment = NULL;
+    Segment* segment_ptr = NULL;
 
-    if (rSegments.pop(&lpSegment, mnSegmentTimeoutMs) && lpSegment)
+    if ( segments.pop( &segment_ptr, mnSegmentTimeoutMs ) && segment_ptr )
     {
-      lbEndOfStream = lpSegment->endOfStream();
+      end_of_stream = segment_ptr->endOfStream();
 
-      if (bSend)
+      if ( send_segments )
       {
-        RsyncPacket* lpPacket = new RsyncPacket(RsyncPacket::RsyncSegment,
-                                                lpSegment->serialize());
+        RsyncPacket* packet_ptr = new RsyncPacket(
+          RsyncPacket::RsyncSegment,
+          segment_ptr->serialize()
+        );
 
-        sendPacketTo(mRequestID, lpPacket);
-        delete lpPacket;
+        if ( flush_success )
+        {
+          flush_success = sendPacketTo( mRequestID, packet_ptr );
+        }
+
+        delete packet_ptr;
       }
 
-      delete lpSegment;
-      lpSegment = NULL;
+      delete segment_ptr;
     }
     else
     {
-      lbEndOfStream = true;
+      flush_success = false;
+      end_of_stream = true;
     }
   }
+
+  return flush_success;
 }
 
 

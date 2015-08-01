@@ -52,6 +52,7 @@ set( SOURCES
 "${SOURCE_BASE}/src/common/${LIBNAME}/SegmentQueue.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RsyncNode.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/JobAgent.cpp"
+"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncQueryResponse.cpp"
 )
 
 add_library( rsync STATIC ${SOURCES} )

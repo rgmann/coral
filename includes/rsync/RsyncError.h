@@ -19,7 +19,10 @@ enum RsyncError {
   RsyncSourceFileNotFound,
 
   RsyncRemoteQueryTimeout,
+  kRsyncRemoteQueryError,
   RsyncRemoteJobTimeout,
+
+  kRsyncCommError,
 
   kRsyncInvalidJob,
   kRsyncJobCanceled,

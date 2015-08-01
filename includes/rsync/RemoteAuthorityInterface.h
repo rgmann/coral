@@ -1,12 +1,16 @@
 #ifndef RSYNC_REMOTE_AUTHORITY_INTERFACE_H
 #define RSYNC_REMOTE_AUTHORITY_INTERFACE_H
 
+#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 #include <fstream>
 #include <boost/thread/mutex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "BinarySem.h"
-// #include "AuthorityInterface.h"
+#include "RsyncQueryResponse.h"
 #include "RsyncError.h"
+#include "RsyncJob.h"
 #include "PacketSubscriber.h"
 #include "InstructionQueue.h"
 #include "SegmentQueue.h"
@@ -41,7 +45,7 @@ private:
 
   RsyncError startRemoteJob(RsyncJob* pJob);
 
-  void flushSegments(SegmentQueue& rSegments, bool bSend);
+  bool flushSegments(SegmentQueue& rSegments, bool bSend);
 
 private:
 
@@ -57,6 +61,28 @@ private:
       mLastInstructionTime = boost::posix_time::microsec_clock::local_time();
     };
     inline RsyncJob* job() { return mpJob; };
+
+    void setQueryResponse( const void* data_ptr, ui32 length ) {
+      RsyncQueryResponse response;
+      if ( response.deserialize( (const char*)data_ptr, length ) )
+      {
+        if ( response.uuid() == mpJob->descriptor().uuid() )
+        {
+          mQueryResponse = response.status();
+        }
+        else
+        {
+          mQueryResponse = kRsyncRemoteQueryError;
+          liber::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Invalid UUID\n");
+        }
+      }
+      else {
+        mQueryResponse = kRsyncRemoteQueryError;
+        liber::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Failed to deserialize\n");
+      }
+
+      mJobStartSignal.give();
+    }
 
     inline RsyncError& queryResponse() { return mQueryResponse; }
 
