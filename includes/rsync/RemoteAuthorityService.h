@@ -16,48 +16,49 @@ namespace rsync {
 
 class JobDescriptor;
 
-class JobCompletionHook {
-public:
-  virtual ~JobCompletionHook() {};
-  virtual void operator () (RsyncJob* pJob) = 0;
-};
+// class JobCompletionHook {
+// public:
+//   virtual ~JobCompletionHook() {};
+//   virtual void operator () (RsyncJob* pJob) = 0;
+// };
 
-class JobQueue : public liber::concurrency::IThread {
-public:
+// class JobQueue : public liber::concurrency::IThread {
+// public:
 
-  JobQueue(FileSystemInterface&, InstructionReceiver&, JobCompletionHook&);
-
-
-  RsyncJob* activeJob();
-  boost::mutex& lock();
-  bool lockIfActive();
-
-  bool push(RsyncJob* pJob);
-
-private:
-
-  void run(const bool& bShutdown);
+//   JobQueue(FileSystemInterface&, InstructionReceiver&, JobCompletionHook&);
 
 
-private:
+//   RsyncJob* activeJob();
+//   boost::mutex& lock();
+//   bool lockIfActive();
 
-  LocalAuthorityInterface mAuthority;
-  InstructionReceiver& mrReceiver;
+//   bool push(RsyncJob* pJob);
 
-  JobCompletionHook& mrJobHook;
+// private:
 
-  Queue<RsyncJob*> mJobQueue;
+//   void run(const bool& bShutdown);
 
-  RsyncJob* mpActiveJob;
-  boost::mutex job_lock_;
-};
+
+// private:
+
+//   LocalAuthorityInterface mAuthority;
+//   InstructionReceiver& mrReceiver;
+
+//   JobCompletionHook& mrJobHook;
+
+//   Queue<RsyncJob*> mJobQueue;
+
+//   RsyncJob* mpActiveJob;
+//   boost::mutex job_lock_;
+// };
 
 class RemoteAuthorityService
 : public liber::netapp::PacketSubscriber
 , public InstructionHook {
 public:
 
-  RemoteAuthorityService(FileSystemInterface&);
+  // RemoteAuthorityService(FileSystemInterface&);
+  RemoteAuthorityService();
   ~RemoteAuthorityService();
 
   void setRequestID(int nRequestID);
@@ -66,6 +67,8 @@ public:
 
   typedef RsyncError (*QueryHandler)(JobDescriptor&);
   void setQueryHandler(QueryHandler pFunc);
+
+  void process( RsyncJob* job_ptr );
 
 private:
 
@@ -79,27 +82,32 @@ private:
 
 private:
 
-  FileSystemInterface& mrFileSys;
+  // FileSystemInterface& mrFileSys;
+
+  boost::mutex active_job_lock_;
+  RsyncJob* active_job_;
+
+  LocalAuthorityInterface authority_;
 
   QueryHandler mpUserHandler;
 
   int mRequestID;
 
 
-  class SendReportHook : public JobCompletionHook {
-  public:
-    SendReportHook(liber::netapp::PacketSubscriber& rSubscriber);
-    ~SendReportHook() {};
+  // class SendReportHook : public JobCompletionHook {
+  // public:
+  //   SendReportHook(liber::netapp::PacketSubscriber& rSubscriber);
+  //   ~SendReportHook() {};
 
-    void setRequestID(int requestID);
-    void operator () (RsyncJob* pJob);
+  //   void setRequestID(int requestID);
+  //   void operator () (RsyncJob* pJob);
 
-  private:
-    liber::netapp::PacketSubscriber& mrSubscriber;
-    int mRequestID;
-  } mSendReportHook;
+  // private:
+  //   liber::netapp::PacketSubscriber& mrSubscriber;
+  //   int mRequestID;
+  // } mSendReportHook;
 
-  JobQueue mJobQueue;
+  // JobQueue mJobQueue;
 };
 
 } // End namespace rsync

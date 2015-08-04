@@ -7,6 +7,7 @@
 #include <fstream>
 #include <boost/thread/mutex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include "Log.h"
 #include "BinarySem.h"
 #include "RsyncQueryResponse.h"
 #include "RsyncError.h"
@@ -24,7 +25,7 @@ public:
   RemoteAuthorityInterface();
   ~RemoteAuthorityInterface();
 
-  void setRequestID(int requestID);
+  // void setRequestID(int requestID);
 
   bool put(const char* pData, ui32 nLength);
 
@@ -146,7 +147,7 @@ private:
   int mnJobAckTimeoutMs;
   int mnJobCompletionTimeoutMs;
 
-  int mRequestID;
+  // int mRequestID;
 };
 
 } // End namespace rsync

@@ -17,10 +17,10 @@ class FileSystemInterface;
 class SegmentFile : public SegmentAccessor {
 public:
 
-  SegmentFile(FileSystemInterface&);
+  SegmentFile();
   ~SegmentFile();
 
-  bool open(const JobDescriptor& descriptor);
+  bool open( FileSystemInterface& file_sys_interface, const JobDescriptor& descriptor );
   void close();
 
   Segment* getSegment(Segment::ID id);
@@ -30,7 +30,7 @@ private:
   const JobDescriptor* mpDescriptor;
   std::ifstream mIStream;
 
-  FileSystemInterface& mrFileSys;
+  // FileSystemInterface& mrFileSys;
 };
 
 } // End namespace rsync

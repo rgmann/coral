@@ -15,7 +15,8 @@ class RsyncJob;
 class LocalAuthorityInterface {
 public:
 
-  explicit LocalAuthorityInterface( FileSystemInterface& );
+  // explicit LocalAuthorityInterface( FileSystemInterface& );
+  LocalAuthorityInterface();
   ~LocalAuthorityInterface();
 
   void process( RsyncJob* job_ptr );
@@ -39,7 +40,7 @@ private:
 
   int segment_timeout_ms_;
 
-  FileSystemInterface& file_sys_interface_;
+  // FileSystemInterface& file_sys_interface_;
   std::ifstream authoritative_file_;
 
   Authority authority_;

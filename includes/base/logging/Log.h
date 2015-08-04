@@ -1,3 +1,6 @@
+#ifndef  LOG_H
+#define  LOG_H
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string>
@@ -202,3 +205,4 @@ namespace log    {
 } // End of namespace log
 } // End of namespace liber
 
+#endif // LOG_H

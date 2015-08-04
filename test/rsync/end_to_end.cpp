@@ -37,7 +37,9 @@ public:
   public:
 
     EndToEndTest()
-    : mLocalNode( NULL )
+    : mLocalWorkGroup(NULL)
+    , mLocalNode( NULL )
+    , mRemoteWorkGroup( NULL )
     , mRemoteNode( NULL )
     , mLocalCallback( "Local" )
     , mRemoteCallback( "Remote" )
@@ -191,8 +193,11 @@ public:
       CopyContents( "./test_root/originals/client", "./test_root/client" );
       CopyContents( "./test_root/originals/server", "./test_root/server" );
 
-      mLocalNode = new RsyncNode( LOCAL_ROOT );
-      mRemoteNode = new RsyncNode( REMOTE_ROOT );
+      mLocalWorkGroup = new WorkerGroup();
+      mRemoteWorkGroup = new WorkerGroup();
+
+      mLocalNode = new RsyncNode( LOCAL_ROOT, *mLocalWorkGroup );
+      mRemoteNode = new RsyncNode( REMOTE_ROOT, *mRemoteWorkGroup );
 
       mLocalRouter.setCounterpart(&mRemoteRouter);
       mRemoteRouter.setCounterpart(&mLocalRouter);
@@ -220,13 +225,18 @@ public:
 
       delete mRemoteNode;
       delete mLocalNode;
+
+      delete mRemoteWorkGroup;
+      delete mLocalWorkGroup;
     }
 
     IntraRouter mLocalRouter;
+    WorkerGroup* mLocalWorkGroup;
     RsyncNode* mLocalNode;
 
     IntraRouter mRemoteRouter;
-    RsyncNode* mRemoteNode;
+    WorkerGroup* mRemoteWorkGroup;
+    RsyncNode*  mRemoteNode;
 
     TestCallback mLocalCallback;
     TestCallback mRemoteCallback;

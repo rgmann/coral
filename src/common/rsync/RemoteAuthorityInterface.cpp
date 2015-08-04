@@ -1,6 +1,7 @@
 #include "Log.h"
 #include "RsyncJob.h"
 #include "RsyncPacket.h"
+#include "RsyncPacketRouter.h"
 #include "RemoteAuthorityInterface.h"
 
 #define  DEFAULT_SEGMENT_TIMEOUT_MS     (10000)
@@ -26,7 +27,7 @@ RemoteAuthorityInterface::RemoteAuthorityInterface()
 : mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
 , mnJobAckTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
 , mnJobCompletionTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
-, mRequestID(RsyncPacket::RsyncAuthorityService)
+// , mRequestID(RsyncPacket::RsyncJobAgent)
 {
 }
 
@@ -36,20 +37,29 @@ RemoteAuthorityInterface::~RemoteAuthorityInterface()
 }
 
 //----------------------------------------------------------------------------
-void RemoteAuthorityInterface::setRequestID(int requestID)
-{
-  mRequestID = requestID;
-}
+// void RemoteAuthorityInterface::setRequestID(int requestID)
+// {
+//   mRequestID = requestID;
+// }
 
 //----------------------------------------------------------------------------
 void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
 {
+  // Subscribe to the jobs packet subscriber.
+  if ( job_ptr->packetRouter().addSubscriber(
+    RsyncPacket::RsyncAuthorityInterface, this ) == false ) {
+    liber::log::debug("RemoteAuthorityInterface::process: FAILED to register\n");
+  }
+
+  liber::log::debug("RemoteAuthorityInterface::process: START %d\n", RsyncPacket::RsyncAuthorityInterface);
+
   // Send the JobDescriptor and then wait for an acknowledgement from the
   // RsyncService.  The RsyncService may send an acknowledgement saying that
   // it cannot handle the request. In this case, we drain the segments and
   // send an end instruction to the Assembler. A timeout is handled in the
   // same way, but different status is reported.
   RsyncError process_status = startRemoteJob( job_ptr );
+  liber::log::debug("RemoteAuthorityInterface::process: START REMOTE JOB\n");
 
   // Read all segments as they become available from the SegmentQueue. If the
   // remote job was not successfully started, this will simply delete the
@@ -58,6 +68,10 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
   if ( flushSegments( job_ptr->segments(), ( process_status == RsyncSuccess ) ) == false )
   {
     process_status = kRsyncCommError;
+    liber::log::debug("RemoteAuthorityInterface::process: kRsyncCommError\n");
+  }
+  else {
+    liber::log::debug("RemoteAuthorityInterface::process: Flushed all segments\n");
   }
 
   // If the remote Authority job was successfully started,
@@ -81,6 +95,12 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
   {
     cancelAssembly( job_ptr->instructions(), process_status );
   }
+
+  liber::log::debug("RemoteAuthorityInterface::process: END\n");
+
+  // Unsubscribe from this jobs packet router.
+  job_ptr->packetRouter().removeSubscriber(
+    RsyncPacket::RsyncAuthorityInterface );
 }
 
 //-----------------------------------------------------------------------------
@@ -183,6 +203,7 @@ sendAssemblyInstruction(const void* pData, ui32 nBytes)
 void RemoteAuthorityInterface::setSourceReport(const void* pData, ui32 nBytes)
 {
   mActiveJob.job()->report().source.deserialize((const char*)pData, nBytes);
+  liber::log::debug("RemoteAuthorityInterface::setSourceReport:\n");
 
   // If this is the source report, RemoteAuthorityInterface is finished
   // with the active job.  Signal completion to the main thread.
@@ -210,8 +231,10 @@ RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
 
   mActiveJob.setJob( job_ptr );
 
-  if ( sendPacketTo( mRequestID, lpPacket ) )
+  liber::log::debug("RemoteAuthorityInterface::startRemoteJob: SENDING\n");
+  if ( sendPacketTo( RsyncPacket::RsyncJobAgent, lpPacket ) )
   {
+    liber::log::debug("RemoteAuthorityInterface::startRemoteJob: WAITING\n");
     if (mActiveJob.waitJobStart(mnJobAckTimeoutMs))
     {
       query_status = mActiveJob.queryResponse();
@@ -258,7 +281,7 @@ bool RemoteAuthorityInterface::flushSegments(
 
         if ( flush_success )
         {
-          flush_success = sendPacketTo( mRequestID, packet_ptr );
+          flush_success = sendPacketTo( RsyncPacket::RsyncAuthorityService, packet_ptr );
         }
 
         delete packet_ptr;

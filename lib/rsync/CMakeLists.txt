@@ -53,6 +53,8 @@ set( SOURCES
 "${SOURCE_BASE}/src/common/${LIBNAME}/RsyncNode.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/JobAgent.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RsyncQueryResponse.cpp"
+"${SOURCE_BASE}/src/common/${LIBNAME}/Worker.cpp"
+"${SOURCE_BASE}/src/common/${LIBNAME}/WorkerGroup.cpp"
 )
 
 add_library( rsync STATIC ${SOURCES} )

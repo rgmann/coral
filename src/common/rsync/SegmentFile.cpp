@@ -7,11 +7,11 @@ using namespace liber;
 using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
-SegmentFile::
-SegmentFile(FileSystemInterface& rFileSystemInterface)
+SegmentFile::SegmentFile()
+// SegmentFile(FileSystemInterface& rFileSystemInterface)
 : SegmentAccessor()
 , mpDescriptor(NULL)
-, mrFileSys(rFileSystemInterface)
+// , mrFileSys(rFileSystemInterface)
 {
 }
 
@@ -22,11 +22,11 @@ SegmentFile::~SegmentFile()
 }
 
 //-----------------------------------------------------------------------------
-bool SegmentFile::open(const liber::rsync::JobDescriptor& descriptor)
+bool SegmentFile::open( FileSystemInterface& file_sys_interface, const liber::rsync::JobDescriptor& descriptor)
 {
   close();
   mpDescriptor = &descriptor;
-  return mrFileSys.open(descriptor.getDestination().path, mIStream);
+  return file_sys_interface.open(descriptor.getDestination().path, mIStream);
 }
 
 //-----------------------------------------------------------------------------

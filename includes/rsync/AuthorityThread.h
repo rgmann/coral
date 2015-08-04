@@ -17,13 +17,14 @@ class RsyncJob;
 class AuthorityThread : public liber::concurrency::IThread {
 public:
 
-  explicit AuthorityThread( FileSystemInterface& );
+  // explicit AuthorityThread( FileSystemInterface& );
+  AuthorityThread();
   ~AuthorityThread();
 
   void addJob( RsyncJob* job_ptr );
 
   liber::netapp::PacketSubscriber& getSubscriber();
-  void setRequestID( int request_id );
+  // void setRequestID( int request_id );
 
 private:
 

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <boost/uuid/uuid.hpp>
+#include <boost/thread/mutex.hpp>
 #include "PacketSubscriber.h"
 
 namespace liber {
@@ -10,17 +11,22 @@ namespace rsync {
 
 class RsyncJob;
 class FileSystemInterface;
-class SegmenterThread;
-class AuthorityThread;
-class AssemblerThread;
+// class SegmenterThread;
+// class AuthorityThread;
+// class AssemblerThread;
+class RsyncPacketRouter;
+class RsyncJobCallback;
+class WorkerGroup;
 
 class JobAgent : public liber::netapp::PacketSubscriber {
 public:
 
   JobAgent( FileSystemInterface& file_sys_interface,
-            SegmenterThread&     segmenter,
-            AuthorityThread&     authority,
-            AssemblerThread&     assembler );
+            RsyncPacketRouter&   packet_router,
+            WorkerGroup&         worker_group );
+            // SegmenterThread&     segmenter,
+            // AuthorityThread&     authority,
+            // AssemblerThread&     assembler );
   ~JobAgent();
 
   RsyncError createJob(
@@ -32,11 +38,16 @@ public:
 
   RsyncJob* nextJob();
 
+  void setCallback( RsyncJobCallback* callback_ptr );
+  void unsetCallback();
+
   bool put( const char* data_ptr, ui32 size_bytes );
 
 private:
 
   bool validate( const JobDescriptor& descriptor );
+
+  void handleRemoteJobRequest( const void* pData, ui32 nLength );
 
   RsyncError createJob( RsyncJob* job_ptr );
   RsyncError createJob( const char* data_ptr, ui32 size_bytes );
@@ -56,11 +67,16 @@ private:
   Queue<RsyncJob*> ready_jobs_;
 
   FileSystemInterface& file_sys_interface_;
-  SegmenterThread& segmenter_;
-  AuthorityThread& authority_;
-  AssemblerThread& assembler_;
+  RsyncPacketRouter&   packet_router_;
+  WorkerGroup&         worker_group_;
+  // SegmenterThread& segmenter_;
+  // AuthorityThread& authority_;
+  // AssemblerThread& assembler_;
 
   bool create_destination_stub_;
+
+  boost::mutex callback_lock_;
+  RsyncJobCallback* callback_ptr_;
 };
 
 } // End namespace rsync

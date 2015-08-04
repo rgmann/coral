@@ -1,6 +1,7 @@
 #include "Log.h"
 #include "RsyncJob.h"
 #include "Segmenter.h"
+#include "FileSystemInterface.h"
 #include "SegmenterThread.h"
 
 using namespace liber;
@@ -8,9 +9,9 @@ using namespace liber::rsync;
 using namespace liber::concurrency;
 
 //----------------------------------------------------------------------------
-SegmenterThread::SegmenterThread( FileSystemInterface& file_sys_interface )
+SegmenterThread::SegmenterThread() // FileSystemInterface& file_sys_interface
 : IThread("SegmenterThread")
-, file_sys_interface_( file_sys_interface )
+// , file_sys_interface_( file_sys_interface )
 {
 }
 
@@ -36,7 +37,7 @@ void SegmenterThread::run(const bool& bShutdown)
     {
       std::ifstream input_file;
 
-      bool segment_success = file_sys_interface_.open(
+      bool segment_success = job_ptr->fileSystem().open(
         job_ptr->descriptor().getDestination().path,
         input_file
       );
@@ -54,7 +55,7 @@ void SegmenterThread::run(const bool& bShutdown)
         {
           log::error("SegmenterThread: %s failed\n",
                      job_ptr->descriptor().getDestination().path.string().c_str());
-        }
+        } else liber::log::status("SegmenterThread::run: Finished segmenting\n");
 
         input_file.close();
       }

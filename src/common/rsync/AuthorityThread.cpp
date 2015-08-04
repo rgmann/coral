@@ -9,9 +9,9 @@ using namespace liber::netapp;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-AuthorityThread::AuthorityThread( FileSystemInterface& file_sys_interface )
+AuthorityThread::AuthorityThread() // FileSystemInterface& file_sys_interface
 : IThread         ( "AuthorityThread" )
-, local_authority_( file_sys_interface )
+// , local_authority_( file_sys_interface )
 {
 }
 
@@ -36,10 +36,10 @@ PacketSubscriber& AuthorityThread::getSubscriber()
 }
 
 //----------------------------------------------------------------------------
-void AuthorityThread::setRequestID( int request_id )
-{
-  remote_authority_.setRequestID( request_id );
-}
+// void AuthorityThread::setRequestID( int request_id )
+// {
+//   remote_authority_.setRequestID( request_id );
+// }
 
 //----------------------------------------------------------------------------
 void AuthorityThread::run(const bool& bShutdown)
@@ -57,7 +57,9 @@ void AuthorityThread::run(const bool& bShutdown)
       }
       else
       {
+        liber::log::debug("AuthorityThread::run: Processing local job\n");
         local_authority_.process( job_ptr );
+        liber::log::debug("AuthorityThread::run: Finished processing local job\n");
       }
 
       job_ptr->signalAuthDone();

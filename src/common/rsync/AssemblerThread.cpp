@@ -10,10 +10,10 @@ using namespace liber::concurrency;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-AssemblerThread::AssemblerThread( FileSystemInterface& file_sys_interface )
+AssemblerThread::AssemblerThread() // FileSystemInterface& file_sys_interface 
 : IThread("AssemblerThread")
-, file_sys_interface_ ( file_sys_interface )
-, segment_file_       ( file_sys_interface )
+// , file_sys_interface_ ( file_sys_interface )
+// , segment_file_       ( file_sys_interface )
 , assembler_          ( segment_file_ )
 {
 }
@@ -40,9 +40,9 @@ void AssemblerThread::run(const bool& bShutdown)
 
     if ( job_queue_.pop( job_ptr ) && job_ptr )
     {
-      if ( segment_file_.open( job_ptr->descriptor() ) )
+      if ( segment_file_.open( job_ptr->fileSystem(), job_ptr->descriptor() ) )
       {
-        bool stage_success = file_sys_interface_.stage(
+        bool stage_success = job_ptr->fileSystem().stage(
           job_ptr->descriptor().getDestination().path,
           stage_path_,
           assembler_.outputStream()
@@ -63,7 +63,7 @@ void AssemblerThread::run(const bool& bShutdown)
           // destination file.
           if ( assembly_success )
           {
-            bool swap_success = file_sys_interface_.swap(
+            bool swap_success = job_ptr->fileSystem().swap(
               stage_path_,
               job_ptr->descriptor().getDestination().path
             );
@@ -73,6 +73,8 @@ void AssemblerThread::run(const bool& bShutdown)
               log::error("AssemblerThread - "
                          "Failed to swap stage file and destination file.\n");
             }
+
+            liber::log::debug("AssemblerThread::process: Finished job\n");
           }
         }
         else

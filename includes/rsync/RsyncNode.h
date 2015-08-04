@@ -1,7 +1,7 @@
 #ifndef RSYNC_CLIENT_H
 #define RSYNC_CLIENT_H
 
-#include <boost/thread/mutex.hpp>
+// #include <boost/thread/mutex.hpp>
 #include "IThread.h"
 #include "Queue.h"
 #include "JobDescriptor.h"
@@ -13,22 +13,24 @@
 #include "AssemblerThread.h"
 #include "RemoteAuthorityService.h"
 #include "RsyncPacketRouter.h"
+#include "WorkerGroup.h"
+#include "RsyncJobCallback.h"
 
 namespace liber {
 namespace rsync {
 
 class RsyncJob;
-class RsyncJobCallback;
+// class RsyncJobCallback;
 
-class RsyncJobCallback {
-public:
+// class RsyncJobCallback {
+// public:
 
-  RsyncJobCallback() {};
-  virtual ~RsyncJobCallback() {};
+//   RsyncJobCallback() {};
+//   virtual ~RsyncJobCallback() {};
 
-  virtual void call( const JobDescriptor& job, const JobReport& report ) = 0;
+//   virtual void call( const JobDescriptor& job, const JobReport& report ) = 0;
 
-};
+// };
 
 
 // Active Object pattern
@@ -36,10 +38,10 @@ public:
 // - Requesters either have the same Router as the server or
 //   they are registered with a different router based on which
 //   foreign node they are syncing with.
-class RsyncNode : public liber::concurrency::IThread {
+class RsyncNode {//: public liber::concurrency::IThread {
 public:
 
-  RsyncNode( const boost::filesystem::path& root );
+  RsyncNode( const boost::filesystem::path& root, WorkerGroup& worker_group );
   ~RsyncNode();
 
   void setCallback( RsyncJobCallback* callback_ptr );
@@ -56,18 +58,19 @@ public:
 
   liber::netapp::PacketSubscriber& subscriber();
 
+// private:
+
+//   void run( const bool& bShutdown );
+
 private:
 
-  void run( const bool& bShutdown );
-
-private:
-
-  boost::mutex callback_lock_;
-  RsyncJobCallback* callback_ptr_;
+  // boost::mutex callback_lock_;
+  // RsyncJobCallback* callback_ptr_;
 
   RsyncPacketRouter router_;
 
   FileSystemInterface file_sys_interface_;
+  WorkerGroup& worker_group_;
   SegmenterThread segmenter_;
   AuthorityThread authority_;
   AssemblerThread assembler_;

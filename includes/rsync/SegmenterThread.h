@@ -3,7 +3,7 @@
 
 #include "IThread.h"
 #include "Queue.h"
-#include "FileSystemInterface.h"
+// #include "FileSystemInterface.h"
 
 namespace liber {
 namespace rsync {
@@ -13,7 +13,8 @@ class RsyncJob;
 class SegmenterThread : public liber::concurrency::IThread {
 public:
 
-  explicit SegmenterThread( FileSystemInterface& );
+  // explicit SegmenterThread( FileSystemInterface& );
+  SegmenterThread();
   ~SegmenterThread();
 
   void addJob( RsyncJob* job_ptr );
@@ -31,7 +32,7 @@ private:
 
   Queue<RsyncJob*> job_queue_;
 
-  FileSystemInterface& file_sys_interface_;
+  // FileSystemInterface& file_sys_interface_;
 };
 
 } // End namespace rsync

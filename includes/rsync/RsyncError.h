@@ -31,6 +31,7 @@ enum RsyncError {
   kRsyncIoError,
 
   kRsyncAssemblerInvalidChunkSize,
+  kRsyncNoWorkersAvailable,
 
   kRsyncErrorCount
 };

@@ -11,10 +11,14 @@
 namespace liber {
 namespace rsync {
 
+class FileSystemInterface;
+class RsyncPacketRouter;
+class RsyncJobCallback;
+
 class RsyncJob {
 public:
 
-  RsyncJob();
+  RsyncJob( FileSystemInterface& file_sys_interface, RsyncPacketRouter& router, RsyncJobCallback* callback_ptr = NULL );
   ~RsyncJob();
 
   JobDescriptor& descriptor();
@@ -33,6 +37,12 @@ public:
 
   bool waitDone(int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
 
+  RsyncPacketRouter& packetRouter(){ return router_; };
+
+  FileSystemInterface& fileSystem(){ return file_sys_interface_; };
+
+  RsyncJobCallback* callback() { return callback_ptr_; };
+
 private:
  
   RsyncJob(const RsyncJob&);
@@ -41,6 +51,10 @@ private:
 private:
 
   JobDescriptor mDescriptor;
+
+  RsyncPacketRouter& router_;
+  FileSystemInterface& file_sys_interface_;
+  RsyncJobCallback* callback_ptr_;
 
   JobReport mReport;
 

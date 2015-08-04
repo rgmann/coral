@@ -11,11 +11,11 @@ using namespace liber;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-LocalAuthorityInterface::LocalAuthorityInterface(
-  FileSystemInterface& file_sys_interface
-)
+LocalAuthorityInterface::LocalAuthorityInterface()
+//   FileSystemInterface& file_sys_interface
+// )
 : segment_timeout_ms_( DEFAULT_SEGMENT_TIMEOUT_MS )
-, file_sys_interface_( file_sys_interface )
+// , file_sys_interface_( file_sys_interface )
 {
 }
 
@@ -92,12 +92,13 @@ void LocalAuthorityInterface::processJob(
     }
   }
   job_ptr->report().source.authority.hashEnd.sample();
+  liber::log::debug("LocalAuthorityInterface::process: RECEIVED ALL SEGMENTS\n");
 
   if ( job_status == RsyncSuccess )
   {
     // Hash has been populated. Now the Authority can begin building the
     // instructions.
-    bool auth_success = file_sys_interface_.open(
+    bool auth_success = job_ptr->fileSystem().open(
       job_ptr->descriptor().getSource().path,
       file()
     );

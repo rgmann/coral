@@ -3,11 +3,14 @@
 #include "RsyncPacket.h"
 #include "FileSystemInterface.h"
 #include "RsyncJob.h"
-#include "JobAgent.h"
 #include "RemoteJobResult.h"
-#include "SegmenterThread.h"
-#include "AuthorityThread.h"
-#include "AssemblerThread.h"
+#include "RsyncQueryResponse.h"
+#include "WorkerGroup.h"
+#include "RsyncJobCallback.h"
+#include "JobAgent.h"
+// #include "SegmenterThread.h"
+// #include "AuthorityThread.h"
+// #include "AssemblerThread.h"
 
 using namespace liber;
 using namespace liber::rsync;
@@ -19,16 +22,21 @@ typedef boost::uuids::uuid buuid;
 JobAgent::
 JobAgent(
   FileSystemInterface& file_sys_interface, 
-  SegmenterThread& segmenter,
-  AuthorityThread& authority,
-  AssemblerThread& assembler
+  RsyncPacketRouter&   packet_router,
+  WorkerGroup&         worker_group
+  // SegmenterThread& segmenter,
+  // AuthorityThread& authority,
+  // AssemblerThread& assembler
 )
 : PacketSubscriber()
 , file_sys_interface_ (file_sys_interface)
-, segmenter_          ( segmenter )
-, authority_          ( authority )
-, assembler_          ( assembler )
+, packet_router_ ( packet_router )
+, worker_group_  ( worker_group )
+// , segmenter_          ( segmenter )
+// , authority_          ( authority )
+// , assembler_          ( assembler )
 , create_destination_stub_( true )
+, callback_ptr_( NULL )
 {
 }
 
@@ -38,11 +46,23 @@ JobAgent::~JobAgent()
 }
 
 //----------------------------------------------------------------------------
-RsyncJob* JobAgent::nextJob()
+// RsyncJob* JobAgent::nextJob()
+// {
+//   RsyncJob* job_ptr = NULL;
+//   ready_jobs_.pop( job_ptr );
+//   return job_ptr;
+// }
+//----------------------------------------------------------------------------
+void JobAgent::setCallback( RsyncJobCallback* callback_ptr )
 {
-  RsyncJob* job_ptr = NULL;
-  ready_jobs_.pop( job_ptr );
-  return job_ptr;
+  boost::mutex::scoped_lock guard( callback_lock_ );
+  callback_ptr_ = callback_ptr;
+}
+//----------------------------------------------------------------------------
+void JobAgent::unsetCallback()
+{
+  boost::mutex::scoped_lock guard( callback_lock_ );
+  callback_ptr_ = NULL;
 }
 
 //----------------------------------------------------------------------------
@@ -53,9 +73,14 @@ RsyncError JobAgent::createJob(
 )
 {
   RsyncError job_create_status = RsyncBadDescriptor;
-  RsyncJob*  job_ptr   = NULL;
 
-  if ( (job_ptr = new (std::nothrow) RsyncJob() ) )
+  RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
+    file_sys_interface_,
+    packet_router_,
+    callback_ptr_
+  );
+
+  if ( job_ptr )
   {
     JobDescriptor& descriptor = job_ptr->descriptor();
 
@@ -80,9 +105,14 @@ RsyncError JobAgent::createJob(
 RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
 {
   RsyncError job_create_status = RsyncSuccess;
-  RsyncJob*  job_ptr   = NULL;
 
-  if ( ( job_ptr = new (std::nothrow) RsyncJob() ) )
+  RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
+    file_sys_interface_,
+    packet_router_,
+    callback_ptr_
+  );
+
+  if ( job_ptr )
   {
     JobDescriptor& descriptor = job_ptr->descriptor();
 
@@ -216,20 +246,25 @@ RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
   // add the job to the ready job queue.
   if ( insert_status.second )
   {
+    // if ( job_ptr->descriptor().getDestination().remote == false )
+    // {
+    //   // If the job was successfully created, and the destination path is
+    //   // local, add the job to the local pipeline.
+    //   segmenter_.addJob( job_ptr );
+    //   authority_.addJob( job_ptr );
+    //   assembler_.addJob( job_ptr );
+    // }
     if ( job_ptr->descriptor().getDestination().remote == false )
     {
-      // If the job was successfully created, and the destination path is
-      // local, add the job to the local pipeline.
-      segmenter_.addJob( job_ptr );
-      authority_.addJob( job_ptr );
-      assembler_.addJob( job_ptr );
+      worker_group_.addJob( this, job_ptr );
+      liber::log::debug("JobAgent::addActiveJob: ADDED JOB  %d\n", job_ptr->descriptor().isRemoteRequest());
     }
 
-    if ( ready_jobs_.push( job_ptr ) == false )
-    {
-      log::error("JobAgent::addActiveJob - Failed to add job to queue\n");
-      job_create_status = RsyncQueueError;
-    }
+    // if ( ready_jobs_.push( job_ptr ) == false )
+    // {
+    //   log::error("JobAgent::addActiveJob - Failed to add job to queue\n");
+    //   job_create_status = RsyncQueueError;
+    // }
 
     if ( job_create_status != RsyncSuccess )
     {
@@ -261,8 +296,9 @@ void JobAgent::removeActiveJob( RsyncJob* job_ptr )
 }
 
 //----------------------------------------------------------------------------
-RsyncError JobAgent::sendRemoteJob(const JobDescriptor& descriptor)
+RsyncError JobAgent::sendRemoteJob( const JobDescriptor& descriptor )
 {
+  liber::log::debug("JobAgent::sendRemoteJob\n");
   // Send the remote job request.
   sendPacketTo(
     RsyncPacket::RsyncJobAgent,
@@ -310,6 +346,15 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
   // Remote the job from the active job table.
   removeActiveJob( job_ptr );
 
+  {
+    boost::mutex::scoped_lock guard( callback_lock_ );
+
+    if ( callback_ptr_ )
+    {
+      callback_ptr_->call( job_ptr->descriptor(), job_ptr->report() );
+    }
+  }
+
   // Delete the job.
   delete job_ptr;
   job_ptr = NULL;
@@ -326,23 +371,137 @@ bool JobAgent::put( const char* data_ptr, ui32 size_bytes )
   {
     switch ( packet.data()->type )
     {
-    case RsyncPacket::RsyncJobRequest:
-      createJob( (const char*)packet.dataPtr(), packet.data()->length );
-      break;
+      case RsyncPacket::RsyncJobRequest:
+        createJob( (const char*)packet.dataPtr(), packet.data()->length );
+        break;
 
-    case RsyncPacket::RsyncJobComplete:
-      finishRemoteJob( (const char*)packet.dataPtr(), packet.data()->length );
-      break;
+      case RsyncPacket::RsyncJobComplete:
+        finishRemoteJob( (const char*)packet.dataPtr(), packet.data()->length );
+        break;
 
-    default:
-      log::error("JobAgent - Unrecognized packet type");
-      route_success = false;
-      break;
+      case RsyncPacket::RsyncRemoteAuthQuery:
+        handleRemoteJobRequest( packet.dataPtr(), packet.data()->length);
+        break;
+
+      default:
+        log::error("JobAgent - Unrecognized packet type");
+        route_success = false;
+        break;
     }
   }
 
   return route_success;
 }
+
+//-----------------------------------------------------------------------------
+void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
+{
+  liber::log::debug("JobAgent::handleRemoteJobRequest\n");
+  RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
+    file_sys_interface_,
+    packet_router_,
+    callback_ptr_
+  );
+
+  if ( job_ptr )
+  {
+    JobDescriptor& descriptor = job_ptr->descriptor();
+
+    if ( descriptor.deserialize((const char*)pData, nLength) )
+    {
+      RsyncError status = RsyncSuccess;
+
+      // Indicate that the job was remotely requested.
+      descriptor.setRemoteRequest();
+
+      // This is an auth request, so by definition the destination must be remote.
+      descriptor.getDestination().remote = true;
+
+      // if (mpUserHandler)
+      // {
+      //   status = mpUserHandler(descriptor);
+      // }
+      // else
+      {
+        // status = defaultQueryHandler(descriptor);
+        if (job_ptr->fileSystem().exists(job_ptr->descriptor().getSource().path) == false)
+        {
+          status = RsyncSourceFileNotFound;
+          log::error("Remote job query failed for %s\n",
+                     job_ptr->descriptor().getSource().path.string().c_str());
+        }
+      }
+
+      //
+      // If a job was successfully created, add it to the job queue.
+      if ( status == RsyncSuccess )
+      {
+        bool add_success = true;
+
+        // If the job is not already in the active job table, add it now.
+        // The job will already be in the table if this job was initiated with
+        // a push operation.
+        if ( active_jobs_.count( job_ptr->descriptor().uuid() ) == 0 )
+        {
+          std::pair<std::map<buuid, RsyncJob*>::iterator,bool> insert_status;
+          std::pair<buuid, RsyncJob*> job_pair;
+
+          job_pair = std::make_pair( job_ptr->descriptor().uuid(), job_ptr );
+          insert_status = active_jobs_.insert( job_pair );
+
+          add_success = insert_status.second;
+        }
+
+        // mJobQueue.push( job_ptr );
+        if ( add_success )
+        {
+          status = worker_group_.addJob( this, job_ptr );
+          liber::log::debug("JobAgent::handleRemoteJobRequest: ADDED JOB %d\n", job_ptr->descriptor().isRemoteRequest());
+        }
+        else
+        {
+          liber::log::debug("JobAgent::handleRemoteJobRequest: FAILED TO ADD JOB\n");
+        }
+      }
+      // Respond immediately on error.
+      else
+      {
+        RsyncQueryResponse response( descriptor.uuid(), status );
+
+        sendPacketTo( RsyncPacket::RsyncAuthorityInterface, new (std::nothrow) RsyncPacket(
+          RsyncPacket::RsyncRemoteAuthAcknowledgment,
+          response.serialize()
+        ));
+      }
+    }
+    else
+    {
+      log::error("RemoteAuthorityService::handleRemoteJobRequest - "
+                 "Failed to deserialize JobDescriptor\n");
+      delete job_ptr;
+    }
+  }
+  else
+  {
+    log::error("RemoteAuthorityService::handleRemoteJobRequest - "
+               "Failed to allocate RsyncJob\n");
+  }
+}
+
+//-----------------------------------------------------------------------------
+// RsyncError JobAgent::defaultQueryHandler(JobDescriptor& rJob)
+// {
+//   RsyncError lStatus = RsyncSuccess;
+
+//   if (mrFileSys.exists(rJob.getSource().path) == false)
+//   {
+//     lStatus = RsyncSourceFileNotFound;
+//     log::error("Remote job query failed for %s\n",
+//                rJob.getSource().path.string().c_str());
+//   }
+
+//   return lStatus;
+// }
 
 //----------------------------------------------------------------------------
 void JobAgent::finishRemoteJob( const char* data_ptr, ui32 size_bytes )
