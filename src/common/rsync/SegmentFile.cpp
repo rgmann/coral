@@ -8,10 +8,8 @@ using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
 SegmentFile::SegmentFile()
-// SegmentFile(FileSystemInterface& rFileSystemInterface)
 : SegmentAccessor()
 , mpDescriptor(NULL)
-// , mrFileSys(rFileSystemInterface)
 {
 }
 

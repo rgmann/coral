@@ -15,7 +15,6 @@ class FileSystemInterface;
 class AssemblerThread : public liber::concurrency::IThread {
 public:
 
-  // AssemblerThread( FileSystemInterface& file_sys_interface );
   AssemblerThread();
   ~AssemblerThread();
 
@@ -32,7 +31,6 @@ private:
 
   Queue<RsyncJob*> job_queue_;
 
-  // FileSystemInterface& file_sys_interface_;
   SegmentFile          segment_file_;
   Assembler            assembler_;
 

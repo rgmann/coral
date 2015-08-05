@@ -6,10 +6,10 @@ using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
 RsyncJob::RsyncJob(
-  FileSystemInterface& file_sys_interface, RsyncPacketRouter& router, RsyncJobCallback* callback_ptr )
+  FileSystemInterface&  file_sys_interface,
+  RsyncPacketRouter&    router )
 : file_sys_interface_( file_sys_interface )
 , router_( router )
-, callback_ptr_( callback_ptr )
 {
 }
 

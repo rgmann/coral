@@ -56,12 +56,6 @@ void Worker::run( const bool& shutdown )
                        job_ptr->descriptor().getSource().path.string().c_str());
           }
 
-          // if ( job_ptr->callback() )
-          // {
-          //   job_ptr->callback()->call( job_ptr->descriptor(), job_ptr->report() );
-          // }
-
-          
           liber::log::debug("Worker::run: Released job\n");
         }
         else if ( job_ptr->descriptor().isRemoteRequest() )

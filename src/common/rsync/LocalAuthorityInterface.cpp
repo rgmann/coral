@@ -1,7 +1,6 @@
 #include "Authority.h"
 #include "Log.h"
 #include "LocalAuthorityInterface.h"
-// #include "SegmentHash.h"
 #include "RsyncJob.h"
 #include "FileSystemInterface.h"
 
@@ -12,10 +11,7 @@ using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
 LocalAuthorityInterface::LocalAuthorityInterface()
-//   FileSystemInterface& file_sys_interface
-// )
 : segment_timeout_ms_( DEFAULT_SEGMENT_TIMEOUT_MS )
-// , file_sys_interface_( file_sys_interface )
 {
 }
 

@@ -8,9 +8,6 @@
 #include "WorkerGroup.h"
 #include "RsyncJobCallback.h"
 #include "JobAgent.h"
-// #include "SegmenterThread.h"
-// #include "AuthorityThread.h"
-// #include "AssemblerThread.h"
 
 using namespace liber;
 using namespace liber::rsync;
@@ -24,17 +21,11 @@ JobAgent(
   FileSystemInterface& file_sys_interface, 
   RsyncPacketRouter&   packet_router,
   WorkerGroup&         worker_group
-  // SegmenterThread& segmenter,
-  // AuthorityThread& authority,
-  // AssemblerThread& assembler
 )
 : PacketSubscriber()
 , file_sys_interface_ (file_sys_interface)
 , packet_router_ ( packet_router )
 , worker_group_  ( worker_group )
-// , segmenter_          ( segmenter )
-// , authority_          ( authority )
-// , assembler_          ( assembler )
 , create_destination_stub_( true )
 , callback_ptr_( NULL )
 {
@@ -45,13 +36,6 @@ JobAgent::~JobAgent()
 {
 }
 
-//----------------------------------------------------------------------------
-// RsyncJob* JobAgent::nextJob()
-// {
-//   RsyncJob* job_ptr = NULL;
-//   ready_jobs_.pop( job_ptr );
-//   return job_ptr;
-// }
 //----------------------------------------------------------------------------
 void JobAgent::setCallback( RsyncJobCallback* callback_ptr )
 {
@@ -76,8 +60,7 @@ RsyncError JobAgent::createJob(
 
   RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
     file_sys_interface_,
-    packet_router_,
-    callback_ptr_
+    packet_router_
   );
 
   if ( job_ptr )
@@ -108,8 +91,7 @@ RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
 
   RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
     file_sys_interface_,
-    packet_router_,
-    callback_ptr_
+    packet_router_
   );
 
   if ( job_ptr )
@@ -246,25 +228,11 @@ RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
   // add the job to the ready job queue.
   if ( insert_status.second )
   {
-    // if ( job_ptr->descriptor().getDestination().remote == false )
-    // {
-    //   // If the job was successfully created, and the destination path is
-    //   // local, add the job to the local pipeline.
-    //   segmenter_.addJob( job_ptr );
-    //   authority_.addJob( job_ptr );
-    //   assembler_.addJob( job_ptr );
-    // }
     if ( job_ptr->descriptor().getDestination().remote == false )
     {
       worker_group_.addJob( this, job_ptr );
       liber::log::debug("JobAgent::addActiveJob: ADDED JOB  %d\n", job_ptr->descriptor().isRemoteRequest());
     }
-
-    // if ( ready_jobs_.push( job_ptr ) == false )
-    // {
-    //   log::error("JobAgent::addActiveJob - Failed to add job to queue\n");
-    //   job_create_status = RsyncQueueError;
-    // }
 
     if ( job_create_status != RsyncSuccess )
     {
@@ -337,10 +305,9 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
   {
     RemoteJobResult result( descriptor.uuid(), job_ptr->report() );
 
-    sendPacketTo(
-      RsyncPacket::RsyncJobAgent,
-      new RsyncPacket( RsyncPacket::RsyncJobComplete, result.serialize() )
-    );
+    sendPacketTo( RsyncPacket::RsyncJobAgent, new RsyncPacket(
+      RsyncPacket::RsyncJobComplete, result.serialize()
+    ));
   }
 
   // Remote the job from the active job table.
@@ -399,8 +366,7 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
   liber::log::debug("JobAgent::handleRemoteJobRequest\n");
   RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
     file_sys_interface_,
-    packet_router_,
-    callback_ptr_
+    packet_router_
   );
 
   if ( job_ptr )
@@ -488,21 +454,6 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
   }
 }
 
-//-----------------------------------------------------------------------------
-// RsyncError JobAgent::defaultQueryHandler(JobDescriptor& rJob)
-// {
-//   RsyncError lStatus = RsyncSuccess;
-
-//   if (mrFileSys.exists(rJob.getSource().path) == false)
-//   {
-//     lStatus = RsyncSourceFileNotFound;
-//     log::error("Remote job query failed for %s\n",
-//                rJob.getSource().path.string().c_str());
-//   }
-
-//   return lStatus;
-// }
-
 //----------------------------------------------------------------------------
 void JobAgent::finishRemoteJob( const char* data_ptr, ui32 size_bytes )
 {
@@ -517,8 +468,11 @@ void JobAgent::finishRemoteJob( const char* data_ptr, ui32 size_bytes )
 
       if ( job_iterator->second )
       {
-        job_iterator->second->mergeReport(job_result.report());
-        job_iterator->second->signalAllDone();
+        if ( job_iterator->second->descriptor().getDestination().remote )
+        {
+          job_iterator->second->mergeReport(job_result.report());
+          job_iterator->second->signalAllDone();
+        }
       }
       else
       {

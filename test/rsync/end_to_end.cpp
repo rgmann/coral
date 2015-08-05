@@ -185,7 +185,7 @@ public:
 
     void SetUp()
     {
-      liber::log::level( liber::log::Verbose );
+      liber::log::level( liber::log::Warn );
 
       DeleteContents( "./test_root/client" );
       DeleteContents( "./test_root/server" );
@@ -318,6 +318,7 @@ TEST_F( EndToEndTest, RemoteSourceTest ) {
   if ( sync_status == RsyncSuccess )
   {
     EXPECT_EQ( true, mLocalCallback.mSem.take() );
+    EXPECT_EQ( true, mRemoteCallback.mSem.take() );
 
     EXPECT_EQ( true, CheckEqual(
       boost::filesystem::path( REMOTE_ROOT ) / destination,

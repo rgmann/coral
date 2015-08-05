@@ -20,25 +20,13 @@ namespace liber {
 namespace rsync {
 
 class RsyncJob;
-// class RsyncJobCallback;
-
-// class RsyncJobCallback {
-// public:
-
-//   RsyncJobCallback() {};
-//   virtual ~RsyncJobCallback() {};
-
-//   virtual void call( const JobDescriptor& job, const JobReport& report ) = 0;
-
-// };
-
 
 // Active Object pattern
 // - Packets are routed via the RsyncNode to Authorities
 // - Requesters either have the same Router as the server or
 //   they are registered with a different router based on which
 //   foreign node they are syncing with.
-class RsyncNode {//: public liber::concurrency::IThread {
+class RsyncNode {
 public:
 
   RsyncNode( const boost::filesystem::path& root, WorkerGroup& worker_group );
@@ -58,14 +46,8 @@ public:
 
   liber::netapp::PacketSubscriber& subscriber();
 
-// private:
-
-//   void run( const bool& bShutdown );
 
 private:
-
-  // boost::mutex callback_lock_;
-  // RsyncJobCallback* callback_ptr_;
 
   RsyncPacketRouter router_;
 

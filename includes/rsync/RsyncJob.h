@@ -18,7 +18,7 @@ class RsyncJobCallback;
 class RsyncJob {
 public:
 
-  RsyncJob( FileSystemInterface& file_sys_interface, RsyncPacketRouter& router, RsyncJobCallback* callback_ptr = NULL );
+  RsyncJob( FileSystemInterface& file_sys_interface, RsyncPacketRouter& router );
   ~RsyncJob();
 
   JobDescriptor& descriptor();
@@ -41,8 +41,6 @@ public:
 
   FileSystemInterface& fileSystem(){ return file_sys_interface_; };
 
-  RsyncJobCallback* callback() { return callback_ptr_; };
-
 private:
  
   RsyncJob(const RsyncJob&);
@@ -54,7 +52,6 @@ private:
 
   RsyncPacketRouter& router_;
   FileSystemInterface& file_sys_interface_;
-  RsyncJobCallback* callback_ptr_;
 
   JobReport mReport;
 

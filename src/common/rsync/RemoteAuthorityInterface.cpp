@@ -27,7 +27,6 @@ RemoteAuthorityInterface::RemoteAuthorityInterface()
 : mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
 , mnJobAckTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
 , mnJobCompletionTimeoutMs(DEFAULT_JOB_TIMEOUT_MS)
-// , mRequestID(RsyncPacket::RsyncJobAgent)
 {
 }
 
@@ -37,21 +36,15 @@ RemoteAuthorityInterface::~RemoteAuthorityInterface()
 }
 
 //----------------------------------------------------------------------------
-// void RemoteAuthorityInterface::setRequestID(int requestID)
-// {
-//   mRequestID = requestID;
-// }
-
-//----------------------------------------------------------------------------
 void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
 {
   // Subscribe to the jobs packet subscriber.
   if ( job_ptr->packetRouter().addSubscriber(
     RsyncPacket::RsyncAuthorityInterface, this ) == false ) {
-    liber::log::debug("RemoteAuthorityInterface::process: FAILED to register\n");
+    liber::log::error("RemoteAuthorityInterface::process: FAILED to register\n");
   }
 
-  liber::log::debug("RemoteAuthorityInterface::process: START %d\n", RsyncPacket::RsyncAuthorityInterface);
+  // liber::log::debug("RemoteAuthorityInterface::process: START %d\n", RsyncPacket::RsyncAuthorityInterface);
 
   // Send the JobDescriptor and then wait for an acknowledgement from the
   // RsyncService.  The RsyncService may send an acknowledgement saying that
@@ -69,9 +62,6 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
   {
     process_status = kRsyncCommError;
     liber::log::debug("RemoteAuthorityInterface::process: kRsyncCommError\n");
-  }
-  else {
-    liber::log::debug("RemoteAuthorityInterface::process: Flushed all segments\n");
   }
 
   // If the remote Authority job was successfully started,
@@ -96,7 +86,7 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
     cancelAssembly( job_ptr->instructions(), process_status );
   }
 
-  liber::log::debug("RemoteAuthorityInterface::process: END\n");
+  // liber::log::debug("RemoteAuthorityInterface::process: END\n");
 
   // Unsubscribe from this jobs packet router.
   job_ptr->packetRouter().removeSubscriber(

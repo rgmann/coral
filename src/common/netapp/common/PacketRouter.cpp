@@ -18,59 +18,55 @@ PacketRouter::~PacketRouter()
 }
 
 //-----------------------------------------------------------------------------
-bool PacketRouter::
-addSubscriber(int subscriberId, PacketSubscriber* pSubscriber)
+bool PacketRouter::addSubscriber(
+  int               subscriber_id,
+  PacketSubscriber* subscriber_ptr
+)
 {
-  bool lbSuccess = true;
+  bool add_success = false;
 
-  table_lock_.lock();
-  lbSuccess = (mSubscriberTable.count(subscriberId) == 0);
-  table_lock_.unlock();
-  if (!lbSuccess)
+  if ( subscriber_ptr != NULL )
   {
-    log::error("PacketRouter::addSubscriber: "
-               "Router already has a subcriber with ID = %d\n", subscriberId);
-  }
+    boost::mutex::scoped_lock guard( table_lock_ );
 
-  lbSuccess &= (pSubscriber != NULL);
-  if (lbSuccess)
-  {
-    // lbSuccess = table_lock_.lock();
-    table_lock_.lock();
-    if (lbSuccess)
+    if ( mSubscriberTable.count(subscriber_id) == 0 )
     {
-      pSubscriber->setID(subscriberId);
-      pSubscriber->setReceiver(mpReceiver);
-      mSubscriberTable.insert(std::make_pair(subscriberId, pSubscriber));
-      lbSuccess = true;
-      table_lock_.unlock();
+      subscriber_ptr->setID( subscriber_id );
+      subscriber_ptr->setReceiver( mpReceiver );
+
+      mSubscriberTable.insert( std::make_pair( subscriber_id, subscriber_ptr ) );
+
+      add_success = true;
+    }
+    else
+    {
+      log::error("PacketRouter::addSubscriber: "
+               "Router already has a subcriber with ID = %d\n", subscriber_id);
     }
   }
 
-  return lbSuccess;
+  return add_success;
 }
 
 //-----------------------------------------------------------------------------
-PacketSubscriber* PacketRouter::removeSubscriber(int subscriberId)
+PacketSubscriber* PacketRouter::removeSubscriber( int subscriber_id )
 {
-  PacketSubscriber* lpSubscriber = NULL;
-  bool lbSuccess = (mSubscriberTable.count(subscriberId) != 0);
+  boost::mutex::scoped_lock guard( table_lock_ );
 
-  lbSuccess &= (lpSubscriber != NULL);
-  if (lbSuccess)
+  PacketSubscriber* subscriber_ptr = NULL;
+
+  if ( mSubscriberTable.count( subscriber_id ) != 0 )
   {
-    // lbSuccess = table_lock_.lock();
-    table_lock_.lock();
-    if (lbSuccess)
-    {
-      lpSubscriber = mSubscriberTable.find(subscriberId)->second;
-      mSubscriberTable.erase(subscriberId);
-      lbSuccess = true;
-      table_lock_.unlock();
-    }
+    subscriber_ptr = mSubscriberTable.find( subscriber_id )->second;
+    mSubscriberTable.erase( subscriber_id );
+  }
+  else
+  {
+    log::warn("PacketRouter::removeSubscriber: "
+             "No subscriber with ID = %d\n", subscriber_id);
   }
 
-  return lpSubscriber;
+  return subscriber_ptr;
 }
 
 //-----------------------------------------------------------------------------
@@ -86,27 +82,23 @@ bool PacketRouter::empty()
 }
 
 //-----------------------------------------------------------------------------
-bool PacketRouter::hasSubscriber(int subscriberId)
+bool PacketRouter::hasSubscriber( int subscriber_id )
 {
-  table_lock_.lock();
-  bool lbExists = (mSubscriberTable.count(subscriberId) != 0);
-  table_lock_.unlock();
-  return lbExists;
+  boost::mutex::scoped_lock guard( table_lock_ );
+  return ( mSubscriberTable.count( subscriber_id ) != 0 );
 }
 
 //-----------------------------------------------------------------------------
-PacketSubscriber* PacketRouter::getSubscriber(int subscriberId)
+PacketSubscriber* PacketRouter::getSubscriber( int subscriber_id )
 {
-  PacketSubscriber* lpSubscriber = NULL;
+  boost::mutex::scoped_lock guard( table_lock_ );
 
-  table_lock_.lock();
-  if (mSubscriberTable.count(subscriberId) != 0)
+  PacketSubscriber* subscriber_ptr = NULL;
+
+  if ( mSubscriberTable.count( subscriber_id ) != 0 )
   {
-    lpSubscriber = mSubscriberTable.find(subscriberId)->second;
+    subscriber_ptr = mSubscriberTable.find( subscriber_id )->second;
   }
-  table_lock_.unlock();
 
-  return lpSubscriber;
+  return subscriber_ptr;
 }
-
-

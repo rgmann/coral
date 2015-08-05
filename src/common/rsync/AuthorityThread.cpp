@@ -9,9 +9,8 @@ using namespace liber::netapp;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-AuthorityThread::AuthorityThread() // FileSystemInterface& file_sys_interface
+AuthorityThread::AuthorityThread()
 : IThread         ( "AuthorityThread" )
-// , local_authority_( file_sys_interface )
 {
 }
 
@@ -34,12 +33,6 @@ PacketSubscriber& AuthorityThread::getSubscriber()
 {
   return remote_authority_;
 }
-
-//----------------------------------------------------------------------------
-// void AuthorityThread::setRequestID( int request_id )
-// {
-//   remote_authority_.setRequestID( request_id );
-// }
 
 //----------------------------------------------------------------------------
 void AuthorityThread::run(const bool& bShutdown)

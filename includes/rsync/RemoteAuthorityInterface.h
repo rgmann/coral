@@ -25,8 +25,6 @@ public:
   RemoteAuthorityInterface();
   ~RemoteAuthorityInterface();
 
-  // void setRequestID(int requestID);
-
   bool put(const char* pData, ui32 nLength);
 
 

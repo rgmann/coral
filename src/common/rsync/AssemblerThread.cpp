@@ -10,10 +10,8 @@ using namespace liber::concurrency;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-AssemblerThread::AssemblerThread() // FileSystemInterface& file_sys_interface 
+AssemblerThread::AssemblerThread()
 : IThread("AssemblerThread")
-// , file_sys_interface_ ( file_sys_interface )
-// , segment_file_       ( file_sys_interface )
 , assembler_          ( segment_file_ )
 {
 }
