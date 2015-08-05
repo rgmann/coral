@@ -6,7 +6,6 @@
 #include "Queue.h"
 #include "RsyncError.h"
 #include "PacketSubscriber.h"
-// #include "AuthorityInterface.h"
 #include "FileSystemInterface.h"
 #include "LocalAuthorityInterface.h"
 #include "InstructionHook.h"
@@ -16,48 +15,11 @@ namespace rsync {
 
 class JobDescriptor;
 
-// class JobCompletionHook {
-// public:
-//   virtual ~JobCompletionHook() {};
-//   virtual void operator () (RsyncJob* pJob) = 0;
-// };
-
-// class JobQueue : public liber::concurrency::IThread {
-// public:
-
-//   JobQueue(FileSystemInterface&, InstructionReceiver&, JobCompletionHook&);
-
-
-//   RsyncJob* activeJob();
-//   boost::mutex& lock();
-//   bool lockIfActive();
-
-//   bool push(RsyncJob* pJob);
-
-// private:
-
-//   void run(const bool& bShutdown);
-
-
-// private:
-
-//   LocalAuthorityInterface mAuthority;
-//   InstructionReceiver& mrReceiver;
-
-//   JobCompletionHook& mrJobHook;
-
-//   Queue<RsyncJob*> mJobQueue;
-
-//   RsyncJob* mpActiveJob;
-//   boost::mutex job_lock_;
-// };
-
 class RemoteAuthorityService
 : public liber::netapp::PacketSubscriber
 , public InstructionHook {
 public:
 
-  // RemoteAuthorityService(FileSystemInterface&);
   RemoteAuthorityService();
   ~RemoteAuthorityService();
 
@@ -82,8 +44,6 @@ private:
 
 private:
 
-  // FileSystemInterface& mrFileSys;
-
   boost::mutex active_job_lock_;
   RsyncJob* active_job_;
 
@@ -93,21 +53,6 @@ private:
 
   int mRequestID;
 
-
-  // class SendReportHook : public JobCompletionHook {
-  // public:
-  //   SendReportHook(liber::netapp::PacketSubscriber& rSubscriber);
-  //   ~SendReportHook() {};
-
-  //   void setRequestID(int requestID);
-  //   void operator () (RsyncJob* pJob);
-
-  // private:
-  //   liber::netapp::PacketSubscriber& mrSubscriber;
-  //   int mRequestID;
-  // } mSendReportHook;
-
-  // JobQueue mJobQueue;
 };
 
 } // End namespace rsync
