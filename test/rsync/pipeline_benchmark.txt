@@ -1,0 +1,466 @@
+[==========] Running 6 tests from 1 test case.
+[----------] Global test environment set-up.
+[----------] 6 tests from EndToEndTest
+[ RUN      ] EndToEndTest.LocalToLocal
+Status: SegmenterThread::run: Finished segmenting
+Status: Local: Completed d_inst.cpp
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+  segment count: 7
+  start time: 1438749355.325939
+  end time: 1438749355.327073
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 2347
+  start time: 1438749355.327215
+  end time: 1438749355.328371
+ Source Authority Report:
+  segments received: 7
+  segments matched: 6
+  chunks sent: 3
+  hash start time: 1438749355.326009
+  hash end time: 1438749355.327138
+  auth start time: 1438749355.327185
+  auth end time: 1438749355.328380
+ Destination Assembly Report:
+  segment count: 6
+  chunk count: 3
+  start time: 1438749355.327223
+  end time: 1438749355.328410
+
+
+[       OK ] EndToEndTest.LocalToLocal (272 ms)
+[ RUN      ] EndToEndTest.RemoteDestSmallTest
+Status: SegmenterThread::run: Finished segmenting
+Status: Local: Completed file.dat
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+E r ror: JobAgent::finishRemoteJob -s eFgamielnetd  ctoou nfti:n d1 
+jo b  swtiatrht  stpiemcei:f ied UUID
+1438749355.592477
+  end time: 1438749355.592528
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 33
+  start time: 1438749355.603422
+  end time: 1438749355.603485
+ Source Authority Report:
+  segments received: 1
+  segments matched: 0
+  chunks sent: 1
+  hash start time: 1438749355.603164
+  hash end time: 1438749355.603340
+  auth start time: 0.000000
+  auth end time: 0.000000
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 1
+  start time: 1438749355.613555
+  end time: 1438749355.613608
+
+
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 0
+  stride size (bytes): 0
+  segment count: 0
+  start time: 0.000000
+  end time: 0.000000
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 33
+  start time: 1438749355.603422
+  end time: 1438749355.603485
+ Source Authority Report:
+  segments received: 1
+  segments matched: 0
+  chunks sent: 1
+  hash start time: 1438749355.603164
+  hash end time: 1438749355.603340
+  auth start time: 1438749355.603394
+  auth end time: 1438749355.603492
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 0
+  start time: 0.000000
+  end time: 0.000000
+
+
+[       OK ] EndToEndTest.RemoteDestSmallTest (271 ms)
+[ RUN      ] EndToEndTest.RemoteDestImageTest
+Status: SegmenterThread::run: Finished segmenting
+Status: RemoteAuthorityInterface::sStatus: Remote: Completed image.png
+RSYNC EJrorbo rR:e pJoorbtA:g
+en tD:e:sftiinniasthiRoenm oSteegJmoebn t-a tFiaoinl eRde ptoor tf:i
+nd   jsoebg mweintth  ssipzeec i(fbiyetde sU)U:I D
+0
+  stride size (bytes): 0
+  segment count: 0
+  start time: 0.000000
+  end time: 0.000000
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 2101464
+  start time: 1438749356.137343
+  end time: 1438749357.123345
+ Source Authority Report:
+  segments received: 8211
+  segments matched: 8208
+  chunks sent: 1
+  hash start time: 1438749355.872107
+  hash end time: 1438749356.126980
+  auth start time: 1438749356.127134
+  auth end time: 1438749357.123356
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 0
+  start time: 0.000000
+  end time: 0.000000
+
+
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+  segment count: 8211
+  start time: 1438749355.861086
+  end time: 1438749356.077558
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 2101464
+  start time: 1438749356.137343
+  end time: 1438749357.123345
+ Source Authority Report:
+  segments received: 8211
+  segments matched: 8208
+  chunks sent: 1
+  hash start time: 1438749355.872107
+  hash end time: 1438749356.126980
+  auth start time: 0.000000
+  auth end time: 0.000000
+ Destination Assembly Report:
+  segment count: 8208
+  chunk count: 1
+  start time: 1438749356.137295
+  end time: 1438749357.123437
+
+
+[       OK ] EndToEndTest.RemoteDestImageTest (1671 ms)
+[ RUN      ] EndToEndTest.RemoteSourceTest
+Status: SegmenterThread::run: Finished segmenting
+Status: Remote: Completed instruction_test.cpp
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+  segment count: 7
+  start time: 1438749357.524273
+  end time: 1438749357.524391
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 2347
+  start time: 1438749357.535419
+  end time: 1438749357.536573
+ Source Authority Report:
+  segments received: 7
+  segments matched: 6
+  chunks sent: 3
+  hash start time: 1438749357.534467
+  hash end time: 1438749357.535324
+  auth start time: 0.000000
+  auth end time: 0.000000
+ Destination Assembly Report:
+  segment count: 6
+  chunk count: 3
+  start time: 1438749357.550001
+  end time: 1438749357.550171
+
+
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 0
+  stride size (bytes): 0
+  segment count: 0
+  start time: 0.000000
+  end time: 0.000000
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 2347
+  start time: 1438749357.535419
+  end time: 1438749357.536573
+ Source Authority Report:
+  segments received: 7
+  segments matched: 6
+  chunks sent: 3
+  hash start time: 1438749357.534467
+  hash end time: 1438749357.535324
+  auth start time: 1438749357.535388
+  auth end time: 1438749357.536581
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 0
+  start time: 0.000000
+  end time: 0.000000
+
+
+[       OK ] EndToEndTest.RemoteSourceTest (264 ms)
+[ RUN      ] EndToEndTest.RemoteSourceCopy
+Status: SegmenterThread::run: Finished segmenting
+Status: Remote: Completed dfile_0.dat
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+  segment count: 1
+  start time: 1438749357.787184
+  end time: 1438749357.787234
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 100000
+  start time: 1438749357.797767
+  end time: 1438749357.852345
+ Source Authority Report:
+  segments received: 1
+  segments matched: 0
+  chunks sent: 196
+  hash start time: 1438749357.797559
+  hash end time: 1438749357.797689
+  auth start time: 0.000000
+  auth end time: 0.000000
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 196
+  start time: 1438749357.808056
+  end time: 1438749357.852402
+
+
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 0
+  stride size (bytes): 0
+  segment count: 0
+  start time: 0.000000
+  end time: 0.000000
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 100000
+  start time: 1438749357.797767
+  end time: 1438749357.852345
+ Source Authority Report:
+  segments received: 1
+  segments matched: 0
+  chunks sent: 196
+  hash start time: 1438749357.797559
+  hash end time: 1438749357.797689
+  auth start time: 1438749357.797738
+  auth end time: 1438749357.852356
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 0
+  start time: 0.000000
+  end time: 0.000000
+
+
+[       OK ] EndToEndTest.RemoteSourceCopy (316 ms)
+[ RUN      ] EndToEndTest.PipelineTest
+Status: SegmenterThread::run: Finished segmenting
+Status: Remote: Completed instruction_test.cpp
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+  segment count: 7
+  start time: 1438749358.105626
+  end time: 1438749358.105773
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 2347
+  start time: 1438749358.116321
+  end time: 1438749358.118698
+ Source Authority Report:
+  segments received: 7
+  segments matched: 6
+  chunks sent: 3
+  hash start time: 1438749358.115973
+  hash end time: 1438749358.116250
+  auth start time: 0.000000
+  auth end time: 0.000000
+ Destination Assembly Report:
+  segment count: 6
+  chunk count: 3
+  start time: 1438749358.144439
+  end time: 1438749358.144598
+
+
+Waiting for "instruction_test.cpp"
+Checking "instruction_test.cpp"
+Done checking "instruction_test.cpp"
+Waiting for "dfile_0.dat"
+Status: SegmenterThread::run: Finished segmenting
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 0
+  stride size (bytes): 0
+  segment count: 0
+  start time: 0.000000
+  end time: 0.000000
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 2347
+  start time: 1438749358.116321
+  end time: 1438749358.118698
+ Source Authority Report:
+  segments received: 7
+  segments matched: 6
+  chunks sent: 3
+  hash start time: 1438749358.115973
+  hash end time: 1438749358.116250
+  auth start time: 1438749358.116295
+  auth end time: 1438749358.118727
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 0
+  start time: 0.000000
+  end time: 0.000000
+
+
+Status: Remote: Completed dfile_0.dat
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+  segment count: 1
+  start time: 1438749358.126241
+  end time: 1438749358.126274
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 100000
+  start time: 1438749358.226780
+  end time: 1438749358.280845
+ Source Authority Report:
+  segments received: 1
+  segments matched: 0
+  chunks sent: 196
+  hash start time: 1438749358.226443
+  hash end time: 1438749358.226649
+  auth start time: 0.000000
+  auth end time: 0.000000
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 196
+  start time: 1438749358.237033
+  end time: 1438749358.280894
+
+
+Checking "dfile_0.dat"
+Done checking "dfile_0.dat"
+Waiting for "screenshot.png"
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 0
+  stride size (bytes): 0
+  segment count: 0
+  start time: 0.000000
+  end time: 0.000000
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 100000
+  start time: 1438749358.226780
+  end time: 1438749358.280845
+ Source Authority Report:
+  segments received: 1
+  segments matched: 0
+  chunks sent: 196
+  hash start time: 1438749358.226443
+  hash end time: 1438749358.226649
+  auth start time: 1438749358.226746
+  auth end time: 1438749358.280855
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 0
+  start time: 0.000000
+  end time: 0.000000
+
+
+Status: Remote: Completed screenshot.png
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 256
+  segment count: 3542
+  start time: 1438749358.138952
+  end time: 1438749358.180643
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 818365
+  start time: 1438749358.443164
+  end time: 1438749358.914815
+ Source Authority Report:
+  segments received: 3542
+  segments matched: 26
+  chunks sent: 1586
+  hash start time: 1438749358.385676
+  hash end time: 1438749358.443040
+  auth start time: 0.000000
+  auth end time: 0.000000
+ Destination Assembly Report:
+  segment count: 26
+  chunk count: 1586
+  start time: 1438749358.453215
+  end time: 1438749358.914874
+
+
+Checking "screenshot.png"
+Done checking "screenshot.png"
+RSYNC Job Report:
+ Destination Segmentation Report:
+  segment size (bytes): 0
+  stride size (bytes): 0
+  segment count: 0
+  start time: 0.000000
+  end time: 0.000000
+ Source Segmentation Report:
+  segment size (bytes): 256
+  stride size (bytes): 1
+  segment count: 818365
+  start time: 1438749358.443164
+  end time: 1438749358.914815
+ Source Authority Report:
+  segments received: 3542
+  segments matched: 26
+  chunks sent: 1586
+  hash start time: 1438749358.385676
+  hash end time: 1438749358.443040
+  auth start time: 1438749358.443134
+  auth end time: 1438749358.914826
+ Destination Assembly Report:
+  segment count: 0
+  chunk count: 0
+  start time: 0.000000
+  end time: 0.000000
+
+
+[       OK ] EndToEndTest.PipelineTest (1062 ms)
+[----------] 6 tests from EndToEndTest (3856 ms total)
+
+[----------] Global test environment tear-down
+[==========] 6 tests from 1 test case ran. (3856 ms total)
+[  PASSED  ] 6 tests.

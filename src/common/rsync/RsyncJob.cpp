@@ -31,16 +31,16 @@ JobReport& RsyncJob::report()
 }
 
 //-----------------------------------------------------------------------------
-void RsyncJob::mergeReport(const JobReport& rReport)
+void RsyncJob::mergeReport( const JobReport& report )
 {
-  if (descriptor().getDestination().remote)
+  if ( mDescriptor.getDestination().remote() )
   {
-    mReport.destination = rReport.destination;
+    mReport.destination = report.destination;
   }
 
-  if (descriptor().getSource().remote)
+  if ( mDescriptor.getSource().remote() )
   {
-    mReport.source = rReport.source;
+    mReport.source = report.source;
   }
 }
 

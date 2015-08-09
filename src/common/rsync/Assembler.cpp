@@ -4,15 +4,12 @@
 #include "JobReport.h"
 #include "Assembler.h"
 
-#define  DEFAULT_INST_TIMEOUT_MS     (100000)
-
 using namespace liber;
 using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
 Assembler::Assembler( SegmentAccessor& segment_accessor )
 : assembler_state_        ( segment_accessor )
-, instruction_timeout_ms_ ( DEFAULT_INST_TIMEOUT_MS )
 {
 }
 
@@ -35,7 +32,7 @@ bool Assembler::process(
           ( assembler_state_.failed() == false ) )
   {
     Instruction* instruction_ptr = instruction_queue.pop(
-      instruction_timeout_ms_
+      job_descriptor.completionTimeoutMs()
     );
 
     if ( instruction_ptr )

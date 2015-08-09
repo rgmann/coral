@@ -6,7 +6,7 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 RelayReceiverHook::RelayReceiverHook()
-: mpReceiver(NULL)
+: receiver_ptr_(NULL)
 {
 }
 
@@ -18,30 +18,30 @@ RelayReceiverHook::~RelayReceiverHook()
 //-----------------------------------------------------------------------------
 void RelayReceiverHook::setReceiver(PacketReceiver* pReceiver)
 {
-  mpReceiver = pReceiver;
+  receiver_ptr_ = pReceiver;
 }
 
 //-----------------------------------------------------------------------------
-bool RelayReceiverHook::call(PacketContainer* pContainer)
+bool RelayReceiverHook::call( PacketContainer* container_ptr )
 {
-  bool lbSuccess = false;
+  bool success = false;
 
-  if (mpReceiver)
+  if ( receiver_ptr_ )
   {
-    lbSuccess = mpReceiver->push(translate(pContainer));
+    success = receiver_ptr_->push( translate( container_ptr ) );
   }
   else
   {
     log::error("RelayReceiverHook::call - NULL receiver\n");
   }
 
-  return lbSuccess;
+  return success;
 }
 
 //-----------------------------------------------------------------------------
-PacketContainer* RelayReceiverHook::translate(PacketContainer* pContainer)
+PacketContainer* RelayReceiverHook::translate( PacketContainer* container_ptr )
 {
-  return pContainer;
+  return container_ptr;
 }
 
 
@@ -68,32 +68,38 @@ void PacketRelay::setReceiver(PacketReceiver* pReceiver)
 //-----------------------------------------------------------------------------
 bool PacketRelay::put(const char* pData, ui32 nSizeBytes)
 {
-  bool lbSuccess = false;
+   bool success = false;
 
-  PacketContainer* lpContainer = toContainer(pData, nSizeBytes);
-  if (lpContainer)
-  {
-    PacketSubscriber* lpSubscriber = getSubscriber(lpContainer->mDestinationID);
-    if (lpSubscriber)
-    {
-      lbSuccess = lpSubscriber->put((char*)lpContainer->mpPacket->basePtr(),
-                                    lpContainer->mpPacket->allocatedSize());
+   PacketContainer* container_ptr = toContainer( pData, nSizeBytes );
 
-      delete lpContainer->mpPacket;
-    }
-    else
-    {
-      log::debug("PacketRelay::put - No subcriber with ID=%d\n",
-                 lpContainer->mDestinationID);
-    }
+   if ( container_ptr )
+   {
+      PacketSubscriber* subscriber_ptr = getSubscriber(
+         container_ptr->mDestinationID
+      );
 
-    delete lpContainer;
-  }
-  else
-  {
-    log::error("PacketRelay::put - Failed to extract relayable container\n");
-  }
+      if ( subscriber_ptr )
+      {
+         success = subscriber_ptr->put(
+            (char*)container_ptr->mpPacket->basePtr(),
+            container_ptr->mpPacket->allocatedSize()
+         );
 
-  return lbSuccess;
+         delete container_ptr->mpPacket;
+      }
+      else
+      {
+         log::debug("PacketRelay::put - No subcriber with ID=%d\n",
+                  container_ptr->mDestinationID);
+      }
+
+      delete container_ptr;
+   }
+   else
+   {
+     log::error("PacketRelay::put - Failed to extract relayable container\n");
+   }
+
+   return success;
 }
 

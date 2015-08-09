@@ -35,10 +35,8 @@ Semaphore::SemStatus Semaphore::take( i32 nTimeoutMs )
             boost::get_system_time() +
             boost::posix_time::milliseconds( nTimeoutMs );
 
-         if ( ( recieved_notify = condition_.timed_wait( guard, timeout ) ) )
-         {
-            break;
-         }
+         recieved_notify = condition_.timed_wait( guard, timeout );
+         break;
       }
    }
 

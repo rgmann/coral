@@ -5,54 +5,55 @@ namespace liber {
 namespace rsync {
 
 enum RsyncError {
-  RsyncSuccess = 0,
+   RsyncSuccess = 0,
 
-  RsyncJobTableInsertionError,
-  RsyncQueueError,
-  RsyncBadDescriptor,
-  RsyncBadRemoteJob,
+   kRsyncJobTableInsertError,
+   kRsyncAllocationError,
+   kRsyncBadDescriptor,
+   RsyncBadRemoteJob,
 
-  // Authority timed out waiting for segments from the destination file.
-  RsyncDestSegmentTimeout,
+   // Authority timed out waiting for segments from the destination file.
+   RsyncDestSegmentTimeout,
 
-  RsyncDestinationFileNotFound,
-  RsyncSourceFileNotFound,
+   RsyncDestinationFileNotFound,
+   RsyncSourceFileNotFound,
 
-  RsyncRemoteQueryTimeout,
-  kRsyncRemoteQueryError,
-  RsyncRemoteJobTimeout,
+   RsyncRemoteQueryTimeout,
+   kRsyncRemoteQueryError,
+   RsyncRemoteJobTimeout,
 
-  kRsyncCommError,
+   kRsyncCommError,
+   kRsyncNotSubscribed,
 
-  kRsyncInvalidJob,
-  kRsyncJobCanceled,
-  kRsyncInvalidInstruction,
-  kRsyncSegmentAccessError,
-  kRsyncIoError,
+   kRsyncInvalidJob,
+   kRsyncJobCanceled,
+   kRsyncInvalidInstruction,
+   kRsyncSegmentAccessError,
+   kRsyncIoError,
 
-  kRsyncAssemblerInvalidChunkSize,
-  kRsyncNoWorkersAvailable,
+   kRsyncAssemblerInvalidChunkSize,
+   kRsyncNoWorkersAvailable,
 
-  kRsyncErrorCount
+   kRsyncErrorCount
 };
 
 inline std::string errorToString(RsyncError error)
 {
-  std::string error_message( "Unknown error code" );
+   std::string error_message( "Unknown error code" );
 
-  switch (error)
-  {
-    case RsyncSuccess: error_message = "Success"; break;
-    case RsyncDestSegmentTimeout: error_message = "RsyncDestSegmentTimeout"; break;
-    case RsyncDestinationFileNotFound: error_message = "Destination file not found"; break;
-    case RsyncSourceFileNotFound: error_message = "Source file not found"; break;
-    case RsyncRemoteQueryTimeout: error_message = "Remote job query timeout"; break;
-    case RsyncRemoteJobTimeout:   error_message = "Remote job timeout"; break;
-    case kRsyncAssemblerInvalidChunkSize: error_message = "Chunk size is exceeded limit"; break;
-    default: break;
-  }
+   switch (error)
+   {
+      case RsyncSuccess: error_message = "Success"; break;
+      case RsyncDestSegmentTimeout: error_message = "RsyncDestSegmentTimeout"; break;
+      case RsyncDestinationFileNotFound: error_message = "Destination file not found"; break;
+      case RsyncSourceFileNotFound: error_message = "Source file not found"; break;
+      case RsyncRemoteQueryTimeout: error_message = "Remote job query timeout"; break;
+      case RsyncRemoteJobTimeout:   error_message = "Remote job timeout"; break;
+      case kRsyncAssemblerInvalidChunkSize: error_message = "Chunk size is exceeded limit"; break;
+      default: break;
+   }
 
-  return error_message;
+   return error_message;
 };
 
 }

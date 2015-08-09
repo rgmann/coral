@@ -29,7 +29,7 @@ protected:
 
 private:
 
-  PacketReceiver* mpReceiver;
+  PacketReceiver* receiver_ptr_;
 };
 
 

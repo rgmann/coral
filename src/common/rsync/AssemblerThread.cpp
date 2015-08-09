@@ -1,5 +1,6 @@
 #include "Log.h"
 #include "RsyncJob.h"
+#include "JobAgent.h"
 #include "SegmentFile.h"
 #include "JobDescriptor.h"
 #include "FileSystemInterface.h"
@@ -10,9 +11,10 @@ using namespace liber::concurrency;
 using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
-AssemblerThread::AssemblerThread()
-: IThread("AssemblerThread")
-, assembler_          ( segment_file_ )
+AssemblerThread::AssemblerThread( JobAgentPairQueue& queue )
+:  IThread("AssemblerThread")
+,  assembler_  ( segment_file_ )
+,  job_queue_  ( queue )
 {
 }
 
@@ -22,77 +24,82 @@ AssemblerThread::~AssemblerThread()
 }
 
 //----------------------------------------------------------------------------
-void AssemblerThread::addJob( RsyncJob* job_ptr )
-{
-  job_queue_.push( job_ptr );
-}
-
-//----------------------------------------------------------------------------
 void AssemblerThread::run(const bool& bShutdown)
 {
-  boost::filesystem::path stage_path_;
+   boost::filesystem::path stage_path_;
 
-  while ( !bShutdown )
-  {
-    RsyncJob* job_ptr = NULL;
+   while ( !bShutdown )
+   {
+      JobAgentPair job_agent_pair;
 
-    if ( job_queue_.pop( job_ptr ) && job_ptr )
-    {
-      if ( segment_file_.open( job_ptr->fileSystem(), job_ptr->descriptor() ) )
+      if ( job_queue_.pop( job_agent_pair ) )
       {
-        bool stage_success = job_ptr->fileSystem().stage(
-          job_ptr->descriptor().getDestination().path,
-          stage_path_,
-          assembler_.outputStream()
-        );
+         JobAgent* agent_ptr = job_agent_pair.first;
+         RsyncJob* job_ptr = job_agent_pair.second;
 
-        if ( stage_success )
-        {
-          bool assembly_success = assembler_.process(
-            job_ptr->descriptor(),
-            job_ptr->instructions(),
-            job_ptr->report().destination.assembly
-          );
-
-          // Close the segment file.
-          segment_file_.close();
-
-          // If assembly completed successfully, swap the stage file and
-          // destination file.
-          if ( assembly_success )
-          {
-            bool swap_success = job_ptr->fileSystem().swap(
-              stage_path_,
-              job_ptr->descriptor().getDestination().path
-            );
-
-            if ( swap_success == false )
+         if ( agent_ptr && job_ptr )
+         {
+            if ( segment_file_.open( job_ptr->fileSystem(), job_ptr->descriptor() ) )
             {
-              log::error("AssemblerThread - "
-                         "Failed to swap stage file and destination file.\n");
+               bool stage_success = job_ptr->fileSystem().stage(
+                  job_ptr->descriptor().getDestination().path(),
+                  stage_path_,
+                  assembler_.outputStream()
+               );
+
+               if ( stage_success )
+               {
+                  bool assembly_success = assembler_.process(
+                     job_ptr->descriptor(),
+                     job_ptr->instructions(),
+                     job_ptr->report().destination.assembly
+                  );
+
+                  // Close the segment file.
+                  segment_file_.close();
+
+                  // If assembly completed successfully, swap the stage file and
+                  // destination file.
+                  if ( assembly_success )
+                  {
+                     bool swap_success = job_ptr->fileSystem().swap(
+                        stage_path_,
+                        job_ptr->descriptor().getDestination().path()
+                     );
+
+                     if ( swap_success == false )
+                     {
+                        log::error("AssemblerThread - "
+                                  "Failed to swap stage file and destination file.\n");
+                     }
+                  }
+               }
+               else
+               {
+                  segment_file_.close();
+
+                  log::error(
+                     "AssemblerThread - Failed to open stage file for %s\n",
+                     job_ptr->descriptor().getDestination().path().string().c_str());
+               }
+            }
+            else
+            {
+               log::error("AssemblerThread - Failed to open segment access file.\n");
             }
 
-            liber::log::debug("AssemblerThread::process: Finished job\n");
-          }
-        }
-        else
-        {
-          segment_file_.close();
+            // When assembly is complete (regardless of whether is was successful),
+            // signal that the RSYNC job is done.
+            job_ptr->signalAssemblyDone();
 
-          log::error(
-            "AssemblerThread - Failed to open stage file for %s\n",
-            job_ptr->descriptor().getDestination().path.string().c_str());
-        }
+            job_ptr->waitDone();
+            agent_ptr->releaseJob( job_ptr );
+         }
+         else
+         {
+            log::error("AssemblerThread - NULL JobAgent or RsyncJob\n");
+         }
       }
-      else
-      {
-        log::error("AssemblerThread - Failed to open segment access file.\n");
-      }
-
-      // When assembly is complete (regardless of whether is was successful),
-      // signal that the RSYNC job is done.
-      job_ptr->signalAssemblyDone();
-    }
-  }
+   }
 }
 

@@ -6,27 +6,23 @@
 #include <boost/uuid/uuid.hpp>
 #include "BaseTypes.h"
 #include "Serializable.h"
+#include "ResourcePath.h"
+
 
 namespace liber {
 namespace rsync {
 
+struct JobLimits {
+   ui32 segment_size_bytes;
+   ui32 maximum_chunk_size_bytes;
+   ui32 completion_timeout_ms;
 
-class ResourcePath : public liber::netapp::Serializable {
-public:
-
-  ResourcePath();
-  ResourcePath(const boost::filesystem::path&, bool bRemote = false);
-
-  boost::filesystem::path path;
-  bool remote;
-
-protected:
-
-  void pack(liber::netapp::SerialStream& rCtor);
-  void pack(liber::netapp::SerialStream& rCtor) const;
-  bool unpack(liber::netapp::SerialStream& rDtor);
+   JobLimits()
+   : segment_size_bytes( 256 )
+   , maximum_chunk_size_bytes( 512 )
+   , completion_timeout_ms( 10000 )
+   {}
 };
-
 
 class JobDescriptor : public liber::netapp::Serializable {
 public:
@@ -38,6 +34,10 @@ public:
 
   void  setSegmentSize(ui32 nSegmentSizeBytes);
   ui32  getSegmentSize() const;
+
+  void  setLimits( const JobLimits& limits );
+
+  ui32  completionTimeoutMs() const;
 
   void  setSource(const boost::filesystem::path&, bool bRemote = false);
   void  setSource(const ResourcePath& path);
@@ -66,15 +66,16 @@ protected:
 
 private:
 
-  ui32 segment_size_bytes_;
-  ui32 maximum_chunk_size_;
+  // ui32 segment_size_bytes_;
+  // ui32 maximum_chunk_size_;
+   JobLimits limits_;
 
-  ResourcePath source_path_;
-  ResourcePath destination_path_;
+   ResourcePath source_path_;
+   ResourcePath destination_path_;
 
-  bool remotely_requested_;
+   bool remotely_requested_;
 
-  boost::uuids::uuid uuid_;
+   boost::uuids::uuid uuid_;
 };
 
 } // End namespace rsync

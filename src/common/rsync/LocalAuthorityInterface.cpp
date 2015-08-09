@@ -95,7 +95,7 @@ void LocalAuthorityInterface::processJob(
     // Hash has been populated. Now the Authority can begin building the
     // instructions.
     bool auth_success = job_ptr->fileSystem().open(
-      job_ptr->descriptor().getSource().path,
+      job_ptr->descriptor().getSource().path(),
       file()
     );
 
@@ -113,7 +113,7 @@ void LocalAuthorityInterface::processJob(
         log::error(
           "AuthorityInterface: "
           "Authoritative processing for %s failed.\n",
-          job_ptr->descriptor().getSource().path.string().c_str()
+          job_ptr->descriptor().getSource().path().string().c_str()
         );
       }
 
@@ -123,7 +123,7 @@ void LocalAuthorityInterface::processJob(
     {
       log::error(
         "AuthorityInterface: Failed to open %s\n",
-        job_ptr->descriptor().getSource().path.string().c_str()
+        job_ptr->descriptor().getSource().path().string().c_str()
       );
 
       job_status = RsyncSourceFileNotFound;

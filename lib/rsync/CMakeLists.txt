@@ -22,6 +22,7 @@ include_directories( "${INCLUDE_BASE}/rsync" )
 
 set( SOURCE_BASE "../.." )
 set( SOURCES
+"${SOURCE_BASE}/src/common/${LIBNAME}/ResourcePath.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/JobDescriptor.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/JobReport.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RemoteJobResult.cpp"
@@ -55,6 +56,7 @@ set( SOURCES
 "${SOURCE_BASE}/src/common/${LIBNAME}/RsyncQueryResponse.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/Worker.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/WorkerGroup.cpp"
+"${SOURCE_BASE}/src/common/${LIBNAME}/RemoteAuthorityServiceThread.cpp"
 )
 
 add_library( rsync STATIC ${SOURCES} )

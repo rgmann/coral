@@ -2,8 +2,8 @@
 #define RSYNC_SEGMENTER_THREAD_H
 
 #include "IThread.h"
-#include "Queue.h"
-// #include "FileSystemInterface.h"
+// #include "Queue.h"
+#include "WorkerThreadTypes.h"
 
 namespace liber {
 namespace rsync {
@@ -13,11 +13,10 @@ class RsyncJob;
 class SegmenterThread : public liber::concurrency::IThread {
 public:
 
-  // explicit SegmenterThread( FileSystemInterface& );
-  SegmenterThread();
+  SegmenterThread( JobAgentPairQueue& queue );
   ~SegmenterThread();
 
-  void addJob( RsyncJob* job_ptr );
+  // void addJob( RsyncJob* job_ptr );
 
 private:
 
@@ -30,7 +29,8 @@ private:
 
 private:
 
-  Queue<RsyncJob*> job_queue_;
+  // Queue<RsyncJob*> job_queue_;
+  JobAgentPairQueue& job_queue_;
 
   // FileSystemInterface& file_sys_interface_;
 };

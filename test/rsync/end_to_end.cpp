@@ -19,11 +19,11 @@ public:
 
   void call(const JobDescriptor& job, const JobReport& report)
   {
-    liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path.string().c_str());
+    liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
     liber::log::flush();
 
-    report.print(std::cout);
-    std::cout << "\n\n";
+    // report.print(std::cout);
+    // std::cout << "\n\n";
 
     mSem.give();
   }
@@ -250,7 +250,9 @@ TEST_F( EndToEndTest, LocalToLocal ) {
   boost::filesystem::path source( "s_inst.cpp" );
   boost::filesystem::path destination( "d_inst.cpp" );;
 
-  RsyncError sync_status = mLocalNode->sync( destination, source );
+  RsyncError sync_status = mLocalNode->sync(
+    LocalResourcePath( destination ),
+    LocalResourcePath( source ) );
   EXPECT_EQ( RsyncSuccess, sync_status );
   if ( sync_status == RsyncSuccess )
   {
@@ -271,7 +273,9 @@ TEST_F( EndToEndTest, RemoteDestSmallTest ) {
   boost::filesystem::path source( "file.dat" );
   boost::filesystem::path destination( "file.dat" );
 
-  RsyncError sync_status = mLocalNode->sync(destination, source, true, false );
+  RsyncError sync_status = mLocalNode->sync(
+    RemoteResourcePath( destination ),
+    LocalResourcePath( source ) );
   EXPECT_EQ( RsyncSuccess, sync_status );
   if ( sync_status == RsyncSuccess )
   {
@@ -292,7 +296,9 @@ TEST_F( EndToEndTest, RemoteDestImageTest ) {
   boost::filesystem::path source( "image.png" );
   boost::filesystem::path destination( "image.png" );
 
-  RsyncError sync_status = mLocalNode->sync(destination, source, true, false );
+  RsyncError sync_status = mLocalNode->sync(
+    RemoteResourcePath( destination ),
+    LocalResourcePath( source ) );
   EXPECT_EQ( RsyncSuccess, sync_status );
   if ( sync_status == RsyncSuccess )
   {
@@ -313,7 +319,10 @@ TEST_F( EndToEndTest, RemoteSourceTest ) {
   boost::filesystem::path source( "instruction_test.cpp" );
   boost::filesystem::path destination( "instruction_test.cpp" );
 
-  RsyncError sync_status = mLocalNode->sync(destination, source, false, true );
+  RsyncError sync_status = mLocalNode->sync(
+    LocalResourcePath( destination ),
+    RemoteResourcePath( source) );
+
   EXPECT_EQ( RsyncSuccess, sync_status );
   if ( sync_status == RsyncSuccess )
   {
@@ -334,7 +343,10 @@ TEST_F( EndToEndTest, RemoteSourceCopy ) {
   boost::filesystem::path source( "dfile_0.dat" );
   boost::filesystem::path destination( "dfile_0.dat" );
 
-  RsyncError sync_status = mLocalNode->sync(destination, source, false, true );
+  RsyncError sync_status = mLocalNode->sync(
+    LocalResourcePath( destination ),
+    RemoteResourcePath( source ) );
+
   EXPECT_EQ( RsyncSuccess, sync_status );
   if ( sync_status == RsyncSuccess )
   {
@@ -367,7 +379,10 @@ TEST_F( EndToEndTest, PipelineTest ) {
   std::vector<op_attrs_t>::iterator pathIt = operations.begin();
   for (; pathIt != operations.end(); pathIt++ )
   {
-    pathIt->status = mLocalNode->sync( pathIt->path, pathIt->path, false, true );
+    pathIt->status = mLocalNode->sync(
+      LocalResourcePath( pathIt->path ),
+      RemoteResourcePath( pathIt->path ) );
+
     EXPECT_EQ( RsyncSuccess, pathIt->status );
   }
 

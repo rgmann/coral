@@ -53,97 +53,48 @@ private:
 
     static const i64 JOB_TIMEOUT_MS = 2000;
 
-    ActiveJob() : mpJob(NULL), mQueryResponse(RsyncSuccess) {}
+    ActiveJob();
 
-    inline void setJob(RsyncJob* pJob) {
-      mpJob = pJob;
-      mLastInstructionTime = boost::posix_time::microsec_clock::local_time();
-    };
-    inline RsyncJob* job() { return mpJob; };
+    void setJob( RsyncJob* job_ptr );
+    RsyncJob* job() { return job_ptr_; };
 
-    void setQueryResponse( const void* data_ptr, ui32 length ) {
-      RsyncQueryResponse response;
-      if ( response.deserialize( (const char*)data_ptr, length ) )
-      {
-        if ( response.uuid() == mpJob->descriptor().uuid() )
-        {
-          mQueryResponse = response.status();
-        }
-        else
-        {
-          mQueryResponse = kRsyncRemoteQueryError;
-          liber::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Invalid UUID\n");
-        }
-      }
-      else {
-        mQueryResponse = kRsyncRemoteQueryError;
-        liber::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Failed to deserialize\n");
-      }
+    void setQueryResponse( const void* data_ptr, ui32 length );
 
-      mJobStartSignal.give();
-    }
+    RsyncError& queryResponse() { return query_response_; }
 
-    inline RsyncError& queryResponse() { return mQueryResponse; }
+    void signalJobStart();
 
-    inline void signalJobStart()
-    {
-      mJobStartSignal.give();
-    }
+    bool waitJobStart( int timeout_ms );
 
-    bool waitJobStart(int nTimeoutMs)
-    {
-      liber::thread::Semaphore::SemStatus lStatus = mJobStartSignal.take(nTimeoutMs);
-      return (lStatus == liber::thread::Semaphore::SemAcquired);
-    }
+    void signalJobEnd();
 
-    inline void signalJobEnd()
-    {
-      mJobEndSignal.give();
-    }
+    bool waitJobEnd(int nTimeoutMs);
 
-    inline bool waitJobEnd(int nTimeoutMs)
-    {
-      return (mJobEndSignal.take(nTimeoutMs) == liber::thread::Semaphore::SemAcquired);
-    }
+    bool lockIfActive();
 
-    bool lockIfActive()
-    {
-      job_lock_.lock();
-      bool lbActive = (mpJob != NULL);
-      if (!lbActive) job_lock_.unlock();
-      return lbActive;
-    }
-
-    inline void unlock() { job_lock_.unlock(); };
+    void unlock() { job_lock_.unlock(); };
 
     void pushInstruction( Instruction* pInstruction );
 
-    bool timeout()
-    {
-      boost::posix_time::time_duration deltaTime =
-        boost::posix_time::microsec_clock::local_time() - mLastInstructionTime;
-      return ( deltaTime.total_milliseconds() >= JOB_TIMEOUT_MS );
-    }
+    bool timeout();
 
   private:
 
-    RsyncJob* mpJob;
+    RsyncJob* job_ptr_;
 
     boost::mutex job_lock_;
 
-    BinarySem mJobStartSignal;
-    BinarySem mJobEndSignal;
+    BinarySem job_start_signal_;
+    BinarySem job_end_signal_;
 
-    RsyncError mQueryResponse;
+    RsyncError query_response_;
 
     // In order to detect a timeout, keep track of when the last instruction
     // was received.
     boost::posix_time::ptime mLastInstructionTime;
-  } mActiveJob;
+  } active_job_;
 
   int mnSegmentTimeoutMs;
-  int mnJobAckTimeoutMs;
-  int mnJobCompletionTimeoutMs;
 
   // int mRequestID;
 };

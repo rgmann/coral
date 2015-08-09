@@ -166,7 +166,7 @@ std::string BeginInstruction::toString() const
   std::stringstream ss;
 
   ss << "BeginInstruction:" << std::endl
-     << "  path: " << mDescriptor.getDestination().path.generic_string() << std::endl
+     << "  path: " << mDescriptor.getDestination().path().generic_string() << std::endl
      << "  segment size: " << mDescriptor.getSegmentSize() << std::endl;
 
   return ss.str();
@@ -174,10 +174,9 @@ std::string BeginInstruction::toString() const
 
 //-----------------------------------------------------------------------------
 void BeginInstruction::execute( AssemblerState& state )
-// execute(ExecutionStatus& rStatus, SegmentAccessor& rAccessor, std::ofstream& ostream)
 {
-  if ( mDescriptor.getDestination().path != 
-       state.jobDescriptor().getDestination().path )
+  if ( mDescriptor.getDestination().path() != 
+       state.jobDescriptor().getDestination().path() )
   {
     state.status_ = kRsyncInvalidJob;
   }

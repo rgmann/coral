@@ -10,20 +10,23 @@ namespace rsync {
 class WorkerGroup {
 public:
 
-  WorkerGroup( int worker_count = 1 );
-  ~WorkerGroup();
+   WorkerGroup( int worker_count = 1 );
+   ~WorkerGroup();
 
-  RsyncError addJob( JobAgent* job_agent_ptr, RsyncJob* job_ptr );
+   RsyncError addJob( JobAgent* job_agent_ptr, RsyncJob* job_ptr );
 
 private:
 
-  std::vector<Worker*> workers_;
+   std::vector<PassiveWorker*> workers_;
 
-  Queue<JobAgentPair> job_queue_;
+   JobAgentPairQueue segment_queue_;
+   JobAgentPairQueue local_auth_queue_;
+   JobAgentPairQueue assembly_queue_;
+   JobAgentPairQueue remote_auth_queue_;
 
 };
 
-}
-}
+} // namespace rsync
+} // namesapce liber
 
 #endif // WORKER_GROUP_H

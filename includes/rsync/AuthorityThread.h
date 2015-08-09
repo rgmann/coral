@@ -2,8 +2,9 @@
 #define RSYNC_AUTHORITY_THREAD_H
 
 #include "IThread.h"
-#include "Queue.h"
-#include "FileSystemInterface.h"
+// #include "Queue.h"
+#include "WorkerThreadTypes.h"
+// #include "FileSystemInterface.h"
 #include "RemoteAuthorityInterface.h"
 #include "LocalAuthorityInterface.h"
 #include "PacketRouter.h"
@@ -17,11 +18,10 @@ class RsyncJob;
 class AuthorityThread : public liber::concurrency::IThread {
 public:
 
-  // explicit AuthorityThread( FileSystemInterface& );
-  AuthorityThread();
+  AuthorityThread( JobAgentPairQueue& queue );
   ~AuthorityThread();
 
-  void addJob( RsyncJob* job_ptr );
+  // void addJob( RsyncJob* job_ptr );
 
   liber::netapp::PacketSubscriber& getSubscriber();
   // void setRequestID( int request_id );
@@ -33,7 +33,8 @@ private:
 
 private:
 
-  Queue<RsyncJob*> job_queue_;
+  // Queue<RsyncJob*> job_queue_;
+  JobAgentPairQueue& job_queue_;
 
   RemoteAuthorityInterface remote_authority_;
   LocalAuthorityInterface  local_authority_;

@@ -20,11 +20,13 @@ SegmentFile::~SegmentFile()
 }
 
 //-----------------------------------------------------------------------------
-bool SegmentFile::open( FileSystemInterface& file_sys_interface, const liber::rsync::JobDescriptor& descriptor)
+bool SegmentFile::open(
+  FileSystemInterface&               file_sys_interface,
+  const liber::rsync::JobDescriptor& descriptor)
 {
   close();
   mpDescriptor = &descriptor;
-  return file_sys_interface.open(descriptor.getDestination().path, mIStream);
+  return file_sys_interface.open( descriptor.getDestination().path(), mIStream );
 }
 
 //-----------------------------------------------------------------------------

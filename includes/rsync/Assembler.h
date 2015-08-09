@@ -14,27 +14,25 @@ class AssemblyReport;
 class Assembler {
 public:
 
-  Assembler( SegmentAccessor& segment_accessor );
-  ~Assembler();
+   Assembler( SegmentAccessor& segment_accessor );
+   ~Assembler();
 
-  bool process(
-    JobDescriptor&    job_descriptor,
-    InstructionQueue& instruction_queue,
-    AssemblyReport&   report );
+   bool process(
+      JobDescriptor&    job_descriptor,
+      InstructionQueue& instruction_queue,
+      AssemblyReport&   report );
 
-  std::ofstream& outputStream();
-
-private:
-
-  Assembler( const Assembler& );
-  Assembler& operator= ( const Assembler& );
+   std::ofstream& outputStream();
 
 private:
 
-  // ExecutionStatus assembly_status_;
-  AssemblerState assembler_state_;
+   Assembler( const Assembler& );
+   Assembler& operator= ( const Assembler& );
 
-  int instruction_timeout_ms_;
+private:
+
+   AssemblerState assembler_state_;
+
 };
 
 

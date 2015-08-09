@@ -2,7 +2,8 @@
 #define RSYNC_ASSEMBLER_THREAD_H
 
 #include "IThread.h"
-#include "Queue.h"
+// #include "Queue.h"
+#include "WorkerThreadTypes.h"
 #include "SegmentFile.h"
 #include "Assembler.h"
 
@@ -15,10 +16,10 @@ class FileSystemInterface;
 class AssemblerThread : public liber::concurrency::IThread {
 public:
 
-  AssemblerThread();
+  AssemblerThread( JobAgentPairQueue& queue );
   ~AssemblerThread();
 
-  void addJob( RsyncJob* job_ptr );
+  // void addJob( RsyncJob* job_ptr );
 
 private:
 
@@ -29,7 +30,8 @@ private:
 
 private:
 
-  Queue<RsyncJob*> job_queue_;
+  // Queue<RsyncJob*> job_queue_;
+  JobAgentPairQueue& job_queue_;
 
   SegmentFile          segment_file_;
   Assembler            assembler_;

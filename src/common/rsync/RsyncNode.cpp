@@ -12,7 +12,6 @@ using namespace liber::rsync;
 RsyncNode::RsyncNode( const boost::filesystem::path& root, WorkerGroup& worker_group )
 : worker_group_ ( worker_group )
 , job_agent_ ( file_sys_interface_, router_, worker_group )
-, segment_size_       ( 256 )
 {
   file_sys_interface_.setRoot(root);
   if ( router_.addSubscriber( RsyncPacket::RsyncJobAgent, &job_agent_ ) == false )
@@ -38,17 +37,59 @@ void RsyncNode::unsetCallback()
 }
 
 //----------------------------------------------------------------------------
+bool RsyncNode::setSegmentSize( ui32 segment_size_bytes )
+{
+  bool limits_ok = true;
+
+  limits_ok &= ( segment_size_bytes > 0 );
+  limits_ok &= ( segment_size_bytes < 65000 );
+
+  if ( limits_ok )
+  {
+    job_agent_.limits_.segment_size_bytes = segment_size_bytes;
+  }
+
+  return limits_ok;
+}
+
+//----------------------------------------------------------------------------
+bool RsyncNode::setMaximumChunkSize( ui32 maximum_chunk_size_bytes )
+{
+  bool limits_ok = true;
+
+  limits_ok &= ( maximum_chunk_size_bytes > 0 );
+  limits_ok &= ( maximum_chunk_size_bytes < 65000 );
+
+  if ( limits_ok )
+  {
+    job_agent_.limits_.maximum_chunk_size_bytes = maximum_chunk_size_bytes;
+  }
+
+  return limits_ok;
+}
+
+//----------------------------------------------------------------------------
+bool RsyncNode::setCompletionTimeout( ui32 completion_timeout_ms )
+{
+  bool limits_ok = true;
+
+  limits_ok &= ( completion_timeout_ms > 0 );
+
+  if ( limits_ok )
+  {
+    job_agent_.limits_.completion_timeout_ms = completion_timeout_ms;
+  }
+
+  return limits_ok;
+}
+
+//----------------------------------------------------------------------------
 RsyncError RsyncNode::sync(
-  const boost::filesystem::path& destination_path,
-  const boost::filesystem::path& source_path,
-  bool remote_destination,
-  bool remote_source
+   const ResourcePath& destination,
+   const ResourcePath& source
 )
 {
-  ResourcePath destination( destination_path, remote_destination );
-  ResourcePath source( source_path, remote_source);
-
-  return job_agent_.createJob( destination, source, segment_size_ );
+  return job_agent_.createJob( destination, source );
 }
 
 //----------------------------------------------------------------------------
@@ -57,7 +98,7 @@ RsyncError RsyncNode::push( const boost::filesystem::path& filepath )
   ResourcePath destination( filepath, true );
   ResourcePath source( filepath, false );
 
-  return job_agent_.createJob( destination, source, segment_size_ );
+  return job_agent_.createJob( destination, source );
 }
 
 //----------------------------------------------------------------------------
@@ -66,7 +107,7 @@ RsyncError RsyncNode::pull( const boost::filesystem::path& filepath )
   ResourcePath destination( filepath, false );
   ResourcePath source( filepath, true );
 
-  return job_agent_.createJob( destination, source, segment_size_ );
+  return job_agent_.createJob( destination, source );
 }
 
 //----------------------------------------------------------------------------

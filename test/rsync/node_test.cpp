@@ -1,48 +1,149 @@
-#include <fstream>
-#include <iostream>
+#include <boost/current_function.hpp>
 #include "Log.h"
 #include "RsyncNode.h"
-
-#define IMAGE
+#include "IntraRouter.h"
+#include "gtest/gtest.h"
 
 using namespace liber;
 using namespace liber::rsync;
 
-class TestCallback : public RsyncJobCallback {
+class NodeTest : public ::testing::Test {
 public:
 
-  TestCallback() : mSem(0) {};
+   NodeTest()
+   : workgroup_(NULL)
+   , node_( NULL )
+   {
+     LOCAL_ROOT = boost::filesystem::current_path() / "test_root/client";
+     REMOTE_ROOT = boost::filesystem::current_path() / "test_root/server";
+   }
 
-  void call(const JobDescriptor& job, const JobReport& report)
-  {
-    log::status("Completed %s\n", job.getDestination().string().c_str());
+   boost::filesystem::path LOCAL_ROOT;
+   boost::filesystem::path REMOTE_ROOT;
 
-    liber::log::flush();
-    report.print(std::cout);
 
-    mSem.give();
-  }
+protected:
 
-  CountingSem mSem;
+   void SetUp()
+   {
+      liber::log::level( liber::log::Warn );
+
+      workgroup_ = new WorkerGroup();
+      node_ = new RsyncNode( LOCAL_ROOT, *workgroup_ );
+      router_.launch();
+
+      ASSERT_EQ( true, router_.addSubscriber( RSYNC_SUB_ID, &node_->subscriber()) );
+
+      // node_->setCallback( &mLocalCallback );
+   }
+
+   void TearDown()
+   {
+      router_.cancel(true);
+      router_.removeSubscriber( RSYNC_SUB_ID );
+
+
+      node_->unsetCallback();
+
+      delete node_;
+      delete workgroup_;
+   }
+
+
+   IntraRouter router_;
+   WorkerGroup* workgroup_;
+   RsyncNode* node_;
+
 };
 
-int main (int argc, char* argv[])
-{
-  liber::log::level(liber::log::Debug);
 
-  TestCallback callback;
-  RsyncNode node("/Users/vaughanbiker/Development/liber/test/rsync/test_root");
+TEST_F( NodeTest, InvalidLocalSourcePath ) {
+   boost::filesystem::path source( "invalid_dir/s_inst.cpp" );
+   boost::filesystem::path destination( "d_inst.cpp" );
 
-  node.setCompletionCallback(&callback);
-  node.sync("client/image.png", "server/image.png");
-  node.sync("client/file.dat", "server/file.dat");
-  node.sync("client/instruction_test.cpp", "server/instruction_test.cpp");
-
-  callback.mSem.take();
-  callback.mSem.take();
-  callback.mSem.take();
-
-  liber::log::flush();
-  return 0;
+   EXPECT_EQ( RsyncSourceFileNotFound, node_->sync(
+      LocalResourcePath( destination ),
+      LocalResourcePath( source ) ) );
 }
 
+TEST_F( NodeTest, InvalidLocalDestinationPath ) {
+   boost::filesystem::path source( "s_inst.cpp" );
+   boost::filesystem::path destination( "invalid_dir/d_inst.cpp" );
+
+   EXPECT_EQ( RsyncDestinationFileNotFound, node_->sync(
+      LocalResourcePath( destination ),
+      LocalResourcePath( source ) ) );
+}
+
+TEST_F( NodeTest, RemoteAuthRequestTimeout ) {
+   boost::filesystem::path source( "s_inst.cpp" );
+   boost::filesystem::path destination( "d_inst.cpp" );
+
+   class TestCallback : public RsyncJobCallback {
+   public:
+
+      void call(const JobDescriptor& job, const JobReport& report)
+      {
+         liber::log::status("%s\n", BOOST_CURRENT_FUNCTION);
+         error_ = report.source.authority.status;
+         sem_.give();
+      }
+
+      BinarySem sem_;
+      RsyncError error_;
+   } callback;
+
+   node_->setCallback( &callback );
+   node_->setCompletionTimeout(2000);
+
+   EXPECT_EQ( RsyncSuccess, node_->sync(
+      LocalResourcePath( destination ),
+      RemoteResourcePath( source ) ) );
+
+   callback.sem_.take();
+   EXPECT_EQ( RsyncRemoteQueryTimeout, callback.error_ );
+}
+
+
+TEST_F( NodeTest, RemoteSourceDoesNotExist ) {
+   IntraRouter remote_router;
+
+   boost::filesystem::path source( "non_existent.cpp" );
+   boost::filesystem::path destination( "d_inst.cpp" );
+
+   class TestCallback : public RsyncJobCallback {
+   public:
+
+      void call( const JobDescriptor& job, const JobReport& report )
+      {
+         error_ = report.source.authority.status;
+         sem_.give();
+      }
+
+      BinarySem sem_;
+      RsyncError error_;
+   } callback;
+
+   node_->setCallback( &callback );
+
+   router_.setCounterpart( &remote_router );
+   remote_router.setCounterpart( &router_ );
+
+   WorkerGroup remote_workgroup;
+   RsyncNode remote_node( REMOTE_ROOT, remote_workgroup );
+   remote_router.launch();
+   ASSERT_EQ( true, remote_router.addSubscriber( RSYNC_SUB_ID, &remote_node.subscriber()) );
+
+   EXPECT_EQ( RsyncSuccess, node_->sync(
+      LocalResourcePath( destination ),
+      RemoteResourcePath( source ) ) );
+
+   callback.sem_.take();
+
+   EXPECT_EQ( RsyncSourceFileNotFound, callback.error_ );
+
+   remote_router.cancel();
+   remote_router.removeSubscriber( RSYNC_SUB_ID );
+
+   router_.setCounterpart( NULL );
+}

@@ -1,7 +1,6 @@
-#ifndef RSYNC_CLIENT_H
-#define RSYNC_CLIENT_H
+#ifndef RSYNC_NODE_H
+#define RSYNC_NODE_H
 
-// #include <boost/thread/mutex.hpp>
 #include "IThread.h"
 #include "Queue.h"
 #include "JobDescriptor.h"
@@ -29,42 +28,44 @@ class RsyncJob;
 class RsyncNode {
 public:
 
-  RsyncNode( const boost::filesystem::path& root, WorkerGroup& worker_group );
-  ~RsyncNode();
+   RsyncNode( const boost::filesystem::path& root, WorkerGroup& worker_group );
+   ~RsyncNode();
 
-  void setCallback( RsyncJobCallback* callback_ptr );
-  void unsetCallback();
+   void setCallback( RsyncJobCallback* callback_ptr );
+   void unsetCallback();
 
-  RsyncError sync(const boost::filesystem::path& destination,
-                  const boost::filesystem::path& source,
-                  bool remote_destination = false,
-                  bool remote_source = false);
+   bool setSegmentSize( ui32 segment_size_bytes );
+   bool setMaximumChunkSize( ui32 maximum_chunk_size_bytes );
+   bool setCompletionTimeout( ui32 completion_timeout_ms );
 
-  RsyncError push( const boost::filesystem::path& filepath );
+   //
+   // 
+   //
+   //
+   // RsyncError sync(const boost::filesystem::path& destination,
+   //                const boost::filesystem::path& source,
+   //                bool remote_destination = false,
+   //                bool remote_source = false);
+   RsyncError sync( const ResourcePath& destination, const ResourcePath& source );
 
-  RsyncError pull( const boost::filesystem::path& filepath );
+   RsyncError push( const boost::filesystem::path& filepath );
 
-  liber::netapp::PacketSubscriber& subscriber();
+   RsyncError pull( const boost::filesystem::path& filepath );
+
+   liber::netapp::PacketSubscriber& subscriber();
 
 
 private:
 
-  RsyncPacketRouter router_;
+   RsyncPacketRouter router_;
 
-  FileSystemInterface file_sys_interface_;
-  WorkerGroup& worker_group_;
-  SegmenterThread segmenter_;
-  AuthorityThread authority_;
-  AssemblerThread assembler_;
-  JobAgent        job_agent_;
-
-  RemoteAuthorityService authority_service_;
-
-  ui32 segment_size_;
+   FileSystemInterface file_sys_interface_;
+   WorkerGroup& worker_group_;
+   JobAgent        job_agent_;
 };
 
 } // End namespace rsync
 } // End namesapce liber
 
-#endif // RSYNC_CLIENT_H
+#endif // RSYNC_NODE_H
 

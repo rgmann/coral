@@ -2,8 +2,7 @@
 #define PACKET_ROUTER_H
 
 #include <map>
-#include "Queue.h"
-//#include "PacketSubscriber.h"
+#include <boost/thread/mutex.hpp>
 
 namespace liber {
 namespace netapp {
@@ -30,16 +29,15 @@ protected:
   PacketSubscriber* getSubscriber(int subscriberId);
 
   //
-  PacketReceiver* mpReceiver;
+  PacketReceiver* receiver_ptr_;
 
 private:
 
   //
-  // Mutex mTableLock;
   boost::mutex table_lock_;
 
   //
-  std::map<int, PacketSubscriber*> mSubscriberTable;
+  std::map<int, PacketSubscriber*> subscriber_table_;
 };
 
 }}

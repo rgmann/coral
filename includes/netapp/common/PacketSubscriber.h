@@ -1,6 +1,8 @@
 #ifndef PACKET_SUBSCRIBER_H
 #define PACKET_SUBSCRIBER_H
 
+#include <boost/thread/mutex.hpp>
+
 namespace liber {
 namespace netapp {
 
@@ -10,12 +12,19 @@ class PacketReceiver;
 class PacketSubscriber {
 public:
 
+   enum { kInvalidSubscriber = -1 };
+
    PacketSubscriber();
    virtual ~PacketSubscriber();
 
-   virtual void setReceiver(PacketReceiver* pReceiver);
+   virtual void setReceiver(PacketReceiver* receiver_ptr);
 
    virtual void setID(int id);
+
+   void subscribe( int subscriber_id, PacketReceiver* receiver_ptr );
+   void unsubscribe();
+
+   bool isSubscribed() const;
 
    /**
     * Synchronously process a packet.  If PacketApp does not perform any
@@ -31,10 +40,12 @@ protected:
 
 private:
 
-  int mSubscriberId;
+   int subscriber_id_;
 
-  // Generic packet receiver. Can be a queue, hook, etc.
-  PacketReceiver* mpReceiver;
+   // Generic packet receiver. Can be a queue, hook, etc.
+   PacketReceiver* receiver_ptr_;
+
+   mutable boost::mutex subscribe_lock_;
 };
 
 } // End namespace netapp
