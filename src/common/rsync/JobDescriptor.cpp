@@ -9,8 +9,6 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 JobDescriptor::JobDescriptor()
-// : segment_size_bytes_(0)
-// , maximum_chunk_size_( 1024 )
 : remotely_requested_(false)
 , uuid_(boost::uuids::random_generator()())
 {

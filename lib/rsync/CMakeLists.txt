@@ -57,6 +57,7 @@ set( SOURCES
 "${SOURCE_BASE}/src/common/${LIBNAME}/Worker.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/WorkerGroup.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RemoteAuthorityServiceThread.cpp"
+"${SOURCE_BASE}/src/common/${LIBNAME}/JobRequestCallback.cpp"
 )
 
 add_library( rsync STATIC ${SOURCES} )

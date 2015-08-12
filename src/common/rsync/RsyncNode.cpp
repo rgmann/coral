@@ -25,15 +25,27 @@ RsyncNode::~RsyncNode()
 }
 
 //----------------------------------------------------------------------------
-void RsyncNode::setCallback( RsyncJobCallback* callback_ptr )
+void RsyncNode::setJobCompletionCallback( RsyncJobCallback* callback_ptr )
 {
-  job_agent_.setCallback( callback_ptr );
+  job_agent_.setJobCompletionCallback( callback_ptr );
 }
 
 //----------------------------------------------------------------------------
-void RsyncNode::unsetCallback()
+void RsyncNode::unsetJobCompletionCallback()
 {
-  job_agent_.unsetCallback();
+  job_agent_.unsetJobCompletionCallback();
+}
+
+//----------------------------------------------------------------------------
+void RsyncNode::setJobRequestCallback( JobRequestCallback* callback_ptr )
+{
+  job_agent_.setJobRequestCallback( callback_ptr );
+}
+
+//----------------------------------------------------------------------------
+void RsyncNode::unsetJobRequestCallback()
+{
+  job_agent_.unsetJobRequestCallback();
 }
 
 //----------------------------------------------------------------------------

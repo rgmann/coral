@@ -29,6 +29,7 @@ JobAgent(
 , worker_group_       ( worker_group )
 , create_destination_stub_( true )
 , callback_ptr_       ( NULL )
+, job_request_callback_ptr_( &default_job_request_callback_ )
 {
 }
 
@@ -51,16 +52,30 @@ JobAgent::~JobAgent()
 }
 
 //----------------------------------------------------------------------------
-void JobAgent::setCallback( RsyncJobCallback* callback_ptr )
+void JobAgent::setJobCompletionCallback( RsyncJobCallback* callback_ptr )
 {
-  boost::mutex::scoped_lock guard( callback_lock_ );
-  callback_ptr_ = callback_ptr;
+   boost::mutex::scoped_lock guard( callback_lock_ );
+   callback_ptr_ = callback_ptr;
 }
 //----------------------------------------------------------------------------
-void JobAgent::unsetCallback()
+void JobAgent::unsetJobCompletionCallback()
 {
-  boost::mutex::scoped_lock guard( callback_lock_ );
-  callback_ptr_ = NULL;
+   boost::mutex::scoped_lock guard( callback_lock_ );
+   callback_ptr_ = NULL;
+}
+
+//----------------------------------------------------------------------------
+void JobAgent::setJobRequestCallback( JobRequestCallback* callback_ptr )
+{
+   boost::mutex::scoped_lock guard( callback_lock_ );
+   job_request_callback_ptr_ = callback_ptr;
+}
+
+//----------------------------------------------------------------------------
+void JobAgent::unsetJobRequestCallback()
+{
+   boost::mutex::scoped_lock guard( callback_lock_ );
+   job_request_callback_ptr_ = &default_job_request_callback_;
 }
 
 //----------------------------------------------------------------------------
@@ -178,13 +193,26 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
 
    // If the source is local, verify that it exists.  If it does not, job
    // creation failed.
-   if ( descriptor.getSource().remote() == false )
+   // if ( descriptor.getSource().remote() == false )
+   // {
+   //    if ( file_sys_interface_.exists( descriptor.getSourcePath() ) == false )
+   //    {
+   //       log::error("JobAgent::createJob - Source resource not found\n");
+   //       job_create_status = error( job_ptr, RsyncSourceFileNotFound );
+   //    }
+   // }
    {
-      if ( file_sys_interface_.exists( descriptor.getSourcePath() ) == false )
-      {
-         log::error("JobAgent::createJob - Source resource not found\n");
-         job_create_status = error( job_ptr, RsyncSourceFileNotFound );
-      }
+      boost::mutex::scoped_lock guard( callback_lock_ );
+
+      job_create_status = job_request_callback_ptr_->canFulfill(
+         job_ptr->fileSystem(),
+         job_ptr->descriptor()
+      );
+   }
+
+   if ( job_create_status != RsyncSuccess )
+   {
+      job_create_status = error( job_ptr, job_create_status );
    }
 
    // If the source or destination is remote, check that the RsyncPacketRouter
@@ -210,8 +238,10 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
    {
       if ( descriptor.getDestination().remote() == false )
       {
+         boost::mutex::scoped_lock guard( callback_lock_ );
          // If the destination file does not exist, create it (if so configured).
-         if ( create_destination_stub_ )
+         // if ( create_destination_stub_ )
+         if ( job_request_callback_ptr_->canTouchDestination() )
          {
             if ( file_sys_interface_.touch( descriptor.getDestinationPath() ) == false )
             {
@@ -219,17 +249,32 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
                job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
             }
          }
-         else
-         {
-            // If the destination still does not exist, the job cannot be performed.
-            if ( file_sys_interface_.exists( descriptor.getDestinationPath() ) == false )
-            {
-               log::error("JobAgent::createJob - Destination resource not found\n");
-               job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
-            }
-         }
       }
    }
+   // if ( job_create_status == RsyncSuccess )
+   // {
+   //    if ( descriptor.getDestination().remote() == false )
+   //    {
+   //       // If the destination file does not exist, create it (if so configured).
+   //       if ( create_destination_stub_ )
+   //       {
+   //          if ( file_sys_interface_.touch( descriptor.getDestinationPath() ) == false )
+   //          {
+   //             log::error("JobAgent::createJob - Failed to touch destination resource\n");
+   //             job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
+   //          }
+   //       }
+   //       else
+   //       {
+   //          // If the destination still does not exist, the job cannot be performed.
+   //          if ( file_sys_interface_.exists( descriptor.getDestinationPath() ) == false )
+   //          {
+   //             log::error("JobAgent::createJob - Destination resource not found\n");
+   //             job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
+   //          }
+   //       }
+   //    }
+   // }
 
    if ( job_create_status == RsyncSuccess )
    {
@@ -460,13 +505,19 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
          // }
          // else
          {
+            boost::mutex::scoped_lock guard( callback_lock_ );
+
+            status = job_request_callback_ptr_->canFulfill(
+               job_ptr->fileSystem(),
+               job_ptr->descriptor()
+            );
             // status = defaultQueryHandler(descriptor);
-            if (job_ptr->fileSystem().exists(job_ptr->descriptor().getSource().path()) == false)
-            {
-               status = RsyncSourceFileNotFound;
-               log::error("Remote job query failed for %s\n",
-                        job_ptr->descriptor().getSource().path().string().c_str());
-            }
+            // if (job_ptr->fileSystem().exists(job_ptr->descriptor().getSource().path()) == false)
+            // {
+            //    status = RsyncSourceFileNotFound;
+            //    log::error("Remote job query failed for %s\n",
+            //             job_ptr->descriptor().getSource().path().string().c_str());
+            // }
          }
 
          //

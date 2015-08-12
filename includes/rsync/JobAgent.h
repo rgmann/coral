@@ -5,6 +5,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/thread/mutex.hpp>
 #include "PacketSubscriber.h"
+#include "JobRequestCallback.h"
 
 namespace liber {
 namespace rsync {
@@ -30,8 +31,11 @@ public:
 
    RsyncJob* nextJob();
 
-   void setCallback( RsyncJobCallback* callback_ptr );
-   void unsetCallback();
+   void setJobCompletionCallback( RsyncJobCallback* callback_ptr );
+   void unsetJobCompletionCallback();
+
+   void setJobRequestCallback( JobRequestCallback* callback_ptr );
+   void unsetJobRequestCallback();
 
    bool put( const char* data_ptr, ui32 size_bytes );
 
@@ -68,6 +72,9 @@ private:
 
    boost::mutex callback_lock_;
    RsyncJobCallback* callback_ptr_;
+
+   JobRequestCallback* job_request_callback_ptr_;
+   JobRequestCallback default_job_request_callback_;
 };
 
 } // End namespace rsync

@@ -43,7 +43,7 @@ protected:
       router_.removeSubscriber( RSYNC_SUB_ID );
 
 
-      node_->unsetCallback();
+      node_->unsetJobCompletionCallback();
 
       delete node_;
       delete workgroup_;
@@ -93,7 +93,7 @@ TEST_F( NodeTest, RemoteAuthRequestTimeout ) {
       RsyncError error_;
    } callback;
 
-   node_->setCallback( &callback );
+   node_->setJobCompletionCallback( &callback );
    node_->setCompletionTimeout(2000);
 
    EXPECT_EQ( RsyncSuccess, node_->sync(
@@ -124,7 +124,7 @@ TEST_F( NodeTest, RemoteSourceDoesNotExist ) {
       RsyncError error_;
    } callback;
 
-   node_->setCallback( &callback );
+   node_->setJobCompletionCallback( &callback );
 
    router_.setCounterpart( &remote_router );
    remote_router.setCounterpart( &router_ );

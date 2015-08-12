@@ -208,8 +208,8 @@ public:
       ASSERT_EQ( true, mLocalRouter.addSubscriber(RSYNC_SUB_ID, &mLocalNode->subscriber()) );
       ASSERT_EQ( true, mRemoteRouter.addSubscriber(RSYNC_SUB_ID, &mRemoteNode->subscriber()) );
 
-      mLocalNode->setCallback( &mLocalCallback );
-      mRemoteNode->setCallback( &mRemoteCallback );
+      mLocalNode->setJobCompletionCallback( &mLocalCallback );
+      mRemoteNode->setJobCompletionCallback( &mRemoteCallback );
     }
 
     void TearDown()
@@ -220,8 +220,8 @@ public:
       mLocalRouter.removeSubscriber( RSYNC_SUB_ID );
       mRemoteRouter.removeSubscriber( RSYNC_SUB_ID );
 
-      mLocalNode->unsetCallback();
-      mRemoteNode->unsetCallback();
+      mLocalNode->unsetJobCompletionCallback();
+      mRemoteNode->unsetJobCompletionCallback();
 
       delete mRemoteNode;
       delete mLocalNode;

@@ -31,21 +31,20 @@ public:
    RsyncNode( const boost::filesystem::path& root, WorkerGroup& worker_group );
    ~RsyncNode();
 
-   void setCallback( RsyncJobCallback* callback_ptr );
-   void unsetCallback();
+   void setJobCompletionCallback( RsyncJobCallback* callback_ptr );
+   void unsetJobCompletionCallback();
+
+   void setJobRequestCallback( JobRequestCallback* callback_ptr );
+   void unsetJobRequestCallback();
 
    bool setSegmentSize( ui32 segment_size_bytes );
    bool setMaximumChunkSize( ui32 maximum_chunk_size_bytes );
    bool setCompletionTimeout( ui32 completion_timeout_ms );
 
    //
-   // 
+   // Synchronize two files.
    //
    //
-   // RsyncError sync(const boost::filesystem::path& destination,
-   //                const boost::filesystem::path& source,
-   //                bool remote_destination = false,
-   //                bool remote_source = false);
    RsyncError sync( const ResourcePath& destination, const ResourcePath& source );
 
    RsyncError push( const boost::filesystem::path& filepath );
