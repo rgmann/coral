@@ -17,8 +17,7 @@ using namespace liber::netapp;
 typedef boost::uuids::uuid buuid;
 
 //----------------------------------------------------------------------------
-JobAgent::
-JobAgent(
+JobAgent::JobAgent(
   FileSystemInterface& file_sys_interface, 
   RsyncPacketRouter&   packet_router,
   WorkerGroup&         worker_group
@@ -191,16 +190,6 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
 
    JobDescriptor& descriptor = job_ptr->descriptor();
 
-   // If the source is local, verify that it exists.  If it does not, job
-   // creation failed.
-   // if ( descriptor.getSource().remote() == false )
-   // {
-   //    if ( file_sys_interface_.exists( descriptor.getSourcePath() ) == false )
-   //    {
-   //       log::error("JobAgent::createJob - Source resource not found\n");
-   //       job_create_status = error( job_ptr, RsyncSourceFileNotFound );
-   //    }
-   // }
    {
       boost::mutex::scoped_lock guard( callback_lock_ );
 
@@ -251,30 +240,7 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
          }
       }
    }
-   // if ( job_create_status == RsyncSuccess )
-   // {
-   //    if ( descriptor.getDestination().remote() == false )
-   //    {
-   //       // If the destination file does not exist, create it (if so configured).
-   //       if ( create_destination_stub_ )
-   //       {
-   //          if ( file_sys_interface_.touch( descriptor.getDestinationPath() ) == false )
-   //          {
-   //             log::error("JobAgent::createJob - Failed to touch destination resource\n");
-   //             job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
-   //          }
-   //       }
-   //       else
-   //       {
-   //          // If the destination still does not exist, the job cannot be performed.
-   //          if ( file_sys_interface_.exists( descriptor.getDestinationPath() ) == false )
-   //          {
-   //             log::error("JobAgent::createJob - Destination resource not found\n");
-   //             job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
-   //          }
-   //       }
-   //    }
-   // }
+
 
    if ( job_create_status == RsyncSuccess )
    {
@@ -499,11 +465,10 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
          // This is an auth request, so by definition the destination must be remote.
          descriptor.getDestination().setRemote( true );
 
-         // if (mpUserHandler)
-         // {
-         //   status = mpUserHandler(descriptor);
-         // }
-         // else
+         // If a remote JobAgent specifies a remote source, the source is
+         // now local (and vice versa).
+         descriptor.getSource().setRemote( false );
+
          {
             boost::mutex::scoped_lock guard( callback_lock_ );
 
@@ -511,13 +476,6 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
                job_ptr->fileSystem(),
                job_ptr->descriptor()
             );
-            // status = defaultQueryHandler(descriptor);
-            // if (job_ptr->fileSystem().exists(job_ptr->descriptor().getSource().path()) == false)
-            // {
-            //    status = RsyncSourceFileNotFound;
-            //    log::error("Remote job query failed for %s\n",
-            //             job_ptr->descriptor().getSource().path().string().c_str());
-            // }
          }
 
          //

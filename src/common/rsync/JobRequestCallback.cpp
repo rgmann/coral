@@ -1,3 +1,4 @@
+#include "Log.h"
 #include "JobDescriptor.h"
 #include "FileSystemInterface.h"
 #include "JobRequestCallback.h"
