@@ -10,6 +10,7 @@
 using namespace liber;
 using namespace liber::rsync;
 using namespace liber::thread;
+using namespace liber::netapp;
 
 
 RemoteAuthorityInterface::ActiveJob::ActiveJob()
@@ -120,8 +121,9 @@ RemoteAuthorityInterface::~RemoteAuthorityInterface()
 void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
 {
    // Subscribe to the jobs packet subscriber.
-   if ( job_ptr->packetRouter().addSubscriber(
-      RsyncPacket::RsyncAuthorityInterface, this ) == false ) {
+   if ( job_ptr->packetRouter().subscribe(
+      RsyncPacket::RsyncAuthorityInterface, this,
+      liber::netapp::kSubscriberModeReadWrite ) == false ) {
       liber::log::error("RemoteAuthorityInterface::process: FAILED to register\n");
    }
 
@@ -166,40 +168,40 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
    }
 
    // Unsubscribe from this jobs packet router.
-   job_ptr->packetRouter().removeSubscriber(
-      RsyncPacket::RsyncAuthorityInterface );
+   job_ptr->packetRouter().unsubscribe(
+      RsyncPacket::RsyncAuthorityInterface, this );
 }
 
 //-----------------------------------------------------------------------------
-bool RemoteAuthorityInterface::put( const char* data_ptr, ui32 length )
+bool RemoteAuthorityInterface::put( DestinationID destination_id, const void* data_ptr, ui32 length )
 {
    bool put_success = false;
-   RsyncPacket* packet_ptr = new RsyncPacket();
+   RsyncPacketLite packet( data_ptr, length );
 
-   if ( packet_ptr->unpack( data_ptr, length ) )
+   if ( packet.valid() )
    {
       // Lock the job state mutex so that the main thread cannot create or
       // delete the RsyncJobState member.
       if ( active_job_.lockIfActive() )
       {
-         switch ( packet_ptr->data()->type )
+         switch ( packet.header()->type )
          {
             case RsyncPacket::RsyncRemoteAuthAcknowledgment:
                active_job_.setQueryResponse(
-                  packet_ptr->dataPtr(),
-                  packet_ptr->data()->length );
+                  packet.data(),
+                  packet.header()->length );
                break;
 
             case RsyncPacket::RsyncInstruction:
                sendAssemblyInstruction(
-                  packet_ptr->dataPtr(),
-                  packet_ptr->data()->length );
+                  packet.data(),
+                  packet.header()->length );
                break;
 
             case RsyncPacket::RsyncAuthorityReport:
                setSourceReport(
-                  packet_ptr->dataPtr(),
-                  packet_ptr->data()->length );
+                  packet.data(),
+                  packet.header()->length );
                break;
 
             default: break;
@@ -319,7 +321,7 @@ RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
 
    active_job_.setJob( job_ptr );
 
-   if ( sendPacketTo( RsyncPacket::RsyncJobAgent, packet_ptr ) )
+   if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) )
    {
       if ( active_job_.waitJobStart( job_ptr->descriptor().completionTimeoutMs() ) )
       {
@@ -375,7 +377,7 @@ bool RemoteAuthorityInterface::flushSegments(
 
             if ( flush_success )
             {
-               flush_success = sendPacketTo(
+               flush_success = sendTo(
                   RsyncPacket::RsyncAuthorityService,
                   packet_ptr
                );

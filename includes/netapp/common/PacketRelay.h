@@ -19,17 +19,19 @@ public:
   RelayReceiverHook();
   virtual ~RelayReceiverHook();
 
-  void setReceiver(PacketReceiver* pReceiver);
+  bool registerReceiver( const RegisteredRouter& receiver );
+  void unregisterReceiver( DestinationID destination_id );
 
 protected:
 
   bool call(PacketContainer* pContainer);
 
-  virtual PacketContainer* translate(PacketContainer* pContainer);
+  virtual PacketContainer* translate( DestinationID destination_id, PacketContainer* pContainer );
 
 private:
 
-  PacketReceiver* receiver_ptr_;
+  // PacketReceiver* receiver_ptr_;
+  RegisteredRouterList routers_;
 };
 
 
@@ -50,25 +52,41 @@ public:
 
   virtual ~PacketRelay();
 
-  void setReceiver(PacketReceiver* pReceiver);
-
-  bool put(const char* pData, ui32 nSizeBytes);
+  bool put( DestinationID destination_id, const void* data_ptr, ui32 length );
 
 protected:
 
-  /**
-   * Pure virtual method to extract an encapsulated packet and return a
-   * routable PacketContainer. This method assumes that the received
-   * represents a packet parsable by this subscriber. The packet header
-   * should indicate the PacketRelay subscriber that should receiver the packet
-   * payload. The method is virtual to allow flexibility in how the packet
-   * header is defined.
-   */
-  virtual PacketContainer* toContainer(const char* pData, ui32 nSizeBytes) = 0;
+   struct RelayInfo {
+      DestinationID destination_id;
+      const void* data_ptr;
+      ui32 length;
+      RelayInfo()
+      : destination_id( 0 )
+      , data_ptr( NULL )
+      , length( 0 )
+      {}
+      RelayInfo( DestinationID destination_id, const void* data_ptr, ui32 length )
+      :  destination_id( destination_id )
+      ,  data_ptr( data_ptr )
+      ,  length( length )
+      {}
+   };
+
+   /**
+    * Pure virtual method to extract an encapsulated packet and return a
+    * routable PacketContainer. This method assumes that the received
+    * represents a packet parsable by this subscriber. The packet header
+    * should indicate the PacketRelay subscriber that should receiver the packet
+    * payload. The method is virtual to allow flexibility in how the packet
+    * header is defined.
+    */
+    virtual RelayInfo* extract( const RelayInfo& input ) = 0;
+
+   virtual PacketReceiver* setReceiver( RegisteredRouter& router_info );
 
 private:
 
-  RelayReceiverHook& mrInReceiver;
+   RelayReceiverHook& relay_receiver_;
 };
 
 

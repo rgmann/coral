@@ -6,7 +6,6 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 RelayReceiverHook::RelayReceiverHook()
-: receiver_ptr_(NULL)
 {
 }
 
@@ -16,32 +15,76 @@ RelayReceiverHook::~RelayReceiverHook()
 }
 
 //-----------------------------------------------------------------------------
-void RelayReceiverHook::setReceiver(PacketReceiver* pReceiver)
+bool RelayReceiverHook::registerReceiver( const RegisteredRouter& router_info )
 {
-  receiver_ptr_ = pReceiver;
+   bool add_success = false;
+
+   // Verify that the router is not already in the list.
+   RegisteredRouterList::iterator router_iterator = routers_.begin();
+   for (; router_iterator != routers_.end(); ++router_iterator )
+   {
+      if ( router_iterator->destination_id == router_info.destination_id )
+         break;
+   }
+
+   if ( router_iterator == routers_.end() )
+   {
+      routers_.push_back( router_info );
+      add_success = true;
+   }
+
+   return add_success;
+}
+
+//-----------------------------------------------------------------------------
+void RelayReceiverHook::unregisterReceiver( DestinationID destination_id )
+{
+   RegisteredRouterList::iterator router_iterator = routers_.begin();
+   for (; router_iterator != routers_.end(); ++router_iterator )
+   {
+      if ( router_iterator->destination_id == destination_id )
+      {
+         routers_.erase( router_iterator );
+         break;
+      }
+   }
 }
 
 //-----------------------------------------------------------------------------
 bool RelayReceiverHook::call( PacketContainer* container_ptr )
 {
-  bool success = false;
+   bool success = false;
 
-  if ( receiver_ptr_ )
-  {
-    success = receiver_ptr_->push( translate( container_ptr ) );
-  }
-  else
-  {
-    log::error("RelayReceiverHook::call - NULL receiver\n");
-  }
+   RegisteredRouterList::iterator router_iterator = routers_.begin();
+   for (; router_iterator != routers_.end(); ++router_iterator )
+   {
+      RegisteredRouter& router_info = *router_iterator;
+
+      PacketContainer* translated_container_ptr = translate(
+         router_info.destination_id,
+         container_ptr
+      );
+
+      if ( translated_container_ptr &&
+         ( router_iterator->mode == kSubscriberModeReadWrite ) )
+      {
+         PacketReceiver* receiver_ptr = router_info.receiver_ptr;
+
+         success = receiver_ptr->send( translated_container_ptr );
+      }
+      else
+      {
+         // TODO
+      }
+   }
 
   return success;
 }
 
 //-----------------------------------------------------------------------------
-PacketContainer* RelayReceiverHook::translate( PacketContainer* container_ptr )
+PacketContainer* RelayReceiverHook::translate( DestinationID destination_id, PacketContainer* container_ptr )
 {
-  return container_ptr;
+   return container_ptr;
 }
 
 
@@ -49,7 +92,7 @@ PacketContainer* RelayReceiverHook::translate( PacketContainer* container_ptr )
 PacketRelay::PacketRelay(RelayReceiverHook& rInReceiver)
 : PacketRouter(&rInReceiver)
 , PacketSubscriber()
-, mrInReceiver(rInReceiver)
+, relay_receiver_(rInReceiver)
 {
 }
 
@@ -59,47 +102,35 @@ PacketRelay::~PacketRelay()
 }
 
 //-----------------------------------------------------------------------------
-void PacketRelay::setReceiver(PacketReceiver* pReceiver)
+PacketReceiver* PacketRelay::setReceiver( RegisteredRouter& registered_router )
 {
-  PacketSubscriber::setReceiver(pReceiver);
-  mrInReceiver.setReceiver(pReceiver);
+   PacketReceiver* receiver_ptr = NULL;
+   if( relay_receiver_.registerReceiver( registered_router ) )
+   {
+      receiver_ptr = &relay_receiver_;
+   }
+  
+   return receiver_ptr;
 }
 
+
 //-----------------------------------------------------------------------------
-bool PacketRelay::put(const char* pData, ui32 nSizeBytes)
+bool PacketRelay::put( DestinationID destination_id, const void* data_ptr, ui32 length )
 {
-   bool success = false;
+   bool relay_success = false;
 
-   PacketContainer* container_ptr = toContainer( pData, nSizeBytes );
+   RelayInfo input( destination_id, data_ptr, length );
+   RelayInfo* output = extract( input );
 
-   if ( container_ptr )
+   if ( output )
    {
-      PacketSubscriber* subscriber_ptr = getSubscriber(
-         container_ptr->mDestinationID
-      );
-
-      if ( subscriber_ptr )
-      {
-         success = subscriber_ptr->put(
-            (char*)container_ptr->mpPacket->basePtr(),
-            container_ptr->mpPacket->allocatedSize()
-         );
-
-         delete container_ptr->mpPacket;
-      }
-      else
-      {
-         log::debug("PacketRelay::put - No subcriber with ID=%d\n",
-                  container_ptr->mDestinationID);
-      }
-
-      delete container_ptr;
+      relay_success = publish( output->destination_id, output->data_ptr, output->length );
+      delete output;
    }
    else
    {
-     log::error("PacketRelay::put - Failed to extract relayable container\n");
+      log::error("PacketRelay::put: Failed to extract payload\n");
    }
 
-   return success;
+   return relay_success;
 }
-

@@ -6,15 +6,15 @@ using namespace liber::netapp;
 
 //----------------------------------------------------------------------------
 PacketContainer::PacketContainer()
-: mDestinationID(-1)
-, mpPacket(NULL)
+: destination_id_(-1)
+, packet_ptr_(NULL)
 {
 }
 
 //----------------------------------------------------------------------------
-PacketContainer::PacketContainer(int destination, GenericPacket* pPacket)
-: mDestinationID(destination)
-, mpPacket(pPacket)
+PacketContainer::PacketContainer( DestinationID destination_id, GenericPacket* packet_ptr )
+: destination_id_(destination_id)
+, packet_ptr_(packet_ptr)
 {
 }
 

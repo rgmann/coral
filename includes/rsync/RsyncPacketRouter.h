@@ -16,7 +16,9 @@ public:
 
 protected:
 
-  liber::netapp::PacketContainer* translate(liber::netapp::PacketContainer* pContainer);
+  liber::netapp::PacketContainer* translate(
+    liber::netapp::DestinationID destination_id,
+    liber::netapp::PacketContainer* in_container_ptr );
 
 private:
 
@@ -33,7 +35,8 @@ public:
 
 protected:
 
-  liber::netapp::PacketContainer* toContainer(const char* pData, ui32 nSizeBytes);
+  // liber::netapp::PacketContainer* toContainer(const char* pData, ui32 nSizeBytes);
+  RelayInfo* extract( const RelayInfo& input );
 
 private:
 

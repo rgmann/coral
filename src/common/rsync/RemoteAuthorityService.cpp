@@ -35,7 +35,8 @@ void RemoteAuthorityService::setRequestID(int requestID)
 //-----------------------------------------------------------------------------
 void RemoteAuthorityService::process( RsyncJob* job_ptr )
 {
-  job_ptr->packetRouter().addSubscriber( RsyncPacket::RsyncAuthorityService, this );
+  job_ptr->packetRouter().subscribe(
+    RsyncPacket::RsyncAuthorityService, this, liber::netapp::kSubscriberModeReadWrite );
 
   {
     boost::mutex::scoped_lock guard( active_job_lock_ );
@@ -44,7 +45,7 @@ void RemoteAuthorityService::process( RsyncJob* job_ptr )
 
   RsyncQueryResponse response( job_ptr->descriptor().uuid(), RsyncSuccess );
 
-  sendPacketTo( mRequestID, new (std::nothrow) RsyncPacket(
+  sendTo( mRequestID, new (std::nothrow) RsyncPacket(
     RsyncPacket::RsyncRemoteAuthAcknowledgment,
     response.serialize()
   ));
@@ -55,7 +56,7 @@ void RemoteAuthorityService::process( RsyncJob* job_ptr )
 
   // JobReport& rReport = job_ptr->report();
 
-  bool auth_report_send_success = sendPacketTo( mRequestID, new RsyncPacket(
+  bool auth_report_send_success = sendTo( mRequestID, new RsyncPacket(
     RsyncPacket::RsyncAuthorityReport,
     job_ptr->report().source.serialize()
   ));
@@ -71,36 +72,36 @@ void RemoteAuthorityService::process( RsyncJob* job_ptr )
     active_job_ = NULL;
   }
 
-  job_ptr->packetRouter().removeSubscriber( RsyncPacket::RsyncAuthorityService );
+  job_ptr->packetRouter().unsubscribe( RsyncPacket::RsyncAuthorityService, this );
 }
 
 //-----------------------------------------------------------------------------
-bool RemoteAuthorityService::put(const char* pData, ui32 nLength)
+bool RemoteAuthorityService::put(DestinationID destination_id, const void* data_ptr, ui32 length )
 {
-  bool lbSuccess = false;
-  RsyncPacket packet;
+   bool success = false;
+   RsyncPacketLite packet( data_ptr, length );
 
-  if ( packet.unpack(pData, nLength) )
-  {
-    switch ( packet.data()->type )
-    {
-      case RsyncPacket::RsyncSegment:
-        pushSegment( packet.dataPtr(), packet.data()->length);
-        lbSuccess = true;
-        break;
+   if ( packet.valid() )
+   {
+      switch ( packet.header()->type )
+      {
+         case RsyncPacket::RsyncSegment:
+            pushSegment( packet.data(), packet.header()->length );
+            success = true;
+            break;
 
-      default:
-        log::debug("RemoteAuthorityService::put - invalid packet type=%d\n",
-                   packet.data()->type);
-        break;
-    }
-  }
-  else
-  {
+         default:
+            log::debug("RemoteAuthorityService::put - invalid packet type=%d\n",
+                      packet.header()->type);
+            break;
+      }
+   }
+   else
+   {
     log::debug("RemoteAuthorityService::put - failed to unpack packet\n");
-  }
+   }
 
-  return lbSuccess;
+   return success;
 }
 
 //-----------------------------------------------------------------------------
@@ -108,7 +109,7 @@ void RemoteAuthorityService::call(Instruction* pInstruction)
 {
   if (pInstruction)
   {
-    sendPacketTo( mRequestID, new RsyncPacket(
+    sendTo( mRequestID, new RsyncPacket(
       RsyncPacket::RsyncInstruction,
       InstructionFactory::Serialize(pInstruction)
     ));

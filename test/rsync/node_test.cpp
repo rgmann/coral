@@ -32,7 +32,7 @@ protected:
       node_ = new RsyncNode( LOCAL_ROOT, *workgroup_ );
       router_.launch();
 
-      ASSERT_EQ( true, router_.addSubscriber( RSYNC_SUB_ID, &node_->subscriber()) );
+      ASSERT_EQ( true, router_.subscribe( RSYNC_SUB_ID, &node_->subscriber()) );
 
       // node_->setCallback( &mLocalCallback );
    }
@@ -40,7 +40,7 @@ protected:
    void TearDown()
    {
       router_.cancel(true);
-      router_.removeSubscriber( RSYNC_SUB_ID );
+      router_.unsubscribe( RSYNC_SUB_ID, &node_->subscriber() );
 
 
       node_->unsetJobCompletionCallback();
@@ -132,7 +132,7 @@ TEST_F( NodeTest, RemoteSourceDoesNotExist ) {
    WorkerGroup remote_workgroup;
    RsyncNode remote_node( REMOTE_ROOT, remote_workgroup );
    remote_router.launch();
-   ASSERT_EQ( true, remote_router.addSubscriber( RSYNC_SUB_ID, &remote_node.subscriber()) );
+   ASSERT_EQ( true, remote_router.subscribe( RSYNC_SUB_ID, &remote_node.subscriber()) );
 
    EXPECT_EQ( RsyncSuccess, node_->sync(
       LocalResourcePath( destination ),
@@ -143,7 +143,7 @@ TEST_F( NodeTest, RemoteSourceDoesNotExist ) {
    EXPECT_EQ( RsyncSourceFileNotFound, callback.error_ );
 
    remote_router.cancel();
-   remote_router.removeSubscriber( RSYNC_SUB_ID );
+   remote_router.unsubscribe( RSYNC_SUB_ID, &remote_node.subscriber() );
 
    router_.setCounterpart( NULL );
 }

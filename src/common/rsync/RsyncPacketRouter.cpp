@@ -9,37 +9,33 @@ using namespace liber::rsync;
 //-----------------------------------------------------------------------------
 RsyncPacketReceiverHook::RsyncPacketReceiverHook()
 : RelayReceiverHook()
-, mnSubscriberID(-1)
 {
 }
 
 //-----------------------------------------------------------------------------
-void RsyncPacketReceiverHook::setSubscriberID(int nSubscriberID)
+PacketContainer* RsyncPacketReceiverHook::translate(
+   DestinationID destination_id, PacketContainer* in_container_ptr )
 {
-  mnSubscriberID = nSubscriberID;
-}
+   PacketContainer* out_container_ptr = NULL;
 
-//-----------------------------------------------------------------------------
-PacketContainer* RsyncPacketReceiverHook::
-translate(PacketContainer* pContainer)
-{
-  PacketContainer* lpContainer = NULL;
+   if ( in_container_ptr )
+   {
+      out_container_ptr = new PacketContainer();
 
-  if (mnSubscriberID > 0)
-  {
-    lpContainer = new PacketContainer();
+      out_container_ptr->packet_ptr_ = new RsyncPacket(
+         in_container_ptr->destination_id_,
+         in_container_ptr->packet_ptr_
+      );
 
-    lpContainer->mpPacket = new RsyncPacket(pContainer->mDestinationID,
-                                            pContainer->mpPacket);
-    lpContainer->mDestinationID = mnSubscriberID;
-  }
-  else
-  {
-    log::error("RsyncPacketReceiverHook::translate - "
-               "RSYNC has not been registered with a valid subscriber ID\n");
-  }
+      out_container_ptr->destination_id_ = destination_id;
+   }
+   else
+   {
+      log::error("RsyncPacketReceiverHook::translate - "
+                 "RSYNC has not been registered with a valid subscriber ID\n");
+   }
 
-  return lpContainer;
+   return out_container_ptr;
 }
 
 
@@ -55,45 +51,37 @@ RsyncPacketRouter::~RsyncPacketRouter()
 }
 
 //-----------------------------------------------------------------------------
-void RsyncPacketRouter::setID(int id)
+PacketRelay::RelayInfo* RsyncPacketRouter::extract(
+   const PacketRelay::RelayInfo& input )
 {
-  PacketRelay::setID(id);
-  mReceiver.setSubscriberID(id);
-}
+   RelayInfo* output = NULL;
 
-//-----------------------------------------------------------------------------
-PacketContainer* RsyncPacketRouter::
-toContainer(const char* pData, ui32 nSizeBytes)
-{
-  PacketContainer* lpContainer = NULL;
+   if ( input.data_ptr )
+   {
+      output = new (std::nothrow) RelayInfo();
 
-  RsyncPacket* lpPacket = new RsyncPacket();
-  if ( lpPacket->unpack( pData, nSizeBytes ) )
-  {
-    lpContainer = new PacketContainer();
-    lpContainer->mDestinationID = lpPacket->data()->type;
+      if ( input.data_ptr && ( input.length >= sizeof(RsyncPacket::Data) ) )
+      {
+         const RsyncPacket::Data* header_ptr =
+            reinterpret_cast<const RsyncPacket::Data*>(input.data_ptr);
 
-    RsyncPacket* lpPayload = new RsyncPacket();
+         output->destination_id = header_ptr->type;
+         output->length     = header_ptr->length;
 
-    if ( lpPayload->unpack( lpPacket->dataPtr(), lpPacket->data()->length ) )
-    {
-      lpContainer = new PacketContainer();
-      lpContainer->mDestinationID = lpPacket->data()->type;
-      lpContainer->mpPacket = lpPayload;
-    }
-    else
-    {
-      log::error("toContainer - Failed to unpack payload\n");
-      delete lpPayload;
-    }
-  }
-  else
-  {
-    log::error("RsyncPacketRouter::repackageIn - Failed to unpack packet\n");
-    //delete lpPacket;
-  }
-  delete lpPacket;
+         if ( header_ptr->length > sizeof(RsyncPacket::Data) )
+         {
+            output->data_ptr = reinterpret_cast<const ui8*>(input.data_ptr) +
+                               sizeof(RsyncPacket::Data);
+         }
+      }
+      
+      if ( output->data_ptr == NULL )
+      {
+         delete output;
+         output = NULL;
+      }
+   }
 
-  return lpContainer;
+   return output;
 }
 

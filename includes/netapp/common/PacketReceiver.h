@@ -4,15 +4,17 @@
 namespace liber {
 namespace netapp {
 
+typedef unsigned int DestinationID;
+
 class PacketContainer {
 public:
 
   PacketContainer();
 
-  PacketContainer(int destination, class GenericPacket* pPacket);
+  PacketContainer( DestinationID destination_id, class GenericPacket* packet_ptr );
 
-  int mDestinationID;
-  class GenericPacket* mpPacket;
+  DestinationID destination_id_;
+  class GenericPacket* packet_ptr_;
 };
 
 
@@ -22,7 +24,7 @@ public:
   PacketReceiver() {};
   virtual ~PacketReceiver() {};
 
-  virtual bool push(PacketContainer* pContainer) = 0;
+  virtual bool send( PacketContainer* container_ptr ) = 0;
 };
 
 } // End namespace netapp

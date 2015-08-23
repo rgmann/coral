@@ -8,9 +8,7 @@
 namespace liber {
 namespace netapp {
 
-class IntraRouter
-: public PacketRouter
-, public liber::concurrency::IThread {
+class IntraRouter : public PacketRouter, public liber::concurrency::IThread {
 public:
 
   IntraRouter();

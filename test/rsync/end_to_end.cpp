@@ -205,8 +205,8 @@ public:
       mLocalRouter.launch();
       mRemoteRouter.launch();
 
-      ASSERT_EQ( true, mLocalRouter.addSubscriber(RSYNC_SUB_ID, &mLocalNode->subscriber()) );
-      ASSERT_EQ( true, mRemoteRouter.addSubscriber(RSYNC_SUB_ID, &mRemoteNode->subscriber()) );
+      ASSERT_EQ( true, mLocalRouter.subscribe(RSYNC_SUB_ID, &mLocalNode->subscriber() ) );
+      ASSERT_EQ( true, mRemoteRouter.subscribe(RSYNC_SUB_ID, &mRemoteNode->subscriber()) );
 
       mLocalNode->setJobCompletionCallback( &mLocalCallback );
       mRemoteNode->setJobCompletionCallback( &mRemoteCallback );
@@ -217,8 +217,8 @@ public:
       mLocalRouter.cancel(true);
       mRemoteRouter.cancel(true);
 
-      mLocalRouter.removeSubscriber( RSYNC_SUB_ID );
-      mRemoteRouter.removeSubscriber( RSYNC_SUB_ID );
+      mLocalRouter.unsubscribe( RSYNC_SUB_ID, &mLocalNode->subscriber() );
+      mRemoteRouter.unsubscribe( RSYNC_SUB_ID, &mRemoteNode->subscriber() );
 
       mLocalNode->unsetJobCompletionCallback();
       mRemoteNode->unsetJobCompletionCallback();

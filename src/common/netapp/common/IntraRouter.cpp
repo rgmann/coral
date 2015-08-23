@@ -28,39 +28,38 @@ void IntraRouter::setCounterpart(IntraRouter* pCounterpart)
 //-----------------------------------------------------------------------------
 void IntraRouter::run(const bool& bShutdown)
 {
-  while (!bShutdown)
-  {
-    PacketContainer* lpContainer = NULL;
-    if ((lpContainer = mReceiver.pop()) != NULL)
-    {
-      if (mpCounterpart)
+   while (!bShutdown)
+   {
+      PacketContainer* container_ptr = NULL;
+      if ( ( container_ptr = mReceiver.pop() ) != NULL )
       {
-        mpCounterpart->routePacket(lpContainer);
-      }
-      else
-      {
-        log::error("IntraRouter - no counterpart set\n");
-      }
+         if ( mpCounterpart )
+         {
+            mpCounterpart->routePacket( container_ptr );
+         }
+         else
+         {
+           log::error("IntraRouter - no counterpart set\n");
+         }
 
-      delete lpContainer;
-    }
-  }
+         if ( container_ptr->packet_ptr_ )
+         {
+            delete container_ptr->packet_ptr_;
+            container_ptr->packet_ptr_ = NULL;
+         }
+
+         delete container_ptr;
+      }
+   }
 }
 
 //-----------------------------------------------------------------------------
 void IntraRouter::routePacket(PacketContainer* pContainer)
 {
-  PacketSubscriber* lpSubscriber = getSubscriber(pContainer->mDestinationID);
-  if (lpSubscriber)
-  {
-    lpSubscriber->put((char*)pContainer->mpPacket->basePtr(),
-                      pContainer->mpPacket->allocatedSize());
-  }
-  else
-  {
-    log::status("IntraRouter::routePacket - no subscriber registered with ID=%d\n",
-                pContainer->mDestinationID);
-  }
+   publish(
+      pContainer->destination_id_,
+      pContainer->packet_ptr_->basePtr(),
+      pContainer->packet_ptr_->allocatedSize());
 }
 
 

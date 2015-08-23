@@ -37,7 +37,7 @@ public:
    void setJobRequestCallback( JobRequestCallback* callback_ptr );
    void unsetJobRequestCallback();
 
-   bool put( const char* data_ptr, ui32 size_bytes );
+   bool put( liber::netapp::DestinationID destination_id, const void* data_ptr, ui32 size_bytes );
 
    JobLimits limits_;
 

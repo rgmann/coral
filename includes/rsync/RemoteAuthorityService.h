@@ -25,7 +25,7 @@ public:
 
   void setRequestID(int nRequestID);
 
-  bool put(const char* pData, ui32 nLength);
+  bool put( liber::netapp::DestinationID destination_id, const void* pData, ui32 nLength);
 
   typedef RsyncError (*QueryHandler)(JobDescriptor&);
   void setQueryHandler(QueryHandler pFunc);

@@ -1,5 +1,6 @@
 #include "Log.h"
 #include "PacketSubscriber.h"
+#include "PacketReceiver.h"
 #include "PacketRouter.h"
 
 using namespace liber;
@@ -14,34 +15,75 @@ PacketRouter::PacketRouter(PacketReceiver* pReceiver)
 //-----------------------------------------------------------------------------
 PacketRouter::~PacketRouter()
 {
-  receiver_ptr_ = NULL;
+   DestinationIterator destination_iterator = destination_table_.begin();
+   for (; destination_iterator != destination_table_.end(); ++destination_iterator )
+   {
+      if ( destination_iterator->second )
+      {
+         delete destination_iterator->second;
+      }
+   }
+   destination_table_.clear();
+
+   receiver_ptr_ = NULL;
 }
 
 //-----------------------------------------------------------------------------
-bool PacketRouter::addSubscriber(
-  int               subscriber_id,
-  PacketSubscriber* subscriber_ptr
+bool PacketRouter::subscribe(
+  DestinationID            destination_id,
+  PacketSubscriber* subscriber_ptr,
+  SubscriberMode          mode
 )
 {
    bool add_success = false;
 
-   if ( subscriber_ptr != NULL )
+   if ( subscriber_ptr )
    {
       boost::mutex::scoped_lock guard( table_lock_ );
 
-      if ( subscriber_table_.count(subscriber_id) == 0 )
+      Destination* destination_ptr = NULL;
+      DestinationIterator destination_iterator = destination_table_.find( destination_id );
+
+      // If the channel does not exist, add the new channel
+      if ( destination_iterator == destination_table_.end() )
       {
-         subscriber_ptr->subscribe( subscriber_id, receiver_ptr_ );
+         destination_ptr = new Destination( destination_id );
 
-         subscriber_table_.insert( std::make_pair( subscriber_id, subscriber_ptr ) );
-
-         add_success = true;
+         destination_table_.insert( std::make_pair( destination_id, destination_ptr ) );
       }
       else
       {
-         log::error(
-            "PacketRouter::addSubscriber: "
-            "Router already has a subcriber with ID = %d\n", subscriber_id);
+         destination_ptr = destination_iterator->second;
+      }
+
+      {
+         boost::mutex::scoped_lock destination_guard( destination_ptr->lock() );
+         
+         // Verify that the subcriber is not already subscribed to this channel.
+         SubscriberList& subscribers = destination_ptr->subscribers();
+         SubscriberIterator subscriber_iterator = subscribers.begin();
+         for (; subscriber_iterator != subscribers.end(); ++subscriber_iterator )
+         {
+            if ( *subscriber_iterator == subscriber_ptr )
+            {
+               break;
+            }
+         }
+
+         // If we reached the end, then the subscriber is not already registered.
+         if ( subscriber_iterator == subscribers.end() )
+         {
+            if ( subscriber_ptr->registerRouter( destination_id, receiver_ptr_, mode ) )
+            {
+               subscribers.push_back( subscriber_ptr );
+
+               add_success = true;
+            }
+            else
+            {
+               log::error("PacketRouter::subscribe: Failed to register router\n");
+            }
+         }
       }
    }
 
@@ -49,58 +91,88 @@ bool PacketRouter::addSubscriber(
 }
 
 //-----------------------------------------------------------------------------
-PacketSubscriber* PacketRouter::removeSubscriber( int subscriber_id )
+bool PacketRouter::unsubscribe( DestinationID destination_id, PacketSubscriber* subscriber_ptr )
 {
    boost::mutex::scoped_lock guard( table_lock_ );
 
-   PacketSubscriber* subscriber_ptr = NULL;
+   bool remove_success = false;
+   DestinationIterator destination_iterator = destination_table_.find( destination_id );
 
-   if ( subscriber_table_.count( subscriber_id ) != 0 )
+   if ( destination_iterator != destination_table_.end() )
    {
-      subscriber_ptr = subscriber_table_.find( subscriber_id )->second;
-      subscriber_ptr->unsubscribe();
+      Destination* destination_ptr = destination_iterator->second;
 
-      subscriber_table_.erase( subscriber_id );
+      boost::mutex::scoped_lock destination_guard( destination_ptr->lock() );
+
+      SubscriberList& subscribers = destination_ptr->subscribers();
+      SubscriberIterator subscriber_iterator = subscribers.begin();
+      for (; subscriber_iterator != subscribers.end(); ++subscriber_iterator )
+      {
+         if ( *subscriber_iterator == subscriber_ptr )
+         {
+            subscribers.erase( subscriber_iterator );
+            remove_success = subscriber_ptr->unregisterRouter( destination_id );
+            break;
+         }
+      }
    }
-   else
-   {
-      log::warn("PacketRouter::removeSubscriber: "
-             "No subscriber with ID = %d\n", subscriber_id);
-   }
 
-   return subscriber_ptr;
+   return remove_success;
 }
 
 //-----------------------------------------------------------------------------
-ui32 PacketRouter::count()
+i32 PacketRouter::count( DestinationID destination_id )
 {
-  return subscriber_table_.size();
-}
 
-//-----------------------------------------------------------------------------
-bool PacketRouter::empty()
-{
-  return subscriber_table_.empty();
-}
-
-//-----------------------------------------------------------------------------
-bool PacketRouter::hasSubscriber( int subscriber_id )
-{
-  boost::mutex::scoped_lock guard( table_lock_ );
-  return ( subscriber_table_.count( subscriber_id ) != 0 );
-}
-
-//-----------------------------------------------------------------------------
-PacketSubscriber* PacketRouter::getSubscriber( int subscriber_id )
-{
    boost::mutex::scoped_lock guard( table_lock_ );
 
-   PacketSubscriber* subscriber_ptr = NULL;
+   i32 subscriber_count = -1;
+   DestinationIterator destination_iterator = destination_table_.find( destination_id );
 
-   if ( subscriber_table_.count( subscriber_id ) != 0 )
+   if ( destination_iterator != destination_table_.end() )
    {
-      subscriber_ptr = subscriber_table_.find( subscriber_id )->second;
+      Destination* destination_ptr = destination_iterator->second;
+
+      subscriber_count = destination_ptr->subscribers().size();
    }
 
-   return subscriber_ptr;
+   return subscriber_count;
 }
+
+//-----------------------------------------------------------------------------
+bool PacketRouter::publish( DestinationID destination_id, const void* data_ptr, ui32 length )
+{
+   bool publish_success = false;
+   Destination* destination_ptr = NULL;
+
+   {
+      boost::mutex::scoped_lock guard( table_lock_ );
+      DestinationIterator destination_iterator = destination_table_.find( destination_id );
+
+      if ( destination_iterator != destination_table_.end() )
+      {
+         destination_ptr = destination_iterator->second;
+      }
+   }
+
+   if ( destination_ptr )
+   {
+      boost::mutex::scoped_lock guard( destination_ptr->lock() );
+
+      SubscriberIterator subscriber_iterator = destination_ptr->subscribers().begin();
+      for (; subscriber_iterator != destination_ptr->subscribers().end(); ++subscriber_iterator )
+      {
+         PacketSubscriber* subscriber_ptr = *subscriber_iterator;
+
+         if ( allowPublish( destination_id, subscriber_ptr, data_ptr, length ) )
+         {
+            subscriber_ptr->put( destination_id, data_ptr, length );
+         }
+      }
+
+      publish_success = true;
+   }
+
+   return publish_success;
+}
+

@@ -165,7 +165,7 @@ RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
          }
          else
          {
-            log::error("JobAgent::createJob - Bad remote job\n");
+            log::error("JobAgent::createJob - Bad remote job: %s\n", descriptor.getDestinationPath().c_str());
             job_create_status = error(job_ptr, RsyncBadRemoteJob);
          }
       }
@@ -322,7 +322,7 @@ RsyncError JobAgent::sendRemoteJob( const JobDescriptor& descriptor )
 
    // Attempt to send the request. Failure means that the packet was not
    // added to the send queue, so delete it.
-   if ( sendPacketTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
+   if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
    {
       send_status = kRsyncCommError;
       delete packet_ptr;
@@ -349,7 +349,7 @@ RsyncError JobAgent::error( RsyncJob* job_ptr, RsyncError error )
 
       if ( packet_ptr )
       {
-         if ( sendPacketTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
+         if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
          {
             error = kRsyncCommError;
             delete packet_ptr;
@@ -381,7 +381,7 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
 
       if ( packet_ptr )
       {
-         if ( sendPacketTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
+         if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
          {
             delete packet_ptr;
          }
@@ -406,26 +406,28 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
 }
 
 //----------------------------------------------------------------------------
-bool JobAgent::put( const char* data_ptr, ui32 size_bytes )
+bool JobAgent::put( DestinationID destination_id, const void* data_ptr, ui32 length )
 {
-   bool route_success = true;
+   bool route_success = false;
+   RsyncPacketLite packet( data_ptr, length );
 
-   RsyncPacket packet;
 
-   if ( packet.unpack( data_ptr, size_bytes ) )
+   if ( packet.valid() )
    {
-      switch ( packet.data()->type )
+      route_success = true;
+
+      switch ( packet.header()->type )
       {
          case RsyncPacket::RsyncJobRequest:
-            createJob( (const char*)packet.dataPtr(), packet.data()->length );
+            createJob( (const char*)packet.data(), packet.header()->length );
             break;
 
          case RsyncPacket::RsyncJobComplete:
-            finishRemoteJob( (const char*)packet.dataPtr(), packet.data()->length );
+            finishRemoteJob( (const char*)packet.data(), packet.header()->length );
             break;
 
          case RsyncPacket::RsyncRemoteAuthQuery:
-            handleRemoteJobRequest( packet.dataPtr(), packet.data()->length);
+            handleRemoteJobRequest( packet.data(), packet.header()->length );
             break;
 
          default:
@@ -433,10 +435,6 @@ bool JobAgent::put( const char* data_ptr, ui32 size_bytes )
             route_success = false;
             break;
       }
-   }
-   else
-   {
-      route_success = false;
    }
 
    return route_success;
@@ -518,7 +516,7 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
                response.serialize()
             );
 
-            if ( sendPacketTo( RsyncPacket::RsyncAuthorityInterface, packet_ptr ) == false )
+            if ( sendTo( RsyncPacket::RsyncAuthorityInterface, packet_ptr ) == false )
             {
                log::error(
                   "%s - Failed to send remote auth request ack.\n",

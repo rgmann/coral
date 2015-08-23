@@ -25,7 +25,7 @@ public:
   RemoteAuthorityInterface();
   ~RemoteAuthorityInterface();
 
-  bool put(const char* pData, ui32 nLength);
+  bool put( liber::netapp::DestinationID destination_id, const void* pData, ui32 nLength);
 
 
   void process(RsyncJob* pJob);

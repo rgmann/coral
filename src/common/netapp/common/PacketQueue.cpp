@@ -14,16 +14,16 @@ PacketQueue::~PacketQueue()
 }
 
 //----------------------------------------------------------------------------
-bool PacketQueue::push(PacketContainer* pContainer)
+bool PacketQueue::send( PacketContainer* container_ptr )
 {
-  return mQueue.push(pContainer);
+  return mQueue.push( container_ptr );
 }
 
 //----------------------------------------------------------------------------
 PacketContainer* PacketQueue::pop(int nTimeoutMs)
 {
-  PacketContainer* lpContainer = NULL;
-  mQueue.pop(lpContainer, nTimeoutMs);
-  return lpContainer;
+  PacketContainer* container_ptr = NULL;
+  mQueue.pop( container_ptr, nTimeoutMs );
+  return container_ptr;
 }
 

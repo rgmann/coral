@@ -39,7 +39,7 @@ public:
    */
   inline size_t size() const { return item_count_; };
 
-  inline size_t buckets() const { return bucket_coount_; };
+  inline size_t buckets() const { return bucket_count_; };
 
   void histogram( std::ostream& stream );
 
@@ -51,7 +51,7 @@ private:
   /**
    * Extremely simple hash function.
    */
-  size_t hash(int key) { return (size_t)(key % bucket_coount_); };
+  size_t hash(int key) { return (size_t)(key % bucket_count_); };
 
   /**
    * Access an item by item by key and comparison functor.
@@ -73,7 +73,7 @@ private:
 private:
 
   // Hash table bucket count.
-  size_t bucket_coount_;
+  size_t bucket_count_;
 
   // The hash table is a vector of vectors.
   std::vector<Bucket> buckets_;
@@ -87,9 +87,9 @@ template<int KeySize, typename Type>
 HashTable<KeySize, Type>::HashTable()
 : item_count_(0)
 {
-  bucket_coount_ = (int)std::pow(2, KeySize);
+  bucket_count_ = (int)std::pow(2, KeySize);
 
-  for (int nBucket = 0; nBucket < bucket_coount_; nBucket++)
+  for (int nBucket = 0; nBucket < bucket_count_; nBucket++)
   {
     buckets_.push_back(Bucket());
   }
@@ -141,7 +141,7 @@ bool HashTable<KeySize, Type>::find(int key, Type& item, Comparator& comp)
 template<int KeySize, typename Type>
 void HashTable<KeySize, Type>::clear()
 {
-  for (size_t bucket_index = 0; bucket_index < bucket_coount_; bucket_index++)
+  for (size_t bucket_index = 0; bucket_index < bucket_count_; bucket_index++)
   {
     buckets_.at( bucket_index ).clear();
   }
@@ -153,7 +153,7 @@ void HashTable<KeySize, Type>::clear()
 template<int KeySize, typename Type> template<typename Destroyer>
 void HashTable<KeySize, Type>::clear(Destroyer& destroy)
 {
-  for (size_t bucket_index = 0; bucket_index < bucket_coount_; bucket_index++)
+  for (size_t bucket_index = 0; bucket_index < bucket_count_; bucket_index++)
   {
     typename HashTable<KeySize, Type>::Bucket& bucket = buckets_.at(bucket_index);
     typename Bucket::iterator item = bucket.begin();

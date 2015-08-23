@@ -14,8 +14,8 @@ PacketReceiverHook::~PacketReceiverHook()
 }
 
 //----------------------------------------------------------------------------
-bool PacketReceiverHook::push(PacketContainer* pContainer)
+bool PacketReceiverHook::send( PacketContainer* container_ptr )
 {
-  return call(pContainer);
+  return call( container_ptr );
 }
 

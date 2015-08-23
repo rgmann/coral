@@ -12,11 +12,11 @@ public:
   PacketReceiverHook();
   virtual ~PacketReceiverHook();
 
-  bool push(PacketContainer* pContainer);
+  bool send( PacketContainer* container_ptr );
 
 protected:
 
-  virtual bool call(PacketContainer* pContainer) = 0;
+  virtual bool call( PacketContainer* container_ptr ) = 0;
 
 };
 
