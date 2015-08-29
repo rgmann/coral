@@ -13,8 +13,8 @@ using namespace liber::rsync;
 //----------------------------------------------------------------------------
 AssemblerThread::AssemblerThread( JobAgentPairQueue& queue )
 :  IThread("AssemblerThread")
-,  assembler_  ( segment_file_ )
 ,  job_queue_  ( queue )
+,  assembler_  ( segment_file_ )
 {
 }
 

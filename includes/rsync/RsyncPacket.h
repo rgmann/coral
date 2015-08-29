@@ -22,10 +22,10 @@ public:
    {
       ui32 length;
       ui32 type;
-      ui8  job_id[ sizeof(boost::uuids::uuid) ];
+      // ui8  job_id[ sizeof(boost::uuids::uuid) ];
    };
 
-   RsyncTransportPacket( Type type, const GenericPacket* packet_ptr );
+   RsyncTransportPacket( int type, const GenericPacket* packet_ptr );
 
    Data* const data() const;
 
@@ -69,6 +69,7 @@ public:
 
    struct __attribute ((__packed__)) Data
    {
+      ui8  job_id[ 16 ];
       ui32 length;
       ui32 type;
    };
@@ -76,7 +77,7 @@ public:
    RsyncPacket();
    RsyncPacket(int type, ui32 nLength, const void* pData = NULL);
    RsyncPacket(int type, const std::string& rData);
-   RsyncPacket(int type, const GenericPacket* pPacket);
+   // RsyncPacket(int type, const GenericPacket* pPacket);
 
 
    Data* const data() const;
@@ -94,11 +95,17 @@ private:
 class RsyncPacketLite {
 public:
 
+   struct __attribute ((__packed__)) Data
+   {
+      ui32 length;
+      ui32 type;
+   };
+
    RsyncPacketLite( const void* data_ptr, ui32 length );
 
    bool valid() const;
 
-   const RsyncPacket::Data* header() const;
+   const Data* header() const;
 
    const void* data() const;
 

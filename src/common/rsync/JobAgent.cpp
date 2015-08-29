@@ -22,7 +22,7 @@ JobAgent::JobAgent(
   RsyncPacketRouter&   packet_router,
   WorkerGroup&         worker_group
 )
-: PacketSubscriber()
+: RsyncPacketSubscriber( false )
 , file_sys_interface_ (file_sys_interface)
 , packet_router_      ( packet_router )
 , worker_group_       ( worker_group )
@@ -316,16 +316,21 @@ RsyncError JobAgent::sendRemoteJob( const JobDescriptor& descriptor )
 {
    RsyncError send_status = RsyncSuccess;
 
-   RsyncPacket* packet_ptr = new (std::nothrow) RsyncPacket(
-      RsyncPacket::RsyncJobRequest, descriptor.serialize()
-   );
-
    // Attempt to send the request. Failure means that the packet was not
    // added to the send queue, so delete it.
-   if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
+   std::string packet_data = descriptor.serialize();
+
+   bool send_success = sendTo(
+      RsyncPacket::RsyncJobAgent,
+      RsyncPacket::RsyncJobRequest,
+      packet_data.data(),
+      packet_data.size()
+   );
+
+   if ( send_success == false )
    {
+      log::error("JobAgent::sendRemoteJob: Failed to send remote job request\n");
       send_status = kRsyncCommError;
-      delete packet_ptr;
    }
 
    return send_status;
@@ -341,23 +346,17 @@ RsyncError JobAgent::error( RsyncJob* job_ptr, RsyncError error )
    {
       RemoteJobResult result( job_ptr->descriptor().uuid(), job_ptr->report() );
 
-      // Report the error to the remote node.
-      RsyncPacket* packet_ptr = new (std::nothrow) RsyncPacket(
+      std::string packet_data = result.serialize();
+      bool send_success = sendTo(
+         RsyncPacket::RsyncJobAgent,
          RsyncPacket::RsyncJobComplete,
-         result.serialize()
-      );
+         packet_data.data(),
+         packet_data.size() );
 
-      if ( packet_ptr )
+      if ( send_success == false )
       {
-         if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
-         {
-            error = kRsyncCommError;
-            delete packet_ptr;
-         }
-      }
-      else
-      {
-         error = kRsyncAllocationError;
+         log::error("JobAgent::error: Failed to transmit error to remote node\n");
+         error = kRsyncCommError;
       }
    }
 
@@ -374,17 +373,16 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
    {
       RemoteJobResult result( descriptor.uuid(), job_ptr->report() );
 
-      RsyncPacket* packet_ptr = new (std::nothrow) RsyncPacket(
+      std::string packet_data = result.serialize();
+      bool send_success = sendTo(
+         RsyncPacket::RsyncJobAgent,
          RsyncPacket::RsyncJobComplete,
-         result.serialize()
-      );
+         packet_data.data(),
+         packet_data.size() );
 
-      if ( packet_ptr )
+      if ( send_success == false )
       {
-         if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) == false )
-         {
-            delete packet_ptr;
-         }
+         log::error("JobAgent::releaseJob: Failed to release job\n");
       }
    }
 
@@ -406,7 +404,7 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
 }
 
 //----------------------------------------------------------------------------
-bool JobAgent::put( DestinationID destination_id, const void* data_ptr, ui32 length )
+bool JobAgent::processPacket( const void* data_ptr, ui32 length )
 {
    bool route_success = false;
    RsyncPacketLite packet( data_ptr, length );
@@ -419,6 +417,7 @@ bool JobAgent::put( DestinationID destination_id, const void* data_ptr, ui32 len
       switch ( packet.header()->type )
       {
          case RsyncPacket::RsyncJobRequest:
+            log::status("JobAgent::processPacket: RsyncJobRequest\n");
             createJob( (const char*)packet.data(), packet.header()->length );
             break;
 
@@ -443,10 +442,9 @@ bool JobAgent::put( DestinationID destination_id, const void* data_ptr, ui32 len
 //-----------------------------------------------------------------------------
 void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
 {
-   liber::log::debug("JobAgent::handleRemoteJobRequest\n");
    RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
-    file_sys_interface_,
-    packet_router_
+      file_sys_interface_,
+      packet_router_
    );
 
    if ( job_ptr )
@@ -509,21 +507,21 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
          // Respond immediately on error.
          else
          {
+            setActiveJob( job_ptr );
+
             RsyncQueryResponse response( descriptor.uuid(), status );
 
-            RsyncPacket* packet_ptr = new (std::nothrow) RsyncPacket(
+            std::string packet_data = response.serialize();
+
+            sendTo(
+               RsyncPacket::RsyncAuthorityInterface,
                RsyncPacket::RsyncRemoteAuthAcknowledgment,
-               response.serialize()
-            );
+               packet_data.data(),
+               packet_data.size() );
 
-            if ( sendTo( RsyncPacket::RsyncAuthorityInterface, packet_ptr ) == false )
-            {
-               log::error(
-                  "%s - Failed to send remote auth request ack.\n",
-                  BOOST_CURRENT_FUNCTION );
+            unsetActiveJob();
 
-               delete packet_ptr;
-            }
+            delete job_ptr;
          }
       }
       else

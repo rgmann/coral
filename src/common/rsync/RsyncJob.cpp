@@ -8,8 +8,8 @@ using namespace liber::rsync;
 RsyncJob::RsyncJob(
   FileSystemInterface&  file_sys_interface,
   RsyncPacketRouter&    router )
-: file_sys_interface_( file_sys_interface )
-, router_( router )
+:  router_( router )
+, file_sys_interface_( file_sys_interface )
 {
 }
 

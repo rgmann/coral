@@ -399,3 +399,63 @@ TEST_F( EndToEndTest, PipelineTest ) {
     std::cout << "Done checking " << pathIt->path << std::endl;
   }
 }
+
+
+TEST_F( EndToEndTest, MultiWorkerPipelineTest ) {
+   WorkerGroup serverWorkgroup( 2 );
+   WorkerGroup clientWorkgroup;
+
+   TestCallback serverCallback("SERVER");
+   TestCallback clientCallback("CLIENT");
+
+   RsyncNode serverNode( REMOTE_ROOT, serverWorkgroup );
+   RsyncNode clientNode( LOCAL_ROOT, clientWorkgroup );
+
+   mLocalRouter.unsubscribe( RSYNC_SUB_ID, &mLocalNode->subscriber() );
+   mRemoteRouter.unsubscribe( RSYNC_SUB_ID, &mRemoteNode->subscriber() );
+
+   ASSERT_EQ( true, mLocalRouter.subscribe(RSYNC_SUB_ID, &clientNode.subscriber() ) );
+   ASSERT_EQ( true, mRemoteRouter.subscribe(RSYNC_SUB_ID, &serverNode.subscriber()) );
+
+   clientNode.setJobCompletionCallback( &clientCallback );
+   serverNode.setJobCompletionCallback( &serverCallback );
+
+
+   std::vector<op_attrs_t> operations;
+
+   op_attrs_t path;
+   path.status = RsyncSuccess;
+
+   path.path = "instruction_test.cpp";
+   operations.push_back( path );
+   path.path = "dfile_0.dat";
+   operations.push_back( path );
+   path.path = "screenshot.png";
+   operations.push_back( path );
+
+   std::vector<op_attrs_t>::iterator pathIt = operations.begin();
+   for (; pathIt != operations.end(); pathIt++ )
+   {
+      pathIt->status = clientNode.sync(
+         LocalResourcePath( pathIt->path ),
+         RemoteResourcePath( pathIt->path ) );
+
+      EXPECT_EQ( RsyncSuccess, pathIt->status );
+   }
+
+   pathIt = operations.begin();
+   for (; pathIt != operations.end(); pathIt++ )
+   {
+      std::cout << "Waiting for " << pathIt->path << std::endl;
+      if ( pathIt->status == RsyncSuccess ) EXPECT_EQ( true, clientCallback.mSem.take() );
+      std::cout << "Checking " << pathIt->path << std::endl;
+      EXPECT_EQ( true, CheckEqual(
+         boost::filesystem::path( REMOTE_ROOT ) / pathIt->path,
+         boost::filesystem::path( LOCAL_ROOT ) / pathIt->path ) );
+
+      std::cout << "Done checking " << pathIt->path << std::endl;
+   }
+
+   ASSERT_EQ( true, mLocalRouter.unsubscribe(RSYNC_SUB_ID, &clientNode.subscriber() ) );
+   ASSERT_EQ( true, mRemoteRouter.unsubscribe(RSYNC_SUB_ID, &serverNode.subscriber()) );
+}

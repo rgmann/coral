@@ -22,7 +22,7 @@ PacketContainer* RsyncPacketReceiverHook::translate(
    {
       out_container_ptr = new PacketContainer();
 
-      out_container_ptr->packet_ptr_ = new RsyncPacket(
+      out_container_ptr->packet_ptr_ = new RsyncTransportPacket(
          in_container_ptr->destination_id_,
          in_container_ptr->packet_ptr_
       );
@@ -54,25 +54,29 @@ RsyncPacketRouter::~RsyncPacketRouter()
 PacketRelay::RelayInfo* RsyncPacketRouter::extract(
    const PacketRelay::RelayInfo& input )
 {
+   static const ui32 MIN_HEADER_LENGTH = sizeof(RsyncTransportPacket::Data);
    RelayInfo* output = NULL;
 
    if ( input.data_ptr )
    {
       output = new (std::nothrow) RelayInfo();
 
-      if ( input.data_ptr && ( input.length >= sizeof(RsyncPacket::Data) ) )
+      if ( input.data_ptr && ( input.length >= MIN_HEADER_LENGTH ) )
       {
-         const RsyncPacket::Data* header_ptr =
-            reinterpret_cast<const RsyncPacket::Data*>(input.data_ptr);
+         const RsyncTransportPacket::Data* header_ptr =
+            reinterpret_cast<const RsyncTransportPacket::Data*>(input.data_ptr);
 
-         output->destination_id = header_ptr->type;
-         output->length     = header_ptr->length;
+         output->destination_id  = header_ptr->type;
+         output->length          = header_ptr->length;
 
-         if ( header_ptr->length > sizeof(RsyncPacket::Data) )
+         if ( header_ptr->length > MIN_HEADER_LENGTH )
          {
             output->data_ptr = reinterpret_cast<const ui8*>(input.data_ptr) +
-                               sizeof(RsyncPacket::Data);
+                               MIN_HEADER_LENGTH;
          }
+
+         // log::status("RsyncPacketRouter::extract: destination_id=%d, length=%d\n",
+         //    output->destination_id, output->length );
       }
       
       if ( output->data_ptr == NULL )

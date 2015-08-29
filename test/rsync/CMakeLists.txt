@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project( rsync_test )
 
 cmake_policy(SET CMP0015 NEW)
+add_definitions ("-Wall")
 
 find_package( Boost 1.46 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 

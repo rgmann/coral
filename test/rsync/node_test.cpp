@@ -26,7 +26,7 @@ protected:
 
    void SetUp()
    {
-      liber::log::level( liber::log::Warn );
+      liber::log::level( liber::log::Verbose );
 
       workgroup_ = new WorkerGroup();
       node_ = new RsyncNode( LOCAL_ROOT, *workgroup_ );

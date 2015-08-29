@@ -12,25 +12,32 @@
 #include "RsyncQueryResponse.h"
 #include "RsyncError.h"
 #include "RsyncJob.h"
-#include "PacketSubscriber.h"
+// #include "PacketSubscriber.h"
+#include "RsyncPacketSubscriber.h"
 #include "InstructionQueue.h"
 #include "SegmentQueue.h"
 
 namespace liber {
 namespace rsync {
 
-class RemoteAuthorityInterface : public liber::netapp::PacketSubscriber {
+class RsyncPacketLite;
+
+class RemoteAuthorityInterface : public RsyncPacketSubscriber {
 public:
 
   RemoteAuthorityInterface();
   ~RemoteAuthorityInterface();
 
-  bool put( liber::netapp::DestinationID destination_id, const void* pData, ui32 nLength);
-
 
   void process(RsyncJob* pJob);
 
+protected:
+
+  bool processPacket( const void* pData, ui32 nLength);
+
 private:
+
+  void handleQueryResponse( const RsyncPacketLite& packet );
 
   RsyncError waitForEndInstruction(int nTimeoutMs);
 
@@ -51,14 +58,14 @@ private:
   class ActiveJob {
   public:
 
-    static const i64 JOB_TIMEOUT_MS = 2000;
+    // static const i64 JOB_TIMEOUT_MS = 2000;
 
     ActiveJob();
 
-    void setJob( RsyncJob* job_ptr );
-    RsyncJob* job() { return job_ptr_; };
+    // void setJob( RsyncJob* job_ptr );
+    // RsyncJob* job() { return job_ptr_; };
 
-    void setQueryResponse( const void* data_ptr, ui32 length );
+    void setQueryResponse( const boost::uuids::uuid& expected_job_id, const void* data_ptr, ui32 length );
 
     RsyncError& queryResponse() { return query_response_; }
 
@@ -70,11 +77,11 @@ private:
 
     bool waitJobEnd(int nTimeoutMs);
 
-    bool lockIfActive();
+    // bool lockIfActive();
 
-    void unlock() { job_lock_.unlock(); };
+    // void unlock() { job_lock_.unlock(); };
 
-    void pushInstruction( Instruction* pInstruction );
+    // void pushInstruction( Instruction* pInstruction );
 
     bool timeout();
 
@@ -91,10 +98,11 @@ private:
 
     // In order to detect a timeout, keep track of when the last instruction
     // was received.
-    boost::posix_time::ptime mLastInstructionTime;
+    // boost::posix_time::ptime mLastInstructionTime;
   } active_job_;
 
   int mnSegmentTimeoutMs;
+  boost::posix_time::ptime last_instruction_time_;
 
   // int mRequestID;
 };

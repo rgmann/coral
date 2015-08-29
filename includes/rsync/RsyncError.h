@@ -52,8 +52,17 @@ inline std::string errorToString(RsyncError error)
       case RsyncDestinationFileNotFound: error_message = "Destination file not found"; break;
       case RsyncSourceFileNotFound: error_message = "Source file not found"; break;
       case RsyncRemoteQueryTimeout: error_message = "Remote job query timeout"; break;
+      case kRsyncRemoteQueryError: error_message = "Remote query error"; break;
       case RsyncRemoteJobTimeout:   error_message = "Remote job timeout"; break;
-      case kRsyncAssemblerInvalidChunkSize: error_message = "Chunk size is exceeded limit"; break;
+      case kRsyncCommError: error_message = "Communication error"; break;
+      case kRsyncNotSubscribed: error_message = "RsyncNode is not subscribed with a packet router"; break;
+      case kRsyncInvalidJob: error_message = "Invalid job"; break;
+      case kRsyncJobCanceled: error_message = "Job canceled"; break;
+      case kRsyncInvalidInstruction: error_message = "Invalid assembly instruction"; break;
+      case kRsyncSegmentAccessError: error_message = "Segment asscess error"; break;
+      case kRsyncIoError: error_message = "IO error"; break;
+      case kRsyncAssemblerInvalidChunkSize: error_message = "Invalid assembly chunk size"; break;
+      case kRsyncNoWorkersAvailable: error_message = "No worker available"; break;
       default: break;
    }
 

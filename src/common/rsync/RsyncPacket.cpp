@@ -11,8 +11,7 @@ using namespace liber::rsync;
 
 
 //-----------------------------------------------------------------------------
-RsyncTransportPacket::RsyncTransportPacket(
-  RsyncTransportPacket::Type type, const GenericPacket* packet_ptr )
+RsyncTransportPacket::RsyncTransportPacket( int type, const GenericPacket* packet_ptr )
 : GenericPacket(sizeof(RsyncTransportPacket::Data), packet_ptr->allocatedSize())
 {
   if ( isAllocated() )
@@ -93,22 +92,6 @@ RsyncPacket::RsyncPacket(int type, const std::string& rData)
 }
 
 //-----------------------------------------------------------------------------
-RsyncPacket::RsyncPacket(int type, const GenericPacket* pPacket)
-: GenericPacket(sizeof(RsyncPacket::Data), pPacket->allocatedSize())
-{
-  if (isAllocated())
-  {
-    data()->type = type;
-    data()->length = pPacket->allocatedSize();
-
-    if (pPacket->allocatedSize() > 0)
-    {
-      memcpy(dataPtr(), pPacket->basePtr(), pPacket->allocatedSize());
-    }
-  }
-}
-
-//-----------------------------------------------------------------------------
 RsyncPacket::Data* const RsyncPacket::data() const
 {
   Data* lpHeader = NULL;
@@ -163,7 +146,7 @@ RsyncPacketLite::RsyncPacketLite( const void* data_ptr, ui32 length )
 ,  data_ptr_( data_ptr )
 ,  length_( length )
 {
-   if ( data_ptr_ && ( length_ >= sizeof(RsyncPacket::Data) ) )
+   if ( data_ptr_ && ( length_ >= sizeof(Data) ) )
    {
       valid_ = true;
    }
@@ -176,18 +159,18 @@ bool RsyncPacketLite::valid() const
 }
 
 //-----------------------------------------------------------------------------
-const RsyncPacket::Data* RsyncPacketLite::header() const
+const RsyncPacketLite::Data* RsyncPacketLite::header() const
 {
-   return reinterpret_cast<const RsyncPacket::Data*>(data_ptr_);
+   return reinterpret_cast<const Data*>(data_ptr_);
 }
 
 //-----------------------------------------------------------------------------
 const void* RsyncPacketLite::data() const
 {
-   if ( length_ > sizeof(RsyncPacket::Data) )
+   if ( length_ > sizeof(Data) )
    {
       return reinterpret_cast<const ui8*>(data_ptr_) +
-             sizeof(RsyncPacket::Data);
+             sizeof(Data);
    }
    else
    {

@@ -5,7 +5,8 @@
 #include "RsyncPacketRouter.h"
 #include "RemoteAuthorityInterface.h"
 
-#define  DEFAULT_SEGMENT_TIMEOUT_MS     (10000)
+#define  DEFAULT_SEGMENT_TIMEOUT_MS    ( 10000 )
+#define  JOB_TIMEOUT_MS                ( 2000 )
 
 using namespace liber;
 using namespace liber::rsync;
@@ -14,39 +15,21 @@ using namespace liber::netapp;
 
 
 RemoteAuthorityInterface::ActiveJob::ActiveJob()
-: job_ptr_(NULL)
-, query_response_(RsyncSuccess)
+:  job_ptr_(NULL)
+,  query_response_(RsyncSuccess)
 {
-}
-
-//----------------------------------------------------------------------------
-void RemoteAuthorityInterface::ActiveJob::setJob( RsyncJob* job_ptr )
-{
-   job_ptr_ = job_ptr;
-   mLastInstructionTime = boost::posix_time::microsec_clock::local_time();
-}
-
-//----------------------------------------------------------------------------
-void RemoteAuthorityInterface::ActiveJob::pushInstruction( Instruction* pInstruction )
-{
-  if ( pInstruction && job_ptr_ )
-  {
-    job_ptr_->instructions().push( pInstruction );
-
-    // Update last receive timestamp.
-    mLastInstructionTime = boost::posix_time::microsec_clock::local_time();
-  }
 }
 
 //----------------------------------------------------------------------------
 void RemoteAuthorityInterface::ActiveJob::setQueryResponse(
+   const boost::uuids::uuid& expected_job_id,
    const void* data_ptr, ui32 length )
 {
    RsyncQueryResponse response;
 
    if ( response.deserialize( (const char*)data_ptr, length ) )
    {
-      if ( response.uuid() == job_ptr_->descriptor().uuid() )
+      if ( response.uuid() == expected_job_id )
       {
          query_response_ = response.status();
       }
@@ -90,25 +73,9 @@ bool RemoteAuthorityInterface::ActiveJob::waitJobEnd( int timeout_ms )
 }
 
 //----------------------------------------------------------------------------
-bool RemoteAuthorityInterface::ActiveJob::lockIfActive()
-{
-   job_lock_.lock();
-   bool lbActive = (job_ptr_ != NULL);
-   if (!lbActive) job_lock_.unlock();
-   return lbActive;
-}
-
-//----------------------------------------------------------------------------
-bool RemoteAuthorityInterface::ActiveJob::timeout()
-{
-   boost::posix_time::time_duration deltaTime =
-     boost::posix_time::microsec_clock::local_time() - mLastInstructionTime;
-   return ( deltaTime.total_milliseconds() >= JOB_TIMEOUT_MS );
-}
-
-//----------------------------------------------------------------------------
 RemoteAuthorityInterface::RemoteAuthorityInterface()
-: mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
+:  RsyncPacketSubscriber( true )
+,  mnSegmentTimeoutMs(DEFAULT_SEGMENT_TIMEOUT_MS)
 {
 }
 
@@ -157,7 +124,8 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
    // being released. Note: This resets ActiveJob's shared pointer to the
    // active RsyncJob, but not the local pointer (so cancelAssembly, if
    // executed will not encounter a race condition).
-   releaseActiveJob();
+   // releaseActiveJob();
+   unsetActiveJob();
 
    // If the remote job failed to start for some reason, or if an error, such
    // as a timeout, occurred while waiting for the End instruction, create
@@ -173,45 +141,32 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
 }
 
 //-----------------------------------------------------------------------------
-bool RemoteAuthorityInterface::put( DestinationID destination_id, const void* data_ptr, ui32 length )
+bool RemoteAuthorityInterface::processPacket( const void* data_ptr, ui32 length )
 {
    bool put_success = false;
    RsyncPacketLite packet( data_ptr, length );
 
    if ( packet.valid() )
    {
-      // Lock the job state mutex so that the main thread cannot create or
-      // delete the RsyncJobState member.
-      if ( active_job_.lockIfActive() )
+      switch ( packet.header()->type )
       {
-         switch ( packet.header()->type )
-         {
-            case RsyncPacket::RsyncRemoteAuthAcknowledgment:
-               active_job_.setQueryResponse(
-                  packet.data(),
-                  packet.header()->length );
-               break;
+         case RsyncPacket::RsyncRemoteAuthAcknowledgment:
+            handleQueryResponse( packet );
+            break;
 
-            case RsyncPacket::RsyncInstruction:
-               sendAssemblyInstruction(
-                  packet.data(),
-                  packet.header()->length );
-               break;
+         case RsyncPacket::RsyncInstruction:
+            sendAssemblyInstruction(
+               packet.data(),
+               packet.header()->length );
+            break;
 
-            case RsyncPacket::RsyncAuthorityReport:
-               setSourceReport(
-                  packet.data(),
-                  packet.header()->length );
-               break;
+         case RsyncPacket::RsyncAuthorityReport:
+            setSourceReport(
+               packet.data(),
+               packet.header()->length );
+            break;
 
-            default: break;
-         }
-
-         active_job_.unlock();
-      }
-      else
-      {
-         log::error("RemoteAuthorityInterface::put - Failed to lock active job\n");
+         default: break;
       }
    }
 
@@ -219,35 +174,51 @@ bool RemoteAuthorityInterface::put( DestinationID destination_id, const void* da
 }
 
 //-----------------------------------------------------------------------------
-RsyncError RemoteAuthorityInterface::waitForEndInstruction(int nTimeoutMs)
+void RemoteAuthorityInterface::handleQueryResponse(
+   const RsyncPacketLite& packet )
 {
-  RsyncError status = RsyncSuccess;
+   boost::mutex::scoped_lock guard( activeJobLock() );
 
-  while ( true )
-  {
-    if ( active_job_.waitJobEnd( 100 ) )
-    {
-      break;
-    }
-    else if ( active_job_.timeout() )
-    {
-      status = RsyncRemoteJobTimeout;
-      break;
-    }
-  }
+   RsyncJob* active_job_ptr = activeJob();
 
-  return status;
+   if ( active_job_ptr )
+   {
+      active_job_.setQueryResponse(
+         active_job_ptr->descriptor().uuid(),
+         packet.data(),
+         packet.header()->length );
+   }
+   else
+   {
+      log::error("RemoteAuthorityInterface::handleQueryResponse: NULL active job\n");
+   }
 }
 
 //-----------------------------------------------------------------------------
-void RemoteAuthorityInterface::releaseActiveJob()
+RsyncError RemoteAuthorityInterface::waitForEndInstruction(int nTimeoutMs)
 {
-   if (active_job_.lockIfActive())
+   RsyncError status = RsyncSuccess;
+
+   while ( true )
    {
-      active_job_.setJob(NULL);
-      active_job_.queryResponse() = RsyncSuccess;
-      active_job_.unlock();
+      if ( active_job_.waitJobEnd( 100 ) )
+      {
+         break;
+      }
+      else
+      {
+         // Check whether an instruction has been received recently.
+         boost::posix_time::time_duration deltaTime =
+            boost::posix_time::microsec_clock::local_time() - last_instruction_time_;
+         if ( deltaTime.total_milliseconds() >= JOB_TIMEOUT_MS )
+         {
+            status = RsyncRemoteJobTimeout;
+            break;
+         }
+      }
    }
+
+   return status;
 }
 
 //-----------------------------------------------------------------------------
@@ -263,8 +234,16 @@ sendAssemblyInstruction(const void* data_ptr, ui32 byte_count )
 
    if ( instruction_ptr )
    {
+      boost::mutex::scoped_lock guard( activeJobLock() );
+
       // Send the instruction to the assembler.
-      active_job_.pushInstruction( instruction_ptr );
+      if ( activeJob() )
+      {
+         activeJob()->instructions().push( instruction_ptr );
+
+         // Update last receive timestamp.
+         last_instruction_time_ = boost::posix_time::microsec_clock::local_time();
+      }
    }
    else
    {
@@ -278,7 +257,9 @@ void RemoteAuthorityInterface::setSourceReport(
    ui32        byte_count
 )
 {
-   RsyncJob* job_ptr = job_ptr = active_job_.job();
+   boost::mutex::scoped_lock guard( activeJobLock() );
+
+   RsyncJob* job_ptr = activeJob();
 
    if ( job_ptr != NULL )
    {
@@ -314,14 +295,16 @@ RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
 {
    RsyncError query_status = RsyncSuccess;
 
-   RsyncPacket* packet_ptr = new RsyncPacket(
+   setActiveJob( job_ptr );
+
+   std::string packet_data = job_ptr->descriptor().serialize();
+   bool send_success = sendTo(
+      RsyncPacket::RsyncJobAgent,
       RsyncPacket::RsyncRemoteAuthQuery,
-      job_ptr->descriptor().serialize()
-   );
+      packet_data.data(),
+      packet_data.size() );
 
-   active_job_.setJob( job_ptr );
-
-   if ( sendTo( RsyncPacket::RsyncJobAgent, packet_ptr ) )
+   if ( send_success )
    {
       if ( active_job_.waitJobStart( job_ptr->descriptor().completionTimeoutMs() ) )
       {
@@ -346,8 +329,6 @@ RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
       job_ptr->report().source.authority.status = query_status;
    }
 
-   delete packet_ptr;
-
    return query_status;
 }
 
@@ -370,20 +351,16 @@ bool RemoteAuthorityInterface::flushSegments(
 
          if ( send_segments )
          {
-            RsyncPacket* packet_ptr = new RsyncPacket(
-               RsyncPacket::RsyncSegment,
-               segment_ptr->serialize()
-            );
-
             if ( flush_success )
             {
+               std::string packet_data = segment_ptr->serialize();
+
                flush_success = sendTo(
                   RsyncPacket::RsyncAuthorityService,
-                  packet_ptr
-               );
+                  RsyncPacket::RsyncSegment,
+                  packet_data.data(),
+                  packet_data.size() );
             }
-
-            delete packet_ptr;
          }
 
          delete segment_ptr;

@@ -69,9 +69,9 @@ bool Assembler::process(
       {
         log::error(
           "Assembler::process - "
-          "Instruction (type=%d) failed with status %d\n",
+          "Instruction (type=%d) failed with status %s\n",
           instruction_ptr->type(),
-          assembler_state_.status_
+          errorToString( assembler_state_.status_ ).c_str()
         );
       }
 

@@ -5,7 +5,8 @@
 #include "IThread.h"
 #include "Queue.h"
 #include "RsyncError.h"
-#include "PacketSubscriber.h"
+// #include "PacketSubscriber.h"
+#include "RsyncPacketSubscriber.h"
 #include "FileSystemInterface.h"
 #include "LocalAuthorityInterface.h"
 #include "InstructionHook.h"
@@ -15,8 +16,7 @@ namespace rsync {
 
 class JobDescriptor;
 
-class RemoteAuthorityService
-: public liber::netapp::PacketSubscriber
+class RemoteAuthorityService : public RsyncPacketSubscriber
 , public InstructionHook {
 public:
 
@@ -25,7 +25,7 @@ public:
 
   void setRequestID(int nRequestID);
 
-  bool put( liber::netapp::DestinationID destination_id, const void* pData, ui32 nLength);
+  bool processPacket( const void* pData, ui32 nLength);
 
   typedef RsyncError (*QueryHandler)(JobDescriptor&);
   void setQueryHandler(QueryHandler pFunc);
@@ -44,8 +44,8 @@ private:
 
 private:
 
-  boost::mutex active_job_lock_;
-  RsyncJob* active_job_;
+  // boost::mutex active_job_lock_;
+  // RsyncJob* active_job_;
 
   LocalAuthorityInterface authority_;
 

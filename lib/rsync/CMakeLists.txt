@@ -4,6 +4,7 @@ project( librsync )
 find_package( Boost 1.46 REQUIRED )
 
 set( LIBNAME rsync )
+add_definitions ("-Wall")
 
 set( INCLUDE_BASE "../../includes" )
 include_directories( ${Boost_INCLUDE_DIRS} )
@@ -31,6 +32,7 @@ set( SOURCES
 "${SOURCE_BASE}/src/common/${LIBNAME}/RsyncJob.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/Segment.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RsyncPacket.cpp"
+"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncPacketSubscriber.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/Assembler.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/AssemblerThread.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/Authority.cpp"

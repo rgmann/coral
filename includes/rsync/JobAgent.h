@@ -4,7 +4,8 @@
 #include <map>
 #include <boost/uuid/uuid.hpp>
 #include <boost/thread/mutex.hpp>
-#include "PacketSubscriber.h"
+// #include "PacketSubscriber.h"
+#include "RsyncPacketSubscriber.h"
 #include "JobRequestCallback.h"
 
 namespace liber {
@@ -16,7 +17,7 @@ class RsyncPacketRouter;
 class RsyncJobCallback;
 class WorkerGroup;
 
-class JobAgent : public liber::netapp::PacketSubscriber {
+class JobAgent : public RsyncPacketSubscriber {
 public:
 
    JobAgent( FileSystemInterface& file_sys_interface,
@@ -37,7 +38,7 @@ public:
    void setJobRequestCallback( JobRequestCallback* callback_ptr );
    void unsetJobRequestCallback();
 
-   bool put( liber::netapp::DestinationID destination_id, const void* data_ptr, ui32 size_bytes );
+   bool processPacket( const void* data_ptr, ui32 size_bytes );
 
    JobLimits limits_;
 
