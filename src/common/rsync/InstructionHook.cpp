@@ -14,8 +14,8 @@ InstructionHook::~InstructionHook()
 }
 
 //-----------------------------------------------------------------------------
-void InstructionHook::push( Instruction* instruction_ptr )
+void InstructionHook::push( InstructionContainer* container_ptr )
 {
-  call( instruction_ptr );
+  call( container_ptr );
 }
 

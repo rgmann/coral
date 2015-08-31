@@ -65,7 +65,8 @@ bool Authority::process(
 
   instruction_receiver_ptr = &instruction_receiver;
 
-  instruction_receiver_ptr->push( new BeginInstruction( job_descriptor ) );
+  // instruction_receiver_ptr->push( new BeginInstruction( job_descriptor ) );
+  addBeginInstruction( job_descriptor );
   
   bool segmentation_success = Segmenter::processEveryOffset(
     istream,
@@ -75,7 +76,8 @@ bool Authority::process(
   );
   
   authority_report_ptr_->authEnd.sample();
-  instruction_receiver_ptr->push( new EndInstruction() );
+  // instruction_receiver_ptr->push( new EndInstruction() );
+  addEndInstruction();
 
   authority_report_ptr_    = NULL;
   instruction_receiver_ptr = NULL;
@@ -83,6 +85,31 @@ bool Authority::process(
   reset();
 
   return segmentation_success;
+}
+
+//-----------------------------------------------------------------------------
+void Authority::addBeginInstruction( JobDescriptor& descriptor )
+{
+   BeginInstruction instruction( descriptor );
+   addInstruction( instruction );
+}
+
+//-----------------------------------------------------------------------------
+void Authority::addEndInstruction()
+{
+   EndInstruction instruction;
+   addInstruction( instruction );
+}
+
+//-----------------------------------------------------------------------------
+void Authority::addInstruction( Instruction& instruction )
+{
+   InstructionContainer* container_ptr = new InstructionContainer( instruction.type() );
+
+   container_ptr->serialize( container_ptr->stream() );
+   instruction.serialize( container_ptr->stream() );
+
+   instruction_receiver_ptr->push( container_ptr );
 }
 
 //-----------------------------------------------------------------------------
@@ -109,11 +136,12 @@ void Authority::flushChunkBuffer( int chunk_flush_count )
 
     // Allocate the chunk instruction and move the specified number of bytes
     // from the chunk buffer to the chunk instruction.
-    ChunkInstruction* instruction_ptr = new ChunkInstruction( chunk_size_bytes );
-    if ( instruction_ptr->data() )
+    // ChunkInstruction* instruction_ptr = new ChunkInstruction( chunk_size_bytes );
+    ChunkInstruction instruction( chunk_size_bytes );
+    if ( instruction.data() )
     {
       ui32 chunk_buffer_bytes_read = chunk_buffer_.read(
-        (char*)instruction_ptr->data(),
+        (char*)instruction.data(),
         chunk_size_bytes
       );
 
@@ -129,7 +157,8 @@ void Authority::flushChunkBuffer( int chunk_flush_count )
     }
 
     // Send the chunk instruction to the instruction receiver.
-    instruction_receiver_ptr->push( instruction_ptr );
+    // instruction_receiver_ptr->push( instruction_ptr );
+    addInstruction( instruction );
 
     // All segment data has been removed from the buffer.
     buffered_segment_count_ = 0;
@@ -142,94 +171,97 @@ void Authority::flushChunkBuffer( int chunk_flush_count )
 //-----------------------------------------------------------------------------
 void Authority::call( Segment& segment )
 {
-  if ( segment.endOfStream() )
-  {
-    // Make sure all chunk data has been sent.
-    flushChunkBuffer();
-  }
-  else if ( segment_skip_count_ == 0 )
-  {
-    Segment* match_segment_ptr = NULL;
-    SegmentComparator comparator( &segment );
+   if ( segment.endOfStream() )
+   {
+      // Make sure all chunk data has been sent.
+      flushChunkBuffer();
+   }
+   else if ( segment_skip_count_ == 0 )
+   {
+      Segment* match_segment_ptr = NULL;
+      SegmentComparator comparator( &segment );
 
-    bool segment_found = segment_hash_.remove(
-      segment.getWeak().checksum(),
-      match_segment_ptr,
-      comparator
-    );
+      bool segment_found = segment_hash_.remove(
+         segment.getWeak().checksum(),
+         match_segment_ptr,
+         comparator
+      );
 
-    if ( segment_found )
-    {
-      // Any data in the buffer when a match occurs should be moved to a chunk
-      // instruction and sent before sending the ID of the matched segment.
-      flushChunkBuffer(( buffer_first_segment_id_ == Segment::EndOfStream ) ?
-                       kFlushAll : (segment.getID() - buffer_first_segment_id_));
-
-      // If the Segment exists in the hash, create a Segment instruction.
-      if ( match_segment_ptr )
+      if ( segment_found )
       {
-        instruction_receiver_ptr->push(
-          new SegmentInstruction( match_segment_ptr->getID() )
-        ); 
+         // Any data in the buffer when a match occurs should be moved to a chunk
+         // instruction and sent before sending the ID of the matched segment.
+         flushChunkBuffer(( buffer_first_segment_id_ == Segment::EndOfStream ) ?
+                          kFlushAll : (segment.getID() - buffer_first_segment_id_));
+
+         // If the Segment exists in the hash, create a Segment instruction.
+         if ( match_segment_ptr )
+         {
+           // instruction_receiver_ptr->push(
+           //   new SegmentInstruction( match_segment_ptr->getID() )
+           // ); 
+            SegmentInstruction instruction( match_segment_ptr->getID() );
+            addInstruction( instruction );
+         }
+         else
+         {
+           log::error("Authority: NULL match segment retrieved from hash.\n");
+         }
+
+         // Since the Authority creates a segment for every byte offset, a match
+         // allows the Authority to skip the next N-1 segments for a Segment size
+         // of N bytes.
+         segment_skip_count_ = segment.size() - 1;
+
+         authority_report_ptr_->matchedSegmentCount++;
+         segment_bytes_ += segment.size();
+
+         delete match_segment_ptr;
       }
       else
       {
-        log::error("Authority: NULL match segment retrieved from hash.\n");
+         if (segment.data())
+         {
+            bool flush_buffer = (
+               // The buffer contains a valid chunk data and...
+               ( buffer_first_segment_id_ != Segment::EndOfStream ) &&
+
+               // the size of the chunk is at least the minimum configured chunk size.
+               ( ( segment.getID() - buffer_first_segment_id_ ) >= max_chunk_size_bytes_ )
+            );
+
+            if ( flush_buffer )
+            {
+               flushChunkBuffer();
+            }
+
+            if (buffered_segment_count_ == 0)
+            {
+               if ( chunk_buffer_.isEmpty() )
+               {
+                  buffer_first_segment_id_ = segment.getID();
+               }
+
+               chunk_buffer_.write((const char*)segment.data(), segment.size());
+               buffered_segment_count_ = segment.size() - 1;
+            }
+            else
+            {
+               buffered_segment_count_--;
+            }
+         }
+         else
+         {
+           log::debug("NULL data at segment #%d\n", segment.getID());
+         }
       }
+   }
+   else
+   {
+      segment_skip_count_--;
+   }
 
-      // Since the Authority creates a segment for every byte offset, a match
-      // allows the Authority to skip the next N-1 segments for a Segment size
-      // of N bytes.
-      segment_skip_count_ = segment.size() - 1;
-
-      authority_report_ptr_->matchedSegmentCount++;
-      segment_bytes_ += segment.size();
-      delete match_segment_ptr;
-    }
-    else
-    {
-      if (segment.data())
-      {
-        bool flush_buffer = (
-          // The buffer contains a valid chunk data and...
-          ( buffer_first_segment_id_ != Segment::EndOfStream ) &&
-
-          // the size of the chunk is at least the minimum configured chunk size.
-          ( ( segment.getID() - buffer_first_segment_id_ ) >= max_chunk_size_bytes_ )
-        );
-
-        if ( flush_buffer )
-        {
-          flushChunkBuffer();
-        }
-
-        if (buffered_segment_count_ == 0)
-        {
-          if ( chunk_buffer_.isEmpty() )
-          {
-            buffer_first_segment_id_ = segment.getID();
-          }
-
-          chunk_buffer_.write((const char*)segment.data(), segment.size());
-          buffered_segment_count_ = segment.size() - 1;
-        }
-        else
-        {
-          buffered_segment_count_--;
-        }
-      }
-      else
-      {
-        log::debug("NULL data at segment #%d\n", segment.getID());
-      }
-    }
-  }
-  else
-  {
-    segment_skip_count_--;
-  }
-
-  total_segment_bytes_ += segment.size();
+   total_segment_bytes_ += segment.size();
 }
 
 

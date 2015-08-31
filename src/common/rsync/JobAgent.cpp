@@ -18,25 +18,32 @@ typedef boost::uuids::uuid buuid;
 
 //----------------------------------------------------------------------------
 JobAgent::JobAgent(
-  FileSystemInterface& file_sys_interface, 
-  RsyncPacketRouter&   packet_router,
-  WorkerGroup&         worker_group
+   FileSystemInterface& file_sys_interface, 
+   RsyncPacketRouter&   packet_router,
+   WorkerGroup&         worker_group
 )
-: RsyncPacketSubscriber( false )
-, file_sys_interface_ (file_sys_interface)
-, packet_router_      ( packet_router )
-, worker_group_       ( worker_group )
-, create_destination_stub_( true )
-, callback_ptr_       ( NULL )
-, job_request_callback_ptr_( &default_job_request_callback_ )
+:  RsyncPacketSubscriber( false )
+,  file_sys_interface_ (file_sys_interface)
+,  packet_router_      ( packet_router )
+,  worker_group_       ( worker_group )
+,  create_destination_stub_( true )
+,  callback_ptr_       ( NULL )
+,  job_request_callback_ptr_( &default_job_request_callback_ )
+,  allow_new_jobs_( true )
 {
 }
 
 //----------------------------------------------------------------------------
 JobAgent::~JobAgent()
 {
+   disablePacketRouting();
+
+   boost::mutex::scoped_lock guard( active_jobs_lock_ );
+
+   allow_new_jobs_ = false;
+
    // Release all active jobs.
-   std::map<buuid, RsyncJob*>::iterator job_iterator = active_jobs_.begin();
+   JobTable::iterator job_iterator = active_jobs_.begin();
    for (; job_iterator != active_jobs_.end(); ++job_iterator )
    {
       RsyncJob* job_ptr = job_iterator->second;
@@ -158,7 +165,7 @@ RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
 
             // If createJob returns an error, the job was not added to the
             // pipeline. Deallocate the job now.
-            if ( job_create_status != RsyncSuccess)
+            if ( job_create_status != RsyncSuccess )
             {
                delete job_ptr;
             }
@@ -228,8 +235,8 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
       if ( descriptor.getDestination().remote() == false )
       {
          boost::mutex::scoped_lock guard( callback_lock_ );
+
          // If the destination file does not exist, create it (if so configured).
-         // if ( create_destination_stub_ )
          if ( job_request_callback_ptr_->canTouchDestination() )
          {
             if ( file_sys_interface_.touch( descriptor.getDestinationPath() ) == false )
@@ -267,31 +274,45 @@ RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
 {
    RsyncError job_create_status = RsyncSuccess;
 
-   std::pair<std::map<buuid, RsyncJob*>::iterator,bool> insert_status;
-   std::pair<buuid, RsyncJob*> job_pair;
+   std::pair<JobTable::iterator,bool> insert_status;
+   std::pair<buuid, RsyncJob*>        job_pair;
 
-   job_pair = std::make_pair( job_ptr->descriptor().uuid(), job_ptr );
-   insert_status = active_jobs_.insert( job_pair );
-
-   // If the job was successfully added to the active-job table,
-   // add the job to the ready job queue.
-   if ( insert_status.second )
    {
-      if ( job_ptr->descriptor().getDestination().remote() == false )
-      {
-         worker_group_.addJob( this, job_ptr );
-      }
+      boost::mutex::scoped_lock guard( active_jobs_lock_ );
 
-      if ( job_create_status != RsyncSuccess )
+      if ( allow_new_jobs_ )
       {
-         active_jobs_.erase( insert_status.first );
+         job_pair = std::make_pair( job_ptr->descriptor().uuid(), job_ptr );
+         insert_status = active_jobs_.insert( job_pair );
+      }
+      else
+      {
+         job_create_status = kRsyncJobTableInsertError;
       }
    }
-   else
+
+   if ( job_create_status == RsyncSuccess )
    {
-      log::error("JobAgent::addActiveJob - "
-                   "Failed to add job to active job table\n");
-      job_create_status = kRsyncJobTableInsertError;
+      // If the job was successfully added to the active-job table,
+      // add the job to the ready job queue.
+      if ( insert_status.second )
+      {
+         if ( job_ptr->descriptor().getDestination().remote() == false )
+         {
+            worker_group_.addJob( this, job_ptr );
+         }
+
+         if ( job_create_status != RsyncSuccess )
+         {
+            active_jobs_.erase( insert_status.first );
+         }
+      }
+      else
+      {
+         log::error("JobAgent::addActiveJob - "
+                      "Failed to add job to active job table\n");
+         job_create_status = kRsyncJobTableInsertError;
+      }
    }
 
    return job_create_status;
@@ -300,6 +321,8 @@ RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
 //----------------------------------------------------------------------------
 void JobAgent::removeActiveJob( RsyncJob* job_ptr )
 {
+   boost::mutex::scoped_lock guard( active_jobs_lock_ );
+
    // Remove the job from the active job table.
    if ( active_jobs_.count( job_ptr->descriptor().uuid() ) > 0 )
    {
@@ -342,7 +365,7 @@ RsyncError JobAgent::error( RsyncJob* job_ptr, RsyncError error )
    job_ptr->report().createJobStatus = error;
 
    // 
-   if ( job_ptr->descriptor().isRemoteRequest() && ( error != RsyncSuccess ) )
+   if ( ( error != RsyncSuccess ) && job_ptr->descriptor().isRemoteRequest() )
    {
       RemoteJobResult result( job_ptr->descriptor().uuid(), job_ptr->report() );
 
@@ -422,7 +445,9 @@ bool JobAgent::processPacket( const void* data_ptr, ui32 length )
             break;
 
          case RsyncPacket::RsyncJobComplete:
-            finishRemoteJob( (const char*)packet.data(), packet.header()->length );
+            finishRemoteJob(
+               (const char*)packet.data(),
+               packet.header()->length );
             break;
 
          case RsyncPacket::RsyncRemoteAuthQuery:
@@ -440,7 +465,7 @@ bool JobAgent::processPacket( const void* data_ptr, ui32 length )
 }
 
 //-----------------------------------------------------------------------------
-void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
+void JobAgent::handleRemoteJobRequest( const void* data_ptr, ui32 length )
 {
    RsyncJob* job_ptr = new (std::nothrow) RsyncJob(
       file_sys_interface_,
@@ -451,14 +476,15 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
    {
       JobDescriptor& descriptor = job_ptr->descriptor();
 
-      if ( descriptor.deserialize((const char*)pData, nLength) )
+      if ( descriptor.deserialize( (const char*)data_ptr, length ) )
       {
          RsyncError status = RsyncSuccess;
 
          // Indicate that the job was remotely requested.
          descriptor.setRemoteRequest();
 
-         // This is an auth request, so by definition the destination must be remote.
+         // This is an auth request, so by definition the destination must be
+         // remote.
          descriptor.getDestination().setRemote( true );
 
          // If a remote JobAgent specifies a remote source, the source is
@@ -478,20 +504,32 @@ void JobAgent::handleRemoteJobRequest( const void* pData, ui32 nLength )
          // If a job was successfully created, add it to the job queue.
          if ( status == RsyncSuccess )
          {
-            bool add_success = true;
+            bool add_success = false;
 
-            // If the job is not already in the active job table, add it now.
-            // The job will already be in the table if this job was initiated with
-            // a push operation.
-            if ( active_jobs_.count( job_ptr->descriptor().uuid() ) == 0 )
             {
-               std::pair<std::map<buuid, RsyncJob*>::iterator,bool> insert_status;
-               std::pair<buuid, RsyncJob*> job_pair;
+               boost::mutex::scoped_lock guard( active_jobs_lock_ );
 
-               job_pair = std::make_pair( job_ptr->descriptor().uuid(), job_ptr );
-               insert_status = active_jobs_.insert( job_pair );
+               // If the job is not already in the active job table, add it now.
+               // The job will already be in the table if this job was initiated
+               // with a push operation.
+               if ( active_jobs_.count( job_ptr->descriptor().uuid() ) > 0 )
+               {
+                  add_success = true;
+               }
+               else if ( allow_new_jobs_ )
+               {
+                  std::pair<JobTable::iterator,bool> insert_status;
+                  std::pair<buuid, RsyncJob*> job_pair;
 
-               add_success = insert_status.second;
+                  job_pair = std::make_pair( job_ptr->descriptor().uuid(), job_ptr );
+                  insert_status = active_jobs_.insert( job_pair );
+
+                  add_success = insert_status.second;
+               }
+               else
+               {
+                  add_success = false;
+               }
             }
 
             if ( add_success )
@@ -545,9 +583,11 @@ void JobAgent::finishRemoteJob( const char* data_ptr, ui32 size_bytes )
 
    if ( job_result.deserialize( data_ptr,  size_bytes ) )
    {
+      boost::mutex::scoped_lock guard( active_jobs_lock_ );
+
       if ( active_jobs_.count( job_result.uuid() ) > 0 )
       {
-         std::map<buuid, RsyncJob*>::iterator job_iterator;
+         JobTable::iterator job_iterator;
 
          job_iterator = active_jobs_.find( job_result.uuid() );
          RsyncJob* job_ptr = job_iterator->second;

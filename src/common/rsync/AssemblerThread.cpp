@@ -24,11 +24,11 @@ AssemblerThread::~AssemblerThread()
 }
 
 //----------------------------------------------------------------------------
-void AssemblerThread::run(const bool& bShutdown)
+void AssemblerThread::run( const bool& shutdown )
 {
    boost::filesystem::path stage_path_;
 
-   while ( !bShutdown )
+   while ( shutdown == false )
    {
       JobAgentPair job_agent_pair;
 
@@ -101,5 +101,7 @@ void AssemblerThread::run(const bool& bShutdown)
          }
       }
    }
+
+   log::debug("AssemblerThread: Shutting down\n");
 }
 

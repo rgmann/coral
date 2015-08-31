@@ -13,7 +13,6 @@ RsyncNode::RsyncNode(
    const boost::filesystem::path& root,
    WorkerGroup& worker_group
 )
-// :  worker_group_ ( worker_group )
 :  job_agent_    ( file_sys_interface_, router_, worker_group )
 {
    file_sys_interface_.setRoot(root);

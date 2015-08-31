@@ -41,6 +41,10 @@ private:
 
   void reset();
 
+  void addInstruction( Instruction& instruction );
+  void addBeginInstruction( JobDescriptor& job_descriptor );
+  void addEndInstruction();
+
   void call( Segment& segment );
 
   enum { kFlushAll = -1 };

@@ -47,94 +47,110 @@ void LocalAuthorityInterface::processJob(
   InstructionReceiver&  instruction_receiver
 )
 {
-  int  received_segment_count = 0;
-  bool hash_insert_done       = false;
+   RsyncError job_status = hashSegments( job_ptr );
 
-  RsyncError job_status = RsyncSuccess;
-
-  job_ptr->report().source.authority.hashBegin.sample();
-  while ( hash_insert_done == false )
-  {
-    Segment* segment_ptr = NULL;
-
-    bool received_segment = job_ptr->segments().pop(
-      &segment_ptr,
-      segment_timeout_ms_
-    );
-
-    if ( received_segment && ( segment_ptr != NULL ) )
-    {
-      hash_insert_done = segment_ptr->endOfStream();
-
-      if ( hash_insert_done == false )
-      {
-        received_segment_count++;
-
-        authority_.hash().insert(
-          segment_ptr->getWeak().checksum(),
-          segment_ptr
-        );
-      }
-    }
-    else
-    {
-      log::error("AuthorityInterface::processJob - "
-                 "Timed out waiting for segment (%d).\n",
-                 received_segment_count);
-      job_status = RsyncDestSegmentTimeout;
-
-      // Stop the hash-insert loop as no more segments will be received.
-      hash_insert_done = true;
-    }
-  }
-  job_ptr->report().source.authority.hashEnd.sample();
-  liber::log::debug("LocalAuthorityInterface::process: RECEIVED ALL SEGMENTS\n");
-
-  if ( job_status == RsyncSuccess )
-  {
-    // Hash has been populated. Now the Authority can begin building the
-    // instructions.
-    bool auth_success = job_ptr->fileSystem().open(
-      job_ptr->descriptor().getSource().path(),
-      file()
-    );
-
-    if ( auth_success )
-    {
-      auth_success = authority_.process(
-        job_ptr->descriptor(),
-        file(),
-        instruction_receiver,
-        job_ptr->report().source
+   if ( job_status == RsyncSuccess )
+   {
+      // Hash has been populated. Now the Authority can begin building the
+      // instructions.
+      bool auth_success = job_ptr->fileSystem().open(
+         job_ptr->descriptor().getSource().path(),
+         file()
       );
 
-      if ( auth_success == false )
+      if ( auth_success )
       {
-        log::error(
-          "AuthorityInterface: "
-          "Authoritative processing for %s failed.\n",
-          job_ptr->descriptor().getSource().path().string().c_str()
-        );
-      }
+         auth_success = authority_.process(
+            job_ptr->descriptor(),
+            file(),
+            instruction_receiver,
+            job_ptr->report().source
+         );
 
-      file().close();
-    }
-    else
-    {
-      log::error(
-        "AuthorityInterface: Failed to open %s\n",
-        job_ptr->descriptor().getSource().path().string().c_str()
+         if ( auth_success == false )
+         {
+            log::error(
+               "AuthorityInterface: "
+               "Authoritative processing for %s failed.\n",
+               job_ptr->descriptor().getSource().path().string().c_str()
+            );
+         }
+
+         file().close();
+      }
+      else
+      {
+         log::error(
+           "AuthorityInterface: Failed to open %s\n",
+           job_ptr->descriptor().getSource().path().string().c_str()
+         );
+
+         job_status = RsyncSourceFileNotFound;
+      }
+   }
+
+   if ( job_status != RsyncSuccess )
+   {
+      EndInstruction instruction;
+      instruction.cancel( job_status );
+
+      InstructionContainer* container_ptr = new InstructionContainer( instruction.type() );
+
+      container_ptr->serialize( container_ptr->stream() );
+      instruction.serialize( container_ptr->stream() );
+
+      instruction_receiver.push( container_ptr );
+   }
+}
+
+//-----------------------------------------------------------------------------
+RsyncError LocalAuthorityInterface::hashSegments( RsyncJob* job_ptr )
+{
+   RsyncError hash_status = RsyncSuccess;
+
+   int  received_segment_count = 0;
+   bool hash_insert_done       = false;
+
+   job_ptr->report().source.authority.hashBegin.sample();
+
+   while ( hash_insert_done == false )
+   {
+      Segment* segment_ptr = NULL;
+
+      bool received_segment = job_ptr->segments().pop(
+         &segment_ptr,
+         segment_timeout_ms_
       );
 
-      job_status = RsyncSourceFileNotFound;
-    }
-  }
+      if ( received_segment && ( segment_ptr != NULL ) )
+      {
+         hash_insert_done = segment_ptr->endOfStream();
 
-  if ( job_status != RsyncSuccess )
-  {
-    EndInstruction* end_instruction_ptr = new EndInstruction();
-    end_instruction_ptr->cancel( job_status );
-    instruction_receiver.push( end_instruction_ptr );
-  }
+         if ( hash_insert_done == false )
+         {
+           received_segment_count++;
+
+           authority_.hash().insert(
+             segment_ptr->getWeak().checksum(),
+             segment_ptr
+           );
+         }
+      }
+      else
+      {
+         log::error("AuthorityInterface::processJob - "
+                    "Timed out waiting for segment (%d).\n",
+                    received_segment_count);
+
+         hash_status = RsyncDestSegmentTimeout;
+
+         // Stop the hash-insert loop as no more segments will be received.
+         hash_insert_done = true;
+      }
+   }
+
+   job_ptr->report().source.authority.hashEnd.sample();
+
+   return hash_status;
 }
 

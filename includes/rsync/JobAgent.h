@@ -62,7 +62,8 @@ private:
 
 private:
 
-   std::map<boost::uuids::uuid, RsyncJob*> active_jobs_;
+   typedef std::map<boost::uuids::uuid, RsyncJob*> JobTable;
+   JobTable active_jobs_;
    Queue<RsyncJob*> ready_jobs_;
 
    FileSystemInterface& file_sys_interface_;
@@ -76,6 +77,9 @@ private:
 
    JobRequestCallback* job_request_callback_ptr_;
    JobRequestCallback default_job_request_callback_;
+
+   boost::mutex active_jobs_lock_;
+   bool allow_new_jobs_;
 };
 
 } // End namespace rsync

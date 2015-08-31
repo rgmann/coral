@@ -15,9 +15,11 @@ public:
 
    RsyncError addJob( JobAgent* job_agent_ptr, RsyncJob* job_ptr );
 
+   const std::vector<Worker*>& workers() const {  return workers_; }
+
 private:
 
-   std::vector<PassiveWorker*> workers_;
+   std::vector<Worker*> workers_;
 
    JobAgentPairQueue segment_queue_;
    JobAgentPairQueue local_auth_queue_;

@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Log.h"
 #include "IThread.h"
 
 using namespace liber::concurrency;
@@ -6,79 +7,79 @@ using namespace liber::concurrency;
 ui32 IThread::ournThreadId = 0;
 
 //--------------------------------------------------------------------
-IThread::IThread(const std::string& name)
-: mnThreadId(IThread::ournThreadId++)
-, mName(name)
-, mbRunning(false)
-, mbShutdown(false)
+IThread::IThread( const std::string& name )
+:  thread_id_  ( IThread::ournThreadId++ )
+,  name_       ( name )
+,  running_    ( false )
 {
 }
 
 //--------------------------------------------------------------------
 IThread::~IThread()
 {
+   thread_.interrupt();
+   thread_.join();
 }
 
 //--------------------------------------------------------------------
 ui32 IThread::getID() const
 {
-  return mnThreadId;
+   return thread_id_;
 }
 
 //--------------------------------------------------------------------
 const std::string& IThread::getName() const
 {
-  return mName;
+   return name_;
 }
 
 //-----------------------------------------------------------------------------
 bool IThread::launch()
 {
-  if ( !mbRunning )
-  {
-    mThread = boost::thread( &IThread::entry, this );
-  }
+   bool launch_success = false;
 
-  return true;
+   if ( running_ == false )
+   {
+      thread_ = boost::thread( &IThread::entry, this );
+
+      launch_success = true;
+   }
+
+   return launch_success;
 }
 
 //-----------------------------------------------------------------------------
-bool IThread::join()
+void IThread::join()
 {
-  mThread.join();
-  return true;
+   thread_.join();
 }
 
 //-----------------------------------------------------------------------------
-bool IThread::cancel(bool bJoin)
+void IThread::cancel( bool join )
 {
-  mThread.interrupt();
-  if ( bJoin ) mThread.join();
+   if ( running_ )
+   {
+      thread_.interrupt();
 
-  return true;
+      if ( join )
+      {
+         thread_.join();
+      }
+   }
 }
 
 //-----------------------------------------------------------------------------
 bool IThread::isRunning() const
 {
-  return mbRunning;
-}
-
-//-----------------------------------------------------------------------------
-void IThread::shutdown()
-{
-  if (mbRunning)
-  {
-    mbShutdown = true;
-  }
+   return running_;
 }
 
 //-----------------------------------------------------------------------------
 void IThread::entry()
 {
-  mbRunning = true;
+   running_ = true;
 
-  run( mbShutdown );
+   run( boost::this_thread::interruption_requested() );
 
-  mbRunning = false;
+   running_ = false;
 }

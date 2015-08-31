@@ -68,5 +68,7 @@ void SegmenterThread::run(const bool& shutdown )
          }
       }
    }
+
+   log::debug("SegmenterThread: Shutting down\n");
 }
 

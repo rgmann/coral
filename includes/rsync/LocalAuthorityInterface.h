@@ -15,35 +15,35 @@ class RsyncJob;
 class LocalAuthorityInterface {
 public:
 
-  // explicit LocalAuthorityInterface( FileSystemInterface& );
-  LocalAuthorityInterface();
-  ~LocalAuthorityInterface();
+   LocalAuthorityInterface();
+   ~LocalAuthorityInterface();
 
-  void process( RsyncJob* job_ptr );
-  void process( RsyncJob* job_ptr, InstructionReceiver& instruction_receiver );
+   void process( RsyncJob* job_ptr );
+   void process( RsyncJob* job_ptr, InstructionReceiver& instruction_receiver );
 
 private:
 
-  LocalAuthorityInterface( const LocalAuthorityInterface& );
-  LocalAuthorityInterface& operator= ( const LocalAuthorityInterface& );
+   LocalAuthorityInterface( const LocalAuthorityInterface& );
+   LocalAuthorityInterface& operator= ( const LocalAuthorityInterface& );
 
-  void processJob(
+   void processJob(
     RsyncJob* job_ptr,
     InstructionReceiver& instruction_receiver
-  );
+   );
 
-  bool open(const boost::filesystem::path& path);
-  void close();
-  std::ifstream& file();
+   RsyncError hashSegments( RsyncJob* job_ptr );
+
+   bool open(const boost::filesystem::path& path);
+   void close();
+   std::ifstream& file();
 
 private:
 
-  int segment_timeout_ms_;
+   int segment_timeout_ms_;
 
-  // FileSystemInterface& file_sys_interface_;
-  std::ifstream authoritative_file_;
+   std::ifstream authoritative_file_;
 
-  Authority authority_;
+   Authority authority_;
 };
 
 } // End namespace rsync

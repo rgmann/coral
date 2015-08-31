@@ -27,9 +27,9 @@ PacketSubscriber& AuthorityThread::getSubscriber()
 }
 
 //----------------------------------------------------------------------------
-void AuthorityThread::run(const bool& bShutdown)
+void AuthorityThread::run( const bool& shutdown )
 {
-  while ( !bShutdown )
+  while ( shutdown == false )
   {
     JobAgentPair job_agent_pair;
 
@@ -55,5 +55,7 @@ void AuthorityThread::run(const bool& bShutdown)
       }
     }
   }
+
+  log::debug("AuthorityThread: Shutting down\n");
 }
 

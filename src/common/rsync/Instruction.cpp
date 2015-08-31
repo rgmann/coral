@@ -17,59 +17,10 @@ void dump_buffer(const char* pBuffer, ui32 nBytes)
   printf("\n");
 }
 
-//-----------------------------------------------------------------------------
-// Class: Instruction
-//-----------------------------------------------------------------------------
-std::string InstructionFactory::Serialize(const Instruction* pInstruction)
-{
-  SerialStream ctor;
-
-  ctor.write(pInstruction->type());
-  pInstruction->serialize(ctor);
-
-//  dump_buffer(ctor.stream.str().data(), ctor.stream.str().size());
-
-  return ctor.stream.str();
-}
- 
-//-----------------------------------------------------------------------------
-Instruction* InstructionFactory::Deserialize(const std::string& data)
-{
-  Instruction* instruction_ptr = NULL;
-
-  SerialStream dtor;
-  dtor.stream.write(data.data(), data.size());
-
-  ui32 lType;
-  if (dtor.read(lType) == false)
-  {
-    return NULL;
-  }
-
-  switch (lType)
-  {
-    case BeginInstruction::Type:
-      instruction_ptr = new BeginInstruction();
-      break;
-    case SegmentInstruction::Type:
-      instruction_ptr = new SegmentInstruction();
-      break;
-    case ChunkInstruction::Type:
-      instruction_ptr = new ChunkInstruction();
-      break;
-    case EndInstruction::Type:
-      instruction_ptr = new EndInstruction();
-      break;
-    default: break;
-  }
-
-  if (instruction_ptr)
-  {
-    instruction_ptr->deserialize(dtor);
-  }
-
-  return instruction_ptr;
-}
+const ui32 BeginInstruction::Type;
+const ui32 SegmentInstruction::Type;
+const ui32 ChunkInstruction::Type;
+const ui32 EndInstruction::Type;
 
 //-----------------------------------------------------------------------------
 AssemblerState::AssemblerState( SegmentAccessor& accessor )
@@ -90,9 +41,15 @@ SegmentAccessor& AssemblerState::segmentAccessor()
 }
 
 //-----------------------------------------------------------------------------
-JobDescriptor& AssemblerState::jobDescriptor()
+JobDescriptor& AssemblerState::descriptor()
 {
   return job_descriptor_;
+}
+
+//-----------------------------------------------------------------------------
+void AssemblerState::setDescriptor( JobDescriptor& job_descriptor )
+{
+  job_descriptor_ = job_descriptor;
 }
 
 //-----------------------------------------------------------------------------
@@ -139,6 +96,35 @@ ui32 Instruction::type() const
   return mType;
 }
 
+InstructionContainer::InstructionContainer( i32 type )
+:  type_( type )
+{
+}
+
+//-----------------------------------------------------------------------------
+void InstructionContainer::pack(SerialStream& ctor) const
+{
+  // log::status("InstructionContainer::pack\n");
+  ctor.write( (ui32)type_ );
+}
+
+void InstructionContainer::pack(SerialStream& ctor)
+{
+  // log::status("InstructionContainer::pack\n");
+  ctor.write( (ui32)type_ );
+}
+
+bool InstructionContainer::unpack(SerialStream& dtor)
+{
+  if ( dtor.read( type_ ) == false )
+  {
+    // log::error("InstructionContainer::unpack: Failed to read type from stream\n");
+    type_ = kInvalidInstructionType;
+  }
+
+  return ( type_ != kInvalidInstructionType );
+}
+
 
 //-----------------------------------------------------------------------------
 // Class: BeginInstruction
@@ -151,7 +137,7 @@ BeginInstruction::BeginInstruction()
 //-----------------------------------------------------------------------------
 BeginInstruction::BeginInstruction(JobDescriptor& descriptor)
 : Instruction(BeginInstruction::Type)
-, mDescriptor(descriptor)
+, descriptor_(descriptor)
 {
 }
 
@@ -161,37 +147,21 @@ BeginInstruction::~BeginInstruction()
 }
 
 //-----------------------------------------------------------------------------
-std::string BeginInstruction::toString() const
-{
-  std::stringstream ss;
-
-  ss << "BeginInstruction:" << std::endl
-     << "  path: " << mDescriptor.getDestination().path().generic_string() << std::endl
-     << "  segment size: " << mDescriptor.getSegmentSize() << std::endl;
-
-  return ss.str();
-}
-
-//-----------------------------------------------------------------------------
-void BeginInstruction::execute( AssemblerState& state )
-{
-  if ( mDescriptor.getDestination().path() != 
-       state.jobDescriptor().getDestination().path() )
-  {
-    state.status_ = kRsyncInvalidJob;
-  }
-}
-
-//-----------------------------------------------------------------------------
 void BeginInstruction::pack(SerialStream& ctor) const
 {
-  mDescriptor.serialize(ctor);
+  descriptor_.serialize(ctor);
+}
+
+//-----------------------------------------------------------------------------
+void BeginInstruction::pack(liber::netapp::SerialStream& ctor)
+{
+  const_cast<const BeginInstruction*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
 bool BeginInstruction::unpack(SerialStream& dtor)
 {
-  return mDescriptor.deserialize(dtor);
+  return descriptor_.deserialize(dtor);
 }
 
 //-----------------------------------------------------------------------------
@@ -205,7 +175,7 @@ SegmentInstruction::SegmentInstruction()
 //-----------------------------------------------------------------------------
 SegmentInstruction::SegmentInstruction(Segment::ID id)
 : Instruction(SegmentInstruction::Type)
-, mID(id)
+, segment_id_(id)
 {
 }
 
@@ -215,47 +185,15 @@ SegmentInstruction::~SegmentInstruction()
 }
 
 //-----------------------------------------------------------------------------
-std::string SegmentInstruction::toString() const
-{
-  std::stringstream ss;
-
-  ss << "SegmentInstruction:" << std::endl
-     << "  ID: " << mID << std::endl;
-
-  return ss.str();
-}
-
-//-----------------------------------------------------------------------------
-void SegmentInstruction::execute( AssemblerState& state )
-{
-  Segment* segment_ptr = state.segmentAccessor().getSegment( mID );
-
-  if ( segment_ptr != NULL )
-  {
-    state.stream().write( (char*)segment_ptr->data(), segment_ptr->size() );
-
-    if ( state.stream().fail() )
-    {
-      state.status_ = kRsyncIoError;
-      log::error("SegmentInstruction: Failed to write segment to ostream.\n");
-    }
-#ifdef DEBUG_RSYNC_INSTRUCTIONS
-    log::debug("Executing SegmentInstruction:\n%s\n",
-               segment_ptr->debugDump().c_str());
-#endif
-  }
-  else
-  {
-    // rStatus.error = ExecutionStatus::SegmentAccessError;
-    state.status_ = kRsyncSegmentAccessError;
-    log::error("SegmentInstruction: Failed to access segment.\n");
-  }
-}
-
-//-----------------------------------------------------------------------------
 void SegmentInstruction::pack(SerialStream& ctor) const
 {
-  ctor.write((ui32)mID);
+  ctor.write((ui32)segment_id_);
+}
+
+//-----------------------------------------------------------------------------
+void SegmentInstruction::pack(liber::netapp::SerialStream& ctor)
+{
+  const_cast<const SegmentInstruction*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
@@ -264,7 +202,7 @@ bool SegmentInstruction::unpack(SerialStream& dtor)
   bool lbSuccess = true;
   ui32 id;
   lbSuccess &= dtor.read(id);
-  mID = id;
+  segment_id_ = id;
   return lbSuccess;
 }
 
@@ -313,64 +251,6 @@ ui32 ChunkInstruction::size() const
 }
 
 //-----------------------------------------------------------------------------
-std::string ChunkInstruction::toString() const
-{
-  std::stringstream ss;
-
-  ss << "ChunkInstruction:" << std::endl
-     << "  chunk size: " << chunk_size_bytes_ << std::endl;
-#ifdef DEBUG_RSYNC_INSTRUCTIONS
-  for (int nByte = 0; nByte < chunk_size_bytes_; nByte++)
-  {
-    printf(" %02X", chunk_data_ptr_[nByte]);
-    if (nByte > 0 && (nByte % 16 == 0)) printf("\n");
-  }
-  printf("\n");
-#endif
-
-  return ss.str();
-}
-
-//-----------------------------------------------------------------------------
-void ChunkInstruction::execute( AssemblerState& state )
-{
-  if ( chunk_data_ptr_ )
-  {
-
-    // Validate the chunk size
-    if ( ( chunk_size_bytes_ > 0 ) &&
-         ( chunk_size_bytes_ <= state.jobDescriptor().getMaximumChunkSize() ) )
-    {
-      state.stream().write( (char*)chunk_data_ptr_, chunk_size_bytes_ );
-
-#ifdef DEBUG_RSYNC_INSTRUCTIONS
-      log::debug("Executing ChunkInstruction:\n");
-      for (int ind = 0; ind < chunk_size_bytes_; ind++)
-      {
-        printf("0x%02X ", chunk_data_ptr_[ind]);
-        if ((ind > 0) && (ind % 16 == 0)) printf("\n");
-      }
-      printf("\n");
-#endif
-
-      if ( state.stream().fail() )
-      {
-        state.status_ = kRsyncIoError;
-      }
-    }
-    else
-    {
-      state.status_ = kRsyncAssemblerInvalidChunkSize;
-    }
-  }
-  else
-  {
-    state.status_ = kRsyncIoError;
-    log::error("ChunkInstruction: NULL data or failed ostream.\n");
-  }
-}
-
-//-----------------------------------------------------------------------------
 void ChunkInstruction::pack(SerialStream& ctor) const
 {
   if (chunk_data_ptr_)
@@ -382,24 +262,34 @@ void ChunkInstruction::pack(SerialStream& ctor) const
 }
 
 //-----------------------------------------------------------------------------
+void ChunkInstruction::pack(liber::netapp::SerialStream& ctor)
+{
+  const_cast<const ChunkInstruction*>(this)->pack(ctor);
+}
+
+//-----------------------------------------------------------------------------
 bool ChunkInstruction::unpack(SerialStream& dtor)
 {
-  bool lbSuccess = true;
-  std::string data;
-  lbSuccess &= dtor.read(data);
-  if (data.size() > 0)
-  {
-    if (chunk_data_ptr_)
-    {
-      delete[] chunk_data_ptr_;
-      chunk_data_ptr_ = NULL;
-    }
+   bool unpack_success = false;
+   std::string data;
 
-    chunk_data_ptr_ = new ui8[data.size()];
-    chunk_size_bytes_ = data.size();
-    memcpy(chunk_data_ptr_, data.data(), data.size());
-  }
-  return lbSuccess;
+   if ( ( dtor.read(data) == SerialStream::ReadOk ) && ( data.size() > 0 ) )
+   {
+      if ( chunk_data_ptr_ )
+      {
+         delete[] chunk_data_ptr_;
+         chunk_data_ptr_ = NULL;
+      }
+
+      chunk_size_bytes_ = data.size();
+      chunk_data_ptr_   = new ui8[ chunk_size_bytes_ ];
+
+      memcpy(chunk_data_ptr_, data.data(), data.size());
+
+      unpack_success = true;
+   }
+
+   return unpack_success;
 }
 
 
@@ -408,8 +298,8 @@ bool ChunkInstruction::unpack(SerialStream& dtor)
 //-----------------------------------------------------------------------------
 EndInstruction::EndInstruction()
 : Instruction(EndInstruction::Type)
-, mbCancelled(false)
-, mCancelError((RsyncError)RsyncSuccess)
+, canceled_(false)
+, cancel_error_((RsyncError)RsyncSuccess)
 {
 }
 
@@ -421,56 +311,41 @@ EndInstruction::~EndInstruction()
 //-----------------------------------------------------------------------------
 void EndInstruction::cancel(RsyncError error)
 {
-  mbCancelled = true;
-  mCancelError = (ui32)error;
+  canceled_ = true;
+  cancel_error_ = (ui32)error;
 }
 
 //-----------------------------------------------------------------------------
-bool EndInstruction::cancelled() const
+bool EndInstruction::canceled() const
 {
-  return mbCancelled;
+  return canceled_;
 }
 
 //-----------------------------------------------------------------------------
 RsyncError EndInstruction::error() const
 {
-  return (RsyncError)mCancelError;
-}
-
-//-----------------------------------------------------------------------------
-std::string EndInstruction::toString() const
-{
-  return std::string("EndInstruction");
-}
-
-//-----------------------------------------------------------------------------
-void EndInstruction::execute( AssemblerState& state )
-{
-  if (mbCancelled)
-  {
-    state.status_ = kRsyncJobCanceled;
-  }
-  else
-  {
-    state.done_ = true;
-  }
-
-  state.stream().close();
+  return (RsyncError)cancel_error_;
 }
 
 //-----------------------------------------------------------------------------
 void EndInstruction::pack(SerialStream& ctor) const
 {
-  ctor.write(mbCancelled);
-  ctor.write(mCancelError);
+  ctor.write(canceled_);
+  ctor.write(cancel_error_);
+}
+
+//-----------------------------------------------------------------------------
+void EndInstruction::pack(liber::netapp::SerialStream& ctor)
+{
+  const_cast<const EndInstruction*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
 bool EndInstruction::unpack(SerialStream& dtor)
 {
-  bool lbSuccess = true;
-  lbSuccess &= dtor.read(mbCancelled);
-  lbSuccess &= dtor.read(mCancelError);
-  return lbSuccess;
+  bool unpack_success = true;
+  unpack_success &= dtor.read(canceled_);
+  unpack_success &= dtor.read(cancel_error_);
+  return unpack_success;
 }
 

@@ -14,6 +14,7 @@ using namespace liber::netapp;
 RsyncPacketSubscriber::RsyncPacketSubscriber( bool require_active_job )
 :  require_active_job_( require_active_job )
 ,  active_job_ptr_( NULL )
+,  allow_packets_( true )
 {
 }
 
@@ -72,25 +73,33 @@ bool RsyncPacketSubscriber::validUuid( const ui8* uuid_ptr )
 }
 
 //-----------------------------------------------------------------------------
-bool RsyncPacketSubscriber::put( DestinationID destination_id, const void* data_ptr, ui32 length )
+bool RsyncPacketSubscriber::put(
+   DestinationID  destination_id,
+   const void*    data_ptr,
+   ui32           length
+)
 {
    bool success = false;
 
-   // log::status("RsyncPacketSubscriber::put: destination_id=%d, length=%d\n", destination_id, length);
-   if ( data_ptr && ( length > RSYNC_JOB_UUID_LENGTH ) )
+   if ( allow_packets_ )
    {
-      const ui8*  uuid_ptr    = reinterpret_cast<const ui8*>(data_ptr);
-      const void* payload_ptr = uuid_ptr + RSYNC_JOB_UUID_LENGTH;
+      if ( data_ptr && ( length > RSYNC_JOB_UUID_LENGTH ) )
+      {
+         const ui8*  uuid_ptr    = reinterpret_cast<const ui8*>(data_ptr);
+         const void* payload_ptr = uuid_ptr + RSYNC_JOB_UUID_LENGTH;
 
-      if ( validUuid( uuid_ptr ) )
-      {
-         // log::status("RsyncPacketSubscriber::put: destination_id=%d, length=%d PROCESSING\n", destination_id, length);
-         success = processPacket( payload_ptr, length - RSYNC_JOB_UUID_LENGTH );
-      }
-      else
-      {
-         log::error(
-            "RsyncPacketSubscriber::put: ERROR - Invalid UUID cannot deliver packet\n");
+         if ( validUuid( uuid_ptr ) )
+         {
+            success = processPacket(
+               payload_ptr,
+               length - RSYNC_JOB_UUID_LENGTH );
+         }
+         else
+         {
+            log::error(
+               "RsyncPacketSubscriber::put: "
+               "ERROR - Invalid UUID cannot deliver packet\n");
+         }
       }
    }
 
@@ -105,19 +114,33 @@ RsyncJob* RsyncPacketSubscriber::activeJob()
 }
 
 //-----------------------------------------------------------------------------
+void RsyncPacketSubscriber::disablePacketRouting()
+{
+   allow_packets_ = false;
+}
+
+//-----------------------------------------------------------------------------
 bool RsyncPacketSubscriber::sendTo(
-   DestinationID destination_id, int type, const void* data_ptr, ui32 length )
+   DestinationID  destination_id,
+   int            type,
+   const void*    data_ptr,
+   ui32           length
+)
 {
    bool success = false;
 
-   RsyncPacket* packet_ptr = new (std::nothrow) RsyncPacket( type, length, data_ptr );
+   RsyncPacket* packet_ptr = new (std::nothrow) RsyncPacket(
+      type,
+      length,
+      data_ptr
+   );
 
    if ( packet_ptr )
    {
 
       bool uuid_success = true;
+      bool valid_uuid   = false;
 
-      bool valid_uuid = false;
       boost::uuids::uuid job_id;
 
       {
@@ -126,7 +149,7 @@ bool RsyncPacketSubscriber::sendTo(
          if ( active_job_ptr_ )
          {
             valid_uuid = true;
-            job_id = active_job_ptr_->descriptor().uuid();
+            job_id     = active_job_ptr_->descriptor().uuid();
          }
       }
 

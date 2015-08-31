@@ -34,6 +34,8 @@ protected:
    //
    RsyncJob* activeJob();
 
+   void disablePacketRouting();
+
    boost::mutex& activeJobLock();
 
    bool sendTo( liber::netapp::DestinationID destination_id, int type, const void* data_ptr, ui32 length );
@@ -50,6 +52,8 @@ private:
    boost::mutex lock_;
 
    RsyncJob* active_job_ptr_;
+
+   bool allow_packets_;
 
 };
 

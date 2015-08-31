@@ -222,24 +222,22 @@ RsyncError RemoteAuthorityInterface::waitForEndInstruction(int nTimeoutMs)
 }
 
 //-----------------------------------------------------------------------------
-void RemoteAuthorityInterface::
-sendAssemblyInstruction(const void* data_ptr, ui32 byte_count )
+void RemoteAuthorityInterface::sendAssemblyInstruction(
+   const void* data_ptr,
+   ui32        byte_count )
 {
-   Instruction* instruction_ptr = NULL;
+   InstructionContainer* container_ptr = new InstructionContainer();
 
-   std::string instruction_data;
-   instruction_data.assign( (const char*)data_ptr, byte_count );
-
-   instruction_ptr = InstructionFactory::Deserialize( instruction_data );
-
-   if ( instruction_ptr )
+   if ( container_ptr )
    {
+      container_ptr->stream().assign( data_ptr, byte_count );
+
       boost::mutex::scoped_lock guard( activeJobLock() );
 
       // Send the instruction to the assembler.
       if ( activeJob() )
       {
-         activeJob()->instructions().push( instruction_ptr );
+         activeJob()->instructions().push( container_ptr );
 
          // Update last receive timestamp.
          last_instruction_time_ = boost::posix_time::microsec_clock::local_time();
@@ -285,9 +283,15 @@ void RemoteAuthorityInterface::cancelAssembly(
    InstructionQueue& instructions,
    RsyncError        status)
 {
-   EndInstruction* end_instr_ptr = new EndInstruction();
-   end_instr_ptr->cancel( status );
-   instructions.push( end_instr_ptr );
+   EndInstruction instruction;
+    instruction.cancel( status );
+
+    InstructionContainer* container_ptr = new InstructionContainer( instruction.type() );
+
+   container_ptr->serialize( container_ptr->stream() );
+   instruction.serialize( container_ptr->stream() );
+
+   instructions.push( container_ptr );
 }
 
 //-----------------------------------------------------------------------------

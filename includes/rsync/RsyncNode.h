@@ -59,8 +59,7 @@ private:
    RsyncPacketRouter router_;
 
    FileSystemInterface file_sys_interface_;
-   // WorkerGroup& worker_group_;
-   JobAgent        job_agent_;
+   JobAgent            job_agent_;
 };
 
 } // End namespace rsync

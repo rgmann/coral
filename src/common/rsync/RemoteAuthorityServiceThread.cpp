@@ -1,7 +1,9 @@
+#include "Log.h"
 #include "RsyncJob.h"
 #include "JobAgent.h"
 #include "RemoteAuthorityServiceThread.h"
 
+using namespace liber;
 using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
@@ -36,4 +38,6 @@ void RemoteAuthorityServiceThread::run( const bool& shutdown )
       }
     }
   }
+
+  log::debug("RemoteAuthorityServiceThread: Shutting down\n");
 }

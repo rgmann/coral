@@ -21,7 +21,8 @@ public:
 
   SegmentAccessor& segmentAccessor();
 
-  JobDescriptor&   jobDescriptor();
+  JobDescriptor&   descriptor();
+  void setDescriptor( JobDescriptor& job_descriptor );
 
   /**
    * Returns true if execution of an instruction failed or if the instruction
@@ -67,13 +68,34 @@ public:
 
   ui32 type() const;
 
-  virtual std::string toString() const = 0;
-
-  virtual void execute( AssemblerState& state ) = 0;
 
 protected:
 
   ui32 mType;
+};
+
+class InstructionContainer : public liber::netapp::Serializable {
+public:
+
+  enum { kInvalidInstructionType = -1 };
+
+  InstructionContainer( i32 type = kInvalidInstructionType );
+
+  i32 type() const { return type_; };
+
+  liber::netapp::SerialStream& stream() { return stream_; };
+
+protected:
+
+  void pack(liber::netapp::SerialStream& ctor) const;
+  void pack(liber::netapp::SerialStream& ctor);
+  bool unpack(liber::netapp::SerialStream& dtor);
+
+private:
+
+  liber::netapp::SerialStream stream_;
+
+  i32 type_;
 };
 
 
@@ -86,20 +108,18 @@ public:
   BeginInstruction(liber::rsync::JobDescriptor&);
   ~BeginInstruction();
 
-  liber::rsync::JobDescriptor& getDescriptor();
+  liber::rsync::JobDescriptor& descriptor(){ return descriptor_; };
 
-  std::string toString() const;
-
-  void execute( AssemblerState& state );
 
 protected:
 
   void pack(liber::netapp::SerialStream& ctor) const;
+  void pack(liber::netapp::SerialStream& ctor);
   bool unpack(liber::netapp::SerialStream& dtor);
 
 private:
 
-  liber::rsync::JobDescriptor mDescriptor;
+  liber::rsync::JobDescriptor descriptor_;
 };
 
 
@@ -114,17 +134,14 @@ public:
 
   liber::rsync::Segment::ID getSegmentId() const;
 
-  std::string toString() const;
-  void execute( AssemblerState& state );
+  liber::rsync::Segment::ID segment_id_;
 
 protected:
 
-  void pack(liber::netapp::SerialStream& ctor) const;
-  bool unpack(liber::netapp::SerialStream& dtor);
+   void pack(liber::netapp::SerialStream& ctor) const;
+   void pack(liber::netapp::SerialStream& ctor);
+   bool unpack(liber::netapp::SerialStream& dtor);
 
-private:
-
-  liber::rsync::Segment::ID mID;
 };
 
 
@@ -140,18 +157,15 @@ public:
   ui8* const data();
   ui32 size() const;
 
-  std::string toString() const;
-  void execute( AssemblerState& state );
+  ui8* chunk_data_ptr_;
+  ui32 chunk_size_bytes_;
 
 protected:
 
   void pack(liber::netapp::SerialStream& ctor) const;
+  void pack(liber::netapp::SerialStream& ctor);
   bool unpack(liber::netapp::SerialStream& dtor);
 
-private:
-
-  ui8* chunk_data_ptr_;
-  ui32 chunk_size_bytes_;
 };
 
 
@@ -164,33 +178,21 @@ public:
   ~EndInstruction();
 
   void cancel(RsyncError error);
-  bool cancelled() const;
+  bool canceled() const;
   RsyncError error() const;
 
-  std::string toString() const;
-  void execute( AssemblerState& state );
+  bool canceled_;
+
+  // If cancelled, error that caused cancellation.
+  ui32 cancel_error_;
 
 protected:
 
   void pack(liber::netapp::SerialStream& ctor) const;
+  void pack(liber::netapp::SerialStream& ctor);
   bool unpack(liber::netapp::SerialStream& dtor);
 
-private:
-
-  bool mbCancelled;
-
-  // If cancelled, error that caused cancellation.
-  ui32 mCancelError;
 };
-
-class InstructionFactory {
-public:
-
-  static std::string Serialize(const Instruction* pInstruction);
-  static Instruction* Deserialize(const std::string& data);
-};
-
-
 
 } // End namespace rsync
 } // End namespace liber

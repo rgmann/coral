@@ -1,98 +1,195 @@
-#include <fstream>
+#include <boost/current_function.hpp>
+#include <string.h>
+#include "Log.h"
+#include "Instruction.h"
 #include "InstructionList.h"
+#include "gtest/gtest.h"
 
+using namespace liber;
 using namespace liber::rsync;
+using namespace liber::netapp;
 
-void test_begin_instruction()
+class InstructionTest : public ::testing::Test {
+public:
+
+   InstructionTest()
+   {
+   }
+
+   boost::filesystem::path LOCAL_ROOT;
+   boost::filesystem::path REMOTE_ROOT;
+
+
+protected:
+
+   void SetUp()
+   {
+      liber::log::level( liber::log::Verbose );
+   }
+
+   void TearDown()
+   {
+      liber::log::flush();
+   }
+};
+
+TEST_F( InstructionTest, TestInstructionContainer )
 {
-  std::cout << "test_begin_isntruction" << std::endl;
+   InstructionContainer sendContainer( EndInstruction::Type );
+   EXPECT_EQ( EndInstruction::Type, sendContainer.type() );
 
-  JobDescriptor descriptor("flowtestdata/client_dir/file.dat", 6);
+   SerialStream stream;
+   sendContainer.serialize( stream );
 
-  BeginInstruction source(descriptor);
-  std::cout << "before:" << std::endl
-            << source.toString() << std::endl;
-  std::string serialized = InstructionFactory::Serialize(&source);
+   InstructionContainer recvContainer;
+   EXPECT_EQ( -1, recvContainer.type() );
 
-  Instruction* lpDestination = InstructionFactory::Deserialize(serialized);
-  if (lpDestination)
-  {
-    std::cout << "after:" << std::endl
-              << lpDestination->toString() << std::endl;
-    delete lpDestination;
-    lpDestination = NULL;
-  }
-  else
-  {
-    std::cout << "Failed to deserialize." << std::endl;
-  }
-  std::cout << std::endl;
+   EXPECT_EQ( true, recvContainer.deserialize( stream ) );
+   EXPECT_EQ( EndInstruction::Type, recvContainer.type() );
+}
+
+TEST_F( InstructionTest, TestBeginInstruction )
+{
+   boost::filesystem::path source( "invalid_dir/s_inst.cpp" );
+   boost::filesystem::path destination( "d_inst.cpp" );
+
+   JobDescriptor descriptor;
+   descriptor.setSource( LocalResourcePath( source ) );
+   descriptor.setDestination( LocalResourcePath( destination ) );
+   EXPECT_EQ( true, descriptor.isValid() );
+
+   BeginInstruction     sendInstruction( descriptor );
+   InstructionContainer sendContainer( sendInstruction.type() );
+   EXPECT_EQ( BeginInstruction::Type, sendContainer.type() );
+
+   sendContainer.serialize( sendContainer.stream() );
+   sendInstruction.serialize( sendContainer.stream() );
+
+   std::string packed_container = sendContainer.stream().stream.str();
+   EXPECT_EQ( false, packed_container.empty() );
+
+   InstructionContainer recvContainer;
+   EXPECT_EQ( -1, recvContainer.type() );
+   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+
+   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
+   EXPECT_EQ( BeginInstruction::Type, recvContainer.type() );
+
+   BeginInstruction recvInstruction;
+   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
+
+   EXPECT_EQ( source.string(), recvInstruction.descriptor().getSourcePath().string() );
+   EXPECT_EQ( destination.string(), recvInstruction.descriptor().getDestinationPath().string() );
 }
 
 
-void test_segment_instruction()
+TEST_F( InstructionTest, TestSegmentInstruction )
 {
-  std::cout << "test_segment_instruction" << std::endl;
+   Segment::ID segment_id = 15;
+   SegmentInstruction sendInstruction( segment_id );
+   InstructionContainer sendContainer( sendInstruction.type() );
+   EXPECT_EQ( SegmentInstruction::Type, sendContainer.type() );
 
-  SegmentInstruction source(15);
-  std::cout << "before:" << std::endl
-            << source.toString() << std::endl;
-  std::string serialized = InstructionFactory::Serialize(&source);
+   sendContainer.serialize( sendContainer.stream() );
+   sendInstruction.serialize( sendContainer.stream() );
 
-  Instruction* lpDestination = InstructionFactory::Deserialize(serialized);
-  if (lpDestination)
-  {
-    std::cout << "after:" << std::endl
-              << lpDestination->toString() << std::endl;
-    delete lpDestination;
-    lpDestination = NULL;
-  }
-  else
-  {
-    std::cout << "Failed to deserialize." << std::endl;
-  }
-  std::cout << std::endl;
+   std::string packed_container = sendContainer.stream().stream.str();
+   EXPECT_EQ( false, packed_container.empty() );
+
+   InstructionContainer recvContainer;
+   EXPECT_EQ( -1, recvContainer.type() );
+   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+
+   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
+   EXPECT_EQ( SegmentInstruction::Type, recvContainer.type() );
+
+   SegmentInstruction recvInstruction;
+   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
+
+   EXPECT_EQ( segment_id, recvInstruction.segment_id_ );
 }
 
 
-void test_chunk_instruction()
+TEST_F( InstructionTest, TestChunkInstruction )
 {
-  ui8 buffer[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+   ui8 buffer[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
-  std::cout << "test_chunk_instruction" << std::endl;
+   ChunkInstruction sendInstruction( sizeof( buffer ) );
+   memcpy( sendInstruction.data(), buffer, sizeof( buffer ) );
+   InstructionContainer sendContainer( sendInstruction.type() );
+   EXPECT_EQ( ChunkInstruction::Type, sendContainer.type() );
 
-  ChunkInstruction source(sizeof(buffer));
-  memcpy(source.data(), buffer, sizeof(buffer));
-  std::cout << "before:" << std::endl
-            << source.toString() << std::endl;
-  std::string serialized = InstructionFactory::Serialize(&source);
+   sendContainer.serialize( sendContainer.stream() );
+   sendInstruction.serialize( sendContainer.stream() );
 
-  Instruction* lpDestination = InstructionFactory::Deserialize(serialized);
-  if (lpDestination)
-  {
-    std::cout << "after:" << std::endl
-              << lpDestination->toString() << std::endl;
-    delete lpDestination;
-    lpDestination = NULL;
-  }
-  else
-  {
-    std::cout << "Failed to deserialize." << std::endl;
-  }
-  std::cout << std::endl;
+   std::string packed_container = sendContainer.stream().stream.str();
+   EXPECT_EQ( false, packed_container.empty() );
+
+   InstructionContainer recvContainer;
+   EXPECT_EQ( -1, recvContainer.type() );
+   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+
+   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
+   EXPECT_EQ( ChunkInstruction::Type, recvContainer.type() );
+
+   ChunkInstruction recvInstruction;
+   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
+
+   EXPECT_EQ( sizeof(buffer), recvInstruction.chunk_size_bytes_ );
+   EXPECT_EQ( 0, memcmp( recvInstruction.chunk_data_ptr_, buffer, sizeof( buffer ) ) );
 }
 
-
-void test_end_instruction()
+TEST_F( InstructionTest, TestEndInstructionSuccess )
 {
+   EndInstruction sendInstruction;
+   InstructionContainer sendContainer( sendInstruction.type() );
+   EXPECT_EQ( EndInstruction::Type, sendContainer.type() );
+
+   sendContainer.serialize( sendContainer.stream() );
+   sendInstruction.serialize( sendContainer.stream() );
+
+   std::string packed_container = sendContainer.stream().stream.str();
+   EXPECT_EQ( false, packed_container.empty() );
+
+   InstructionContainer recvContainer;
+   EXPECT_EQ( -1, recvContainer.type() );
+   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+
+   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
+   EXPECT_EQ( EndInstruction::Type, recvContainer.type() );
+
+   EndInstruction recvInstruction;
+   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
+
+   EXPECT_EQ( false, recvInstruction.canceled() );
+   EXPECT_EQ( RsyncSuccess, recvInstruction.canceled() );
 }
 
-
-int main (int argc, char* argv[])
+TEST_F( InstructionTest, TestEndInstructionCancel )
 {
-  test_begin_instruction();
-  test_segment_instruction();
-  test_chunk_instruction();
-  return 0;
+   EndInstruction sendInstruction;
+   sendInstruction.cancel( kRsyncDestinationNotWritable );
+
+   InstructionContainer sendContainer( sendInstruction.type() );
+   EXPECT_EQ( EndInstruction::Type, sendContainer.type() );
+
+   sendContainer.serialize( sendContainer.stream() );
+   sendInstruction.serialize( sendContainer.stream() );
+
+   std::string packed_container = sendContainer.stream().stream.str();
+   EXPECT_EQ( false, packed_container.empty() );
+
+   InstructionContainer recvContainer;
+   EXPECT_EQ( -1, recvContainer.type() );
+   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+
+   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
+   EXPECT_EQ( EndInstruction::Type, recvContainer.type() );
+
+   EndInstruction recvInstruction;
+   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
+
+   EXPECT_EQ( true, recvInstruction.canceled() );
+   EXPECT_EQ( kRsyncDestinationNotWritable, recvInstruction.error() );
 }
 
