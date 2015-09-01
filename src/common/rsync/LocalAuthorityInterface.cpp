@@ -29,27 +29,27 @@ std::ifstream& LocalAuthorityInterface::file()
 //----------------------------------------------------------------------------
 void LocalAuthorityInterface::process( RsyncJob* job_ptr )
 {
-  processJob( job_ptr, job_ptr->instructions() );
+   processJob( job_ptr, job_ptr->instructions() );
 }
 
 //----------------------------------------------------------------------------
 void LocalAuthorityInterface::process(
-  RsyncJob*             job_ptr,
-  InstructionReceiver&  instruction_receiver
+   RsyncJob*             job_ptr,
+   InstructionReceiver&  instruction_receiver
 )
 {
-  processJob( job_ptr, instruction_receiver );
+   processJob( job_ptr, instruction_receiver );
 }
 
 //----------------------------------------------------------------------------
 void LocalAuthorityInterface::processJob(
-  RsyncJob*             job_ptr,
-  InstructionReceiver&  instruction_receiver
+   RsyncJob*             job_ptr,
+   InstructionReceiver&  instruction_receiver
 )
 {
    RsyncError job_status = hashSegments( job_ptr );
 
-   if ( job_status == RsyncSuccess )
+   if ( job_status == kRsyncSuccess )
    {
       // Hash has been populated. Now the Authority can begin building the
       // instructions.
@@ -89,16 +89,13 @@ void LocalAuthorityInterface::processJob(
       }
    }
 
-   if ( job_status != RsyncSuccess )
+   if ( job_status != kRsyncSuccess )
    {
       EndInstruction instruction;
       instruction.cancel( job_status );
 
-      InstructionContainer* container_ptr = new InstructionContainer( instruction.type() );
-
-      container_ptr->serialize( container_ptr->stream() );
-      instruction.serialize( container_ptr->stream() );
-
+      InstructionContainer* container_ptr =
+         new InstructionContainer( instruction );
       instruction_receiver.push( container_ptr );
    }
 }
@@ -106,7 +103,7 @@ void LocalAuthorityInterface::processJob(
 //-----------------------------------------------------------------------------
 RsyncError LocalAuthorityInterface::hashSegments( RsyncJob* job_ptr )
 {
-   RsyncError hash_status = RsyncSuccess;
+   RsyncError hash_status = kRsyncSuccess;
 
    int  received_segment_count = 0;
    bool hash_insert_done       = false;
@@ -128,12 +125,12 @@ RsyncError LocalAuthorityInterface::hashSegments( RsyncJob* job_ptr )
 
          if ( hash_insert_done == false )
          {
-           received_segment_count++;
+            received_segment_count++;
 
-           authority_.hash().insert(
-             segment_ptr->getWeak().checksum(),
-             segment_ptr
-           );
+            authority_.hash().insert(
+               segment_ptr->getWeak().checksum(),
+               segment_ptr
+            );
          }
       }
       else

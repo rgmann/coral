@@ -103,14 +103,13 @@ RsyncError JobAgent::createJob(
 
       descriptor.setDestination( destination );
       descriptor.setSource( source );
-      // descriptor.setSegmentSize( segment_size );
       descriptor.setLimits( limits_ );
 
       job_create_status = createJob( job_ptr );
 
       // If createJob returns an error, the job was not added to the pipeline.
       // Deallocate the job now.
-      if ( job_create_status != RsyncSuccess )
+      if ( job_create_status != kRsyncSuccess )
       {
          delete job_ptr;
       }
@@ -165,14 +164,15 @@ RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
 
             // If createJob returns an error, the job was not added to the
             // pipeline. Deallocate the job now.
-            if ( job_create_status != RsyncSuccess )
+            if ( job_create_status != kRsyncSuccess )
             {
                delete job_ptr;
             }
          }
          else
          {
-            log::error("JobAgent::createJob - Bad remote job: %s\n", descriptor.getDestinationPath().c_str());
+            log::error("JobAgent::createJob - Bad remote job: %s\n",
+               descriptor.getDestinationPath().c_str());
             job_create_status = error(job_ptr, RsyncBadRemoteJob);
          }
       }
@@ -193,7 +193,7 @@ RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
 //---------------------------------------------------------------------------
 RsyncError JobAgent::createJob( RsyncJob* job_ptr )
 {
-   RsyncError job_create_status = RsyncSuccess;
+   RsyncError job_create_status = kRsyncSuccess;
 
    JobDescriptor& descriptor = job_ptr->descriptor();
 
@@ -206,7 +206,7 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
       );
    }
 
-   if ( job_create_status != RsyncSuccess )
+   if ( job_create_status != kRsyncSuccess )
    {
       job_create_status = error( job_ptr, job_create_status );
    }
@@ -214,7 +214,7 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
    // If the source or destination is remote, check that the RsyncPacketRouter
    // has been registered with a packet router and that the JobAgent has been
    // registered with the RsyncPacketRouter.
-   if ( job_create_status == RsyncSuccess )
+   if ( job_create_status == kRsyncSuccess )
    {
       if ( descriptor.getSource().remote() || descriptor.getDestination().remote() )
       {
@@ -230,7 +230,7 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
    // If the destination is local, verify that it exists. If it does not, but
    // stub creation is enabled, attempt to create it with touch. If stub
    // creation is not enabled, job creation failed.
-   if ( job_create_status == RsyncSuccess )
+   if ( job_create_status == kRsyncSuccess )
    {
       if ( descriptor.getDestination().remote() == false )
       {
@@ -249,9 +249,9 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
    }
 
 
-   if ( job_create_status == RsyncSuccess )
+   if ( job_create_status == kRsyncSuccess )
    {
-      if ( ( job_create_status = addActiveJob( job_ptr ) ) == RsyncSuccess )
+      if ( ( job_create_status = addActiveJob( job_ptr ) ) == kRsyncSuccess )
       {
          // If this is a remote job, send the descriptor to the remote node.
          if ( descriptor.getDestination().remote() )
@@ -272,7 +272,7 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
 //----------------------------------------------------------------------------
 RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
 {
-   RsyncError job_create_status = RsyncSuccess;
+   RsyncError job_create_status = kRsyncSuccess;
 
    std::pair<JobTable::iterator,bool> insert_status;
    std::pair<buuid, RsyncJob*>        job_pair;
@@ -291,7 +291,7 @@ RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
       }
    }
 
-   if ( job_create_status == RsyncSuccess )
+   if ( job_create_status == kRsyncSuccess )
    {
       // If the job was successfully added to the active-job table,
       // add the job to the ready job queue.
@@ -302,7 +302,7 @@ RsyncError JobAgent::addActiveJob( RsyncJob* job_ptr )
             worker_group_.addJob( this, job_ptr );
          }
 
-         if ( job_create_status != RsyncSuccess )
+         if ( job_create_status != kRsyncSuccess )
          {
             active_jobs_.erase( insert_status.first );
          }
@@ -337,7 +337,7 @@ void JobAgent::removeActiveJob( RsyncJob* job_ptr )
 //----------------------------------------------------------------------------
 RsyncError JobAgent::sendRemoteJob( const JobDescriptor& descriptor )
 {
-   RsyncError send_status = RsyncSuccess;
+   RsyncError send_status = kRsyncSuccess;
 
    // Attempt to send the request. Failure means that the packet was not
    // added to the send queue, so delete it.
@@ -365,7 +365,7 @@ RsyncError JobAgent::error( RsyncJob* job_ptr, RsyncError error )
    job_ptr->report().createJobStatus = error;
 
    // 
-   if ( ( error != RsyncSuccess ) && job_ptr->descriptor().isRemoteRequest() )
+   if ( ( error != kRsyncSuccess ) && job_ptr->descriptor().isRemoteRequest() )
    {
       RemoteJobResult result( job_ptr->descriptor().uuid(), job_ptr->report() );
 
@@ -478,7 +478,7 @@ void JobAgent::handleRemoteJobRequest( const void* data_ptr, ui32 length )
 
       if ( descriptor.deserialize( (const char*)data_ptr, length ) )
       {
-         RsyncError status = RsyncSuccess;
+         RsyncError status = kRsyncSuccess;
 
          // Indicate that the job was remotely requested.
          descriptor.setRemoteRequest();
@@ -502,7 +502,7 @@ void JobAgent::handleRemoteJobRequest( const void* data_ptr, ui32 length )
 
          //
          // If a job was successfully created, add it to the job queue.
-         if ( status == RsyncSuccess )
+         if ( status == kRsyncSuccess )
          {
             bool add_success = false;
 

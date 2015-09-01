@@ -315,7 +315,7 @@ public:
 
   void process(const liber::cli::ArgumentList& args) {
     if ( attributes_.is_connected() ) {
-      if ( attributes_.node_ptr_->push( args[ 0 ] ) == RsyncSuccess ) {
+      if ( attributes_.node_ptr_->push( args[ 0 ] ) == kRsyncSuccess ) {
         attributes_.semaphore_.take();
         liber::log::status("Done\n");
       } else {
@@ -340,7 +340,7 @@ public:
 
   void process(const liber::cli::ArgumentList& args) {
     if ( attributes_.is_connected() ) {
-      if ( attributes_.node_ptr_->pull( args[ 0 ] ) == RsyncSuccess ) {
+      if ( attributes_.node_ptr_->pull( args[ 0 ] ) == kRsyncSuccess ) {
         attributes_.semaphore_.take();
         liber::log::status("Done\n");
       } else {

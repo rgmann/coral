@@ -55,7 +55,7 @@ RsyncError WorkerGroup::addJob( JobAgent* agent_ptr, RsyncJob* job_ptr )
          remote_auth_queue_.push( job_agent_pair );
       }
 
-      add_status = RsyncSuccess;
+      add_status = kRsyncSuccess;
    }
 
    return add_status;

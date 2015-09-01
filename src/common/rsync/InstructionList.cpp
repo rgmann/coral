@@ -15,15 +15,15 @@ InstructionList::~InstructionList()
 //-----------------------------------------------------------------------------
 void InstructionList::push( InstructionContainer* container_ptr )
 {
-  if ( container_ptr )
-  {
-    containers_.push_back( container_ptr );
-  }
+   if ( container_ptr )
+   {
+      containers_.push_back( container_ptr );
+   }
 }
 
 //-----------------------------------------------------------------------------
 std::vector<InstructionContainer*>& InstructionList::instructions()
 {
-  return containers_;
+   return containers_;
 }
 

@@ -4,7 +4,7 @@ using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
 InstructionHook::InstructionHook()
-: InstructionReceiver()
+:  InstructionReceiver()
 {
 }
 
@@ -16,6 +16,9 @@ InstructionHook::~InstructionHook()
 //-----------------------------------------------------------------------------
 void InstructionHook::push( InstructionContainer* container_ptr )
 {
-  call( container_ptr );
+   if ( container_ptr )
+   {
+      call( container_ptr );
+   }
 }
 

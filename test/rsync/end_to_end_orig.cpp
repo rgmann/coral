@@ -59,7 +59,7 @@ int main (int argc, char* argv[])
   if (localRouter.addSubscriber(RSYNC_SUB_ID, &local.subscriber()) &&
       remoteRouter.addSubscriber(RSYNC_SUB_ID, &remote.subscriber()))
   {
-    RsyncError jobStatus = RsyncSuccess;
+    RsyncError jobStatus = kRsyncSuccess;
 
     local.setCallback(&localCallback);
     remote.setCallback(&remoteCallback);
@@ -71,7 +71,7 @@ int main (int argc, char* argv[])
     //
 
     jobStatus = local.sync("d_inst.cpp", "s_inst.cpp");
-    if (jobStatus == RsyncSuccess)
+    if (jobStatus == kRsyncSuccess)
     {
       localCallback.mSem.take();
     }
@@ -89,7 +89,7 @@ int main (int argc, char* argv[])
     //
 
     jobStatus = local.sync("file.dat", "file.dat", true, false);
-    if (jobStatus == RsyncSuccess)
+    if (jobStatus == kRsyncSuccess)
     {
       localCallback.mSem.take();
       remoteCallback.mSem.take();
@@ -107,7 +107,7 @@ int main (int argc, char* argv[])
     //
 
     jobStatus = local.sync("image.png", "image.png", true, false);
-    if (jobStatus == RsyncSuccess)
+    if (jobStatus == kRsyncSuccess)
     {
       localCallback.mSem.take();
       remoteCallback.mSem.take();
@@ -126,7 +126,7 @@ int main (int argc, char* argv[])
     //
 
     jobStatus = local.sync("instruction_test.cpp", "instruction_test.cpp", false, true);
-    if (jobStatus == RsyncSuccess)
+    if (jobStatus == kRsyncSuccess)
     {
       localCallback.mSem.take();
     }
@@ -144,7 +144,7 @@ int main (int argc, char* argv[])
     //
 
     jobStatus = local.sync("dfile_0.dat", "dfile_0.dat", false, true);
-    if (jobStatus == RsyncSuccess)
+    if (jobStatus == kRsyncSuccess)
     {
       localCallback.mSem.take();
       //remoteCallback.mSem.take();

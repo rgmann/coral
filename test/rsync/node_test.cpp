@@ -96,7 +96,7 @@ TEST_F( NodeTest, RemoteAuthRequestTimeout ) {
    node_->setJobCompletionCallback( &callback );
    node_->setCompletionTimeout(2000);
 
-   EXPECT_EQ( RsyncSuccess, node_->sync(
+   EXPECT_EQ( kRsyncSuccess, node_->sync(
       LocalResourcePath( destination ),
       RemoteResourcePath( source ) ) );
 
@@ -134,7 +134,7 @@ TEST_F( NodeTest, RemoteSourceDoesNotExist ) {
    remote_router.launch();
    ASSERT_EQ( true, remote_router.subscribe( RSYNC_SUB_ID, &remote_node.subscriber()) );
 
-   EXPECT_EQ( RsyncSuccess, node_->sync(
+   EXPECT_EQ( kRsyncSuccess, node_->sync(
       LocalResourcePath( destination ),
       RemoteResourcePath( source ) ) );
 

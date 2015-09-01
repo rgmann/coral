@@ -16,7 +16,7 @@ using namespace liber::netapp;
 
 RemoteAuthorityInterface::ActiveJob::ActiveJob()
 :  job_ptr_(NULL)
-,  query_response_(RsyncSuccess)
+,  query_response_(kRsyncSuccess)
 {
 }
 
@@ -105,7 +105,7 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
    // remote job was not successfully started, this will simply delete the
    // segments. If this remote job was successfully started, flushSegments will
    // send the segments before deleting them.
-   if ( flushSegments( job_ptr->segments(), ( process_status == RsyncSuccess ) ) == false )
+   if ( flushSegments( job_ptr->segments(), ( process_status == kRsyncSuccess ) ) == false )
    {
       process_status = kRsyncCommError;
       liber::log::debug("RemoteAuthorityInterface::process: kRsyncCommError\n");
@@ -113,7 +113,7 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
 
    // If the remote Authority job was successfully started,
    // wait until End instruction is received from the remote job.
-   if ( process_status == RsyncSuccess )
+   if ( process_status == kRsyncSuccess )
    {
       process_status = waitForEndInstruction(
          job_ptr->descriptor().completionTimeoutMs() );
@@ -130,7 +130,7 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
    // If the remote job failed to start for some reason, or if an error, such
    // as a timeout, occurred while waiting for the End instruction, create
    // an End instruction that notifies the Assembler of the error.
-   if ( process_status != RsyncSuccess )
+   if ( process_status != kRsyncSuccess )
    {
       cancelAssembly( job_ptr->instructions(), process_status );
    }
@@ -197,7 +197,7 @@ void RemoteAuthorityInterface::handleQueryResponse(
 //-----------------------------------------------------------------------------
 RsyncError RemoteAuthorityInterface::waitForEndInstruction(int nTimeoutMs)
 {
-   RsyncError status = RsyncSuccess;
+   RsyncError status = kRsyncSuccess;
 
    while ( true )
    {
@@ -297,7 +297,7 @@ void RemoteAuthorityInterface::cancelAssembly(
 //-----------------------------------------------------------------------------
 RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
 {
-   RsyncError query_status = RsyncSuccess;
+   RsyncError query_status = kRsyncSuccess;
 
    setActiveJob( job_ptr );
 

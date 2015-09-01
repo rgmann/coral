@@ -63,7 +63,7 @@ private:
 class Instruction : public liber::netapp::Serializable {
 public:
 
-  Instruction(ui32 type);
+  Instruction( ui32 type );
   virtual ~Instruction();
 
   ui32 type() const;
@@ -71,7 +71,7 @@ public:
 
 protected:
 
-  ui32 mType;
+  ui32 type_;
 };
 
 class InstructionContainer : public liber::netapp::Serializable {
@@ -80,6 +80,7 @@ public:
   enum { kInvalidInstructionType = -1 };
 
   InstructionContainer( i32 type = kInvalidInstructionType );
+  InstructionContainer( const Instruction& instruction );
 
   i32 type() const { return type_; };
 

@@ -244,7 +244,7 @@ TEST_F( WorkerTest, MultiWorkerPipelineTest ) {
    std::vector<worker_test::op_attrs_t> operations;
 
    worker_test::op_attrs_t path;
-   path.status = RsyncSuccess;
+   path.status = kRsyncSuccess;
 
    path.path = "instruction_test.cpp";
    operations.push_back( path );
@@ -260,14 +260,14 @@ TEST_F( WorkerTest, MultiWorkerPipelineTest ) {
          LocalResourcePath( pathIt->path ),
          RemoteResourcePath( pathIt->path ) );
 
-      EXPECT_EQ( RsyncSuccess, pathIt->status );
+      EXPECT_EQ( kRsyncSuccess, pathIt->status );
    }
 
    pathIt = operations.begin();
    for (; pathIt != operations.end(); pathIt++ )
    {
       std::cout << "Waiting for " << pathIt->path << std::endl;
-      if ( pathIt->status == RsyncSuccess ) EXPECT_EQ( true, clientCallback.mSem.take() );
+      if ( pathIt->status == kRsyncSuccess ) EXPECT_EQ( true, clientCallback.mSem.take() );
       std::cout << "Checking " << pathIt->path << std::endl;
       EXPECT_EQ( true, CheckEqual(
          boost::filesystem::path( REMOTE_ROOT ) / pathIt->path,

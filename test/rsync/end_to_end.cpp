@@ -253,8 +253,8 @@ TEST_F( EndToEndTest, LocalToLocal ) {
   RsyncError sync_status = mLocalNode->sync(
     LocalResourcePath( destination ),
     LocalResourcePath( source ) );
-  EXPECT_EQ( RsyncSuccess, sync_status );
-  if ( sync_status == RsyncSuccess )
+  EXPECT_EQ( kRsyncSuccess, sync_status );
+  if ( sync_status == kRsyncSuccess )
   {
     EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
@@ -276,8 +276,8 @@ TEST_F( EndToEndTest, RemoteDestSmallTest ) {
   RsyncError sync_status = mLocalNode->sync(
     RemoteResourcePath( destination ),
     LocalResourcePath( source ) );
-  EXPECT_EQ( RsyncSuccess, sync_status );
-  if ( sync_status == RsyncSuccess )
+  EXPECT_EQ( kRsyncSuccess, sync_status );
+  if ( sync_status == kRsyncSuccess )
   {
     EXPECT_EQ( true, mLocalCallback.mSem.take() );
     EXPECT_EQ( true, mRemoteCallback.mSem.take() );
@@ -299,8 +299,8 @@ TEST_F( EndToEndTest, RemoteDestImageTest ) {
   RsyncError sync_status = mLocalNode->sync(
     RemoteResourcePath( destination ),
     LocalResourcePath( source ) );
-  EXPECT_EQ( RsyncSuccess, sync_status );
-  if ( sync_status == RsyncSuccess )
+  EXPECT_EQ( kRsyncSuccess, sync_status );
+  if ( sync_status == kRsyncSuccess )
   {
     EXPECT_EQ( true, mLocalCallback.mSem.take() );
     EXPECT_EQ( true, mRemoteCallback.mSem.take() );
@@ -323,8 +323,8 @@ TEST_F( EndToEndTest, RemoteSourceTest ) {
     LocalResourcePath( destination ),
     RemoteResourcePath( source) );
 
-  EXPECT_EQ( RsyncSuccess, sync_status );
-  if ( sync_status == RsyncSuccess )
+  EXPECT_EQ( kRsyncSuccess, sync_status );
+  if ( sync_status == kRsyncSuccess )
   {
     EXPECT_EQ( true, mLocalCallback.mSem.take() );
     EXPECT_EQ( true, mRemoteCallback.mSem.take() );
@@ -347,8 +347,8 @@ TEST_F( EndToEndTest, RemoteSourceCopy ) {
     LocalResourcePath( destination ),
     RemoteResourcePath( source ) );
 
-  EXPECT_EQ( RsyncSuccess, sync_status );
-  if ( sync_status == RsyncSuccess )
+  EXPECT_EQ( kRsyncSuccess, sync_status );
+  if ( sync_status == kRsyncSuccess )
   {
     EXPECT_EQ( true, mLocalCallback.mSem.take() );
 
@@ -367,7 +367,7 @@ TEST_F( EndToEndTest, PipelineTest ) {
   std::vector<op_attrs_t> operations;
 
   op_attrs_t path;
-  path.status = RsyncSuccess;
+  path.status = kRsyncSuccess;
 
   path.path = "instruction_test.cpp";
   operations.push_back( path );
@@ -383,14 +383,14 @@ TEST_F( EndToEndTest, PipelineTest ) {
       LocalResourcePath( pathIt->path ),
       RemoteResourcePath( pathIt->path ) );
 
-    EXPECT_EQ( RsyncSuccess, pathIt->status );
+    EXPECT_EQ( kRsyncSuccess, pathIt->status );
   }
 
   pathIt = operations.begin();
   for (; pathIt != operations.end(); pathIt++ )
   {
     std::cout << "Waiting for " << pathIt->path << std::endl;
-    if ( pathIt->status == RsyncSuccess ) EXPECT_EQ( true, mLocalCallback.mSem.take() );
+    if ( pathIt->status == kRsyncSuccess ) EXPECT_EQ( true, mLocalCallback.mSem.take() );
     std::cout << "Checking " << pathIt->path << std::endl;
     EXPECT_EQ( true, CheckEqual(
       boost::filesystem::path( REMOTE_ROOT ) / pathIt->path,

@@ -20,11 +20,11 @@ public:
 
    RpcMarshalledCall* invokeRpc(const RpcObject &object);
 
-   bool put(const char* pData, ui32 nLength);
+   bool put( liber::netapp::DestinationID destination_id, const void* data_ptr, ui32 length );
 
 private:
 
-   RpcMarshalledCall* getMarshalledRpc(const RpcObject &object);
+   RpcMarshalledCall* getMarshalledRpc( const RpcObject &object );
 
    void processCancellations();
 

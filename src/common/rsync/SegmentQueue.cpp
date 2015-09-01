@@ -6,9 +6,8 @@ using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
 SegmentQueue::SegmentQueue()
-: SegmentReceiver()
+:  SegmentReceiver()
 {
-  // mSegments.initialize();
 }
 
 //----------------------------------------------------------------------------
@@ -17,20 +16,20 @@ SegmentQueue::~SegmentQueue()
 }
 
 //----------------------------------------------------------------------------
-void SegmentQueue::push(Segment& rSegment)
+void SegmentQueue::push( Segment& segment )
 {
-  mSegments.push(new Segment(rSegment));
+   segments_.push( new Segment( segment ) );
 }
 
 //----------------------------------------------------------------------------
-void SegmentQueue::push(Segment* pSegment)
+void SegmentQueue::push( Segment* segment_ptr )
 {
-  mSegments.push(pSegment);
+   segments_.push( segment_ptr );
 }
 
 //----------------------------------------------------------------------------
-bool SegmentQueue::pop(Segment** ppSegment, int nTimeoutMs)
+bool SegmentQueue::pop( Segment** ppSegment, int timeout_ms )
 {
-  return mSegments.pop(*ppSegment, nTimeoutMs);
+   return segments_.pop( *ppSegment, timeout_ms );
 }
 

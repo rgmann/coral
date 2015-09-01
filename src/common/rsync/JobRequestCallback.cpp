@@ -15,9 +15,10 @@ JobRequestCallback::JobRequestCallback( bool create_permitted )
 //-----------------------------------------------------------------------------
 RsyncError JobRequestCallback::canFulfill(
    const FileSystemInterface& file_sys,
-   const JobDescriptor& descriptor )
+   const JobDescriptor&       descriptor
+)
 {
-   RsyncError status = RsyncSuccess;
+   RsyncError status = kRsyncSuccess;
    std::string error_message;
 
    if ( authorized( descriptor ) )

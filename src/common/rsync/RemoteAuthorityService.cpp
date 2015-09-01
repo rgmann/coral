@@ -44,7 +44,7 @@ void RemoteAuthorityService::process( RsyncJob* job_ptr )
   // }
   setActiveJob( job_ptr );
 
-  RsyncQueryResponse response( job_ptr->descriptor().uuid(), RsyncSuccess );
+  RsyncQueryResponse response( job_ptr->descriptor().uuid(), kRsyncSuccess );
 
   // sendTo( mRequestID, new (std::nothrow) RsyncPacket(
   //   RsyncPacket::RsyncRemoteAuthAcknowledgment,

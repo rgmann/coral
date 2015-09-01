@@ -4,7 +4,6 @@
 #include <map>
 #include <boost/uuid/uuid.hpp>
 #include <boost/thread/mutex.hpp>
-// #include "PacketSubscriber.h"
 #include "RsyncPacketSubscriber.h"
 #include "JobRequestCallback.h"
 

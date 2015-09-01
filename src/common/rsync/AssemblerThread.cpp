@@ -12,7 +12,7 @@ using namespace liber::rsync;
 
 //----------------------------------------------------------------------------
 AssemblerThread::AssemblerThread( JobAgentPairQueue& queue )
-:  IThread("AssemblerThread")
+:  IThread( "AssemblerThread" )
 ,  job_queue_  ( queue )
 ,  assembler_  ( segment_file_ )
 {
@@ -35,7 +35,7 @@ void AssemblerThread::run( const bool& shutdown )
       if ( job_queue_.pop( job_agent_pair ) )
       {
          JobAgent* agent_ptr = job_agent_pair.first;
-         RsyncJob* job_ptr = job_agent_pair.second;
+         RsyncJob* job_ptr   = job_agent_pair.second;
 
          if ( agent_ptr && job_ptr )
          {
@@ -101,7 +101,4 @@ void AssemblerThread::run( const bool& shutdown )
          }
       }
    }
-
-   log::debug("AssemblerThread: Shutting down\n");
 }
-

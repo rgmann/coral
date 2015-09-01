@@ -13,15 +13,15 @@ using namespace liber::rsync;
 
 //-----------------------------------------------------------------------------
 Authority::Authority()
-: SegmentHook()
-, segment_skip_count_(0)
-, max_chunk_size_bytes_(512)
-, buffered_segment_count_(0)
-, buffer_first_segment_id_( Segment::EndOfStream )
-, total_segment_bytes_(0)
-, segment_bytes_(0)
-, chunk_bytes_(0)
-, instruction_receiver_ptr(NULL)
+:  SegmentHook()
+,  segment_skip_count_     ( 0 )
+,  max_chunk_size_bytes_   ( 512 )
+,  buffered_segment_count_ ( 0 )
+,  buffer_first_segment_id_( Segment::EndOfStream )
+,  total_segment_bytes_    ( 0 )
+,  segment_bytes_          ( 0 )
+,  chunk_bytes_            ( 0 )
+,  instruction_receiver_ptr( NULL )
 {
   chunk_buffer_.allocate( max_chunk_size_bytes_ );
 }
@@ -34,21 +34,21 @@ Authority::~Authority()
 //-----------------------------------------------------------------------------
 void Authority::reset()
 {
-  buffered_segment_count_ = 0;
-  segment_skip_count_ = 0;
-  buffer_first_segment_id_ = -1;
+   buffered_segment_count_ = 0;
+   segment_skip_count_     = 0;
+   buffer_first_segment_id_ = -1;
 
-  total_segment_bytes_ = 0;
-  segment_bytes_ = 0;
-  chunk_bytes_ = 0;
+   total_segment_bytes_ = 0;
+   segment_bytes_       = 0;
+   chunk_bytes_         = 0;
 
-  chunk_buffer_.clear();
+   chunk_buffer_.clear();
 
-  instruction_receiver_ptr = NULL;
+   instruction_receiver_ptr = NULL;
 
-  // Delete all Segments remaining in the Segment hash.
-  SegmentDestructor destructor;
-  segment_hash_.clear( destructor );
+   // Delete all Segments remaining in the Segment hash.
+   SegmentDestructor destructor;
+   segment_hash_.clear( destructor );
 }
 
 //-----------------------------------------------------------------------------
@@ -58,33 +58,31 @@ bool Authority::process(
   InstructionReceiver& instruction_receiver,
   SourceReport& report)
 {
-  authority_report_ptr_ = &report.authority;
-  
-  authority_report_ptr_->receivedSegmentCount = segment_hash_.size();
-  authority_report_ptr_->authBegin.sample();
+   authority_report_ptr_ = &report.authority;
 
-  instruction_receiver_ptr = &instruction_receiver;
+   authority_report_ptr_->receivedSegmentCount = segment_hash_.size();
+   authority_report_ptr_->authBegin.sample();
 
-  // instruction_receiver_ptr->push( new BeginInstruction( job_descriptor ) );
-  addBeginInstruction( job_descriptor );
-  
-  bool segmentation_success = Segmenter::processEveryOffset(
-    istream,
-    *this,
-    job_descriptor.getSegmentSize(),
-    report.segmentation
-  );
-  
-  authority_report_ptr_->authEnd.sample();
-  // instruction_receiver_ptr->push( new EndInstruction() );
-  addEndInstruction();
+   instruction_receiver_ptr = &instruction_receiver;
 
-  authority_report_ptr_    = NULL;
-  instruction_receiver_ptr = NULL;
-  
-  reset();
+   addBeginInstruction( job_descriptor );
 
-  return segmentation_success;
+   bool segmentation_success = Segmenter::processEveryOffset(
+      istream,
+      *this,
+      job_descriptor.getSegmentSize(),
+      report.segmentation
+   );
+
+   authority_report_ptr_->authEnd.sample();
+   addEndInstruction();
+
+   authority_report_ptr_    = NULL;
+   instruction_receiver_ptr = NULL;
+
+   reset();
+
+   return segmentation_success;
 }
 
 //-----------------------------------------------------------------------------
@@ -104,68 +102,63 @@ void Authority::addEndInstruction()
 //-----------------------------------------------------------------------------
 void Authority::addInstruction( Instruction& instruction )
 {
-   InstructionContainer* container_ptr = new InstructionContainer( instruction.type() );
-
-   container_ptr->serialize( container_ptr->stream() );
-   instruction.serialize( container_ptr->stream() );
-
+   InstructionContainer* container_ptr = new InstructionContainer( instruction );
    instruction_receiver_ptr->push( container_ptr );
 }
 
 //-----------------------------------------------------------------------------
 HashTable<16, Segment*>& Authority::hash()
 {
-  return segment_hash_;
+   return segment_hash_;
 }
 
 //-----------------------------------------------------------------------------
 void Authority::flushChunkBuffer( int chunk_flush_count )
 {
-  if (!chunk_buffer_.isEmpty())
-  {
-    // Determine how many bytes to send in the chunk instruction. If the 
-    // caller specifies 'kFlushAll', all bytes are sent.  Otherwise only the
-    // first 'chunk_flush_count' bytes are sent in the chunk and the remainder
-    // are thrown away.
-    ui32 chunk_size_bytes = chunk_flush_count;
+   if ( chunk_buffer_.isEmpty() == false )
+   {
+      // Determine how many bytes to send in the chunk instruction. If the 
+      // caller specifies 'kFlushAll', all bytes are sent.  Otherwise only the
+      // first 'chunk_flush_count' bytes are sent in the chunk and the remainder
+      // are thrown away.
+      ui32 chunk_size_bytes = chunk_flush_count;
 
-    if ( chunk_flush_count == kFlushAll )
-    {
-      chunk_size_bytes = chunk_buffer_.size();
-    }
-
-    // Allocate the chunk instruction and move the specified number of bytes
-    // from the chunk buffer to the chunk instruction.
-    // ChunkInstruction* instruction_ptr = new ChunkInstruction( chunk_size_bytes );
-    ChunkInstruction instruction( chunk_size_bytes );
-    if ( instruction.data() )
-    {
-      ui32 chunk_buffer_bytes_read = chunk_buffer_.read(
-        (char*)instruction.data(),
-        chunk_size_bytes
-      );
-
-      if ( chunk_buffer_bytes_read != chunk_size_bytes )
+      if ( chunk_flush_count == kFlushAll )
       {
-        log::error("Authority: Failed to read from chunk buffer\n");
+         chunk_size_bytes = chunk_buffer_.size();
       }
 
-      // Reset the chunk buffer.
-      chunk_buffer_.clear();
+      // Allocate the chunk instruction and move the specified number of bytes
+      // from the chunk buffer to the chunk instruction.
+      // ChunkInstruction* instruction_ptr = new ChunkInstruction( chunk_size_bytes );
+      ChunkInstruction instruction( chunk_size_bytes );
+      if ( instruction.data() )
+      {
+         ui32 chunk_buffer_bytes_read = chunk_buffer_.read(
+            (char*)instruction.data(),
+            chunk_size_bytes
+         );
 
-      chunk_bytes_ += chunk_size_bytes;
-    }
+         if ( chunk_buffer_bytes_read != chunk_size_bytes )
+         {
+           log::error("Authority: Failed to read from chunk buffer\n");
+         }
 
-    // Send the chunk instruction to the instruction receiver.
-    // instruction_receiver_ptr->push( instruction_ptr );
-    addInstruction( instruction );
+         // Reset the chunk buffer.
+         chunk_buffer_.clear();
 
-    // All segment data has been removed from the buffer.
-    buffered_segment_count_ = 0;
-    buffer_first_segment_id_ = Segment::EndOfStream;
+         chunk_bytes_ += chunk_size_bytes;
+      }
 
-    authority_report_ptr_->chunkCount++;
-  }
+      // Send the chunk instruction to the instruction receiver.
+      addInstruction( instruction );
+
+      // All segment data has been removed from the buffer.
+      buffered_segment_count_ = 0;
+      buffer_first_segment_id_ = Segment::EndOfStream;
+
+      authority_report_ptr_->chunkCount++;
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -191,21 +184,25 @@ void Authority::call( Segment& segment )
       {
          // Any data in the buffer when a match occurs should be moved to a chunk
          // instruction and sent before sending the ID of the matched segment.
-         flushChunkBuffer(( buffer_first_segment_id_ == Segment::EndOfStream ) ?
-                          kFlushAll : (segment.getID() - buffer_first_segment_id_));
+         if ( buffer_first_segment_id_ == Segment::EndOfStream )
+         {
+            flushChunkBuffer( kFlushAll );
+         }
+         else
+         {
+            flushChunkBuffer( segment.getID() - buffer_first_segment_id_ );
+         }
+
 
          // If the Segment exists in the hash, create a Segment instruction.
          if ( match_segment_ptr )
          {
-           // instruction_receiver_ptr->push(
-           //   new SegmentInstruction( match_segment_ptr->getID() )
-           // ); 
             SegmentInstruction instruction( match_segment_ptr->getID() );
             addInstruction( instruction );
          }
          else
          {
-           log::error("Authority: NULL match segment retrieved from hash.\n");
+            log::error("Authority: NULL match segment retrieved from hash.\n");
          }
 
          // Since the Authority creates a segment for every byte offset, a match

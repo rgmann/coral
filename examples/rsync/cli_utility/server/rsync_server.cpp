@@ -144,7 +144,7 @@ public:
 
   void push_file( const boost::filesystem::path& path )
   {
-    if ( rsync_node_.push( path ) != RsyncSuccess )
+    if ( rsync_node_.push( path ) != kRsyncSuccess )
     {
       liber::log::status( "Failed to push file: %s\n", path.string().c_str() );
     }

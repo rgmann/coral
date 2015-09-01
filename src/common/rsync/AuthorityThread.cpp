@@ -29,33 +29,34 @@ PacketSubscriber& AuthorityThread::getSubscriber()
 //----------------------------------------------------------------------------
 void AuthorityThread::run( const bool& shutdown )
 {
-  while ( shutdown == false )
-  {
-    JobAgentPair job_agent_pair;
+   while ( shutdown == false )
+   {
+      JobAgentPair job_agent_pair;
 
-    // Wait for a job. This is also a thread cancellation point.
-    if ( job_queue_.pop( job_agent_pair ) )
-    {
-      JobAgent* agent_ptr = job_agent_pair.first;
-      RsyncJob* job_ptr = job_agent_pair.second;
-      if ( agent_ptr && job_ptr )
+      // Wait for a job. This is also a thread cancellation point.
+      if ( job_queue_.pop( job_agent_pair ) )
       {
-        if ( job_ptr->descriptor().getSource().remote() )
-        {
-          remote_authority_.process( job_ptr );
-        }
-        else
-        {
-          liber::log::debug("AuthorityThread::run: Processing local job\n");
-          local_authority_.process( job_ptr );
-          liber::log::debug("AuthorityThread::run: Finished processing local job\n");
-        }
+         JobAgent* agent_ptr = job_agent_pair.first;
+         RsyncJob* job_ptr   = job_agent_pair.second;
 
-        job_ptr->signalAuthDone();
+         if ( agent_ptr && job_ptr )
+         {
+            if ( job_ptr->descriptor().getSource().remote() )
+            {
+               remote_authority_.process( job_ptr );
+            }
+            else
+            {
+               local_authority_.process( job_ptr );
+            }
+
+            job_ptr->signalAuthDone();
+         }
+         else
+         {
+            log::error("AuthorityThread::run: NULL JobAgent or RsyncJob\n");
+         }
       }
-    }
-  }
-
-  log::debug("AuthorityThread: Shutting down\n");
+   }
 }
 

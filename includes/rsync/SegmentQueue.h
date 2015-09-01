@@ -10,22 +10,22 @@ namespace rsync {
 class SegmentQueue : public SegmentReceiver {
 public:
 
-  SegmentQueue();
-  ~SegmentQueue();
+   SegmentQueue();
+   ~SegmentQueue();
 
-  void push(Segment& rSegment);
-  void push(Segment* pSegment);
+   void push( Segment& segment );
+   void push( Segment* segment_ptr );
 
-  bool pop(Segment** ppSegment, int nTimeoutMs);
-
-private:
-
-  SegmentQueue(const SegmentQueue&);
-  SegmentQueue& operator= (const SegmentQueue&);
+   bool pop( Segment** ppSegment, int timeout_ms );
 
 private:
 
-  Queue<Segment*> mSegments;
+   SegmentQueue(const SegmentQueue&);
+   SegmentQueue& operator= (const SegmentQueue&);
+
+private:
+
+   Queue<Segment*> segments_;
 };
 
 } // End namespace rsync

@@ -27,47 +27,45 @@ struct JobLimits {
 class JobDescriptor : public liber::netapp::Serializable {
 public:
 
-  JobDescriptor();
+   JobDescriptor();
 
-  void  setRemoteRequest();
-  bool  isRemoteRequest() const;
+   void  setRemoteRequest();
+   bool  isRemoteRequest() const;
 
-  void  setSegmentSize(ui32 nSegmentSizeBytes);
-  ui32  getSegmentSize() const;
+   void  setSegmentSize(ui32 nSegmentSizeBytes);
+   ui32  getSegmentSize() const;
 
-  void  setLimits( const JobLimits& limits );
+   void  setLimits( const JobLimits& limits );
 
-  ui32  completionTimeoutMs() const;
+   ui32  completionTimeoutMs() const;
 
-  void  setSource(const boost::filesystem::path&, bool bRemote = false);
-  void  setSource(const ResourcePath& path);
-  const boost::filesystem::path& getSourcePath() const;
-  const ResourcePath& getSource() const;
-  ResourcePath& getSource();
+   void  setSource(const boost::filesystem::path&, bool bRemote = false);
+   void  setSource(const ResourcePath& path);
+   const boost::filesystem::path& getSourcePath() const;
+   const ResourcePath& getSource() const;
+   ResourcePath& getSource();
 
-  void  setDestination(const boost::filesystem::path&, bool bRemote = false);
-  void  setDestination(const ResourcePath& path);
-  const boost::filesystem::path& getDestinationPath() const;
-  const ResourcePath& getDestination() const;
-  ResourcePath& getDestination();
+   void  setDestination(const boost::filesystem::path&, bool bRemote = false);
+   void  setDestination(const ResourcePath& path);
+   const boost::filesystem::path& getDestinationPath() const;
+   const ResourcePath& getDestination() const;
+   ResourcePath& getDestination();
 
-  bool  isValid() const;
+   bool  isValid() const;
 
-  const boost::uuids::uuid& uuid() const;
+   const boost::uuids::uuid& uuid() const;
 
-  ui32 getMaximumChunkSize() const;
+   ui32 getMaximumChunkSize() const;
 
 
 protected:
 
-  void  pack(liber::netapp::SerialStream& rCtor);
-  void  pack(liber::netapp::SerialStream& rCtor) const;
-  bool  unpack(liber::netapp::SerialStream& rDtor);
+   void  pack( liber::netapp::SerialStream& ctor );
+   void  pack( liber::netapp::SerialStream& ctor ) const;
+   bool  unpack( liber::netapp::SerialStream& dtor );
 
 private:
 
-  // ui32 segment_size_bytes_;
-  // ui32 maximum_chunk_size_;
    JobLimits limits_;
 
    ResourcePath source_path_;

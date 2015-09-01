@@ -5,7 +5,7 @@ namespace liber {
 namespace rsync {
 
 enum RsyncError {
-   RsyncSuccess = 0,
+   kRsyncSuccess = 0,
 
    kRsyncJobTableInsertError,
    kRsyncAllocationError,
@@ -47,7 +47,7 @@ inline std::string errorToString(RsyncError error)
 
    switch (error)
    {
-      case RsyncSuccess: error_message = "Success"; break;
+      case kRsyncSuccess: error_message = "Success"; break;
       case RsyncDestSegmentTimeout: error_message = "RsyncDestSegmentTimeout"; break;
       case RsyncDestinationFileNotFound: error_message = "Destination file not found"; break;
       case RsyncSourceFileNotFound: error_message = "Source file not found"; break;

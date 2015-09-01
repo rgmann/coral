@@ -55,7 +55,7 @@ void AssemblerState::setDescriptor( JobDescriptor& job_descriptor )
 //-----------------------------------------------------------------------------
 bool AssemblerState::failed() const
 {
-  return (status_ != RsyncSuccess);
+  return (status_ != kRsyncSuccess);
 }
 
 //-----------------------------------------------------------------------------
@@ -73,15 +73,15 @@ bool AssemblerState::done() const
 //-----------------------------------------------------------------------------
 void AssemblerState::reset()
 {
-  status_ = RsyncSuccess;
-  done_ = false;
+  status_ = kRsyncSuccess;
+  done_   = false;
 }
 
 //-----------------------------------------------------------------------------
 // Class: Instruction
 //-----------------------------------------------------------------------------
-Instruction::Instruction(ui32 type)
-: mType(type)
+Instruction::Instruction( ui32 type )
+: type_( type )
 {
 }
 
@@ -93,36 +93,44 @@ Instruction::~Instruction()
 //-----------------------------------------------------------------------------
 ui32 Instruction::type() const
 {
-  return mType;
+   return type_;
 }
 
+//-----------------------------------------------------------------------------
 InstructionContainer::InstructionContainer( i32 type )
 :  type_( type )
 {
 }
 
 //-----------------------------------------------------------------------------
+InstructionContainer::InstructionContainer( const Instruction& instruction )
+:  type_( instruction.type() )
+{
+   serialize( stream() );
+   instruction.serialize( stream() );
+}
+
+//-----------------------------------------------------------------------------
 void InstructionContainer::pack(SerialStream& ctor) const
 {
-  // log::status("InstructionContainer::pack\n");
-  ctor.write( (ui32)type_ );
+   ctor.write( (ui32)type_ );
 }
 
+//-----------------------------------------------------------------------------
 void InstructionContainer::pack(SerialStream& ctor)
 {
-  // log::status("InstructionContainer::pack\n");
-  ctor.write( (ui32)type_ );
+   ctor.write( (ui32)type_ );
 }
 
+//-----------------------------------------------------------------------------
 bool InstructionContainer::unpack(SerialStream& dtor)
 {
-  if ( dtor.read( type_ ) == false )
-  {
-    // log::error("InstructionContainer::unpack: Failed to read type from stream\n");
-    type_ = kInvalidInstructionType;
-  }
+   if ( dtor.read( type_ ) == false )
+   {
+      type_ = kInvalidInstructionType;
+   }
 
-  return ( type_ != kInvalidInstructionType );
+   return ( type_ != kInvalidInstructionType );
 }
 
 
@@ -130,14 +138,14 @@ bool InstructionContainer::unpack(SerialStream& dtor)
 // Class: BeginInstruction
 //-----------------------------------------------------------------------------
 BeginInstruction::BeginInstruction()
-: Instruction(BeginInstruction::Type)
+:  Instruction( BeginInstruction::Type )
 {
 }
 
 //-----------------------------------------------------------------------------
-BeginInstruction::BeginInstruction(JobDescriptor& descriptor)
-: Instruction(BeginInstruction::Type)
-, descriptor_(descriptor)
+BeginInstruction::BeginInstruction( JobDescriptor& descriptor )
+:  Instruction( BeginInstruction::Type )
+,  descriptor_( descriptor )
 {
 }
 
@@ -147,35 +155,35 @@ BeginInstruction::~BeginInstruction()
 }
 
 //-----------------------------------------------------------------------------
-void BeginInstruction::pack(SerialStream& ctor) const
+void BeginInstruction::pack( SerialStream& ctor ) const
 {
-  descriptor_.serialize(ctor);
+  descriptor_.serialize( ctor );
 }
 
 //-----------------------------------------------------------------------------
-void BeginInstruction::pack(liber::netapp::SerialStream& ctor)
+void BeginInstruction::pack( SerialStream& ctor )
 {
-  const_cast<const BeginInstruction*>(this)->pack(ctor);
+  const_cast<const BeginInstruction*>(this)->pack( ctor );
 }
 
 //-----------------------------------------------------------------------------
-bool BeginInstruction::unpack(SerialStream& dtor)
+bool BeginInstruction::unpack( SerialStream& dtor )
 {
-  return descriptor_.deserialize(dtor);
+  return descriptor_.deserialize( dtor );
 }
 
 //-----------------------------------------------------------------------------
 // Class: SegmentInstruction
 //-----------------------------------------------------------------------------
 SegmentInstruction::SegmentInstruction()
-: Instruction(SegmentInstruction::Type)
+: Instruction( SegmentInstruction::Type )
 {
 }
 
 //-----------------------------------------------------------------------------
-SegmentInstruction::SegmentInstruction(Segment::ID id)
-: Instruction(SegmentInstruction::Type)
-, segment_id_(id)
+SegmentInstruction::SegmentInstruction( Segment::ID id )
+: Instruction( SegmentInstruction::Type )
+, segment_id_( id )
 {
 }
 
@@ -185,13 +193,13 @@ SegmentInstruction::~SegmentInstruction()
 }
 
 //-----------------------------------------------------------------------------
-void SegmentInstruction::pack(SerialStream& ctor) const
+void SegmentInstruction::pack( SerialStream& ctor ) const
 {
-  ctor.write((ui32)segment_id_);
+   ctor.write( (ui32)segment_id_ );
 }
 
 //-----------------------------------------------------------------------------
-void SegmentInstruction::pack(liber::netapp::SerialStream& ctor)
+void SegmentInstruction::pack( liber::netapp::SerialStream& ctor )
 {
   const_cast<const SegmentInstruction*>(this)->pack(ctor);
 }
@@ -199,76 +207,74 @@ void SegmentInstruction::pack(liber::netapp::SerialStream& ctor)
 //-----------------------------------------------------------------------------
 bool SegmentInstruction::unpack(SerialStream& dtor)
 {
-  bool lbSuccess = true;
-  ui32 id;
-  lbSuccess &= dtor.read(id);
-  segment_id_ = id;
-  return lbSuccess;
+   bool unpack_success = true;
+   unpack_success     &= dtor.read( segment_id_ );
+   return unpack_success;
 }
 
 //-----------------------------------------------------------------------------
 // Class: SegmentInstruction
 //-----------------------------------------------------------------------------
 ChunkInstruction::ChunkInstruction()
-: Instruction( ChunkInstruction::Type )
-, chunk_data_ptr_   ( NULL )
-, chunk_size_bytes_ ( 0 )
+:  Instruction( ChunkInstruction::Type )
+,  chunk_data_ptr_   ( NULL )
+,  chunk_size_bytes_ ( 0 )
 {
 }
 
 //-----------------------------------------------------------------------------
 ChunkInstruction::ChunkInstruction( ui32 chunk_size_bytes )
-: Instruction( ChunkInstruction::Type )
-, chunk_data_ptr_   ( NULL )
-, chunk_size_bytes_ ( chunk_size_bytes )
+:  Instruction( ChunkInstruction::Type )
+,  chunk_data_ptr_   ( NULL )
+,  chunk_size_bytes_ ( chunk_size_bytes )
 {
-  if ( chunk_size_bytes > 0 )
-  {
-    chunk_data_ptr_ = new ui8[ chunk_size_bytes_ ];
-  }
+   if ( chunk_size_bytes > 0 )
+   {
+      chunk_data_ptr_ = new ui8[ chunk_size_bytes_ ];
+   }
 }
 
 //-----------------------------------------------------------------------------
 ChunkInstruction::~ChunkInstruction()
 {
-  if ( chunk_data_ptr_ )
-  {
-    delete[] chunk_data_ptr_;
-    chunk_data_ptr_ = NULL;
-  }
+   if ( chunk_data_ptr_ )
+   {
+      delete[] chunk_data_ptr_;
+      chunk_data_ptr_ = NULL;
+   }
 }
 
 //-----------------------------------------------------------------------------
 ui8* const ChunkInstruction::data()
 {
-  return chunk_data_ptr_;
+   return chunk_data_ptr_;
 }
 
 //-----------------------------------------------------------------------------
 ui32 ChunkInstruction::size() const
 {
-  return chunk_size_bytes_;
+   return chunk_size_bytes_;
 }
 
 //-----------------------------------------------------------------------------
 void ChunkInstruction::pack(SerialStream& ctor) const
 {
-  if (chunk_data_ptr_)
-  {
-    std::string data;
-    data.assign((char*)chunk_data_ptr_, chunk_size_bytes_);
-    ctor.write(data);
-  }
+   if (chunk_data_ptr_)
+   {
+      std::string data;
+      data.assign( (char*)chunk_data_ptr_, chunk_size_bytes_ );
+      ctor.write( data );
+   }
 }
 
 //-----------------------------------------------------------------------------
-void ChunkInstruction::pack(liber::netapp::SerialStream& ctor)
+void ChunkInstruction::pack( SerialStream& ctor )
 {
-  const_cast<const ChunkInstruction*>(this)->pack(ctor);
+   const_cast<const ChunkInstruction*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
-bool ChunkInstruction::unpack(SerialStream& dtor)
+bool ChunkInstruction::unpack( SerialStream& dtor )
 {
    bool unpack_success = false;
    std::string data;
@@ -297,9 +303,9 @@ bool ChunkInstruction::unpack(SerialStream& dtor)
 // Class: EndInstruction
 //-----------------------------------------------------------------------------
 EndInstruction::EndInstruction()
-: Instruction(EndInstruction::Type)
-, canceled_(false)
-, cancel_error_((RsyncError)RsyncSuccess)
+:  Instruction( EndInstruction::Type )
+,  canceled_( false )
+,  cancel_error_( (RsyncError)kRsyncSuccess )
 {
 }
 
@@ -309,43 +315,43 @@ EndInstruction::~EndInstruction()
 }
 
 //-----------------------------------------------------------------------------
-void EndInstruction::cancel(RsyncError error)
+void EndInstruction::cancel( RsyncError error )
 {
-  canceled_ = true;
-  cancel_error_ = (ui32)error;
+   canceled_     = true;
+   cancel_error_ = (ui32)error;
 }
 
 //-----------------------------------------------------------------------------
 bool EndInstruction::canceled() const
 {
-  return canceled_;
+   return canceled_;
 }
 
 //-----------------------------------------------------------------------------
 RsyncError EndInstruction::error() const
 {
-  return (RsyncError)cancel_error_;
+   return (RsyncError)cancel_error_;
 }
 
 //-----------------------------------------------------------------------------
-void EndInstruction::pack(SerialStream& ctor) const
+void EndInstruction::pack( SerialStream& ctor ) const
 {
-  ctor.write(canceled_);
-  ctor.write(cancel_error_);
+   ctor.write( canceled_ );
+   ctor.write( cancel_error_ );
 }
 
 //-----------------------------------------------------------------------------
-void EndInstruction::pack(liber::netapp::SerialStream& ctor)
+void EndInstruction::pack( SerialStream& ctor )
 {
-  const_cast<const EndInstruction*>(this)->pack(ctor);
+   const_cast<const EndInstruction*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
-bool EndInstruction::unpack(SerialStream& dtor)
+bool EndInstruction::unpack( SerialStream& dtor )
 {
-  bool unpack_success = true;
-  unpack_success &= dtor.read(canceled_);
-  unpack_success &= dtor.read(cancel_error_);
-  return unpack_success;
+   bool unpack_success = true;
+   unpack_success     &= dtor.read( canceled_ );
+   unpack_success     &= dtor.read( cancel_error_ );
+   return unpack_success;
 }
 

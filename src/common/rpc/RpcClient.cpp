@@ -48,7 +48,7 @@ RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
 
       // The RPC client and server always have the same subscriber ID,
       // so there is no need to send the packet to a particular subscriber ID.
-      sendPacket(lpPacket);
+      sendPacket( lpPacket );
     }
     else
     {
@@ -65,13 +65,13 @@ RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClient::put(const char* pData, ui32 nLength)
+bool RpcClient::put( DestinationID destination_id, const void* data_ptr, ui32 length )
 {
   bool lbSuccess = false;
   RpcPacket* lpPacket = new RpcPacket();
   RpcObject lRxObject;
 
-  if (lpPacket->unpack(pData, nLength))
+  if ( lpPacket->unpack( data_ptr, length ) )
   {
     if (lpPacket->getObject(lRxObject))
     {

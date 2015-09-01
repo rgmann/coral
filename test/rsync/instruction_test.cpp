@@ -162,7 +162,7 @@ TEST_F( InstructionTest, TestEndInstructionSuccess )
    EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
 
    EXPECT_EQ( false, recvInstruction.canceled() );
-   EXPECT_EQ( RsyncSuccess, recvInstruction.canceled() );
+   EXPECT_EQ( kRsyncSuccess, recvInstruction.canceled() );
 }
 
 TEST_F( InstructionTest, TestEndInstructionCancel )
