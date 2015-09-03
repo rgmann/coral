@@ -185,7 +185,7 @@ public:
 
     void SetUp()
     {
-      liber::log::level( liber::log::Warn );
+      liber::log::level( liber::log::Verbose );
 
       DeleteContents( "./test_root/client" );
       DeleteContents( "./test_root/server" );

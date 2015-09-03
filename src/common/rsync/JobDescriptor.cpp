@@ -15,6 +15,13 @@ JobDescriptor::JobDescriptor()
 }
 
 //-----------------------------------------------------------------------------
+JobDescriptor::JobDescriptor( const void* data_ptr, ui32 length )
+:  remotely_requested_( false )
+{
+   deserialize( (const char*)data_ptr, length );
+}
+
+//-----------------------------------------------------------------------------
 void JobDescriptor::setRemoteRequest()
 {
    remotely_requested_ = true;
@@ -191,7 +198,7 @@ bool JobDescriptor::unpack(liber::netapp::SerialStream& dtor)
 
    if ( dtor.read((char*)uuid_.data, uuid_.size()) != SerialStream::ReadOk )
    {
-      log::error("RemoteJobStatus::unpack - failed to deserialize UUID\n");
+      log::error("JobDescriptor::unpack - failed to deserialize UUID\n");
       return false;
    }
 

@@ -94,9 +94,10 @@ void LocalAuthorityInterface::processJob(
       EndInstruction instruction;
       instruction.cancel( job_status );
 
-      InstructionContainer* container_ptr =
-         new InstructionContainer( instruction );
-      instruction_receiver.push( container_ptr );
+      // InstructionContainer* container_ptr =
+      //    new InstructionContainer( instruction );
+      instruction_receiver.push( instruction.instruction() );
+      instruction.release();
    }
 }
 

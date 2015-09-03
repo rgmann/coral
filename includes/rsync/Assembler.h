@@ -26,10 +26,10 @@ public:
 
 private:
 
-   void processBeginInstruction( liber::netapp::SerialStream& stream );
-   void processChunkInstruction( liber::netapp::SerialStream& stream );
-   void processSegmentInstruction( liber::netapp::SerialStream& stream );
-   void processEndInstruction( liber::netapp::SerialStream& stream );
+   void processBeginInstruction( InstructionRaw* instruction_ptr );
+   void processChunkInstruction( InstructionRaw* instruction_ptr );
+   void processSegmentInstruction( InstructionRaw* instruction_ptr );
+   void processEndInstruction( InstructionRaw* instruction_ptr );
 
    Assembler( const Assembler& );
    Assembler& operator= ( const Assembler& );

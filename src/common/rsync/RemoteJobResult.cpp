@@ -50,7 +50,7 @@ bool RemoteJobResult::unpack(SerialStream& dtor)
 {
   if (dtor.read((char*)mUUID.data, mUUID.size()) != liber::netapp::SerialStream::ReadOk)
   {
-    log::error("RemoteJobStatus::unpack - failed to deserialize UUID\n");
+    log::error("RemoteJobResult::unpack - failed to deserialize UUID\n");
     return false;
   }
 

@@ -117,20 +117,21 @@ bool RemoteAuthorityService::processPacket( const void* data_ptr, ui32 length )
 }
 
 //-----------------------------------------------------------------------------
-void RemoteAuthorityService::call( InstructionContainer* container_ptr )
+void RemoteAuthorityService::call( InstructionRaw* instruction_ptr )
 {
-   if ( container_ptr )
+   if ( instruction_ptr )
    {
 
-      std::string packet_data = container_ptr->stream().stream.str();
-      
+      // std::string packet_data = container_ptr->stream().stream.str();
+      // log::status("RemoteAuthorityService::call: %d, %d\n", instruction_ptr->length(), instruction_ptr->payload_length());
+      // instruction_ptr->dump();
       sendTo(
          RsyncPacket::RsyncAuthorityInterface,
          RsyncPacket::RsyncInstruction,
-         packet_data.data(),
-         packet_data.size() );
+         instruction_ptr->data(),
+         instruction_ptr->length() );
 
-      delete container_ptr;
+      delete instruction_ptr;
    }
 }
 

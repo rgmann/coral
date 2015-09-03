@@ -34,7 +34,7 @@ public:
 
 private:
 
-  void call(InstructionContainer* container_ptr);
+  void call(InstructionRaw* instruction_ptr);
 
   void handleRemoteJobRequest(const void* pData, ui32 nLength);
 

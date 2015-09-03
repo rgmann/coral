@@ -13,16 +13,16 @@ InstructionList::~InstructionList()
 }
 
 //-----------------------------------------------------------------------------
-void InstructionList::push( InstructionContainer* container_ptr )
+void InstructionList::push( InstructionRaw* instruction_ptr )
 {
-   if ( container_ptr )
+   if ( instruction_ptr )
    {
-      containers_.push_back( container_ptr );
+      containers_.push_back( instruction_ptr );
    }
 }
 
 //-----------------------------------------------------------------------------
-std::vector<InstructionContainer*>& InstructionList::instructions()
+std::vector<InstructionRaw*>& InstructionList::instructions()
 {
    return containers_;
 }

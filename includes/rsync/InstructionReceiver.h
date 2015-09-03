@@ -17,7 +17,7 @@ public:
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  virtual void push( InstructionContainer* container_ptr ) = 0;
+  virtual void push( InstructionRaw* container_ptr ) = 0;
 
 };
 

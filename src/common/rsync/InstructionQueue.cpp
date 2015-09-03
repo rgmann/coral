@@ -16,11 +16,11 @@ InstructionQueue::~InstructionQueue()
 }
 
 //----------------------------------------------------------------------------
-void InstructionQueue::push( InstructionContainer* container_ptr )
+void InstructionQueue::push( InstructionRaw* instruction_ptr )
 {
-   if ( container_ptr )
+   if ( instruction_ptr )
    {
-      if ( containers_.push( container_ptr ) == false )
+      if ( containers_.push( instruction_ptr ) == false )
       {
          log::status("InstructionQueue::push: Failed to push\n");
       }
@@ -32,10 +32,10 @@ void InstructionQueue::push( InstructionContainer* container_ptr )
 }
 
 //----------------------------------------------------------------------------
-InstructionContainer* InstructionQueue::pop( int timeout_ms )
+InstructionRaw* InstructionQueue::pop( int timeout_ms )
 {
-   InstructionContainer* container_ptr = NULL;
-   containers_.pop( container_ptr, timeout_ms );
-   return container_ptr;
+   InstructionRaw* instruction_ptr = NULL;
+   containers_.pop( instruction_ptr, timeout_ms );
+   return instruction_ptr;
 }
 

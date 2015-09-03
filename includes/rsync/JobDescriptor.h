@@ -28,6 +28,7 @@ class JobDescriptor : public liber::netapp::Serializable {
 public:
 
    JobDescriptor();
+   JobDescriptor( const void* data_ptr, ui32 length );
 
    void  setRemoteRequest();
    bool  isRemoteRequest() const;

@@ -14,11 +14,11 @@ InstructionHook::~InstructionHook()
 }
 
 //-----------------------------------------------------------------------------
-void InstructionHook::push( InstructionContainer* container_ptr )
+void InstructionHook::push( InstructionRaw* instruction_ptr )
 {
-   if ( container_ptr )
+   if ( instruction_ptr )
    {
-      call( container_ptr );
+      call( instruction_ptr );
    }
 }
 

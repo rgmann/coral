@@ -33,23 +33,7 @@ protected:
    }
 };
 
-TEST_F( InstructionTest, TestInstructionContainer )
-{
-   InstructionContainer sendContainer( EndInstruction::Type );
-   EXPECT_EQ( EndInstruction::Type, sendContainer.type() );
-
-   SerialStream stream;
-   sendContainer.serialize( stream );
-
-   InstructionContainer recvContainer;
-   EXPECT_EQ( -1, recvContainer.type() );
-
-   EXPECT_EQ( true, recvContainer.deserialize( stream ) );
-   EXPECT_EQ( EndInstruction::Type, recvContainer.type() );
-}
-
-TEST_F( InstructionTest, TestBeginInstruction )
-{
+TEST_F( InstructionTest, TestBeginInstruction ) {
    boost::filesystem::path source( "invalid_dir/s_inst.cpp" );
    boost::filesystem::path destination( "d_inst.cpp" );
 
@@ -58,138 +42,124 @@ TEST_F( InstructionTest, TestBeginInstruction )
    descriptor.setDestination( LocalResourcePath( destination ) );
    EXPECT_EQ( true, descriptor.isValid() );
 
-   BeginInstruction     sendInstruction( descriptor );
-   InstructionContainer sendContainer( sendInstruction.type() );
-   EXPECT_EQ( BeginInstruction::Type, sendContainer.type() );
+   BeginInstruction send_instruction( descriptor );
+   EXPECT_EQ( true, send_instruction.valid() );
+   EXPECT_EQ( BeginInstruction::Type, send_instruction.type() );
 
-   sendContainer.serialize( sendContainer.stream() );
-   sendInstruction.serialize( sendContainer.stream() );
+   InstructionRaw* send_instruction_ptr = send_instruction.instruction();
 
-   std::string packed_container = sendContainer.stream().stream.str();
-   EXPECT_EQ( false, packed_container.empty() );
+   // Decouple the original BeginInstruction and its raw instruction.
+   send_instruction.release();
+   EXPECT_EQ( NULL, send_instruction.instruction() );
+   EXPECT_EQ( false, send_instruction.valid() );
 
-   InstructionContainer recvContainer;
-   EXPECT_EQ( -1, recvContainer.type() );
-   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+   EXPECT_EQ( true, send_instruction_ptr->valid() );
+   EXPECT_EQ( BeginInstruction::Type, send_instruction_ptr->type() );
 
-   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
-   EXPECT_EQ( BeginInstruction::Type, recvContainer.type() );
 
-   BeginInstruction recvInstruction;
-   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
+   BeginInstruction recv_instruction( send_instruction_ptr );
+   // EXPECT_NE( NULL, recv_instruction.instruction() );
+   EXPECT_EQ( true, recv_instruction.valid() );
 
-   EXPECT_EQ( source.string(), recvInstruction.descriptor().getSourcePath().string() );
-   EXPECT_EQ( destination.string(), recvInstruction.descriptor().getDestinationPath().string() );
+   JobDescriptor recv_descriptor( send_instruction_ptr->payload_ptr(), send_instruction_ptr->payload_length());
+   EXPECT_EQ( true, recv_instruction.descriptor( recv_descriptor ) );
+   EXPECT_EQ( source.string(), recv_descriptor.getSourcePath().string() );
+   EXPECT_EQ( destination.string(), recv_descriptor.getDestinationPath().string() );
 }
 
 
 TEST_F( InstructionTest, TestSegmentInstruction )
 {
    Segment::ID segment_id = 15;
-   SegmentInstruction sendInstruction( segment_id );
-   InstructionContainer sendContainer( sendInstruction.type() );
-   EXPECT_EQ( SegmentInstruction::Type, sendContainer.type() );
+   SegmentInstruction send_instruction( segment_id );
+   EXPECT_EQ( true, send_instruction.valid() );
+   EXPECT_EQ( SegmentInstruction::Type, send_instruction.type() );
 
-   sendContainer.serialize( sendContainer.stream() );
-   sendInstruction.serialize( sendContainer.stream() );
+   InstructionRaw* send_instruction_ptr = send_instruction.instruction();
 
-   std::string packed_container = sendContainer.stream().stream.str();
-   EXPECT_EQ( false, packed_container.empty() );
+   // Decouple the original BeginInstruction and its raw instruction.
+   send_instruction.release();
+   EXPECT_EQ( NULL, send_instruction.instruction() );
+   EXPECT_EQ( false, send_instruction.valid() );
 
-   InstructionContainer recvContainer;
-   EXPECT_EQ( -1, recvContainer.type() );
-   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+   EXPECT_EQ( true, send_instruction_ptr->valid() );
+   EXPECT_EQ( SegmentInstruction::Type, send_instruction_ptr->type() );
 
-   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
-   EXPECT_EQ( SegmentInstruction::Type, recvContainer.type() );
-
-   SegmentInstruction recvInstruction;
-   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
-
-   EXPECT_EQ( segment_id, recvInstruction.segment_id_ );
+   SegmentInstruction recv_instruction( send_instruction_ptr );
+   // EXPECT_NE( NULL, recv_instruction.instruction() );
+   EXPECT_EQ( true, recv_instruction.valid() );
+   EXPECT_EQ( segment_id, recv_instruction.segmentId() );
 }
 
 
-TEST_F( InstructionTest, TestChunkInstruction )
-{
+TEST_F( InstructionTest, TestChunkInstruction ) {
    ui8 buffer[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 
-   ChunkInstruction sendInstruction( sizeof( buffer ) );
-   memcpy( sendInstruction.data(), buffer, sizeof( buffer ) );
-   InstructionContainer sendContainer( sendInstruction.type() );
-   EXPECT_EQ( ChunkInstruction::Type, sendContainer.type() );
+   ChunkInstruction send_instruction( sizeof( buffer ) );
+   memcpy( send_instruction.data(), buffer, sizeof( buffer ) );
+   EXPECT_EQ( true, send_instruction.valid() );
+   EXPECT_EQ( ChunkInstruction::Type, send_instruction.type() );
 
-   sendContainer.serialize( sendContainer.stream() );
-   sendInstruction.serialize( sendContainer.stream() );
+   InstructionRaw* send_instruction_ptr = send_instruction.instruction();
 
-   std::string packed_container = sendContainer.stream().stream.str();
-   EXPECT_EQ( false, packed_container.empty() );
+   // Decouple the original BeginInstruction and its raw instruction.
+   send_instruction.release();
+   EXPECT_EQ( NULL, send_instruction.instruction() );
+   EXPECT_EQ( false, send_instruction.valid() );
 
-   InstructionContainer recvContainer;
-   EXPECT_EQ( -1, recvContainer.type() );
-   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+   EXPECT_EQ( true, send_instruction_ptr->valid() );
+   EXPECT_EQ( ChunkInstruction::Type, send_instruction_ptr->type() );
 
-   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
-   EXPECT_EQ( ChunkInstruction::Type, recvContainer.type() );
-
-   ChunkInstruction recvInstruction;
-   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
-
-   EXPECT_EQ( sizeof(buffer), recvInstruction.chunk_size_bytes_ );
-   EXPECT_EQ( 0, memcmp( recvInstruction.chunk_data_ptr_, buffer, sizeof( buffer ) ) );
+   ChunkInstruction recv_instruction( send_instruction_ptr );
+   // EXPECT_NE( NULL, recv_instruction.instruction() );
+   EXPECT_EQ( true, recv_instruction.valid() );
+   EXPECT_EQ( 0, memcmp( recv_instruction.data(), buffer, sizeof( buffer ) ) );
 }
 
-TEST_F( InstructionTest, TestEndInstructionSuccess )
-{
-   EndInstruction sendInstruction;
-   InstructionContainer sendContainer( sendInstruction.type() );
-   EXPECT_EQ( EndInstruction::Type, sendContainer.type() );
+TEST_F( InstructionTest, TestEndInstructionSuccess ) {
+   EndInstruction send_instruction;
+   EXPECT_EQ( true, send_instruction.valid() );
+   EXPECT_EQ( EndInstruction::Type, send_instruction.type() );
 
-   sendContainer.serialize( sendContainer.stream() );
-   sendInstruction.serialize( sendContainer.stream() );
+   InstructionRaw* send_instruction_ptr = send_instruction.instruction();
 
-   std::string packed_container = sendContainer.stream().stream.str();
-   EXPECT_EQ( false, packed_container.empty() );
+   // Decouple the original BeginInstruction and its raw instruction.
+   send_instruction.release();
+   EXPECT_EQ( NULL, send_instruction.instruction() );
+   EXPECT_EQ( false, send_instruction.valid() );
 
-   InstructionContainer recvContainer;
-   EXPECT_EQ( -1, recvContainer.type() );
-   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
+   EXPECT_EQ( true, send_instruction_ptr->valid() );
+   EXPECT_EQ( EndInstruction::Type, send_instruction_ptr->type() );
 
-   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
-   EXPECT_EQ( EndInstruction::Type, recvContainer.type() );
-
-   EndInstruction recvInstruction;
-   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
-
-   EXPECT_EQ( false, recvInstruction.canceled() );
-   EXPECT_EQ( kRsyncSuccess, recvInstruction.canceled() );
+   EndInstruction recv_instruction( send_instruction_ptr );
+   // EXPECT_NE( NULL, recv_instruction.instruction() );
+   EXPECT_EQ( true, recv_instruction.valid() );
+   EXPECT_EQ( EndInstruction::Type, recv_instruction.type() );
+   EXPECT_EQ( false, recv_instruction.canceled() );
+   EXPECT_EQ( kRsyncSuccess, recv_instruction.error() );
 }
 
-TEST_F( InstructionTest, TestEndInstructionCancel )
-{
-   EndInstruction sendInstruction;
-   sendInstruction.cancel( kRsyncDestinationNotWritable );
+TEST_F( InstructionTest, TestEndInstructionCancel ) {
+   EndInstruction send_instruction;
+   send_instruction.cancel( kRsyncDestinationNotWritable );
+   EXPECT_EQ( true, send_instruction.valid() );
+   EXPECT_EQ( EndInstruction::Type, send_instruction.type() );
 
-   InstructionContainer sendContainer( sendInstruction.type() );
-   EXPECT_EQ( EndInstruction::Type, sendContainer.type() );
+   InstructionRaw* send_instruction_ptr = send_instruction.instruction();
 
-   sendContainer.serialize( sendContainer.stream() );
-   sendInstruction.serialize( sendContainer.stream() );
+   // Decouple the original BeginInstruction and its raw instruction.
+   send_instruction.release();
+   EXPECT_EQ( NULL, send_instruction.instruction() );
+   EXPECT_EQ( false, send_instruction.valid() );
 
-   std::string packed_container = sendContainer.stream().stream.str();
-   EXPECT_EQ( false, packed_container.empty() );
+   EXPECT_EQ( true, send_instruction_ptr->valid() );
+   EXPECT_EQ( EndInstruction::Type, send_instruction_ptr->type() );
 
-   InstructionContainer recvContainer;
-   EXPECT_EQ( -1, recvContainer.type() );
-   recvContainer.stream().assign( packed_container.data(), packed_container.size() );
-
-   EXPECT_EQ( true, recvContainer.deserialize( recvContainer.stream() ) );
-   EXPECT_EQ( EndInstruction::Type, recvContainer.type() );
-
-   EndInstruction recvInstruction;
-   EXPECT_EQ( true, recvInstruction.deserialize( recvContainer.stream() ) );
-
-   EXPECT_EQ( true, recvInstruction.canceled() );
-   EXPECT_EQ( kRsyncDestinationNotWritable, recvInstruction.error() );
+   EndInstruction recv_instruction( send_instruction_ptr );
+   // EXPECT_NE( NULL, recv_instruction.instruction() );
+   EXPECT_EQ( true, recv_instruction.valid() );
+   EXPECT_EQ( EndInstruction::Type, recv_instruction.type() );
+   EXPECT_EQ( true, recv_instruction.canceled() );
+   EXPECT_EQ( kRsyncDestinationNotWritable, recv_instruction.error() );
 }
 
