@@ -17,14 +17,14 @@ public:
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  void push( InstructionRaw* container_ptr );
+  void push( RawInstructionPtr container_ptr );
 
-  std::vector<InstructionRaw*>& instructions();
+  std::vector<RawInstructionPtr>& instructions();
 
   
 private:
 
-  std::vector<InstructionRaw*> containers_;
+  std::vector<RawInstructionPtr> containers_;
 
 };
 

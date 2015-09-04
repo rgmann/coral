@@ -17,9 +17,9 @@ public:
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  void push( InstructionRaw* container_ptr );
+  void push( RawInstructionPtr container_ptr );
 
-  InstructionRaw* pop(int nTimeoutMs);
+  RawInstructionPtr pop(int nTimeoutMs);
   
 private:
 
@@ -28,7 +28,7 @@ private:
 
 private:
 
-  Queue<InstructionRaw*> containers_;
+  Queue<RawInstructionPtr> containers_;
 
 };
 

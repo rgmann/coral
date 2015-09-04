@@ -14,7 +14,7 @@ InstructionHook::~InstructionHook()
 }
 
 //-----------------------------------------------------------------------------
-void InstructionHook::push( InstructionRaw* instruction_ptr )
+void InstructionHook::push( RawInstructionPtr instruction_ptr )
 {
    if ( instruction_ptr )
    {

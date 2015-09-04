@@ -26,10 +26,10 @@ public:
 
 private:
 
-   void processBeginInstruction( InstructionRaw* instruction_ptr );
-   void processChunkInstruction( InstructionRaw* instruction_ptr );
-   void processSegmentInstruction( InstructionRaw* instruction_ptr );
-   void processEndInstruction( InstructionRaw* instruction_ptr );
+   RsyncError processBeginInstruction( RawInstructionPtr instruction_ptr );
+   RsyncError processChunkInstruction( RawInstructionPtr instruction_ptr );
+   RsyncError processSegmentInstruction( RawInstructionPtr instruction_ptr );
+   RsyncError processEndInstruction( RawInstructionPtr instruction_ptr );
 
    Assembler( const Assembler& );
    Assembler& operator= ( const Assembler& );

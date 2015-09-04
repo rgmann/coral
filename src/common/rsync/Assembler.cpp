@@ -32,7 +32,7 @@ bool Assembler::process(
    while ( ( assembler_state_.done() == false ) &&
            ( assembler_state_.failed() == false ) )
    {
-      InstructionRaw* instruction_ptr = instruction_queue.pop(
+      RawInstructionPtr instruction_ptr = instruction_queue.pop(
          job_descriptor.completionTimeoutMs()
       );
 
@@ -40,33 +40,37 @@ bool Assembler::process(
       {
          if ( instruction_ptr->valid() )
          {
-            // log::status("Assembler::process: %d\n", instruction_ptr->length());
-            // instruction_ptr->dump();
             switch ( instruction_ptr->type() )
             {
                case BeginInstruction::Type:
                   report.begin.sample();
-                  processBeginInstruction( instruction_ptr );
+                  assembler_state_.status_ = processBeginInstruction(
+                     instruction_ptr );
                   break;
 
                case SegmentInstruction::Type:
                   report.segmentCount++;
-                  processSegmentInstruction( instruction_ptr );
+                  assembler_state_.status_ = processSegmentInstruction(
+                     instruction_ptr );
                   break;
 
                case ChunkInstruction::Type:
                   report.chunkCount++;
-                  processChunkInstruction( instruction_ptr );
+                  assembler_state_.status_ = processChunkInstruction(
+                     instruction_ptr );
                   break;
 
                case EndInstruction::Type:
                   report.end.sample();
-                  processEndInstruction( instruction_ptr );
+                  assembler_state_.status_ = processEndInstruction(
+                     instruction_ptr );
                   break;
 
                default:
-                  log::error("Assembler - Invalid instruction type %d\n",
-                           instruction_ptr->type());
+                  log::error(
+                     "Assembler - Invalid instruction type %d\n",
+                     instruction_ptr->type());
+
                   assembler_state_.status_ = kRsyncInvalidInstruction;
                   break;
             }
@@ -83,8 +87,6 @@ bool Assembler::process(
                errorToString( assembler_state_.status_ ).c_str()
             );
          }
-
-         delete instruction_ptr;
       }
       else
       {
@@ -104,8 +106,10 @@ std::ofstream& Assembler::outputStream()
 }
 
 //-----------------------------------------------------------------------------
-void Assembler::processBeginInstruction( InstructionRaw* instruction_ptr )
+RsyncError Assembler::processBeginInstruction( RawInstructionPtr instruction_ptr )
 {
+   RsyncError status = kRsyncSuccess;
+
    BeginInstruction instruction( instruction_ptr );
 
    if ( instruction.valid() )
@@ -118,25 +122,27 @@ void Assembler::processBeginInstruction( InstructionRaw* instruction_ptr )
          if ( descriptor.getDestination().path() != 
               assembler_state_.descriptor()->getDestination().path() )
          {
-            assembler_state_.status_ = kRsyncInvalidJob;
+            status = kRsyncInvalidJob;
          }
       }
       else
       {
-         assembler_state_.status_ = kRsyncInvalidJob;
+         status = kRsyncInvalidJob;
       }
    }
    else
    {
-      assembler_state_.status_ = kRsyncCommError;
+      status = kRsyncCommError;
    }
 
-   instruction.release();
+   return status;
 }
 
 //-----------------------------------------------------------------------------
-void Assembler::processChunkInstruction( InstructionRaw* instruction_ptr )
+RsyncError Assembler::processChunkInstruction( RawInstructionPtr instruction_ptr )
 {
+   RsyncError status = kRsyncSuccess;
+
    ChunkInstruction instruction( instruction_ptr );
 
    if ( instruction.valid() )
@@ -165,31 +171,33 @@ void Assembler::processChunkInstruction( InstructionRaw* instruction_ptr )
 
             if ( assembler_state_.stream().fail() )
             {
-               assembler_state_.status_ = kRsyncIoError;
+               status = kRsyncIoError;
             }
          }
          else
          {
-            assembler_state_.status_ = kRsyncAssemblerInvalidChunkSize;
+            status = kRsyncAssemblerInvalidChunkSize;
          }
       }
       else
       {
-         assembler_state_.status_ = kRsyncIoError;
+         status = kRsyncIoError;
          log::error("ChunkInstruction: NULL data or failed ostream.\n");
       }
    }
    else
    {
-      assembler_state_.status_ = kRsyncCommError;
+      status = kRsyncCommError;
    }
 
-   instruction.release();
+   return status;
 }
 
 //-----------------------------------------------------------------------------
-void Assembler::processSegmentInstruction( InstructionRaw* instruction_ptr )
+RsyncError Assembler::processSegmentInstruction( RawInstructionPtr instruction_ptr )
 {
+   RsyncError status = kRsyncSuccess;
+
    SegmentInstruction instruction( instruction_ptr );
 
    if ( instruction.valid() )
@@ -207,7 +215,7 @@ void Assembler::processSegmentInstruction( InstructionRaw* instruction_ptr )
 
          if ( assembler_state_.stream().fail() )
          {
-            assembler_state_.status_ = kRsyncIoError;
+            status = kRsyncIoError;
             log::error(
                "SegmentInstruction: Failed to write segment to ostream.\n" );
          }
@@ -219,28 +227,30 @@ void Assembler::processSegmentInstruction( InstructionRaw* instruction_ptr )
       }
       else
       {
-         assembler_state_.status_ = kRsyncSegmentAccessError;
+         status = kRsyncSegmentAccessError;
          log::error("SegmentInstruction: Failed to access segment.\n");
       }
    }
    else
    {
-      assembler_state_.status_ = kRsyncCommError;
+      status = kRsyncCommError;
    }
 
-   instruction.release();
+   return status;
 }
 
 //-----------------------------------------------------------------------------
-void Assembler::processEndInstruction( InstructionRaw* instruction_ptr )
+RsyncError Assembler::processEndInstruction( RawInstructionPtr instruction_ptr )
 {
+   RsyncError status = kRsyncSuccess;
+
    EndInstruction instruction( instruction_ptr );
 
    if ( instruction.valid() )
    {
       if ( instruction.canceled() )
       {
-         assembler_state_.status_ = kRsyncJobCanceled;
+         status = kRsyncJobCanceled;
       }
       else
       {
@@ -251,9 +261,9 @@ void Assembler::processEndInstruction( InstructionRaw* instruction_ptr )
    }
    else
    {
-      assembler_state_.status_ = kRsyncCommError;
+      status = kRsyncCommError;
    }
 
-   instruction.release();
+   return status;
 }
 

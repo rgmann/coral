@@ -105,7 +105,7 @@ void Authority::addInstruction( Instruction& instruction )
    // InstructionContainer* container_ptr = new InstructionContainer( instruction );
    if ( instruction.valid() == false ) log::status("Authority::addInstruction: Invalid instruction\n");
    instruction_receiver_ptr->push( instruction.instruction() );
-   instruction.release();
+   // instruction.release();
 }
 
 //-----------------------------------------------------------------------------

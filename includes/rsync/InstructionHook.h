@@ -17,12 +17,12 @@ public:
    * Transfer control of a Segment instance to the
    * receiver.
    */
-  void push( InstructionRaw* instruction_ptr );
+  void push( RawInstructionPtr instruction_ptr );
 
 
 protected:
 
-  virtual void call( InstructionRaw* instruction_ptr ) = 0;
+  virtual void call( RawInstructionPtr instruction_ptr ) = 0;
 };
 
 } // End namespace rsync

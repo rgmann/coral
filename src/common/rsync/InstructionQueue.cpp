@@ -16,7 +16,7 @@ InstructionQueue::~InstructionQueue()
 }
 
 //----------------------------------------------------------------------------
-void InstructionQueue::push( InstructionRaw* instruction_ptr )
+void InstructionQueue::push( RawInstructionPtr instruction_ptr )
 {
    if ( instruction_ptr )
    {
@@ -32,9 +32,9 @@ void InstructionQueue::push( InstructionRaw* instruction_ptr )
 }
 
 //----------------------------------------------------------------------------
-InstructionRaw* InstructionQueue::pop( int timeout_ms )
+RawInstructionPtr InstructionQueue::pop( int timeout_ms )
 {
-   InstructionRaw* instruction_ptr = NULL;
+   RawInstructionPtr instruction_ptr;
    containers_.pop( instruction_ptr, timeout_ms );
    return instruction_ptr;
 }

@@ -97,7 +97,7 @@ void LocalAuthorityInterface::processJob(
       // InstructionContainer* container_ptr =
       //    new InstructionContainer( instruction );
       instruction_receiver.push( instruction.instruction() );
-      instruction.release();
+      // instruction.release();
    }
 }
 

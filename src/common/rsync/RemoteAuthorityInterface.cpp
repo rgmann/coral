@@ -227,7 +227,7 @@ void RemoteAuthorityInterface::sendAssemblyInstruction(
    ui32        byte_count )
 {
    // InstructionContainer* container_ptr = new InstructionContainer();
-   InstructionRaw* instruction_ptr = new InstructionRaw( data_ptr, byte_count );
+   RawInstructionPtr instruction_ptr( new RawInstruction( data_ptr, byte_count ) );
 
    if ( instruction_ptr )
    {

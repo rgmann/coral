@@ -13,7 +13,7 @@ InstructionList::~InstructionList()
 }
 
 //-----------------------------------------------------------------------------
-void InstructionList::push( InstructionRaw* instruction_ptr )
+void InstructionList::push( RawInstructionPtr instruction_ptr )
 {
    if ( instruction_ptr )
    {
@@ -22,7 +22,7 @@ void InstructionList::push( InstructionRaw* instruction_ptr )
 }
 
 //-----------------------------------------------------------------------------
-std::vector<InstructionRaw*>& InstructionList::instructions()
+std::vector<RawInstructionPtr>& InstructionList::instructions()
 {
    return containers_;
 }

@@ -34,7 +34,7 @@ public:
 
 private:
 
-  void call(InstructionRaw* instruction_ptr);
+  void call(RawInstructionPtr instruction_ptr);
 
   void handleRemoteJobRequest(const void* pData, ui32 nLength);
 
@@ -44,14 +44,11 @@ private:
 
 private:
 
-  // boost::mutex active_job_lock_;
-  // RsyncJob* active_job_;
-
   LocalAuthorityInterface authority_;
 
-  QueryHandler mpUserHandler;
+  QueryHandler user_handler_ptr_;
 
-  int mRequestID;
+  int request_id_;
 
 };
 

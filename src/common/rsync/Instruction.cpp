@@ -7,16 +7,6 @@
 using namespace liber::rsync;
 using namespace liber::netapp;
 
-void dump_buffer(const char* pBuffer, ui32 nBytes)
-{
-  for (int nByte = 0; nByte < nBytes; nByte++)
-  {
-    printf(" %02X", pBuffer[nByte]);
-    if ((nByte > 0) && (nByte % 16 == 0)) printf("\n");
-  }
-  printf("\n");
-}
-
 const ui32 BeginInstruction::Type;
 const ui32 SegmentInstruction::Type;
 const ui32 ChunkInstruction::Type;
@@ -26,334 +16,384 @@ const ui32 EndInstruction::Type;
 AssemblerState::AssemblerState( SegmentAccessor& accessor )
 : segment_accessor_( accessor )
 {
-  reset();
+   reset();
 }
 
 //-----------------------------------------------------------------------------
 std::ofstream& AssemblerState::stream()
 {
-  return stream_;
+   return stream_;
 }
 
 //-----------------------------------------------------------------------------
 SegmentAccessor& AssemblerState::segmentAccessor()
 {
-  return segment_accessor_;
+   return segment_accessor_;
 }
 
 //-----------------------------------------------------------------------------
 JobDescriptor* AssemblerState::descriptor()
 {
-  return job_descriptor_ptr_;
+   return job_descriptor_ptr_;
 }
 
 //-----------------------------------------------------------------------------
 void AssemblerState::setDescriptor( JobDescriptor& job_descriptor )
 {
-  job_descriptor_ptr_ = &job_descriptor;
+   job_descriptor_ptr_ = &job_descriptor;
 }
 
 //-----------------------------------------------------------------------------
 bool AssemblerState::failed() const
 {
-  return (status_ != kRsyncSuccess);
+   return ( status_ != kRsyncSuccess );
 }
 
 //-----------------------------------------------------------------------------
 bool AssemblerState::cancelled() const
 {
-  return (status_ == kRsyncJobCanceled);
+   return ( status_ == kRsyncJobCanceled );
 }
 
 //-----------------------------------------------------------------------------
 bool AssemblerState::done() const
 {
-  return done_;
+   return done_;
 }
 
 //-----------------------------------------------------------------------------
 void AssemblerState::reset()
 {
-  status_ = kRsyncSuccess;
-  done_   = false;
-  job_descriptor_ptr_ = NULL;
+   status_ = kRsyncSuccess;
+   done_   = false;
+   job_descriptor_ptr_ = NULL;
+}
+
+
+//-----------------------------------------------------------------------------
+// Class: Instruction
+//-----------------------------------------------------------------------------
+Instruction::Instruction( i32 type, RawInstructionPtr instruction_ptr )
+:  type_( type )
+,  instruction_ptr_( instruction_ptr )
+{
+}
+
+//-----------------------------------------------------------------------------
+Instruction::~Instruction()
+{
+}
+
+//-----------------------------------------------------------------------------
+bool Instruction::valid() const
+{
+   return (
+      ( instruction_ptr_ != nullptr ) &&
+      instruction_ptr_->valid() &&
+      ( instruction_ptr_->type() == type_ )
+   );
+}
+
+//-----------------------------------------------------------------------------
+i32 Instruction::type() const
+{
+   if ( valid() )
+   {
+      return instruction_ptr_->type();
+   }
+   else
+   {
+      return RawInstruction::kInvalidInstructionType;
+   }
+}
+
+//-----------------------------------------------------------------------------
+RawInstructionPtr Instruction::instruction()
+{
+   return instruction_ptr_;
+}
+
+
+//-----------------------------------------------------------------------------
+// Class: RawInstruction
+//-----------------------------------------------------------------------------
+RawInstruction::RawInstruction( const void* data_ptr, ui32 length )
+:  data_ptr_ ( NULL )
+,  length_ ( 0 )
+{
+   allocate( length );
+   memcpy( data_ptr_, data_ptr, length_ );
+}
+//-----------------------------------------------------------------------------
+RawInstruction::RawInstruction( ui32 type, ui32 length )
+:  data_ptr_ ( NULL )
+,  length_ ( 0 )
+{
+   allocate( length + sizeof(i32) );
+   i32* type_ptr = (i32*)data_ptr_;
+   *type_ptr = type;
+}
+//-----------------------------------------------------------------------------
+RawInstruction::~RawInstruction()
+{
+   if ( data_ptr_ != NULL )
+   {
+      delete[] data_ptr_;
+   }
+}
+
+//-----------------------------------------------------------------------------
+i32 RawInstruction::type() const
+{
+   i32 type = kInvalidInstructionType;
+
+   if ( length_ >= sizeof( i32 ) )
+   {
+      type = *((i32*)data_ptr_);
+   }
+
+   return type;
+}
+
+//-----------------------------------------------------------------------------
+ui32 RawInstruction::length() const
+{
+   return length_;
+}
+
+//-----------------------------------------------------------------------------
+ui32 RawInstruction::payload_length() const
+{
+   ui32 payload_length = 0;
+
+   if ( length_ > sizeof(i32) )
+   {
+      payload_length = length_ - sizeof(i32);
+   }
+
+   return payload_length;
+}
+
+//-----------------------------------------------------------------------------
+void* const RawInstruction::data() const
+{
+   return data_ptr_;
+}
+
+//-----------------------------------------------------------------------------
+void* const RawInstruction::payload_ptr() const
+{
+   if ( data_ptr_ && ( length_ > sizeof(i32) ) )
+   {
+      return ( (ui8*)data_ptr_ + sizeof(i32) );
+   }
+
+   return NULL;
+}
+
+//-----------------------------------------------------------------------------
+void RawInstruction::allocate( ui32 length )
+{
+   if ( data_ptr_ != NULL )
+   {
+      delete[] data_ptr_;
+      data_ptr_ = NULL;
+   }
+
+   data_ptr_ = new ui8[ length ];
+   length_   = length;
+
+   memset( data_ptr_, 0, length_ );
+}
+
+//-----------------------------------------------------------------------------
+bool RawInstruction::valid() const {
+   return (
+      payload_ptr() &&
+      ( type() != RawInstruction::kInvalidInstructionType )
+   );
+}
+
+//-----------------------------------------------------------------------------
+void RawInstruction::dump()
+{
+   if ( valid() )
+   {
+      liber::log::mem_dump("", (const char*)data(), length() );
+   }
+}
+
+
+//-----------------------------------------------------------------------------
+// Class: BeginInstruction
+//-----------------------------------------------------------------------------
+BeginInstruction::BeginInstruction( RawInstructionPtr instruction_ptr )
+:  Instruction( BeginInstruction::Type, instruction_ptr )
+{
+}
+
+//-----------------------------------------------------------------------------
+BeginInstruction::BeginInstruction(liber::rsync::JobDescriptor& descriptor )
+:  Instruction( BeginInstruction::Type, RawInstructionPtr() )
+{
+   std::string packed = descriptor.serialize();
+   instruction_ptr_ =
+      RawInstructionPtr( new RawInstruction( Type, packed.size() ) );
+   memcpy( instruction_ptr_->payload_ptr(), packed.data(), packed.size() );
+}
+
+//-----------------------------------------------------------------------------
+bool BeginInstruction::descriptor( liber::rsync::JobDescriptor& descriptor )
+{
+   bool success = false;
+
+   if ( instruction_ptr_.get() != NULL )
+   {
+      success = descriptor.deserialize(
+         (const char*)instruction_ptr_->payload_ptr(),
+         instruction_ptr_->payload_length() );
+   // liber::log::status("BeginInstruction::descriptor: %d, %d, %d\n",
+   //   instruction_ptr_->length(), instruction_ptr_->payload_length(), success);
+   }
+
+   return success;
+}
+
+//-----------------------------------------------------------------------------
+// Class: SegmentInstruction
+//-----------------------------------------------------------------------------
+SegmentInstruction::SegmentInstruction( RawInstructionPtr instruction_ptr )
+:  Instruction( SegmentInstruction::Type, instruction_ptr )
+{
+}
+
+//-----------------------------------------------------------------------------
+SegmentInstruction::SegmentInstruction( liber::rsync::Segment::ID id )
+: Instruction( SegmentInstruction::Type, RawInstructionPtr() )
+{
+   instruction_ptr_ =
+      RawInstructionPtr( new RawInstruction( Type, sizeof( id ) ) );
+   Segment::ID* data_ptr = (Segment::ID*)instruction_ptr_->payload_ptr();
+   *data_ptr = id;
 }
 
 // //-----------------------------------------------------------------------------
-// // Class: Instruction
-// //-----------------------------------------------------------------------------
-// Instruction::Instruction( ui32 type )
-// : type_( type )
-// {
-// }
+liber::rsync::Segment::ID SegmentInstruction::segmentId() const
+{
+   Segment::ID segment_id = -1;
 
-// //-----------------------------------------------------------------------------
-// Instruction::~Instruction()
-// {
-// }
+   if ( instruction_ptr_ )
+   {
+      Segment::ID* segment_id_ptr = (Segment::ID*)instruction_ptr_->payload_ptr();
+      segment_id = *segment_id_ptr;
+   }
 
-// //-----------------------------------------------------------------------------
-// ui32 Instruction::type() const
-// {
-//    return type_;
-// }
-
-// //-----------------------------------------------------------------------------
-// InstructionContainer::InstructionContainer( i32 type )
-// :  type_( type )
-// {
-// }
-
-// //-----------------------------------------------------------------------------
-// InstructionContainer::InstructionContainer( const Instruction& instruction )
-// :  type_( instruction.type() )
-// {
-//    serialize( stream() );
-//    instruction.serialize( stream() );
-// }
-
-// //-----------------------------------------------------------------------------
-// void InstructionContainer::pack(SerialStream& ctor) const
-// {
-//    ctor.write( (ui32)type_ );
-// }
-
-// //-----------------------------------------------------------------------------
-// void InstructionContainer::pack(SerialStream& ctor)
-// {
-//    ctor.write( (ui32)type_ );
-// }
-
-// //-----------------------------------------------------------------------------
-// bool InstructionContainer::unpack(SerialStream& dtor)
-// {
-//    if ( dtor.read( type_ ) == false )
-//    {
-//       type_ = kInvalidInstructionType;
-//    }
-
-//    return ( type_ != kInvalidInstructionType );
-// }
+   return segment_id;
+}
 
 
-// //-----------------------------------------------------------------------------
-// // Class: BeginInstruction
-// //-----------------------------------------------------------------------------
-// BeginInstruction::BeginInstruction()
-// :  Instruction( BeginInstruction::Type )
-// {
-// }
+//-----------------------------------------------------------------------------
+// Class: SegmentInstruction
+//-----------------------------------------------------------------------------
+ChunkInstruction::ChunkInstruction( RawInstructionPtr instruction_ptr )
+:  Instruction( ChunkInstruction::Type, instruction_ptr )
+{
+}
 
-// //-----------------------------------------------------------------------------
-// BeginInstruction::BeginInstruction( JobDescriptor& descriptor )
-// :  Instruction( BeginInstruction::Type )
-// ,  descriptor_( descriptor )
-// {
-// }
+//-----------------------------------------------------------------------------
+ChunkInstruction::ChunkInstruction( ui32 length )
+: Instruction( ChunkInstruction::Type, RawInstructionPtr() )
+{
+   instruction_ptr_ = RawInstructionPtr( new RawInstruction( Type, length ) );
+}
 
-// //-----------------------------------------------------------------------------
-// BeginInstruction::~BeginInstruction()
-// {
-// }
+//-----------------------------------------------------------------------------
+ui8* const ChunkInstruction::data()
+{
+   if ( instruction_ptr_ )
+   {
+      return (ui8* const)instruction_ptr_->payload_ptr();
+   }
+   else
+   {
+      return NULL;
+   }
+}
 
-// //-----------------------------------------------------------------------------
-// void BeginInstruction::pack( SerialStream& ctor ) const
-// {
-//   descriptor_.serialize( ctor );
-// }
+//-----------------------------------------------------------------------------
+ui32 ChunkInstruction::size() const
+{
+   if ( instruction_ptr_ )
+   {
+      return instruction_ptr_->payload_length();
+   }
+   else
+   {
+      return 0;
+   }
+}
 
-// //-----------------------------------------------------------------------------
-// void BeginInstruction::pack( SerialStream& ctor )
-// {
-//   const_cast<const BeginInstruction*>(this)->pack( ctor );
-// }
+//-----------------------------------------------------------------------------
+// Class: EndInstruction
+//-----------------------------------------------------------------------------
+EndInstruction::EndInstruction( RawInstructionPtr instruction_ptr )
+:  Instruction( EndInstruction::Type, instruction_ptr )
+{
+}
 
-// //-----------------------------------------------------------------------------
-// bool BeginInstruction::unpack( SerialStream& dtor )
-// {
-//   return descriptor_.deserialize( dtor );
-// }
+//-----------------------------------------------------------------------------
+EndInstruction::EndInstruction()
+:  Instruction( EndInstruction::Type, RawInstructionPtr() )
+{
+   instruction_ptr_ =
+      RawInstructionPtr( new RawInstruction( Type, sizeof( data ) ) );
+}
 
-// //-----------------------------------------------------------------------------
-// // Class: SegmentInstruction
-// //-----------------------------------------------------------------------------
-// SegmentInstruction::SegmentInstruction()
-// : Instruction( SegmentInstruction::Type )
-// {
-// }
+//-----------------------------------------------------------------------------
+void EndInstruction::cancel(RsyncError error)
+{
+   if ( instruction_ptr_ )
+   {
+      data_ptr()->canceled = true;
+      data_ptr()->cancel_error = error;
+   }
+}
 
-// //-----------------------------------------------------------------------------
-// SegmentInstruction::SegmentInstruction( Segment::ID id )
-// : Instruction( SegmentInstruction::Type )
-// , segment_id_( id )
-// {
-// }
+//-----------------------------------------------------------------------------
+bool EndInstruction::canceled() const
+{
+   bool canceled = true;
 
-// //-----------------------------------------------------------------------------
-// SegmentInstruction::~SegmentInstruction()
-// {
-// }
+   if ( data_ptr() )
+   {
+      canceled = data_ptr()->canceled;
+   }
 
-// //-----------------------------------------------------------------------------
-// void SegmentInstruction::pack( SerialStream& ctor ) const
-// {
-//    ctor.write( (ui32)segment_id_ );
-// }
+   return canceled;
+}
 
-// //-----------------------------------------------------------------------------
-// void SegmentInstruction::pack( liber::netapp::SerialStream& ctor )
-// {
-//   const_cast<const SegmentInstruction*>(this)->pack(ctor);
-// }
+//-----------------------------------------------------------------------------
+RsyncError EndInstruction::error() const
+{
+   RsyncError error = kRsyncIoError;
 
-// //-----------------------------------------------------------------------------
-// bool SegmentInstruction::unpack(SerialStream& dtor)
-// {
-//    bool unpack_success = true;
-//    unpack_success     &= dtor.read( segment_id_ );
-//    return unpack_success;
-// }
+   if ( data_ptr() )
+   {
+      error = (RsyncError)data_ptr()->cancel_error;
+   }
 
-// //-----------------------------------------------------------------------------
-// // Class: SegmentInstruction
-// //-----------------------------------------------------------------------------
-// ChunkInstruction::ChunkInstruction()
-// :  Instruction( ChunkInstruction::Type )
-// ,  chunk_data_ptr_   ( NULL )
-// ,  chunk_size_bytes_ ( 0 )
-// {
-// }
+   return error;
+}
 
-// //-----------------------------------------------------------------------------
-// ChunkInstruction::ChunkInstruction( ui32 chunk_size_bytes )
-// :  Instruction( ChunkInstruction::Type )
-// ,  chunk_data_ptr_   ( NULL )
-// ,  chunk_size_bytes_ ( chunk_size_bytes )
-// {
-//    if ( chunk_size_bytes > 0 )
-//    {
-//       chunk_data_ptr_ = new ui8[ chunk_size_bytes_ ];
-//    }
-// }
-
-// //-----------------------------------------------------------------------------
-// ChunkInstruction::~ChunkInstruction()
-// {
-//    if ( chunk_data_ptr_ )
-//    {
-//       delete[] chunk_data_ptr_;
-//       chunk_data_ptr_ = NULL;
-//    }
-// }
-
-// //-----------------------------------------------------------------------------
-// ui8* const ChunkInstruction::data()
-// {
-//    return chunk_data_ptr_;
-// }
-
-// //-----------------------------------------------------------------------------
-// ui32 ChunkInstruction::size() const
-// {
-//    return chunk_size_bytes_;
-// }
-
-// //-----------------------------------------------------------------------------
-// void ChunkInstruction::pack(SerialStream& ctor) const
-// {
-//    if (chunk_data_ptr_)
-//    {
-//       std::string data;
-//       data.assign( (char*)chunk_data_ptr_, chunk_size_bytes_ );
-//       ctor.write( data );
-//    }
-// }
-
-// //-----------------------------------------------------------------------------
-// void ChunkInstruction::pack( SerialStream& ctor )
-// {
-//    const_cast<const ChunkInstruction*>(this)->pack(ctor);
-// }
-
-// //-----------------------------------------------------------------------------
-// bool ChunkInstruction::unpack( SerialStream& dtor )
-// {
-//    bool unpack_success = false;
-//    std::string data;
-
-//    if ( ( dtor.read(data) == SerialStream::ReadOk ) && ( data.size() > 0 ) )
-//    {
-//       if ( chunk_data_ptr_ )
-//       {
-//          delete[] chunk_data_ptr_;
-//          chunk_data_ptr_ = NULL;
-//       }
-
-//       chunk_size_bytes_ = data.size();
-//       chunk_data_ptr_   = new ui8[ chunk_size_bytes_ ];
-
-//       memcpy(chunk_data_ptr_, data.data(), data.size());
-
-//       unpack_success = true;
-//    }
-
-//    return unpack_success;
-// }
-
-
-// //-----------------------------------------------------------------------------
-// // Class: EndInstruction
-// //-----------------------------------------------------------------------------
-// EndInstruction::EndInstruction()
-// :  Instruction( EndInstruction::Type )
-// ,  canceled_( false )
-// ,  cancel_error_( (RsyncError)kRsyncSuccess )
-// {
-// }
-
-// //-----------------------------------------------------------------------------
-// EndInstruction::~EndInstruction()
-// {
-// }
-
-// //-----------------------------------------------------------------------------
-// void EndInstruction::cancel( RsyncError error )
-// {
-//    canceled_     = true;
-//    cancel_error_ = (ui32)error;
-// }
-
-// //-----------------------------------------------------------------------------
-// bool EndInstruction::canceled() const
-// {
-//    return canceled_;
-// }
-
-// //-----------------------------------------------------------------------------
-// RsyncError EndInstruction::error() const
-// {
-//    return (RsyncError)cancel_error_;
-// }
-
-// //-----------------------------------------------------------------------------
-// void EndInstruction::pack( SerialStream& ctor ) const
-// {
-//    ctor.write( canceled_ );
-//    ctor.write( cancel_error_ );
-// }
-
-// //-----------------------------------------------------------------------------
-// void EndInstruction::pack( SerialStream& ctor )
-// {
-//    const_cast<const EndInstruction*>(this)->pack(ctor);
-// }
-
-// //-----------------------------------------------------------------------------
-// bool EndInstruction::unpack( SerialStream& dtor )
-// {
-//    bool unpack_success = true;
-//    unpack_success     &= dtor.read( canceled_ );
-//    unpack_success     &= dtor.read( cancel_error_ );
-//    return unpack_success;
-// }
-
+//-----------------------------------------------------------------------------
+EndInstruction::data* const EndInstruction::data_ptr() const
+{
+   if ( instruction_ptr_ )
+   {
+      return (data*)instruction_ptr_->payload_ptr();
+   }
+   else
+   {
+      return NULL;
+   }
+}

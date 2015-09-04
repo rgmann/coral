@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <string.h>
+#include <memory>
 #include "Log.h"
 #include "JobDescriptor.h"
 #include "Segment.h"
@@ -26,25 +27,25 @@ public:
   JobDescriptor*   descriptor();
   void setDescriptor( JobDescriptor& job_descriptor );
 
-  /**
-   * Returns true if execution of an instruction failed or if the instruction
-   * stream has been cancelled by the Authority.
-   */
+  //
+  // Returns true if execution of an instruction failed or if the instruction
+  // stream has been cancelled by the Authority.
+  //
   bool failed() const;
 
-  /**
-   * Returns true if the instruction stream has been cancelled by the Authority.
-   */
+  //
+  // Returns true if the instruction stream has been cancelled by the Authority.
+  //
   bool cancelled() const;
 
-  /**
-   * Returns true if the instruction stream completed successfully.
-   */
+  //
+  // Returns true if the instruction stream completed successfully.
+  //
   bool done() const;
 
-  /**
-   *
-   */
+  //
+  //
+  //
   void reset();
 
 
@@ -62,228 +63,159 @@ private:
 };
 
 
-// class Instruction : public liber::netapp::Serializable {
-// public:
-
-//   Instruction( ui32 type );
-//   virtual ~Instruction();
-
-//   ui32 type() const;
-
-
-// protected:
-
-//   ui32 type_;
-// };
-
-class InstructionRaw {
+class RawInstruction {
 public:
-  InstructionRaw( const void* data_ptr, ui32 length )
-  :  data_ptr_ ( NULL )
-  ,  length_ ( 0 )
-  {
-    // liber::log::status("FIRST\n");
-    allocate( length );
-    memcpy( data_ptr_, data_ptr, length_ );
-  }
-  InstructionRaw( ui32 type, ui32 length )
-  :  data_ptr_ ( NULL )
-  ,  length_ ( 0 )
-  {
-    // liber::log::status("SECOND\n");
-    allocate( length + sizeof(i32) );
-    i32* type_ptr = (i32*)data_ptr_;
-    *type_ptr = type;
-  }
-  ~InstructionRaw() {
-    if ( data_ptr_ != NULL ) delete[] data_ptr_;
-  }
 
-  enum { kInvalidInstructionType = -1 };
-  i32 type() const {
-    i32* type_ptr = NULL;
-    // liber::log::status("InstructionRaw::type: data=%p, length=%d\n", data_ptr_, length_ );
-    if ( length_ >= sizeof( i32 ) ) {
-      type_ptr = (i32*)data_ptr_;
-    }
-    i32 type = kInvalidInstructionType;
-    if ( type_ptr ) {
-      type = *type_ptr;
-    }
-    return type;
-  }
-  ui32 length() const { return length_; }
-  ui32 payload_length() const {
-    ui32 payload_length = 0;
-    if ( length_ > sizeof(i32)) payload_length = length_ - sizeof(i32);
-    return payload_length;
-  }
-  void* const data() const { return data_ptr_; }
-  void* const payload_ptr() const {
-    if ( data_ptr_ && (length_ > sizeof(i32))) {
-      return ((ui8*)data_ptr_ + sizeof(i32));
-    }
-    return NULL;
-  }
+   //
+   //
+   //
+   RawInstruction( const void* data_ptr, ui32 length );
 
-  void allocate( ui32 length ) {
-    if ( data_ptr_ != NULL ) {
-      delete[] data_ptr_;
-      data_ptr_ = NULL;
-    }
-    data_ptr_ = new ui8[ length ];
-    length_ = length;
-    memset( data_ptr_, 0, length_ );
-  }
+   //
+   //
+   //
+   RawInstruction( ui32 type, ui32 length );
 
-  bool valid() const {
-    return (
-      payload_ptr() &&
-      ( type() != InstructionRaw::kInvalidInstructionType ) );
-  }
+   //
+   //
+   //
+   ~RawInstruction();
 
-  void dump() {
-    if ( valid() ) {
-      liber::log::mem_dump("", (const char*)data(), length() );
-    }
-  }
+   //
+   //
+   //
+   enum { kInvalidInstructionType = -1 };
+   i32 type() const;
+
+   //
+   //
+   //
+   void* const data() const ;
+
+   //
+   //
+   //
+   ui32 length() const;
+
+   //
+   //
+   //
+   ui32 payload_length() const;
+
+   //
+   //
+   //
+   void* const payload_ptr() const;
+
+   //
+   //
+   //
+   void allocate( ui32 length );
+
+   //
+   //
+   //
+   bool valid() const;
+
+   //
+   //
+   //
+   void dump();
+
 
 private:
 
-  ui8* data_ptr_;
-  ui32 length_;
+   // Raw instruction data pointer
+   ui8* data_ptr_;
+
+   // Size of raw packet
+   ui32 length_;
 
 };
 
-typedef  std::shared_ptr<InstructionRaw> InstructionRawPtr;
+typedef  std::shared_ptr<RawInstruction> RawInstructionPtr;
 class Instruction {
 public:
-  // Instuction() : instruction_ptr_( NULL ) {}
-  Instruction( i32 type, InstructionRaw* instruction_ptr = NULL )
-  : type_( type ), instruction_ptr_( instruction_ptr ) {}
-  virtual ~Instruction() {
-    if ( instruction_ptr_ != NULL ) delete instruction_ptr_;
-  }
 
-  bool valid() const {
-    // if ( instruction_ptr_ )
-      // liber::log::status("valid: %d, %d\n", instruction_ptr_->valid(), instruction_ptr_->type());
-    return (
-      ( instruction_ptr_ != NULL ) &&
-      instruction_ptr_->valid() &&
-      ( instruction_ptr_->type() == type_ ) );
-  }
+   //
+   //
+   //
+   Instruction( i32 type, RawInstructionPtr instruction_ptr );
 
-  i32 type() const {
-    if ( valid() ) {
-      return instruction_ptr_->type();
-    } else {
-      return InstructionRaw::kInvalidInstructionType;
-    }
-  }
+   //
+   //
+   //
+   virtual ~Instruction();
 
-  InstructionRaw* instruction(){ return instruction_ptr_; }
-  void release() { instruction_ptr_ = NULL; }
+   //
+   //
+   //
+   bool valid() const;
+
+   //
+   // 
+   //
+   i32 type() const;
+
+   //
+   // Access raw instruction backing this Instruction instance.
+   //
+   RawInstructionPtr instruction();
+
 
 protected:
-  i32 type_;
-  InstructionRaw* instruction_ptr_;
+
+   // Instruction type ID
+   i32 type_;
+
+   // Shared pointer to RawInstruction backing this Instruction instance
+   RawInstructionPtr instruction_ptr_;
+
 };
-
-// class InstructionContainer : public liber::netapp::Serializable {
-// public:
-
-//   enum { kInvalidInstructionType = -1 };
-
-//   InstructionContainer( i32 type = kInvalidInstructionType );
-//   InstructionContainer( const Instruction& instruction );
-
-//   i32 type() const { return type_; };
-
-//   liber::netapp::SerialStream& stream() { return stream_; };
-
-// protected:
-
-//   void pack(liber::netapp::SerialStream& ctor) const;
-//   void pack(liber::netapp::SerialStream& ctor);
-//   bool unpack(liber::netapp::SerialStream& dtor);
-
-// private:
-
-//   liber::netapp::SerialStream stream_;
-
-//   i32 type_;
-// };
 
 
 class BeginInstruction : public Instruction {
 public:
 
-  static const ui32 Type = 0;
+   static const ui32 Type = 0;
 
-  BeginInstruction( InstructionRaw* instruction_ptr = NULL ) : Instruction( Type, instruction_ptr ){}
-  BeginInstruction(liber::rsync::JobDescriptor& descriptor ) : Instruction( Type, NULL ) {
-    std::string packed = descriptor.serialize();
-    // instruction_ptr_ = new InstructionRaw( packed.data(), packed.size() );
-    instruction_ptr_ = new InstructionRaw( Type, packed.size() );
-    memcpy( instruction_ptr_->payload_ptr(), packed.data(), packed.size() );
-  }
-  // ~BeginInstruction();
+   //
+   //
+   //
+   BeginInstruction( RawInstructionPtr instruction_ptr = RawInstructionPtr() );
 
-  bool descriptor( liber::rsync::JobDescriptor& descriptor ) {
-    bool success = false;
-    if ( instruction_ptr_ != NULL ) {
-      success = descriptor.deserialize(
-        (const char*)instruction_ptr_->payload_ptr(),
-        instruction_ptr_->payload_length() );
-      liber::log::status("BeginInstruction::descriptor: %d, %d, %d\n",
-        instruction_ptr_->length(), instruction_ptr_->payload_length(), success);
-    }
-    return success;
-  }
+   //
+   //
+   //
+   BeginInstruction(liber::rsync::JobDescriptor& descriptor );
 
+   //
+   //
+   //
+   bool descriptor( liber::rsync::JobDescriptor& descriptor );
 
-// protected:
-
-//   void pack(liber::netapp::SerialStream& ctor) const;
-//   void pack(liber::netapp::SerialStream& ctor);
-//   bool unpack(liber::netapp::SerialStream& dtor);
-
-private:
-
-  liber::rsync::JobDescriptor descriptor_;
 };
 
 
 class SegmentInstruction : public Instruction {
 public:
 
-  static const ui32 Type = 1;
+   static const ui32 Type = 1;
 
-  SegmentInstruction( InstructionRaw* instruction_ptr = NULL ) : Instruction( Type, instruction_ptr ){}
-  SegmentInstruction(liber::rsync::Segment::ID id) : Instruction( Type, NULL ) {
-    instruction_ptr_ = new InstructionRaw( Type, sizeof( id ) );
-    Segment::ID*  data_ptr = (Segment::ID*)instruction_ptr_->payload_ptr();
-    *data_ptr = id;
-  }
-  // ~SegmentInstruction();
+   //
+   //
+   //
+   SegmentInstruction( RawInstructionPtr instruction_ptr = RawInstructionPtr() );
 
-  // liber::rsync::Segment::ID getSegmentId() const;
-  liber::rsync::Segment::ID segmentId() const {
-    Segment::ID segment_id = -1;
-    if ( instruction_ptr_ ) {
-      Segment::ID* segment_id_ptr = (Segment::ID*)instruction_ptr_->payload_ptr();
-      segment_id = *segment_id_ptr;
-    }
-    return segment_id;
-  }
-  // liber::rsync::Segment::ID segment_id_;
+   //
+   //
+   //
+   SegmentInstruction(liber::rsync::Segment::ID id);
 
-// protected:
-
-//    void pack(liber::netapp::SerialStream& ctor) const;
-//    void pack(liber::netapp::SerialStream& ctor);
-//    bool unpack(liber::netapp::SerialStream& dtor);
+   //
+   //
+   //
+   liber::rsync::Segment::ID segmentId() const;
 
 };
 
@@ -291,37 +223,27 @@ public:
 class ChunkInstruction : public Instruction {
 public:
 
-  static const ui32 Type = 2;
+   static const ui32 Type = 2;
 
-  ChunkInstruction( InstructionRaw* instruction_ptr = NULL ) : Instruction( Type, instruction_ptr ){}
-  ChunkInstruction( ui32 length ) : Instruction( Type, NULL ) {
-    instruction_ptr_ = new InstructionRaw( Type, length );
-  }
-  // ~ChunkInstruction();
+   //
+   //
+   //
+   ChunkInstruction( RawInstructionPtr instruction_ptr = RawInstructionPtr() );
 
-  ui8* const data() {
-    if ( instruction_ptr_ ) {
-      return (ui8* const)instruction_ptr_->payload_ptr();
-    } else {
-      return NULL;
-    }
-  }
-  ui32 size() const {
-    if ( instruction_ptr_ ) {
-      return instruction_ptr_->payload_length();
-    } else {
-      return 0;
-    }
-  }
+   //
+   //
+   //
+   ChunkInstruction( ui32 length );
 
-  // ui8* chunk_data_ptr_;
-  // ui32 chunk_size_bytes_;
+   //
+   //
+   //
+   ui8* const data();
 
-// protected:
-
-//   void pack(liber::netapp::SerialStream& ctor) const;
-//   void pack(liber::netapp::SerialStream& ctor);
-//   bool unpack(liber::netapp::SerialStream& dtor);
+   //
+   //
+   //
+   ui32 size() const;
 
 };
 
@@ -329,58 +251,42 @@ public:
 class EndInstruction : public Instruction {
 public:
 
-  static const ui32 Type = 3;
+   static const ui32 Type = 3;
 
-  struct __attribute__((packed)) data {
-    bool canceled;
-    ui32 cancel_error;
-  };
+   struct __attribute__((packed)) data {
+      bool canceled;
+      ui32 cancel_error;
+   };
 
-  EndInstruction( InstructionRaw* instruction_ptr ) : Instruction( Type, instruction_ptr ){}
-  EndInstruction() : Instruction( Type, NULL ) {
-    instruction_ptr_ = new InstructionRaw( Type, sizeof( data ) );
-  }
-  // ~EndInstruction();
+   //
+   //
+   //
+   EndInstruction( RawInstructionPtr instruction_ptr );
 
-  void cancel(RsyncError error) {
-    if ( instruction_ptr_ ) {
-      data_ptr()->canceled = true;
-      data_ptr()->cancel_error = error;
-    }
-  }
-  bool canceled() const {
-    bool canceled = true;
-    if ( data_ptr() ) {
-      canceled = data_ptr()->canceled;
-    }
-    return canceled;
-  }
-  RsyncError error() const {
-    RsyncError error = kRsyncIoError;
-    if ( data_ptr() ) {
-      error = (RsyncError)data_ptr()->cancel_error;
-    }
-    return error;
-  }
+   //
+   //
+   //
+   EndInstruction();
 
-  data* const data_ptr() const {
-    if ( instruction_ptr_ ) {
-      return (data*)instruction_ptr_->payload_ptr();
-    } else {
-      return NULL;
-    }
-  }
+   //
+   //
+   //
+   void cancel( RsyncError error );
 
-  // bool canceled_;
+   //
+   //
+   //
+   bool canceled() const;
 
-  // If cancelled, error that caused cancellation.
-  // ui32 cancel_error_;
+   //
+   //
+   //
+   RsyncError error() const;
 
-// protected:
-
-//   void pack(liber::netapp::SerialStream& ctor) const;
-//   void pack(liber::netapp::SerialStream& ctor);
-//   bool unpack(liber::netapp::SerialStream& dtor);
+   //
+   //
+   //
+   data* const data_ptr() const;
 
 };
 

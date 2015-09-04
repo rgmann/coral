@@ -15,9 +15,9 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 RemoteAuthorityService::RemoteAuthorityService()
-: RsyncPacketSubscriber( true )
-, mpUserHandler(NULL)
-, mRequestID(RsyncPacket::RsyncAuthorityInterface)
+:  RsyncPacketSubscriber( true )
+,  user_handler_ptr_(NULL)
+,  request_id_(RsyncPacket::RsyncAuthorityInterface)
 {
 }
 
@@ -27,64 +27,47 @@ RemoteAuthorityService::~RemoteAuthorityService()
 }
 
 //-----------------------------------------------------------------------------
-void RemoteAuthorityService::setRequestID(int requestID)
+void RemoteAuthorityService::setRequestID( int requestID )
 {
-  mRequestID = requestID;
+   request_id_ = requestID;
 }
 
 //-----------------------------------------------------------------------------
 void RemoteAuthorityService::process( RsyncJob* job_ptr )
 {
-  job_ptr->packetRouter().subscribe(
-    RsyncPacket::RsyncAuthorityService, this, liber::netapp::kSubscriberModeReadWrite );
+   job_ptr->packetRouter().subscribe(
+      RsyncPacket::RsyncAuthorityService,
+      this,
+      liber::netapp::kSubscriberModeReadWrite );
 
-  // {
-  //   boost::mutex::scoped_lock guard( active_job_lock_ );
-  //   active_job_ = job_ptr;
-  // }
-  setActiveJob( job_ptr );
+   setActiveJob( job_ptr );
 
-  RsyncQueryResponse response( job_ptr->descriptor().uuid(), kRsyncSuccess );
+   RsyncQueryResponse response( job_ptr->descriptor().uuid(), kRsyncSuccess );
 
-  // sendTo( mRequestID, new (std::nothrow) RsyncPacket(
-  //   RsyncPacket::RsyncRemoteAuthAcknowledgment,
-  //   response.serialize()
-  // ));
-  std::string packet_data = response.serialize();
-  sendTo(
-    RsyncPacket::RsyncAuthorityInterface,
-    RsyncPacket::RsyncRemoteAuthAcknowledgment,
-    packet_data.data(),
-    packet_data.size() );
+   std::string packet_data = response.serialize();
+   sendTo(
+      RsyncPacket::RsyncAuthorityInterface,
+      RsyncPacket::RsyncRemoteAuthAcknowledgment,
+      packet_data.data(),
+      packet_data.size() );
 
-  authority_.process( job_ptr, *this );
-  // liber::log::debug("RemoteAuthorityService::process: FINISHED PROCESSING\n");
+   authority_.process( job_ptr, *this );
 
-  // JobReport& rReport = job_ptr->report();
+   packet_data = job_ptr->report().source.serialize();
+   bool auth_report_send_success = sendTo(
+      RsyncPacket::RsyncAuthorityInterface,
+      RsyncPacket::RsyncAuthorityReport,
+      packet_data.data(),
+      packet_data.size() );
 
-  // bool auth_report_send_success = sendTo( mRequestID, new RsyncPacket(
-  //   RsyncPacket::RsyncAuthorityReport,
-  //   job_ptr->report().source.serialize()
-  // ));
-  packet_data = job_ptr->report().source.serialize();
-  bool auth_report_send_success = sendTo(
-    RsyncPacket::RsyncAuthorityInterface,
-    RsyncPacket::RsyncAuthorityReport,
-    packet_data.data(),
-    packet_data.size() );
+   if ( auth_report_send_success == false )
+   {
+      log::error("SendReportHook - Failed to send report to %d\n", request_id_);
+   }
 
-  if ( auth_report_send_success == false )
-  {
-    log::error("SendReportHook - Failed to send report to %d\n", mRequestID);
-  }
+   unsetActiveJob();
 
-  // {
-  //   boost::mutex::scoped_lock guard( active_job_lock_ );
-  //   active_job_ = NULL;
-  // }
-  unsetActiveJob();
-
-  job_ptr->packetRouter().unsubscribe( RsyncPacket::RsyncAuthorityService, this );
+   job_ptr->packetRouter().unsubscribe( RsyncPacket::RsyncAuthorityService, this );
 }
 
 //-----------------------------------------------------------------------------
@@ -117,37 +100,30 @@ bool RemoteAuthorityService::processPacket( const void* data_ptr, ui32 length )
 }
 
 //-----------------------------------------------------------------------------
-void RemoteAuthorityService::call( InstructionRaw* instruction_ptr )
+void RemoteAuthorityService::call( RawInstructionPtr instruction_ptr )
 {
    if ( instruction_ptr )
    {
-
-      // std::string packet_data = container_ptr->stream().stream.str();
-      // log::status("RemoteAuthorityService::call: %d, %d\n", instruction_ptr->length(), instruction_ptr->payload_length());
-      // instruction_ptr->dump();
       sendTo(
          RsyncPacket::RsyncAuthorityInterface,
          RsyncPacket::RsyncInstruction,
          instruction_ptr->data(),
          instruction_ptr->length() );
-
-      delete instruction_ptr;
    }
 }
 
 //-----------------------------------------------------------------------------
 void RemoteAuthorityService::pushSegment(const void* pData, ui32 nLength)
 {
-  // boost::mutex::scoped_lock guard( active_job_lock_ );
+   Segment* segment_ptr = new Segment();
 
-  Segment* segment_ptr = new Segment();
-  if ( segment_ptr->deserialize( (const char*)pData, nLength ) )
-  {
-    activeJob()->segments().push( segment_ptr );
-  }
-  else
-  {
-    log::error("Failed to deserialize segment.\n");
-    delete segment_ptr;
-  }
+   if ( segment_ptr->deserialize( (const char*)pData, nLength ) )
+   {
+      activeJob()->segments().push( segment_ptr );
+   }
+   else
+   {
+      log::error("Failed to deserialize segment.\n");
+      delete segment_ptr;
+   }
 }
