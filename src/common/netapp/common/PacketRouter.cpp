@@ -15,6 +15,8 @@ PacketRouter::PacketRouter(PacketReceiver* pReceiver)
 //-----------------------------------------------------------------------------
 PacketRouter::~PacketRouter()
 {
+   boost::mutex::scoped_lock guard( table_lock_ );
+
    DestinationIterator destination_iterator = destination_table_.begin();
    for (; destination_iterator != destination_table_.end(); ++destination_iterator )
    {

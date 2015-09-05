@@ -19,6 +19,12 @@ RsyncJob::~RsyncJob()
 }
 
 //-----------------------------------------------------------------------------
+void RsyncJob::setDescriptor( const JobDescriptor& descriptor )
+{
+  mDescriptor = descriptor;
+}
+
+//-----------------------------------------------------------------------------
 JobDescriptor& RsyncJob::descriptor()
 {
   return mDescriptor;

@@ -21,23 +21,35 @@ RemoteAuthorityServiceThread::~RemoteAuthorityServiceThread()
 //-----------------------------------------------------------------------------
 void RemoteAuthorityServiceThread::run( const bool& shutdown )
 {
-  while ( shutdown == false )
-  {
-    JobAgentPair job_agent_pair;
+   while ( shutdown == false )
+   {
+      JobAgentPair job_agent_pair;
 
-    if ( job_queue_.pop( job_agent_pair ) )
-    {
-      JobAgent* agent_ptr = job_agent_pair.first;
-      RsyncJob* job_ptr = job_agent_pair.second;
-
-      if ( agent_ptr && job_ptr )
+      if ( job_queue_.pop( job_agent_pair ) )
       {
-        authority_.process( job_ptr );
+         JobAgent* agent_ptr = job_agent_pair.first;
+         RsyncJob* job_ptr = job_agent_pair.second;
 
-        agent_ptr->releaseJob( job_ptr );
+         if ( agent_ptr && job_ptr )
+         {
+            authority_.process( job_ptr );
+
+            if ( job_ptr->descriptor().isRemoteRequest() )
+            {
+               log::status("RemoteAuthorityServiceThread::run: FINISHED REMOTE REQUEST\n");
+            }
+            else
+            {
+               log::status("RemoteAuthorityServiceThread::run: FINISHED LOCAL REQUEST\n");
+            }
+
+            if ( job_ptr->descriptor().isRemoteRequest() )
+            {
+               agent_ptr->releaseJob( job_ptr );
+            }
+         }
       }
-    }
-  }
+   }
 
-  log::debug("RemoteAuthorityServiceThread: Shutting down\n");
+   log::debug("RemoteAuthorityServiceThread: Shutting down\n");
 }

@@ -5,7 +5,6 @@
 #include "IThread.h"
 #include "Queue.h"
 #include "RsyncError.h"
-// #include "PacketSubscriber.h"
 #include "RsyncPacketSubscriber.h"
 #include "FileSystemInterface.h"
 #include "LocalAuthorityInterface.h"
@@ -16,8 +15,7 @@ namespace rsync {
 
 class JobDescriptor;
 
-class RemoteAuthorityService : public RsyncPacketSubscriber
-, public InstructionHook {
+class RemoteAuthorityService : public RsyncPacketSubscriber, public InstructionHook {
 public:
 
   RemoteAuthorityService();

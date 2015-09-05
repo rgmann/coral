@@ -45,7 +45,7 @@ private:
 
    bool validate( const JobDescriptor& descriptor );
 
-   void handleRemoteJobRequest( const void* pData, ui32 nLength );
+   void processRemoteAuthRequest( const void* data_ptr, ui32 size_bytes );
 
    RsyncError createJob( RsyncJob* job_ptr );
    RsyncError createJob( const char* data_ptr, ui32 size_bytes );
@@ -58,6 +58,8 @@ private:
 
    RsyncError addActiveJob( RsyncJob* job_ptr );
    void removeActiveJob( RsyncJob* job_ptr );
+
+   bool addJobToTable( RsyncJob* job_ptr );
 
 private:
 

@@ -284,15 +284,10 @@ void RemoteAuthorityInterface::cancelAssembly(
    InstructionQueue& instructions,
    RsyncError        status)
 {
+   log::error("RemoteAuthorityInterface::cancelAssembly: CANCEL - %s\n",
+      errorToString( status ).c_str() );
    EndInstruction instruction;
    instruction.cancel( status );
-
-    // InstructionContainer* container_ptr = new InstructionContainer( instruction.type() );
-
-   // container_ptr->serialize( container_ptr->stream() );
-   // instruction.serialize( container_ptr->stream() );
-
-   // instructions.push( container_ptr );
    instructions.push( instruction.instruction() );
 }
 

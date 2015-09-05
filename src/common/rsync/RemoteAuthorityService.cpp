@@ -27,47 +27,54 @@ RemoteAuthorityService::~RemoteAuthorityService()
 }
 
 //-----------------------------------------------------------------------------
-void RemoteAuthorityService::setRequestID( int requestID )
+void RemoteAuthorityService::setRequestID( int request_id )
 {
-   request_id_ = requestID;
+   request_id_ = request_id;
 }
 
 //-----------------------------------------------------------------------------
 void RemoteAuthorityService::process( RsyncJob* job_ptr )
 {
-   job_ptr->packetRouter().subscribe(
+   bool subscribed = job_ptr->packetRouter().subscribe(
       RsyncPacket::RsyncAuthorityService,
       this,
-      liber::netapp::kSubscriberModeReadWrite );
+      liber::netapp::kSubscriberModeReadWrite
+   );
 
-   setActiveJob( job_ptr );
-
-   RsyncQueryResponse response( job_ptr->descriptor().uuid(), kRsyncSuccess );
-
-   std::string packet_data = response.serialize();
-   sendTo(
-      RsyncPacket::RsyncAuthorityInterface,
-      RsyncPacket::RsyncRemoteAuthAcknowledgment,
-      packet_data.data(),
-      packet_data.size() );
-
-   authority_.process( job_ptr, *this );
-
-   packet_data = job_ptr->report().source.serialize();
-   bool auth_report_send_success = sendTo(
-      RsyncPacket::RsyncAuthorityInterface,
-      RsyncPacket::RsyncAuthorityReport,
-      packet_data.data(),
-      packet_data.size() );
-
-   if ( auth_report_send_success == false )
+   if ( subscribed )
    {
-      log::error("SendReportHook - Failed to send report to %d\n", request_id_);
+      setActiveJob( job_ptr );
+
+      RsyncQueryResponse response( job_ptr->descriptor().uuid(), kRsyncSuccess );
+
+      std::string packet_data = response.serialize();
+      sendTo(
+         RsyncPacket::RsyncAuthorityInterface,
+         RsyncPacket::RsyncRemoteAuthAcknowledgment,
+         packet_data.data(),
+         packet_data.size() );
+
+      authority_.process( job_ptr, *this );
+
+      packet_data = job_ptr->report().source.serialize();
+      bool auth_report_send_success = sendTo(
+         RsyncPacket::RsyncAuthorityInterface,
+         RsyncPacket::RsyncAuthorityReport,
+         packet_data.data(),
+         packet_data.size() );
+
+      if ( auth_report_send_success == false )
+      {
+         log::error("SendReportHook - Failed to send report to %d\n", request_id_);
+      }
+
+      unsetActiveJob();
+
+      job_ptr->packetRouter().unsubscribe(
+         RsyncPacket::RsyncAuthorityService,
+         this
+      );
    }
-
-   unsetActiveJob();
-
-   job_ptr->packetRouter().unsubscribe( RsyncPacket::RsyncAuthorityService, this );
 }
 
 //-----------------------------------------------------------------------------

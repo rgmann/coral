@@ -57,12 +57,12 @@ inline std::string errorToString(RsyncError error)
       case kRsyncCommError: error_message = "Communication error"; break;
       case kRsyncNotSubscribed: error_message = "RsyncNode is not subscribed with a packet router"; break;
       case kRsyncInvalidJob: error_message = "Invalid job"; break;
-      case kRsyncJobCanceled: error_message = "Job canceled"; break;
-      case kRsyncInvalidInstruction: error_message = "Invalid assembly instruction"; break;
-      case kRsyncSegmentAccessError: error_message = "Segment asscess error"; break;
+      case kRsyncJobCanceled: error_message = "job canceled"; break;
+      case kRsyncInvalidInstruction: error_message = "invalid assembly instruction"; break;
+      case kRsyncSegmentAccessError: error_message = "segment asscess error"; break;
       case kRsyncIoError: error_message = "IO error"; break;
-      case kRsyncAssemblerInvalidChunkSize: error_message = "Invalid assembly chunk size"; break;
-      case kRsyncNoWorkersAvailable: error_message = "No worker available"; break;
+      case kRsyncAssemblerInvalidChunkSize: error_message = "invalid assembly chunk size"; break;
+      case kRsyncNoWorkersAvailable: error_message = "no worker available"; break;
       default: break;
    }
 

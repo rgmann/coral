@@ -21,6 +21,7 @@ public:
   RsyncJob( FileSystemInterface& file_sys_interface, RsyncPacketRouter& router );
   ~RsyncJob();
 
+  void setDescriptor( const JobDescriptor& descriptor );
   JobDescriptor& descriptor();
 
   JobReport& report();
