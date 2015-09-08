@@ -12,7 +12,6 @@
 #include "RsyncQueryResponse.h"
 #include "RsyncError.h"
 #include "RsyncJob.h"
-// #include "PacketSubscriber.h"
 #include "RsyncPacketSubscriber.h"
 #include "InstructionQueue.h"
 #include "SegmentQueue.h"
@@ -58,12 +57,7 @@ private:
   class ActiveJob {
   public:
 
-    // static const i64 JOB_TIMEOUT_MS = 2000;
-
     ActiveJob();
-
-    // void setJob( RsyncJob* job_ptr );
-    // RsyncJob* job() { return job_ptr_; };
 
     void setQueryResponse( const boost::uuids::uuid& expected_job_id, const void* data_ptr, ui32 length );
 
@@ -76,12 +70,6 @@ private:
     void signalJobEnd();
 
     bool waitJobEnd(int nTimeoutMs);
-
-    // bool lockIfActive();
-
-    // void unlock() { job_lock_.unlock(); };
-
-    // void pushInstruction( Instruction* pInstruction );
 
     bool timeout();
 
@@ -104,7 +92,6 @@ private:
   int mnSegmentTimeoutMs;
   boost::posix_time::ptime last_instruction_time_;
 
-  // int mRequestID;
 };
 
 } // End namespace rsync

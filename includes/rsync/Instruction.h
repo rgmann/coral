@@ -18,67 +18,62 @@ namespace rsync {
 class AssemblerState {
 public:
 
-  AssemblerState( SegmentAccessor& accessor );
+   AssemblerState( SegmentAccessor& accessor );
 
-  std::ofstream& stream();
+   std::ofstream& stream();
 
-  SegmentAccessor& segmentAccessor();
+   SegmentAccessor& segmentAccessor();
 
-  JobDescriptor*   descriptor();
-  void setDescriptor( JobDescriptor& job_descriptor );
+   JobDescriptor*   descriptor();
+   void setDescriptor( JobDescriptor& job_descriptor );
 
-  //
-  // Returns true if execution of an instruction failed or if the instruction
-  // stream has been cancelled by the Authority.
-  //
-  bool failed() const;
+   //
+   // Returns true if execution of an instruction failed or if the instruction
+   // stream has been cancelled by the Authority.
+   //
+   bool failed() const;
 
-  //
-  // Returns true if the instruction stream has been cancelled by the Authority.
-  //
-  bool cancelled() const;
+   //
+   // Returns true if the instruction stream has been cancelled by the Authority.
+   //
+   bool cancelled() const;
 
-  //
-  // Returns true if the instruction stream completed successfully.
-  //
-  bool done() const;
+   //
+   // Returns true if the instruction stream completed successfully.
+   //
+   bool done() const;
 
-  //
-  //
-  //
-  void reset();
+   //
+   // Reset reset assembler state in preparation for the next job.
+   //
+   void reset();
 
+   //
+   // Assembly completion status for active job.
+   //
+   RsyncError  status_;
 
-  RsyncError  status_;
-
-  bool done_;
+   //
+   // Flag indicating that active assembly job has been completed.
+   //
+   bool done_;
 
 private:
 
-  std::ofstream     stream_;
+   std::ofstream     stream_;
 
-  SegmentAccessor&  segment_accessor_;
+   SegmentAccessor&  segment_accessor_;
 
-  JobDescriptor*    job_descriptor_ptr_;
+   JobDescriptor*    job_descriptor_ptr_;
 };
 
 
 class RawInstruction {
 public:
 
-   //
-   //
-   //
+
    RawInstruction( const void* data_ptr, ui32 length );
-
-   //
-   //
-   //
    RawInstruction( ui32 type, ui32 length );
-
-   //
-   //
-   //
    ~RawInstruction();
 
    //
@@ -87,39 +82,15 @@ public:
    enum { kInvalidInstructionType = -1 };
    i32 type() const;
 
-   //
-   //
-   //
-   void* const data() const ;
 
-   //
-   //
-   //
+   void* const data() const ;
    ui32 length() const;
 
-   //
-   //
-   //
    ui32 payload_length() const;
-
-   //
-   //
-   //
    void* const payload_ptr() const;
 
-   //
-   //
-   //
    void allocate( ui32 length );
-
-   //
-   //
-   //
    bool valid() const;
-
-   //
-   //
-   //
    void dump();
 
 
@@ -133,18 +104,12 @@ private:
 
 };
 
+
 typedef  std::shared_ptr<RawInstruction> RawInstructionPtr;
 class Instruction {
 public:
 
-   //
-   //
-   //
    Instruction( i32 type, RawInstructionPtr instruction_ptr );
-
-   //
-   //
-   //
    virtual ~Instruction();
 
    //
@@ -155,7 +120,7 @@ public:
    //
    // 
    //
-   i32 type() const;
+   i32  type() const;
 
    //
    // Access raw instruction backing this Instruction instance.

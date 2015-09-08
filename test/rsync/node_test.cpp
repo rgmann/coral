@@ -26,7 +26,7 @@ protected:
 
    void SetUp()
    {
-      liber::log::level( liber::log::Verbose );
+      liber::log::level( liber::log::Warn );
 
       workgroup_ = new WorkerGroup();
       node_ = new RsyncNode( LOCAL_ROOT, *workgroup_ );
@@ -61,7 +61,7 @@ TEST_F( NodeTest, InvalidLocalSourcePath ) {
    boost::filesystem::path source( "invalid_dir/s_inst.cpp" );
    boost::filesystem::path destination( "d_inst.cpp" );
 
-   EXPECT_EQ( RsyncSourceFileNotFound, node_->sync(
+   EXPECT_EQ( kRsyncSourceFileNotFound, node_->sync(
       LocalResourcePath( destination ),
       LocalResourcePath( source ) ) );
 }
@@ -70,7 +70,7 @@ TEST_F( NodeTest, InvalidLocalDestinationPath ) {
    boost::filesystem::path source( "s_inst.cpp" );
    boost::filesystem::path destination( "invalid_dir/d_inst.cpp" );
 
-   EXPECT_EQ( RsyncDestinationFileNotFound, node_->sync(
+   EXPECT_EQ( kRsyncDestinationFileNotFound, node_->sync(
       LocalResourcePath( destination ),
       LocalResourcePath( source ) ) );
 }
@@ -101,7 +101,7 @@ TEST_F( NodeTest, RemoteAuthRequestTimeout ) {
       RemoteResourcePath( source ) ) );
 
    callback.sem_.take();
-   EXPECT_EQ( RsyncRemoteQueryTimeout, callback.error_ );
+   EXPECT_EQ( kRsyncRemoteQueryTimeout, callback.error_ );
 }
 
 
@@ -140,7 +140,7 @@ TEST_F( NodeTest, RemoteSourceDoesNotExist ) {
 
    callback.sem_.take();
 
-   EXPECT_EQ( RsyncSourceFileNotFound, callback.error_ );
+   EXPECT_EQ( kRsyncSourceFileNotFound, callback.error_ );
 
    remote_router.cancel();
    remote_router.unsubscribe( RSYNC_SUB_ID, &remote_node.subscriber() );

@@ -74,8 +74,8 @@ void AssemblerState::reset()
 // Class: Instruction
 //-----------------------------------------------------------------------------
 Instruction::Instruction( i32 type, RawInstructionPtr instruction_ptr )
-:  type_( type )
-,  instruction_ptr_( instruction_ptr )
+:  type_             ( type )
+,  instruction_ptr_  ( instruction_ptr )
 {
 }
 
@@ -118,8 +118,8 @@ RawInstructionPtr Instruction::instruction()
 // Class: RawInstruction
 //-----------------------------------------------------------------------------
 RawInstruction::RawInstruction( const void* data_ptr, ui32 length )
-:  data_ptr_ ( NULL )
-,  length_ ( 0 )
+:  data_ptr_   ( NULL )
+,  length_     ( 0 )
 {
    allocate( length );
    memcpy( data_ptr_, data_ptr, length_ );
@@ -129,9 +129,9 @@ RawInstruction::RawInstruction( ui32 type, ui32 length )
 :  data_ptr_ ( NULL )
 ,  length_ ( 0 )
 {
-   allocate( length + sizeof(i32) );
-   i32* type_ptr = (i32*)data_ptr_;
-   *type_ptr = type;
+   allocate( length + sizeof( i32 ) );
+   i32* type_ptr  = (i32*)data_ptr_;
+   *type_ptr      = type;
 }
 //-----------------------------------------------------------------------------
 RawInstruction::~RawInstruction()
@@ -166,7 +166,7 @@ ui32 RawInstruction::payload_length() const
 {
    ui32 payload_length = 0;
 
-   if ( length_ > sizeof(i32) )
+   if ( length_ > sizeof( i32 ) )
    {
       payload_length = length_ - sizeof(i32);
    }
@@ -183,9 +183,9 @@ void* const RawInstruction::data() const
 //-----------------------------------------------------------------------------
 void* const RawInstruction::payload_ptr() const
 {
-   if ( data_ptr_ && ( length_ > sizeof(i32) ) )
+   if ( data_ptr_ && ( length_ > sizeof( i32 ) ) )
    {
-      return ( (ui8*)data_ptr_ + sizeof(i32) );
+      return ( (ui8*)data_ptr_ + sizeof( i32 ) );
    }
 
    return NULL;
@@ -237,8 +237,10 @@ BeginInstruction::BeginInstruction(liber::rsync::JobDescriptor& descriptor )
 :  Instruction( BeginInstruction::Type, RawInstructionPtr() )
 {
    std::string packed = descriptor.serialize();
+
    instruction_ptr_ =
       RawInstructionPtr( new RawInstruction( Type, packed.size() ) );
+
    memcpy( instruction_ptr_->payload_ptr(), packed.data(), packed.size() );
 }
 
@@ -252,8 +254,6 @@ bool BeginInstruction::descriptor( liber::rsync::JobDescriptor& descriptor )
       success = descriptor.deserialize(
          (const char*)instruction_ptr_->payload_ptr(),
          instruction_ptr_->payload_length() );
-   // liber::log::status("BeginInstruction::descriptor: %d, %d, %d\n",
-   //   instruction_ptr_->length(), instruction_ptr_->payload_length(), success);
    }
 
    return success;
@@ -284,8 +284,9 @@ liber::rsync::Segment::ID SegmentInstruction::segmentId() const
 
    if ( instruction_ptr_ )
    {
-      Segment::ID* segment_id_ptr = (Segment::ID*)instruction_ptr_->payload_ptr();
-      segment_id = *segment_id_ptr;
+      // Segment::ID* segment_id_ptr = (Segment::ID*)instruction_ptr_->payload_ptr();
+      // segment_id = *segment_id_ptr;
+      segment_id = *( (Segment::ID*)instruction_ptr_->payload_ptr() );
    }
 
    return segment_id;

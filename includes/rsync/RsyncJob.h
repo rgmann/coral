@@ -36,6 +36,7 @@ public:
   void signalAssemblyDone();
   void signalAllDone();
 
+  bool done() const;
   bool waitDone(int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
 
   RsyncPacketRouter& packetRouter(){ return router_; };
@@ -54,7 +55,7 @@ private:
   RsyncPacketRouter& router_;
   FileSystemInterface& file_sys_interface_;
 
-  JobReport mReport;
+  JobReport report_;
 
   SegmentQueue mSegments;
   InstructionQueue mInstructions;

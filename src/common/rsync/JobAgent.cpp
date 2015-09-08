@@ -50,6 +50,7 @@ JobAgent::~JobAgent()
 
       if ( job_ptr )
       {
+         job_ptr->waitDone();
          releaseJob( job_ptr );
       }
    }
@@ -145,11 +146,19 @@ RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
          // from the perspective of the RsyncNode::sync call):
          //
          // Source |  Dest  | Description
-         // ---------------------------------------------------------
-         // remote | remote | Tell remote node to synchronize two of its resources.
+         // ---------------------------------------------------------------
+         // remote | remote | Tell remote node to synchronize two of its
+         //        |        | resources.
+         // ---------------------------------------------------------------
          // remote | local  | Not allowed; performed locally.
-         // local  | remote | Tell remote node to synchronize its resource to local resource.
+         //        |        |
+         // ---------------------------------------------------------------
+         // local  | remote | Tell remote node to synchronize its resource
+         //        |        | to local resource.
+         // ---------------------------------------------------------------
          // local  | local  | Not allowed; performed locally.
+         //        |        |
+         // ---------------------------------------------------------------
          if ( descriptor.getDestination().remote() )
          {
             descriptor.getDestination().setRemote( false );
@@ -173,7 +182,7 @@ RsyncError JobAgent::createJob( const char* data_ptr, ui32 size_bytes )
          {
             log::error("JobAgent::createJob - Bad remote job: %s\n",
                descriptor.getDestinationPath().c_str());
-            job_create_status = error(job_ptr, RsyncBadRemoteJob);
+            job_create_status = error(job_ptr, kRsyncBadRemoteJob);
          }
       }
       else
@@ -216,12 +225,17 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
    // registered with the RsyncPacketRouter.
    if ( job_create_status == kRsyncSuccess )
    {
-      if ( descriptor.getSource().remote() || descriptor.getDestination().remote() )
+      if ( descriptor.getSource().remote() ||
+           descriptor.getDestination().remote() )
       {
          if ( ( packet_router_.isSubscribed() == false ) ||
               ( this->isSubscribed() == false ) )
          {
-            log::error("JobAgent::createJob - Packet subscription not initialized. Can't complete remote job.\n");
+            log::error(
+               "JobAgent::createJob - "
+               "Packet subscription not initialized. "
+               "Can't complete remote job.\n");
+
             job_create_status = error( job_ptr, kRsyncNotSubscribed );
          }
       }
@@ -241,8 +255,11 @@ RsyncError JobAgent::createJob( RsyncJob* job_ptr )
          {
             if ( file_sys_interface_.touch( descriptor.getDestinationPath() ) == false )
             {
-               log::error("JobAgent::createJob - Failed to touch destination resource\n");
-               job_create_status = error(job_ptr, RsyncDestinationFileNotFound);
+               log::error(
+                  "JobAgent::createJob - "
+                  "Failed to touch destination resource\n" );
+               job_create_status = error(
+                  job_ptr, kRsyncDestinationFileNotFound );
             }
          }
       }
@@ -367,18 +384,29 @@ RsyncError JobAgent::error( RsyncJob* job_ptr, RsyncError error )
 }
 
 //----------------------------------------------------------------------------
+void JobAgent::releaseJobIfReleasable( RsyncJob* job_ptr )
+{
+   if ( job_ptr->done() || job_ptr->descriptor().isRemoteRequest() )
+   {
+      releaseJob( job_ptr );
+   }
+}
+
+//----------------------------------------------------------------------------
 void JobAgent::releaseJob( RsyncJob* job_ptr )
 {
    JobDescriptor& descriptor = job_ptr->descriptor();
 
-   log::status("JobAgent::releaseJob: %s\n", descriptor.isRemoteRequest() ? "REMOTE" : "LOCAL" );
+   log::debug(
+      "JobAgent::releaseJob: Releasing %s job\n",
+      descriptor.isRemoteRequest() ? "REMOTE" : "LOCAL" );
 
    // Notify the remote node that a job has been completed.
-   if ( descriptor.isRemoteRequest() && ( descriptor.getDestination().remote() == false ) )
+   if ( descriptor.isRemoteRequest() &&
+      ( descriptor.getDestination().remote() == false ) )
    {
       RemoteJobResult result( descriptor.uuid(), job_ptr->report() );
 
-      log::status("JobAgent::releaseJob: SENDING RSYNC_JOB_COMPLETE - %s\n", descriptor.isRemoteRequest() ? "REMOTE" : "LOCAL" );
       std::string packet_data = result.serialize();
       bool send_success = sendTo(
          RsyncPacket::RsyncJobAgent,
@@ -392,13 +420,11 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
       }
    }
 
-   // log::status("JobAgent::releaseJob: REMOVING %s\n", descriptor.isRemoteRequest() ? "REMOTE" : "LOCAL" );
 
    // Remote the job from the active job table.
    removeActiveJob( job_ptr );
 
    // Invoke the job-completion callback (if available).
-   // log::status("JobAgent::releaseJob: REMOVED %s\n", descriptor.isRemoteRequest() ? "REMOTE" : "LOCAL" );
    {
       boost::mutex::scoped_lock guard( callback_lock_ );
 
@@ -408,7 +434,6 @@ void JobAgent::releaseJob( RsyncJob* job_ptr )
       }
    }
 
-   // log::status("JobAgent::releaseJob: DONE %s\n", descriptor.isRemoteRequest() ? "REMOTE" : "LOCAL" );
 
    // Finally, the job can be deallocated.
    delete job_ptr;
@@ -428,7 +453,6 @@ bool JobAgent::processPacket( const void* data_ptr, ui32 length )
       switch ( packet.header()->type )
       {
          case RsyncPacket::RsyncJobRequest:
-            log::status("JobAgent::processPacket: RsyncJobRequest\n");
             createJob( (const char*)packet.data(), packet.header()->length );
             break;
 
@@ -443,7 +467,7 @@ bool JobAgent::processPacket( const void* data_ptr, ui32 length )
             break;
 
          default:
-            log::error("JobAgent - Unrecognized packet type");
+            // log::error("JobAgent - Unrecognized packet type");
             route_success = false;
             break;
       }
@@ -465,7 +489,8 @@ void JobAgent::processRemoteAuthRequest( const void* data_ptr, ui32 length )
       {
          boost::mutex::scoped_lock guard( active_jobs_lock_ );
 
-         JobTable::iterator job_iterator = active_jobs_.find( descriptor.uuid() );
+         JobTable::iterator job_iterator =
+            active_jobs_.find( descriptor.uuid() );
 
          if ( job_iterator != active_jobs_.end() )
          {
@@ -476,8 +501,8 @@ void JobAgent::processRemoteAuthRequest( const void* data_ptr, ui32 length )
             // Indicate that the job was remotely requested.
             descriptor.setRemoteRequest();
 
-            // This is an auth request, so by definition the destination must be
-            // remote.
+            // This is an auth request, so by definition the destination must
+            // be remote.
             descriptor.getDestination().setRemote( true );
 
             // If a remote JobAgent specifies a remote source, the source is
@@ -599,19 +624,17 @@ void JobAgent::finishRemoteJob( const char* data_ptr, ui32 size_bytes )
 
       if ( job_ptr )
       {
+         job_ptr->mergeReport( job_result.report() );
+
          if ( job_ptr->descriptor().getDestination().remote() )
          {
-            job_ptr->mergeReport( job_result.report() );
-
             if ( job_ptr->report().createJobStatus != kRsyncSuccess )
             {
                log::error("JobAgent::finishRemoteJob: Failed to create job - %s\n",
                   errorToString( job_ptr->report().createJobStatus ).c_str() );
             }
 
-            job_ptr->signalAllDone();
-
-            releaseJob( job_ptr );
+            releaseJobIfReleasable( job_ptr );
          }
       }
       else

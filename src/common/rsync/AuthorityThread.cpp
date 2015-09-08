@@ -11,7 +11,7 @@ using namespace liber::rsync;
 //----------------------------------------------------------------------------
 AuthorityThread::AuthorityThread( JobAgentPairQueue& queue )
 : IThread         ( "AuthorityThread" )
-, job_queue_( queue )
+, job_queue_      ( queue )
 {
 }
 

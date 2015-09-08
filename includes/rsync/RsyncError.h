@@ -10,21 +10,21 @@ enum RsyncError {
    kRsyncJobTableInsertError,
    kRsyncAllocationError,
    kRsyncBadDescriptor,
-   RsyncBadRemoteJob,
+   kRsyncBadRemoteJob,
 
    // Authority timed out waiting for segments from the destination file.
-   RsyncDestSegmentTimeout,
+   kRsyncDestSegmentTimeout,
 
-   RsyncDestinationFileNotFound,
-   RsyncSourceFileNotFound,
+   kRsyncDestinationFileNotFound,
+   kRsyncSourceFileNotFound,
 
    kRsyncDestinationNotWritable,
    kRsyncSourceNotReadable,
    kRsyncUnauthorizedRequest,
 
-   RsyncRemoteQueryTimeout,
+   kRsyncRemoteQueryTimeout,
    kRsyncRemoteQueryError,
-   RsyncRemoteJobTimeout,
+   kRsyncRemoteJobTimeout,
 
    kRsyncCommError,
    kRsyncNotSubscribed,
@@ -34,6 +34,7 @@ enum RsyncError {
    kRsyncInvalidInstruction,
    kRsyncSegmentAccessError,
    kRsyncIoError,
+   kRsyncMemAllocationFailed,
 
    kRsyncAssemblerInvalidChunkSize,
    kRsyncNoWorkersAvailable,
@@ -48,12 +49,12 @@ inline std::string errorToString(RsyncError error)
    switch (error)
    {
       case kRsyncSuccess: error_message = "Success"; break;
-      case RsyncDestSegmentTimeout: error_message = "RsyncDestSegmentTimeout"; break;
-      case RsyncDestinationFileNotFound: error_message = "Destination file not found"; break;
-      case RsyncSourceFileNotFound: error_message = "Source file not found"; break;
-      case RsyncRemoteQueryTimeout: error_message = "Remote job query timeout"; break;
+      case kRsyncDestSegmentTimeout: error_message = "kRsyncDestSegmentTimeout"; break;
+      case kRsyncDestinationFileNotFound: error_message = "Destination file not found"; break;
+      case kRsyncSourceFileNotFound: error_message = "Source file not found"; break;
+      case kRsyncRemoteQueryTimeout: error_message = "Remote job query timeout"; break;
       case kRsyncRemoteQueryError: error_message = "Remote query error"; break;
-      case RsyncRemoteJobTimeout:   error_message = "Remote job timeout"; break;
+      case kRsyncRemoteJobTimeout:   error_message = "Remote job timeout"; break;
       case kRsyncCommError: error_message = "Communication error"; break;
       case kRsyncNotSubscribed: error_message = "RsyncNode is not subscribed with a packet router"; break;
       case kRsyncInvalidJob: error_message = "Invalid job"; break;

@@ -28,6 +28,7 @@ public:
    RsyncError createJob( const ResourcePath& destination, const ResourcePath& source );
 
    void releaseJob( RsyncJob* job_ptr );
+   void releaseJobIfReleasable( RsyncJob* job_ptr );
 
    RsyncJob* nextJob();
 

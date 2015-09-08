@@ -33,7 +33,7 @@ JobDescriptor& RsyncJob::descriptor()
 //-----------------------------------------------------------------------------
 JobReport& RsyncJob::report()
 {
-  return mReport;
+  return report_;
 }
 
 //-----------------------------------------------------------------------------
@@ -41,12 +41,12 @@ void RsyncJob::mergeReport( const JobReport& report )
 {
   if ( mDescriptor.getDestination().remote() )
   {
-    mReport.destination = report.destination;
+    report_.destination = report.destination;
   }
 
   if ( mDescriptor.getSource().remote() )
   {
-    mReport.source = report.source;
+    report_.source = report.source;
   }
 }
 
@@ -66,18 +66,22 @@ InstructionQueue& RsyncJob::instructions()
 void RsyncJob::signalSegmentationDone()
 {
   mSegmentationDone.give();
+  report_.destination.segmentation.complete = true;
 }
 
 //-----------------------------------------------------------------------------
 void RsyncJob::signalAuthDone()
 {
   mAuthDone.give();
+  report_.source.segmentation.complete = true;
+  report_.source.authority.complete = true;
 }
 
 //-----------------------------------------------------------------------------
 void RsyncJob::signalAssemblyDone()
 {
   mAssemblyDone.give();
+  report_.destination.assembly.complete = true;
 }
 
 //-----------------------------------------------------------------------------
@@ -89,29 +93,67 @@ void RsyncJob::signalAllDone()
 }
 
 //-----------------------------------------------------------------------------
+bool RsyncJob::done() const
+{
+   bool job_done = true;
+
+   if ( mDescriptor.getDestination().remote() )
+   {
+      if ( mDescriptor.getSource().remote() == false )
+      {
+         job_done =  report_.source.segmentation.complete &&
+                     report_.source.authority.complete;
+
+         // If this job was initiate locally, then we also need to have
+         // received completion status from the remote node.
+         if ( mDescriptor.isRemoteRequest() == false )
+         {
+            job_done &= report_.destination.segmentation.complete &
+                        report_.destination.assembly.complete;
+         }
+         // log::status("RsyncJob::done: %s\n", job_done ? "DONE" : "NOT_DONE");
+      }
+   }
+   else
+   {
+      job_done &= report_.destination.segmentation.complete;
+      job_done &= report_.destination.assembly.complete;
+      job_done &= report_.source.segmentation.complete;
+      job_done &= report_.source.authority.complete;
+   }
+
+   return job_done;
+}
+
+//-----------------------------------------------------------------------------
 bool RsyncJob::waitDone(int nTimeoutMs)
 {
-  bool lbSuccess = false;
+   bool job_done = false;//done();
 
-  if (mSegmentationDone.take(nTimeoutMs))
-  {
-    if (mAuthDone.take(nTimeoutMs))
-    {
-      if ((lbSuccess = mAssemblyDone.take(nTimeoutMs)) == false)
+   if ( job_done == false )
+   {
+      if (mSegmentationDone.take(nTimeoutMs))
       {
-        log::error("RsyncJob::waitDone - Assembly timedout.\n");
-      }
-    }
-    else
-    {
-      log::error("RsyncJob::waitDone - Authoritization timedout.\n");
-    }
-  }
-  else
-  {
-    log::error("RsyncJob::waitDone - Segmentation timedout.\n");
-  }
+         if (mAuthDone.take(nTimeoutMs))
+         {
+            job_done = mAssemblyDone.take(nTimeoutMs);
 
-  return lbSuccess;
+            if ( job_done == false)
+            {
+               log::error("RsyncJob::waitDone - Assembly timedout.\n");
+            }
+         }
+         else
+         {
+            log::error("RsyncJob::waitDone - Authoritization timedout.\n");
+         }
+      }
+      else
+      {
+         log::error("RsyncJob::waitDone - Segmentation timedout.\n");
+      }
+   }
+
+  return job_done;
 }
 

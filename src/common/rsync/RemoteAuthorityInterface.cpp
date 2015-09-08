@@ -90,7 +90,7 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
    // Subscribe to the jobs packet subscriber.
    if ( job_ptr->packetRouter().subscribe(
       RsyncPacket::RsyncAuthorityInterface, this,
-      liber::netapp::kSubscriberModeReadWrite ) == false ) {
+      kSubscriberModeReadWrite ) == false ) {
       liber::log::error("RemoteAuthorityInterface::process: FAILED to register\n");
    }
 
@@ -212,7 +212,7 @@ RsyncError RemoteAuthorityInterface::waitForEndInstruction(int nTimeoutMs)
             boost::posix_time::microsec_clock::local_time() - last_instruction_time_;
          if ( deltaTime.total_milliseconds() >= JOB_TIMEOUT_MS )
          {
-            status = RsyncRemoteJobTimeout;
+            status = kRsyncRemoteJobTimeout;
             break;
          }
       }
@@ -226,8 +226,10 @@ void RemoteAuthorityInterface::sendAssemblyInstruction(
    const void* data_ptr,
    ui32        byte_count )
 {
-   // InstructionContainer* container_ptr = new InstructionContainer();
-   RawInstructionPtr instruction_ptr( new RawInstruction( data_ptr, byte_count ) );
+   RawInstructionPtr instruction_ptr( new RawInstruction(
+      data_ptr,
+      byte_count
+   ));
 
    if ( instruction_ptr )
    {
@@ -241,7 +243,8 @@ void RemoteAuthorityInterface::sendAssemblyInstruction(
          activeJob()->instructions().push( instruction_ptr );
 
          // Update last receive timestamp.
-         last_instruction_time_ = boost::posix_time::microsec_clock::local_time();
+         last_instruction_time_ =
+            boost::posix_time::microsec_clock::local_time();
       }
    }
    else
@@ -317,7 +320,7 @@ RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
          log::error(
             "%s - RSYNC remote query timeout.\n", BOOST_CURRENT_FUNCTION );
 
-         query_status = RsyncRemoteQueryTimeout;
+         query_status = kRsyncRemoteQueryTimeout;
          job_ptr->report().source.authority.status = query_status;
       }
    }

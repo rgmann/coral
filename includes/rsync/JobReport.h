@@ -14,6 +14,7 @@ public:
   SegmentationReport();
 
   RsyncError status;
+  bool complete;
 
   Timestamp begin;
   Timestamp end;
@@ -37,6 +38,7 @@ public:
   AssemblyReport();
 
   RsyncError status;
+  bool complete;
 
   ui32 segmentCount;
   ui32 chunkCount;
@@ -58,6 +60,7 @@ public:
   AuthorityReport();
 
   RsyncError status;
+  bool complete;
 
   ui32 receivedSegmentCount;
   ui32 matchedSegmentCount;
@@ -122,6 +125,7 @@ public:
    */
   bool success() const;
   void print(std::ostream&) const;
+  std::string toString() const;
 
 protected:
 

@@ -75,6 +75,7 @@ bool Authority::process(
    );
 
    authority_report_ptr_->authEnd.sample();
+
    addEndInstruction();
 
    authority_report_ptr_    = NULL;
@@ -102,10 +103,14 @@ void Authority::addEndInstruction()
 //-----------------------------------------------------------------------------
 void Authority::addInstruction( Instruction& instruction )
 {
-   // InstructionContainer* container_ptr = new InstructionContainer( instruction );
-   if ( instruction.valid() == false ) log::status("Authority::addInstruction: Invalid instruction\n");
-   instruction_receiver_ptr->push( instruction.instruction() );
-   // instruction.release();
+   if ( instruction.valid() )
+   {
+      instruction_receiver_ptr->push( instruction.instruction() );
+   }
+   else
+   {
+      log::status("Authority::addInstruction: Invalid instruction\n");
+   }
 }
 
 //-----------------------------------------------------------------------------
@@ -132,7 +137,6 @@ void Authority::flushChunkBuffer( int chunk_flush_count )
 
       // Allocate the chunk instruction and move the specified number of bytes
       // from the chunk buffer to the chunk instruction.
-      // ChunkInstruction* instruction_ptr = new ChunkInstruction( chunk_size_bytes );
       ChunkInstruction instruction( chunk_size_bytes );
       if ( instruction.data() )
       {

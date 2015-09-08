@@ -28,6 +28,29 @@ private:
   PacketQueue                 packet_receiver;
 };
 
+typedef boost::shared_ptr<AsioTcpPacketRouter> AsioTcpPacketRouterPtr;
+
+class AsioTcpServer {
+public:
+
+  AsioTcpServer( boost::asio::io_service& io_service, const tcp::endpoint& endpoint );
+  virtual ~AsioTcpServer();
+
+  void startAccept();
+
+  void handleAccept( AsioTcpPacketRouterPtr session, const boost::system::error_code& error );
+
+
+private:
+
+   boost::asio::io_service& io_service_;
+
+   tcp::acceptor acceptor_;
+};
+
+typedef boost::shared_ptr<AsioRsyncServer> AsioRsyncServerPtr;
+
+
 }
 }
 

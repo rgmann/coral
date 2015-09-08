@@ -16,8 +16,8 @@ using namespace liber::netapp;
 //-----------------------------------------------------------------------------
 RemoteAuthorityService::RemoteAuthorityService()
 :  RsyncPacketSubscriber( true )
-,  user_handler_ptr_(NULL)
-,  request_id_(RsyncPacket::RsyncAuthorityInterface)
+,  user_handler_ptr_( NULL )
+,  request_id_( RsyncPacket::RsyncAuthorityInterface )
 {
 }
 
@@ -100,7 +100,7 @@ bool RemoteAuthorityService::processPacket( const void* data_ptr, ui32 length )
    }
    else
    {
-    log::debug("RemoteAuthorityService::put - failed to unpack packet\n");
+      log::debug("RemoteAuthorityService::put - failed to unpack packet\n");
    }
 
    return success;

@@ -25,12 +25,11 @@ RsyncError JobRequestCallback::canFulfill(
    {
       if ( descriptor.getSource().remote() == false )
       {
-         bool resource_exists = file_sys.exists(
-            descriptor.getSourcePath() );
+         bool resource_exists = file_sys.exists( descriptor.getSourcePath() );
 
          if ( resource_exists == false )
          {
-            status = RsyncSourceFileNotFound;
+            status = kRsyncSourceFileNotFound;
          }
          else
          {
@@ -51,7 +50,7 @@ RsyncError JobRequestCallback::canFulfill(
 
          if ( ( resource_exists == false ) && ( create_permitted_ == false ) )
          {
-            status = RsyncDestinationFileNotFound;
+            status = kRsyncDestinationFileNotFound;
          }
          else
          {

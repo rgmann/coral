@@ -20,10 +20,11 @@ public:
   void call(const JobDescriptor& job, const JobReport& report)
   {
     liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
-    // liber::log::flush();
 
-    // report.print(std::cout);
-    // std::cout << "\n\n";
+    // if ( report.source.authority.complete && (report.source.authority.status != kRsyncSuccess ))
+    // {
+    //   liber::log::status("%s Report:\n%s\n", mpName, report.toString().c_str() );
+    // }
 
     mSem.give();
   }
@@ -185,7 +186,7 @@ public:
 
     void SetUp()
     {
-      liber::log::level( liber::log::Verbose );
+      liber::log::level( liber::log::Warn );
 
       DeleteContents( "./test_root/client" );
       DeleteContents( "./test_root/server" );

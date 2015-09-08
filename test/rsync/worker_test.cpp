@@ -21,11 +21,8 @@ public:
 
   void call(const JobDescriptor& job, const JobReport& report)
   {
-    liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
-    // liber::log::flush();
-
-    // report.print(std::cout);
-    // std::cout << "\n\n";
+    // liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
+    liber::log::status("%s Report:\n%s\n", mpName, report.toString().c_str() );
 
     mSem.give();
   }
@@ -266,14 +263,14 @@ TEST_F( WorkerTest, MultiWorkerPipelineTest ) {
    pathIt = operations.begin();
    for (; pathIt != operations.end(); pathIt++ )
    {
-      std::cout << "Waiting for " << pathIt->path << std::endl;
+      liber::log::status( "Waiting for %s\n", pathIt->path.c_str() );
       if ( pathIt->status == kRsyncSuccess ) EXPECT_EQ( true, clientCallback.mSem.take() );
-      std::cout << "Checking " << pathIt->path << std::endl;
+      liber::log::status( "Checking %s\n", pathIt->path.c_str() );
       EXPECT_EQ( true, CheckEqual(
          boost::filesystem::path( REMOTE_ROOT ) / pathIt->path,
          boost::filesystem::path( LOCAL_ROOT ) / pathIt->path ) );
 
-      std::cout << "Done checking " << pathIt->path << std::endl;
+      liber::log::status( "Done checking %s\n", pathIt->path.c_str() );
    }
 
    ASSERT_EQ( true, clientRouter.unsubscribe(RSYNC_SUB_ID, &clientNode.subscriber() ) );

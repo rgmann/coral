@@ -36,17 +36,16 @@ void RemoteAuthorityServiceThread::run( const bool& shutdown )
 
             if ( job_ptr->descriptor().isRemoteRequest() )
             {
-               log::status("RemoteAuthorityServiceThread::run: FINISHED REMOTE REQUEST\n");
+               log::debug("RemoteAuthorityServiceThread::run: FINISHED REMOTE REQUEST\n");
             }
             else
             {
-               log::status("RemoteAuthorityServiceThread::run: FINISHED LOCAL REQUEST\n");
+               log::debug("RemoteAuthorityServiceThread::run: FINISHED LOCAL REQUEST\n");
             }
 
-            if ( job_ptr->descriptor().isRemoteRequest() )
-            {
-               agent_ptr->releaseJob( job_ptr );
-            }
+            job_ptr->signalAuthDone();
+
+            agent_ptr->releaseJobIfReleasable( job_ptr );
          }
       }
    }

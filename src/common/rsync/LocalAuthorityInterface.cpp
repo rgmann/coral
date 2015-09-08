@@ -1,3 +1,4 @@
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "Authority.h"
 #include "Log.h"
 #include "LocalAuthorityInterface.h"
@@ -85,7 +86,7 @@ void LocalAuthorityInterface::processJob(
            job_ptr->descriptor().getSource().path().string().c_str()
          );
 
-         job_status = RsyncSourceFileNotFound;
+         job_status = kRsyncSourceFileNotFound;
       }
    }
 
@@ -94,10 +95,7 @@ void LocalAuthorityInterface::processJob(
       EndInstruction instruction;
       instruction.cancel( job_status );
 
-      // InstructionContainer* container_ptr =
-      //    new InstructionContainer( instruction );
       instruction_receiver.push( instruction.instruction() );
-      // instruction.release();
    }
 }
 
@@ -140,7 +138,7 @@ RsyncError LocalAuthorityInterface::hashSegments( RsyncJob* job_ptr )
                     "Timed out waiting for segment (%d).\n",
                     received_segment_count);
 
-         hash_status = RsyncDestSegmentTimeout;
+         hash_status = kRsyncDestSegmentTimeout;
 
          // Stop the hash-insert loop as no more segments will be received.
          hash_insert_done = true;
