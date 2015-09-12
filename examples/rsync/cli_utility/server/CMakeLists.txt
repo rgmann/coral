@@ -33,7 +33,7 @@ add_executable( rsync_server rsync_server.cpp )
 
 target_link_libraries( rsync_server rsync )
 target_link_libraries( rsync_server base )
-target_link_libraries( rsync_server netapp_server )
+target_link_libraries( rsync_server netapp_common )
 target_link_libraries( rsync_server ${Boost_LIBRARIES})
 target_link_libraries( rsync_server gtest )
 target_link_libraries( rsync_server pthread )
