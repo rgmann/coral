@@ -10,7 +10,8 @@
 #include <boost/asio.hpp>
 #include "Log.h"
 #include "ArgParser.h"
-#include "AsioTcpPacketRouter.h"
+// #include "AsioTcpPacketRouter.h"
+#include "AsioTcpServer.h"
 #include "RsyncNode.h"
 
 #define  RSYNC_SUB_ID  ( 1 )
@@ -128,7 +129,7 @@ public:
 
 protected:
 
-   void afterAccept()
+   void afterConnect()
    {
       client_manager_.join( callback_ );
    }

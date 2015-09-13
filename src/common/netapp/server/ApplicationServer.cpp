@@ -37,23 +37,10 @@ bool ApplicationServer
 }
 
 //-----------------------------------------------------------------------------
-bool ApplicationServer::stop()
+void ApplicationServer::stop()
 {
-  bool lbSuccess = true;
-
-  if (!mListener.join())
-  {
-    log::error("ApplicationServer: Failed to stop ConnectionListener.\n");
-    lbSuccess = false;
-  }
-
-  if (!mNodeManager.join())
-  {
-    log::error("ApplicationServer: Failed to stop WorkerNodeManager.\n");
-    lbSuccess = false;
-  }
-
-  return lbSuccess;
+  mListener.cancel( true );
+  mNodeManager.cancel( true );
 }
 
 

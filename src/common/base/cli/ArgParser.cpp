@@ -32,29 +32,35 @@ ArgParser::~ArgParser()
 //------------------------------------------------------------------------------
 bool ArgParser::addArg(const std::string &arg)
 {
-   Argument* l_pArg = NULL;
+   Argument* argument_ptr = NULL;
    
-   l_pArg = Argument::Create(arg);
-   
-   if (!l_pArg)
+   if ( ( argument_ptr = Argument::Create( arg ) ) != NULL )
    {
-      return false;
+      m_ArgVector.push_back( argument_ptr );
+
+      std::pair<std::string,Argument*> primary_pair =
+         std::make_pair( argument_ptr->primary(), argument_ptr );
+
+      m_PrimaryMap.insert( primary_pair );
+
+      if ( argument_ptr->alt().empty() == false )
+      {
+         std::pair<std::string,Argument*> alt_pair =
+            std::make_pair( argument_ptr->alt(), argument_ptr );
+
+         m_AltMap.insert( alt_pair );
+      }
+
+      if ( argument_ptr->name().empty() == false )
+      {
+         std::pair<std::string,Argument*> name_pair =
+            std::make_pair( argument_ptr->name(), argument_ptr );
+
+         m_NameMap.insert( name_pair );
+      }
    }
    
-   m_ArgVector.push_back(l_pArg);
-   m_PrimaryMap[l_pArg->primary()] = l_pArg;
-   
-   if (!l_pArg->alt().empty())
-   {
-      m_AltMap[l_pArg->alt()] = l_pArg;
-   }
-   
-   if (!l_pArg->name().empty())
-   {
-      m_NameMap[l_pArg->name()] = l_pArg;
-   }
-   
-   return true;
+   return ( argument_ptr != NULL );
 }
 
 //------------------------------------------------------------------------------
@@ -75,10 +81,10 @@ bool ArgParser::parse(const char* argv[], int argc)
    resetArgs();
    
    // Start at one to skip over program name
-   for (int l_nArg = 1; l_nArg < argc; l_nArg++)
+   for ( int argument_index = 1; argument_index < argc; ++argument_index )
    {
-      bool l_bMoreArgsAvail = ((l_nArg + 1) < argc);
-      l_sArgStr = std::string(argv[l_nArg]);
+      bool more_arguments_available = ( ( argument_index + 1 ) < argc );
+      l_sArgStr = std::string(argv[argument_index]);
       
       // Search secondary keys if the arg starts with "--"
       if (l_sArgStr.find("--") == 0)
@@ -123,7 +129,7 @@ bool ArgParser::parse(const char* argv[], int argc)
       // Currently all option type args require a value to be specified.
       if (l_pArg->type() == Argument::ArgOption)
       {
-         if (!l_bMoreArgsAvail)
+         if (!more_arguments_available)
          {
             // This argument requires a value, but there are no more
             // argument tokens available.  Therefore, log error and
@@ -135,7 +141,7 @@ bool ArgParser::parse(const char* argv[], int argc)
          }
 
          // Set the value for the argument.
-         l_pArg->value(std::string(argv[++l_nArg]));
+         l_pArg->value(std::string(argv[++argument_index]));
          
          // Validate the parameter value type.
          if (!ValidType(l_pArg->valtype(), l_pArg->value()))

@@ -7,9 +7,10 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 AsioTcpPacketRouter::AsioTcpPacketRouter( boost::asio::io_service& io_service )
-:  PacketRouter  ( this )
-,  io_service_   ( io_service )
-,  socket_       ( io_service )
+   : PacketRouter  ( this )
+   , io_service_   ( io_service )
+   , socket_       ( io_service )
+   , connected_    ( false )
 {
    memset( &read_packet_header_, 0, sizeof( read_packet_header_ ) );
 }
@@ -28,8 +29,10 @@ boost::asio::ip::tcp::socket& AsioTcpPacketRouter::socket()
 //-----------------------------------------------------------------------------
 void AsioTcpPacketRouter::start()
 {
+   connected_ = true;
+
    // Invoke on-accept callback.
-   afterAccept();
+   afterConnect();
 
    startReadHeader();
 }
@@ -41,6 +44,12 @@ void AsioTcpPacketRouter::close()
       &AsioTcpPacketRouter::doClose,
       shared_from_this()
    ));
+}
+
+//-----------------------------------------------------------------------------
+bool AsioTcpPacketRouter::connected() const
+{
+   return connected_;
 }
 
 //-----------------------------------------------------------------------------
@@ -109,9 +118,12 @@ void AsioTcpPacketRouter::handleReadHeader(const boost::system::error_code& erro
 //-----------------------------------------------------------------------------
 void AsioTcpPacketRouter::handleReadBody(const boost::system::error_code& error)
 {
-   if (!error)
+   if ( !error )
    {
-      publish( read_packet_.data()->type, read_packet_.dataPtr(), read_packet_.data()->length );
+      publish(
+         read_packet_.data()->type,
+         read_packet_.dataPtr(),
+         read_packet_.data()->length );
 
       read_packet_.destroy();
 
@@ -119,6 +131,37 @@ void AsioTcpPacketRouter::handleReadBody(const boost::system::error_code& error)
    }
    else
    {
+      doClose();
+   }
+}
+
+//-----------------------------------------------------------------------------
+void AsioTcpPacketRouter::handleConnect(
+   const boost::system::error_code& error )
+{
+   if ( !error )
+   {
+      start();
+   }
+}
+
+//-----------------------------------------------------------------------------
+void AsioTcpPacketRouter::handleConnectTimeout(
+   const boost::system::error_code& error)
+{
+   if ( error.value() != boost::system::errc::success )
+   {
+      log::debug(
+         "AsioTcpPacketRouter::handleConnectTimeout: "
+         "ERROR - %s\n", error.message().c_str() );
+   }
+
+   if ( error.value() != boost::system::errc::operation_canceled )
+   {
+      log::debug(
+         "AsioTcpPacketRouter::handleConnectTimeout: "
+         "Timed out establishing connection\n" );
+
       doClose();
    }
 }
@@ -139,7 +182,11 @@ void AsioTcpPacketRouter::writePacket( const PacketContainer* container_ptr )
    //       packet_ptr->data()->length,
    //       packet_ptr->data()->type );
 
-   io_service_.post( boost::bind( &AsioTcpPacketRouter::doWrite, shared_from_this(), packet_ptr ) );
+   io_service_.post( boost::bind(
+      &AsioTcpPacketRouter::doWrite,
+      shared_from_this(),
+      packet_ptr
+   ));
 }
 
 //-----------------------------------------------------------------------------
@@ -205,48 +252,7 @@ void AsioTcpPacketRouter::doClose()
 {
    beforeClose();
 
+   connected_ = false;
+
    socket_.close();
-}
-
-//-----------------------------------------------------------------------------
-AsioTcpServer::AsioTcpServer(
-   boost::asio::io_service&   io_service,
-   const tcp::endpoint&       endpoint )
-:  io_service_( io_service )
-,  acceptor_  ( io_service, endpoint )
-{
-}
-
-//-----------------------------------------------------------------------------
-AsioTcpServer::~AsioTcpServer()
-{
-}
-
-//-----------------------------------------------------------------------------
-void AsioTcpServer::startAccept()
-{
-   AsioTcpPacketRouterPtr connection = createRouter( io_service_ ) ;
-
-   acceptor_.async_accept(
-      connection->socket(),
-      boost::bind(
-        &AsioTcpServer::handleAccept,
-        this,
-        connection,
-        boost::asio::placeholders::error
-      )
-   );
-}
-
-//-----------------------------------------------------------------------------
-void AsioTcpServer::handleAccept(
-   AsioTcpPacketRouterPtr        connection,
-   const boost::system::error_code& error )
-{
-   if ( !error )
-   {
-      connection->start();
-   }
-
-   startAccept();
 }

@@ -16,7 +16,7 @@ public:
 
   const Timestamp& lastKeepaliveSendTime() const;
 
-  bool put(const char* pData, ui32 nLength);
+  bool put( DestinationID destination, const void* pData, ui32 nLength);
 
 private:
 

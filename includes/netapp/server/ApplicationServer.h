@@ -17,7 +17,7 @@ public:
   bool start(int nPort, WorkerCreator* pCreator,
              WorkerNodeComparator::Mode mode = WorkerNodeComparator::FewestWorkersFirst);
 
-  bool stop();
+  void stop();
 
 private:
 

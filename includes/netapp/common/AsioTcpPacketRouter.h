@@ -11,7 +11,6 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/asio.hpp>
-// #include "IThread.h"
 #include "NetAppPacket.h"
 #include "PacketRouter.h"
 #include "PacketReceiverHook.h"
@@ -19,10 +18,9 @@
 namespace liber {
 namespace netapp {
 
-
 class AsioTcpPacketRouter :
-public liber::netapp::PacketRouter,
-public liber::netapp::PacketReceiverHook,
+public PacketRouter,
+public PacketReceiverHook,
 public boost::enable_shared_from_this<AsioTcpPacketRouter>  {
 public:
 
@@ -36,25 +34,22 @@ public:
 
    void close();
 
+   bool connected() const;
 
 protected:
 
-   virtual void afterAccept() {}
+   virtual void afterConnect() {}
 
    virtual void beforeClose() {}
 
    virtual bool call( PacketContainer* container_ptr );
 
 
-private:
+protected:
 
-   void handleConnect( const boost::system::error_code& error )
-   {
-      if ( !error )
-      {
-         start();
-      }
-   }
+   void handleConnect( const boost::system::error_code& error );
+
+   void handleConnectTimeout(const boost::system::error_code&);
 
    void writePacket( const PacketContainer* container_ptr );
 
@@ -70,7 +65,6 @@ private:
 
    void doClose();
 
-   friend class AsioTcpClient;
 
 private:
 
@@ -80,74 +74,13 @@ private:
    NetAppPacket                read_packet_;
    std::deque<NetAppPacket*>   write_packets_;
    boost::mutex                lock_;
+   bool connected_;
 };
 
 typedef boost::shared_ptr<AsioTcpPacketRouter> AsioTcpPacketRouterPtr;
 
-
-class AsioTcpClient {
-public:
-
-   AsioTcpClient( boost::asio::io_service& io_service )
-      :  resolver_( io_service ) {}
-
-   ~AsioTcpClient() {}
-
-   void connect( AsioTcpPacketRouterPtr router, const std::string& host, const std::string port )
-   {
-      boost::asio::ip::tcp::resolver::query query( host.c_str(), port );
-      boost::asio::ip::tcp::resolver::iterator iterator = resolver_.resolve(query);
-
-      boost::asio::async_connect(
-         router->socket(),
-         iterator,
-         boost::bind(
-           &AsioTcpPacketRouter::handleConnect,
-           router,
-           boost::asio::placeholders::error
-         )
-      );
-   }
-
-private:
-
-   boost::asio::ip::tcp::resolver resolver_;
-    
-};
-
-
-class AsioTcpServer {
-public:
-
-   AsioTcpServer(
-      boost::asio::io_service&              io_service,
-      const boost::asio::ip::tcp::endpoint& endpoint );
-   virtual ~AsioTcpServer();
-
-   void startAccept();
-
-
-protected:
-
-   virtual AsioTcpPacketRouterPtr createRouter( boost::asio::io_service& io_service ) = 0;
-
-private:
-
-   void handleAccept( AsioTcpPacketRouterPtr session, const boost::system::error_code& error );
-
-private:
-
-   boost::asio::io_service& io_service_;
-
-   boost::asio::ip::tcp::acceptor acceptor_;
-
-};
-
-typedef boost::shared_ptr<AsioTcpServer> AsioTcpServerPtr;
-
-
-}
-}
+} // namespace netapp
+} // namespace liber
 
 
 #endif // ASIO_TCP_PACKET_ROUTER_H

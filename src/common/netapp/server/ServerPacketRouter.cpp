@@ -30,21 +30,23 @@ bool ServerPacketRouter::route(NetAppPacket* pPacket)
 
   if (pPacket)
   {
-    int lSubscriberId = pPacket->data()->type;
+    DestinationID destination_id = pPacket->data()->type;
+    publish( destination_id, (char*)pPacket->dataPtr(),
+                                      pPacket->data()->length );
 
-    lbSuccess = hasSubscriber(lSubscriberId);
-    if (lbSuccess)
-    {
-      lpSubscriber = getSubscriber(lSubscriberId);
-      lbSuccess = (lpSubscriber != NULL);
+//     lbSuccess = hasSubscriber(lSubscriberId);
+//     if (lbSuccess)
+//     {
+//       lpSubscriber = getSubscriber(lSubscriberId);
+//       lbSuccess = (lpSubscriber != NULL);
 
-      if (lbSuccess)
-      {
-//        printf("ServerPacketRouter::route: id = %d, length = %u\n", lSubscriberId, pPacket->data()->length);
-        lbSuccess = lpSubscriber->put((char*)pPacket->dataPtr(),
-                                      pPacket->data()->length);
-      }
-    }
+//       if (lbSuccess)
+//       {
+// //        printf("ServerPacketRouter::route: id = %d, length = %u\n", lSubscriberId, pPacket->data()->length);
+//         lbSuccess = lpSubscriber->put((char*)pPacket->dataPtr(),
+//                                       pPacket->data()->length);
+//       }
+//     }
   }
 
   return lbSuccess;

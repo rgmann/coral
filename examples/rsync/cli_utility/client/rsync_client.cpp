@@ -8,7 +8,8 @@
 #include <boost/thread/locks.hpp>
 #include "Log.h"
 #include "ArgParser.h"
-#include "AsioTcpPacketRouter.h"
+// #include "AsioTcpPacketRouter.h"
+#include "AsioTcpClient.h"
 #include "RsyncNode.h"
 #include "InteractiveCommandRouter.h"
 
@@ -43,10 +44,11 @@ public:
 class ClientAttributes {
 public:
 
-   ClientAttributes( RsyncNode* node_ptr )
+   ClientAttributes( RsyncNode* node_ptr, AsioTcpClientRouterPtr client )
       : node_ptr_ ( node_ptr )
       , semaphore_( 0 )
       , callback_ ( "job_callback", semaphore_ )
+      , client_( client )
    {
       node_ptr_->setJobCompletionCallback( &callback_ );
    }
@@ -54,12 +56,13 @@ public:
 
    bool is_connected() const
    {
-      return true;
+      return client_->connected();
    }
 
    RsyncNode*  node_ptr_;
    CountingSem semaphore_;
    CompletionCallback callback_;
+   AsioTcpClientRouterPtr  client_;
 };
 
 class PushCommand : public InteractiveCommand {
@@ -110,7 +113,27 @@ public:
 
 private:
 
-  ClientAttributes& attributes_;
+   ClientAttributes& attributes_;
+};
+
+class ConnectionStatusCommand : public InteractiveCommand {
+public:
+
+   ConnectionStatusCommand( ClientAttributes& attributes )
+      : InteractiveCommand( "status", "Check connection status" )
+      , attributes_( attributes ) {}
+
+   void process( const liber::cli::ArgumentList& args ) {
+      if ( attributes_.is_connected() ) {
+         liber::log::status("Connected to server.\n");
+      } else {
+         liber::log::status("Not connected to server.\n");
+      }
+   }
+
+private:
+
+   ClientAttributes& attributes_;
 };
 
 
@@ -135,32 +158,37 @@ int main(int argc, char* argv[])
       try
       {
          boost::asio::io_service io_service;
-         AsioTcpPacketRouterPtr router( new AsioTcpPacketRouter( io_service ) );
-         AsioTcpClient client( io_service );
+         // AsioTcpPacketRouterPtr router( new AsioTcpPacketRouter( io_service ) );
+         // AsioTcpClient client( io_service );
+         AsioTcpClientRouterPtr client_router( new AsioTcpClientRouter( io_service ) );
 
-         client.connect( router, host_name, host_port );
+         // client.connect( router, host_name, host_port );
+         client_router->connect( host_name, host_port, AsioTcpClientRouter::kWaitForever );
 
-         boost::thread t(boost::bind(&boost::asio::io_service::run, &io_service));
+         boost::thread t(boost::bind( &boost::asio::io_service::run, &io_service));
 
          WorkerGroup work_group;
          RsyncNode* rsync_node_ptr = new RsyncNode( boost::filesystem::current_path() / "rsync_client_root", work_group );
-         ClientAttributes attributes( rsync_node_ptr );
+         ClientAttributes attributes( rsync_node_ptr, client_router );
 
-         router->subscribe( RSYNC_SUB_ID, &rsync_node_ptr->subscriber() );
+         client_router->subscribe( RSYNC_SUB_ID, &rsync_node_ptr->subscriber() );
 
          PushCommand push_command( attributes );
          PullCommand pull_command( attributes );
+         ConnectionStatusCommand status_command( attributes );
 
          InteractiveCommandRouter command_router;
          command_router.add( &push_command );
          command_router.add( &pull_command );
+         command_router.add( &status_command );
 
          command_router.run();
 
+         client_router->unsubscribe( RSYNC_SUB_ID, &rsync_node_ptr->subscriber() );
 
-         router->unsubscribe( RSYNC_SUB_ID, &rsync_node_ptr->subscriber() );
+         client_router->close();
 
-         router->close();
+         t.interrupt();
          t.join();
 
          rsync_node_ptr->unsetJobCompletionCallback();

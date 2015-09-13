@@ -14,7 +14,7 @@ ServerConnectionStatus::~ServerConnectionStatus()
 }
 
 //-----------------------------------------------------------------------------
-bool ServerConnectionStatus::put(const char* pData, ui32 nLength)
+bool ServerConnectionStatus::put(DestinationID destination, const void* pData, ui32 nLength)
 {
   bool lbSuccess = false;
 
@@ -29,7 +29,9 @@ bool ServerConnectionStatus::put(const char* pData, ui32 nLength)
 
       // Send a keepalive acknowledgement.
       mKeepalive.data()->count++;
-      sendPacket(&mKeepalive);
+
+      // TODO: Convert to new architecture.
+      // sendPacket(&mKeepalive);
     }
   }
 

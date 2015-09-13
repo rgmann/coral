@@ -29,7 +29,7 @@ bool ApplicationWorker::initialize(TcpSocket* pSocket)
   mpSocket = pSocket;
 
   // Register the keepalive subscriber.
-  lbSuccess &= mRouter.addSubscriber(ConnectionStatus::SubscriberId,
+  lbSuccess &= mRouter.subscribe(ConnectionStatus::SubscriberId,
                                      &mConnectionStatus);
 
   //
@@ -72,7 +72,7 @@ void ApplicationWorker::destroy()
   }
 
   // Unregister the keepalive subscriber.
-  mRouter.removeSubscriber(ConnectionStatus::SubscriberId);
+  mRouter.unsubscribe(ConnectionStatus::SubscriberId, &mConnectionStatus );
 
   derivedDestroy();
 }
@@ -217,12 +217,12 @@ bool ApplicationWorker::writePacket(int nTimeoutMs)
     PacketContainer* lpContainer = NULL;
     if ((lpContainer = mOutQueue.pop(nTimeoutMs)) != NULL)
     {
-      NetAppPacket packet(lpContainer->mDestinationID,
-                          lpContainer->mpPacket->allocatedSize());
+      NetAppPacket packet(lpContainer->destination_id_,
+                          lpContainer->packet_ptr_->allocatedSize());
 
       memcpy(packet.dataPtr(),
-             lpContainer->mpPacket->basePtr(),
-             lpContainer->mpPacket->allocatedSize());
+             lpContainer->packet_ptr_->basePtr(),
+             lpContainer->packet_ptr_->allocatedSize());
 
       SocketStatus lStatus;
 
