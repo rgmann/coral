@@ -3,8 +3,10 @@
 
 #include <string>
 
-class Argument
-{
+namespace liber {
+namespace cli {
+
+class Argument {
 public:
    
    enum ArgType {
@@ -47,10 +49,6 @@ public:
    
    void  setId(ArgField field, const std::string &value);
    
-   //bool  setDefault(int defaultVal = 0);
-//   bool  setDefault(std::string &defaultVal = "");
-//   bool  setDefault(float defaultVal = 0.0);
-   
    void        name(const std::string &val){ m_sName = val; };
    std::string name(){ return m_sName; };
    
@@ -59,6 +57,7 @@ public:
    
    void        alt(const std::string &val){ m_sAltId = val; };
    std::string alt(){ return m_sAltId; };
+   bool        hasAlt() const { return ( m_sAltId.empty() == false ); }
    
    void        description(const std::string &val){ m_sDescription = val; };
    std::string description(){ return m_sDescription; };
@@ -85,12 +84,9 @@ private:
       ArgFound
    };
    
-   void  initialize();
    
    bool  parse(const std::string &definition);
-   
-   std::string generate();
-   
+      
    void        status(ArgStatus val){ m_Status = val; };
    ArgStatus   status(){ return m_Status; };
    
@@ -113,5 +109,8 @@ private:
    
    friend class ArgParser;
 };
+
+} // namespace cli
+} // namespace liber
 
 #endif // ARGUMENT_H

@@ -17,8 +17,8 @@ IThread::IThread( const std::string& name )
 //--------------------------------------------------------------------
 IThread::~IThread()
 {
-   thread_.interrupt();
-   thread_.join();
+   // thread_.interrupt();
+   // thread_.join();
 }
 
 //--------------------------------------------------------------------

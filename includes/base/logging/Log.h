@@ -77,17 +77,17 @@ namespace log    {
      */
     LogMessage(LogLevel level,
                const char* header,
-               const char* pData, ui32 nBytes,
-               ui32 nBytesPerRow);
+               const char* data_ptr, ui32 length,
+               ui32 max_line_length);
 
     /**
      * Convert the message to a string. The message formate can be configured.
      */
     std::string toString(ui32 format = log::DisplayAll) const;
 
-    LogLevel    mLevel;
-    std::string mMessage;
-    Timestamp   mTimestamp;
+    LogLevel    log_level_;
+    std::string message_;
+    Timestamp   timestamp_;
   };
 
 
@@ -143,19 +143,19 @@ namespace log    {
 
   private:
 
-    ui32 mConsoleLogOpts;
+    ui32 console_log_options_;
 
-    LogLevel mLevel;
-    Queue<LogMessage> mMessages;
+    LogLevel log_level_;
+    Queue<LogMessage> messages_;
 
-    bool mbAllowMessages;
+    bool          allow_messages_;
 
-    boost::mutex file_attribute_lock_;
-    bool mbLogFileEnabled;
-    std::string   mPath;
-    std::string   mSuffix;
-    std::ofstream mFile;
-    ui32 mnFileSizeBytes;
+    boost::mutex  file_attribute_lock_;
+    bool          log_file_enabled_;
+    std::string   path_;
+    std::string   suffix_;
+    std::ofstream log_file_;
+    ui32          current_log_file_size_;
   };
 
   // Global Logger instance
@@ -200,7 +200,7 @@ namespace log    {
   void error(const char* format, ...);
   void warn(const char* format, ...);
   void debug(const char* format, ...);
-  void mem_dump(const char* header, const char* pData, ui32 nBytes, ui32 nBytesPerRow = 16);
+  void mem_dump(const char* header, const char* pData, ui32 length, ui32 max_line_length = 16);
 
 } // End of namespace log
 } // End of namespace liber

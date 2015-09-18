@@ -12,82 +12,95 @@ using namespace liber::log;
 
 //-----------------------------------------------------------------------------
 LogMessage::LogMessage(LogLevel level, const std::string& message)
-: mLevel(level)
-, mMessage(message)
-, mTimestamp(Timestamp::Now())
+   : log_level_( level )
+   , message_  ( message )
+   , timestamp_( Timestamp::Now() )
 {
 }
 
 //-----------------------------------------------------------------------------
-LogMessage::LogMessage(LogLevel level,
-                       const char* header,
-                       const char* pData, ui32 nBytes,
-                       ui32 nBytesPerRow)
-: mLevel(level)
-, mTimestamp(Timestamp::Now())
+LogMessage::LogMessage(
+   LogLevel    level,
+   const char* header,
+   const char* data_ptr,
+   ui32        length,
+   ui32        max_line_length
+)
+   : log_level_( level )
+   , timestamp_( Timestamp::Now() )
 {
-  char rowPrefix[7];
-  std::stringstream stream;
+   char row_prefix[7];
+   std::stringstream stream;
 
-  if (strlen(header) > 0)
-  {
-    stream << header << "\n";
-  }
+   if ( strlen( header ) > 0 )
+   {
+      stream << header << "\n";
+   }
 
-  ui32 lnOffset = 0;
-  for (; lnOffset < nBytes; lnOffset++)
-  {
-    if (lnOffset % nBytesPerRow == 0)
-    {
-      snprintf(rowPrefix, sizeof(rowPrefix), "%4X: ", lnOffset);
-      stream << rowPrefix;
-    }
+   ui32 offset = 0;
+   for (; offset < length; ++offset )
+   {
+      if ( ( offset % max_line_length ) == 0)
+      {
+         snprintf(row_prefix, sizeof( row_prefix ), "%4X: ", offset);
+         stream << row_prefix;
+      }
 
-    snprintf(rowPrefix, sizeof(rowPrefix), "%02X ", (unsigned char)pData[lnOffset]);
-    stream << rowPrefix;
-    if (lnOffset > 0 && ((lnOffset+1) % nBytesPerRow == 0))
-    {
+      snprintf( row_prefix, sizeof(row_prefix), "%02X ", (unsigned char)data_ptr[ offset ] );
+      stream << row_prefix;
+
+      if ( ( offset > 0 ) && ( ( offset + 1 ) % max_line_length == 0 ) )
+      {
+         stream << "\n";
+      }
+   }
+
+   if ( offset > 0 )
+   {
       stream << "\n";
-    }
-  }
-  if (lnOffset > 0) stream << "\n";
+   }
 
-  mMessage.assign(stream.str());
+   message_.assign( stream.str() );
 }
 
 //-----------------------------------------------------------------------------
-std::string LogMessage::toString(ui32 format) const
+std::string LogMessage::toString( ui32 format ) const
 {
-  std::stringstream ss;
+   std::stringstream ss;
 
-  if (format & log::DisplayTimestamp)
-  {
-    ss << std::fixed << mTimestamp.fseconds() << std::dec << " ";
-  }
+   if ( format & log::DisplayTimestamp )
+   {
+      ss << std::fixed << timestamp_.fseconds() << std::dec << " ";
+   }
 
-  if (format & log::DisplayLogLevel)
-  {
-    ss << LogLevelToString(mLevel) ;
-    if ( mLevel != Raw ) ss << ":";
-    ss << " ";
-  }
+   if ( format & log::DisplayLogLevel )
+   {
+      ss << LogLevelToString( log_level_ ) ;
 
-  ss << mMessage;
+      if ( log_level_ != Raw )
+      {
+         ss << ":";
+      }
 
-  return ss.str();
+      ss << " ";
+   }
+
+   ss << message_;
+
+   return ss.str();
 }
 
 
 //-----------------------------------------------------------------------------
 Logger::Logger()
-: liber::concurrency::IThread("CommonLoggingThread")
-, mConsoleLogOpts(log::DisplayLogLevel)
-, mLevel(liber::log::Status)
-, mbAllowMessages(true)
-, mbLogFileEnabled(false)
-, mPath(boost::filesystem::current_path().generic_string())
-, mSuffix("")
-, mnFileSizeBytes(0)
+   : liber::concurrency::IThread("CommonLoggingThread")
+   , console_log_options_  ( log::DisplayLogLevel )
+   , log_level_            ( liber::log::Status )
+   , allow_messages_       ( true )
+   , log_file_enabled_     ( false )
+   , path_                 (boost::filesystem::current_path().generic_string())
+   , suffix_               ( "" )
+   , current_log_file_size_( 0 )
 {
   launch();
 }
@@ -95,137 +108,141 @@ Logger::Logger()
 //-----------------------------------------------------------------------------
 Logger::~Logger()
 {
-  cancel(true);
-  mFile.close();
+  cancel( true );
+  log_file_.close();
 }
 
 //-----------------------------------------------------------------------------
-void Logger::setLogFileEnabled(bool bEnable)
+void Logger::setLogFileEnabled( bool enable )
 {
-  mbLogFileEnabled = bEnable;
+   log_file_enabled_ = enable;
 }
 
 //-----------------------------------------------------------------------------
-void Logger::setPath(const std::string& path)
+void Logger::setPath( const std::string& path )
 {
-  boost::mutex::scoped_lock guard( file_attribute_lock_ );
-  mPath = path;
+   boost::mutex::scoped_lock guard( file_attribute_lock_ );
+   path_ = path;
 }
 
 //-----------------------------------------------------------------------------
-void Logger::setSuffix(const std::string& suffix)
+void Logger::setSuffix( const std::string& suffix )
 {
-  boost::mutex::scoped_lock guard( file_attribute_lock_ );
-  mSuffix = suffix;
+   boost::mutex::scoped_lock guard( file_attribute_lock_ );
+   suffix_ = suffix;
 }
 
 //-----------------------------------------------------------------------------
-void Logger::setFilterLevel(LogLevel level)
+void Logger::setFilterLevel( LogLevel level )
 {
-  mLevel = level;
+   log_level_ = level;
 }
 
 //-----------------------------------------------------------------------------
-void Logger::setConsoleDisplayOptions(ui32 displayOptions)
+void Logger::setConsoleDisplayOptions( ui32 display_options )
 {
-  mConsoleLogOpts = displayOptions;
+   console_log_options_ = display_options;
 }
 
 //-----------------------------------------------------------------------------
-void Logger::send(const LogMessage& message)
+void Logger::send( const LogMessage& message )
 {
-  if (mbAllowMessages)
-  {
-    mMessages.push(message, 0);
-  }
+   if ( allow_messages_ )
+   {
+      messages_.push( message, 0 );
+   }
 }
 
 //-----------------------------------------------------------------------------
 void Logger::flush()
 {
-  mbAllowMessages = false;
-  while (mMessages.size() > 0)
-  {
-    usleep(100000);
-  }
-  mbAllowMessages = true;
+   allow_messages_ = false;
+
+   while ( messages_.size() > 0 )
+   {
+      usleep( 100000 );
+   }
+
+   allow_messages_ = true;
 }
 
 //-----------------------------------------------------------------------------
-void Logger::run(const bool& bShutdown)
+void Logger::run( const bool& shutdown )
 {
-  LogMessage lMessage;
-  std::string lPath = mPath;
-  std::string lSuffix = mSuffix;
+   LogMessage message;
+   std::string path = path_;
+   std::string suffix = suffix_;
 
-  while (!bShutdown)
-  {
-    if (mMessages.pop(lMessage))
-    {
-      if (lMessage.mLevel <= mLevel)
+   while ( shutdown == false )
+   {
+      if ( messages_.pop( message ) )
       {
-        std::cout << lMessage.toString(mConsoleLogOpts);
-      }
+         if ( message.log_level_ <= log_level_ )
+         {
+            std::cout << message.toString(console_log_options_);
+         }
 
-      if (mbLogFileEnabled)
-      {
-        {
-          boost::mutex::scoped_lock guard( file_attribute_lock_ );
-          lPath = mPath;
-          lSuffix = mSuffix;
-        }
+         if ( log_file_enabled_ )
+         {
+            {
+               boost::mutex::scoped_lock guard( file_attribute_lock_ );
+               path   = path_;
+               suffix = suffix_;
+            }
 
-        if (!mFile.is_open())
-        {
-          mFile.close();
-          openLogFile(lPath, lSuffix);
-        }
+            if ( log_file_.is_open() == false )
+            {
+               log_file_.close();
+               openLogFile( path, suffix );
+            }
 
-        if (mFile.is_open())
-        {
-          std::string lLogStr = lMessage.toString(log::DisplayAll);
-          mnFileSizeBytes += lLogStr.size();
-          mFile << lLogStr;
-        }
+            if ( log_file_.is_open() )
+            {
+               std::string log_message = message.toString( log::DisplayAll );
+               current_log_file_size_ += log_message.size();
+               log_file_ << log_message;
+            }
+         }
+         else
+         {
+            if ( log_file_.is_open() )
+            {
+               log_file_.close();
+            }
+         }
       }
-      else
-      {
-        if (mFile.is_open())
-        {
-          mFile.close();
-        }
-      }
-    }
-  }
+   }
 }
 
 //-----------------------------------------------------------------------------
-void Logger::
-openLogFile(const std::string& path, const std::string& suffix)
+void Logger::openLogFile(
+   const std::string& path,
+   const std::string& suffix
+)
 {
-  Date lDate;
+   Date log_date;
 
-  lDate.sample();
-  std::stringstream ss;
-  ss << lDate.year() << "_";
-  ss << (lDate.month() + 1) << "_";
-  ss << lDate.dayOfMonth() << "_";
-  ss << lDate.hour() << "_";
-  ss << lDate.minute() << "_";
-  ss << lDate.second() << "_";
+   log_date.sample();
+   std::stringstream ss;
+   ss << log_date.year() << "_";
+   ss << (log_date.month() + 1) << "_";
+   ss << log_date.dayOfMonth() << "_";
+   ss << log_date.hour() << "_";
+   ss << log_date.minute() << "_";
+   ss << log_date.second() << "_";
 
-  if (!suffix.empty())
-  {
-    ss << suffix << "_";
-  }
-  ss << "log.txt";
+   if ( suffix.empty() == false )
+   {
+      ss << suffix << "_";
+   }
+   ss << "log.txt";
 
-  mnFileSizeBytes = 0;
+   current_log_file_size_ = 0;
 
-  boost::filesystem::path lPath(path);
-  lPath /= ss.str();
+   boost::filesystem::path log_path( path );
+   log_path /= ss.str();
 
-  mFile.open( lPath.string().c_str(), std::ofstream::out );
+   log_file_.open( log_path.string().c_str(), std::ofstream::out );
 }
 
 Logger liber::log::glog;
@@ -233,129 +250,141 @@ Logger liber::log::glog;
 //-----------------------------------------------------------------------------
 void liber::log::setPath(const std::string& path)
 {
-  liber::log::glog.setPath(path);
+   liber::log::glog.setPath( path );
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::setSuffix(const std::string& suffix)
 {
-  liber::log::glog.setSuffix(suffix);
+   liber::log::glog.setSuffix( suffix );
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::enable()
 {
-  liber::log::glog.setLogFileEnabled(true);
+   liber::log::glog.setLogFileEnabled(true);
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::disable()
 {
-  liber::log::glog.setLogFileEnabled(false);
+   liber::log::glog.setLogFileEnabled(false);
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::options(ui32 opts)
 {
-  liber::log::glog.setConsoleDisplayOptions(opts);
+   liber::log::glog.setConsoleDisplayOptions(opts);
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::level(LogLevel level)
 {
-  liber::log::glog.setFilterLevel(level);
+   liber::log::glog.setFilterLevel(level);
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::flush()
 {
-  liber::log::glog.flush();
+   liber::log::glog.flush();
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::print(LogLevel level, const char* format, va_list args)
 {
-  static char message_buffer[MAX_MESSAGE_LEN_BYTES];
-  if (format)
-  {
-    vsnprintf( message_buffer, sizeof( message_buffer ), format, args );
-    liber::log::glog.send( LogMessage( level, std::string( message_buffer ) ) );
-  }
+   static char message_buffer[ MAX_MESSAGE_LEN_BYTES ];
+
+   if ( format )
+   {
+      vsnprintf( message_buffer, sizeof( message_buffer ), format, args );
+      liber::log::glog.send( LogMessage( level, std::string( message_buffer ) ) );
+   }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::raw(const char* format, ...)
+void liber::log::raw( const char* format, ... )
 {
-  if (format)
-  {
-    va_list args;
-    va_start(args, format);
-    liber::log::print(Raw, format, args);
-    va_end(args);
-  }
+   if (format)
+   {
+      va_list args;
+      va_start( args, format );
+      liber::log::print( Raw, format, args );
+      va_end( args );
+   }
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::status(const char* format, ...)
 {
-  if (format)
-  {
-    va_list args;
-    va_start(args, format);
-    liber::log::print(Status, format, args);
-    va_end(args);
-  }
+   if (format)
+   {
+      va_list args;
+      va_start( args, format );
+      liber::log::print( Status, format, args );
+      va_end( args );
+   }
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::error(const char* format, ...)
 {
-  if (format)
-  {
-    va_list args;
-    va_start(args, format);
-    liber::log::print(Error, format, args);
-    va_end(args);
-  }
+   if ( format )
+   {
+      va_list args;
+      va_start( args, format );
+      liber::log::print( Error, format, args );
+      va_end( args );
+   }
 }
 
 //-----------------------------------------------------------------------------
 void liber::log::warn(const char* format, ...)
 {
-  if (format)
-  {
-    va_list args;
-    va_start(args, format);
-    liber::log::print(Warn, format, args);
-    va_end(args);
-  }
+   if ( format )
+   {
+      va_list args;
+      va_start( args, format );
+      liber::log::print( Warn, format, args );
+      va_end( args );
+   }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::debug(const char* format, ...)
+void liber::log::debug( const char* format, ... )
 {
-  if (format)
-  {
-    va_list args;
-    va_start(args, format);
-    liber::log::print(Debug, format, args);
-    va_end(args);
-  }
+   if ( format )
+   {
+      va_list args;
+      va_start( args, format );
+      liber::log::print( Debug, format, args );
+      va_end( args );
+   }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::mem_dump(const char* header, const char* pData, ui32 nBytes, ui32 nBytesPerRow)
+void liber::log::mem_dump(
+   const char* header,
+   const char* data_ptr,
+   ui32        length,
+   ui32        max_line_length )
 {
-  if ((header != NULL) && (pData != NULL))
-  {
-    try
-    {
-      liber::log::glog.send(LogMessage(MemDump, header, pData, nBytes, nBytesPerRow));
-    }
-    catch (...)
-    {
-      liber::log::error("liber::log::mem_dump - exception while logging dump\n");
-    }
-  }
+   if ( ( header != NULL ) && ( data_ptr != NULL ) )
+   {
+      try
+      {
+         liber::log::glog.send( LogMessage(
+            MemDump,
+            header,
+            data_ptr,
+            length,
+            max_line_length
+         ));
+      }
+      catch ( ... )
+      {
+         liber::log::error(
+            "liber::log::mem_dump - exception while logging dump\n" );
+      }
+   }
 }
 

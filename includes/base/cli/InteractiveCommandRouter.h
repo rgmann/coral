@@ -34,14 +34,34 @@ public:
    //
    InteractiveCommand* remove( const std::string& command );
 
+   //
+   // Set the message printed at startup.
+   //
+   void setStartupMessage( const std::string& message );
+
+   //
+   // Set the message printed on shutdown (defaults to "bye")
+   //
+   void setShutdownMessage( const std::string& message );
+
+
+// private:
+
+   void processLine( std::istream& stream );
+
 
 private:
 
    // Command prompt
    std::string prompt_;
 
+   std::string startup_message_;
+
+   std::string shutdown_message_;
+
    // Map from command/alias name to command object
-   std::map<std::string, InteractiveCommand*> commands_;
+   typedef std::map<std::string,InteractiveCommand*> CommandTable;
+   CommandTable commands_;
 
    // Quit signal
    bool quit_signalled_;

@@ -1,189 +1,15 @@
+#include "Log.h"
 #include "Argument.h"
 #include "StringHelper.h"
 
 #define  NAME     0
 #define  VALUE    1
 
+using namespace liber;
+using namespace liber::cli;
+
 //------------------------------------------------------------------------------
 Argument::Argument()
-{
-   initialize();
-}
-
-//------------------------------------------------------------------------------
-Argument* Argument::Create(const std::string &definition)
-{
-   Argument*   l_pArgument = NULL;
-   
-   l_pArgument = new Argument();
-   if (l_pArgument == NULL)
-   {
-      return NULL;
-   }
-   
-   if (!l_pArgument->parse(definition))
-   {
-      delete l_pArgument;
-      l_pArgument = NULL;
-   }
-   
-   return l_pArgument;
-}
-
-//------------------------------------------------------------------------------
-bool Argument::parse(const std::string &definition)
-{
-   bool  l_bSuccess = true;
-   std::vector<std::string>            l_vAttributes;
-   std::vector<std::string>::iterator  l_vAttrIt;
-   
-   l_vAttributes = StringHelper::Split(definition, ',');
-   
-   l_vAttrIt = l_vAttributes.begin();
-   for (; l_vAttrIt < l_vAttributes.end(); ++l_vAttrIt)
-   {
-      std::vector<std::string> l_vNameVal;
-      std::string              l_sName;
-      std::string              l_sValue;
-      
-      // Split the substring at the ':'
-      l_vNameVal = StringHelper::Split(*l_vAttrIt, ':');
-      
-      if (l_vNameVal.size() == 0)
-      {
-         continue;
-      }
-      else if (l_vNameVal.size() == 1)
-      {
-         l_sName = l_vNameVal[NAME];
-         
-         if (!setAttribute(StringHelper::Trim(l_sName)))
-         {
-            l_bSuccess = false;
-            break;
-         }
-      }
-      else if (l_vNameVal.size() == 2)
-      {
-         l_sName = l_vNameVal[NAME];
-         l_sValue = l_vNameVal[VALUE];
-         
-         if (!setAttribute(StringHelper::Trim(l_sName), 
-                      StringHelper::Trim(l_sValue)))
-         {
-            l_bSuccess = false;
-            break;
-         }
-      }
-   }
-   
-   return l_bSuccess;
-}
-
-//------------------------------------------------------------------------------
-bool Argument::setAttribute(const std::string &attrName, 
-                            const std::string &attrVal)
-{
-   if (attrName.compare("name") == 0)
-   {
-      if (attrVal.empty())
-      {
-         return false;
-      }
-      m_sName = attrVal;
-   }
-   else if (attrName.compare("primary") == 0)
-   {
-      if (attrVal.empty())
-      {
-         return false;
-      }
-      m_sId = attrVal;
-   }
-   else if (attrName.compare("alt") == 0)
-   {
-      if (attrVal.empty())
-      {
-         return false;
-      }
-      m_sAltId = attrVal;
-   }
-   else if (attrName.compare("desc") == 0 || 
-            attrName.compare("description") == 0)
-   {
-      if (attrVal.empty())
-      {
-         return false;
-      }
-      m_sDescription = attrVal;
-   }
-   else if (attrName.compare("type") == 0)
-   {
-      if (attrVal.empty())
-      {
-         return false;
-      }
-      
-      if (attrVal.compare("flag") == 0)
-      {
-         m_Type = ArgFlag;
-      }
-      else if (attrVal.compare("opt") == 0 || 
-               attrVal.compare("option") == 0)
-      {
-         m_Type = ArgOption;
-      }
-      else
-      {
-         return false;
-      }
-   }
-   else if (attrName.compare("required") == 0)
-   {
-      m_Policy = ArgRequired;
-   }
-   else if (attrName.compare("def") == 0 ||
-            attrName.compare("default") == 0)
-   {
-      if (attrVal.empty())
-      {
-         return false;
-      }
-      
-      m_sDefault = attrVal;
-   }
-   else if (attrName.compare("valtype") == 0 ||
-            attrName.compare("vtype") == 0)
-   {
-      if (attrVal.empty())
-      {
-         return false;
-      }
-      
-      if (attrVal.compare("int") == 0 ||
-          attrVal.compare("integer") == 0)
-      {
-         m_ValType = ArgInt;
-      }
-      else if (attrVal.compare("float") == 0)
-      {
-         m_ValType = ArgFloat;
-      }
-      else if (attrVal.compare("string") == 0)
-      {
-         m_ValType = ArgString;
-      }
-      else
-      {
-         return false;
-      }
-   }
-   
-   return true;
-}
-
-//------------------------------------------------------------------------------
-void  Argument::initialize()
 {
    m_sName = "";
    m_sId = "";
@@ -196,4 +22,212 @@ void  Argument::initialize()
    m_sValue = "";
    m_sDefault = "";
    m_Status = ArgOmitted;
+}
+
+//------------------------------------------------------------------------------
+Argument* Argument::Create( const std::string &definition )
+{
+   Argument* argument_ptr = new Argument();
+   
+   if ( argument_ptr != NULL )
+   {
+      if ( argument_ptr->parse(definition) == false )
+      {
+         delete argument_ptr;
+         argument_ptr = NULL;
+      }
+   }
+   
+   return argument_ptr;
+}
+
+//------------------------------------------------------------------------------
+bool Argument::parse( const std::string& definition )
+{
+   bool parse_success = false;
+   std::vector<std::string>            attribute_list;
+   std::vector<std::string>::iterator  attribute_iterator;
+   
+   attribute_list = StringHelper::Split( definition, ',' );
+   
+   if ( attribute_list.size() > 0 )
+   {
+      parse_success = true;
+
+      attribute_iterator = attribute_list.begin();
+      for (; attribute_iterator < attribute_list.end(); ++attribute_iterator )
+      {
+         // Split the substring at the ':'
+         std::vector<std::string> attributes_tokens =
+            StringHelper::Split( *attribute_iterator, ':' );
+                  
+         if ( attributes_tokens.size() == 0 )
+         {
+            continue;
+         }
+
+         // Key-only attributes
+         else if ( attributes_tokens.size() == 1 )
+         {
+            std::string attribute_key = attributes_tokens[ NAME ];
+            
+            if ( setAttribute( StringHelper::Trim( attribute_key ) ) == false )
+            {
+               parse_success = false;
+               break;
+            }
+         }
+
+         // Key-value attributes
+         else if ( attributes_tokens.size() == 2 )
+         {
+            std::string attribute_key   = attributes_tokens[ NAME ];
+            std::string attribute_value = attributes_tokens[ VALUE ];
+            
+            if ( setAttribute( StringHelper::Trim( attribute_key ), 
+                           StringHelper::Trim( attribute_value ) ) == false )
+            {
+               parse_success = false;
+               break;
+            }
+         }
+      }
+
+      // Validate the minimum set of attributes.
+      if ( parse_success )
+      {
+         parse_success &= ( m_sName.empty() == false );
+         parse_success &= ( m_sId.empty() == false );
+      }
+   }
+   
+   return parse_success;
+}
+
+//------------------------------------------------------------------------------
+bool Argument::setAttribute(const std::string &attribute_name, 
+                            const std::string &attribute_value )
+{
+   bool success = true;
+
+   if ( attribute_name.compare("name") == 0 )
+   {
+      if (attribute_value.empty())
+      {
+         success = false;
+      }
+      else
+      {
+         m_sName = attribute_value;
+      }
+   }
+   else if (attribute_name.compare("primary") == 0)
+   {
+      if (attribute_value.empty())
+      {
+         success = false;
+      }
+      else
+      {
+         m_sId = attribute_value;
+      }
+   }
+   else if (attribute_name.compare("alt") == 0)
+   {
+      if (attribute_value.empty())
+      {
+         success = false;
+      }
+      else
+      {
+         m_sAltId = attribute_value;
+      }
+   }
+   else if (attribute_name.compare("desc") == 0 || 
+            attribute_name.compare("description") == 0)
+   {
+      if (attribute_value.empty())
+      {
+         success = false;
+      }
+      else
+      {
+         m_sDescription = attribute_value;
+      }
+   }
+   else if (attribute_name.compare("type") == 0)
+   {
+      if (attribute_value.empty())
+      {
+         success = false;
+      }
+      else
+      {
+         if (attribute_value.compare("flag") == 0)
+         {
+            m_Type = ArgFlag;
+         }
+         else if (attribute_value.compare("opt") == 0 || 
+                  attribute_value.compare("option") == 0)
+         {
+            m_Type = ArgOption;
+         }
+         else
+         {
+            success = false;
+         }
+      }
+   }
+   else if (attribute_name.compare("required") == 0)
+   {
+      m_Policy = ArgRequired;
+   }
+   else if (attribute_name.compare("def") == 0 ||
+            attribute_name.compare("default") == 0)
+   {
+      if (attribute_value.empty())
+      {
+         success = false;
+      }
+      else
+      {
+         m_sDefault = attribute_value;
+      }
+   }
+   else if (attribute_name.compare("valtype") == 0 ||
+            attribute_name.compare("vtype") == 0)
+   {
+      if (attribute_value.empty())
+      {
+         success = false;
+      }
+      else
+      {
+         if (attribute_value.compare("int") == 0 ||
+             attribute_value.compare("integer") == 0)
+         {
+            m_ValType = ArgInt;
+         }
+         else if (attribute_value.compare("float") == 0)
+         {
+            m_ValType = ArgFloat;
+         }
+         else if (attribute_value.compare("string") == 0)
+         {
+            m_ValType = ArgString;
+         }
+         else
+         {
+            success = false;
+         }
+      }
+   }
+   else
+   {
+      log::debug(
+         "Argument::setAttribute: Ignoring invalid attribute '%d'\n",
+         attribute_name.c_str() );
+   }
+   
+   return success;
 }

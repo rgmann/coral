@@ -6,23 +6,25 @@
 #include <map>
 #include "Argument.h"
 
-class ArgParser
-{
+namespace liber {
+namespace cli {
+
+class ArgParser {
 public:
    
    ArgParser();
    
    ~ArgParser();
    
-   bool addArg(const std::string &arg);
+   bool  addArg( const std::string &arg );
    
-   bool  parse(const char* argv[], int argc);
+   bool  parse( const char* argv[], int argc );
    
    void  printArgErrors(bool bPrinHelp = false);
    
    void  printHelp();
    
-   bool  isSet(Argument::ArgField field, const std::string &fieldStr);
+   bool  isSet( Argument::ArgField field, const std::string &fieldStr );
    
    bool  getArgVal(int &val, 
                    Argument::ArgField field, 
@@ -53,12 +55,14 @@ private:
    
 private:
    
-   std::map<std::string, Argument*>  m_PrimaryMap;
-   std::map<std::string, Argument*>  m_AltMap;
-   std::map<std::string, Argument*>  m_NameMap;
-   
-   std::vector<Argument*>    m_ArgVector;
-   std::vector<std::string> m_ArgErrors;
+   std::map<std::string,Argument*>  primary_table_;
+   std::map<std::string,Argument*>  alt_table_;
+   std::map<std::string,Argument*>  name_table_;
+   std::vector<Argument*>           arguments_;
+   std::vector<std::string>         argument_errors_;
 };
+
+} // namespace cli
+} // namespace liber
 
 #endif // ARG_PARSER_H
