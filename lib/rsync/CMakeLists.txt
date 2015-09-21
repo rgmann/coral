@@ -5,6 +5,7 @@ find_package( Boost 1.46 REQUIRED )
 
 set( LIBNAME rsync )
 add_definitions ("-Wall")
+add_definitions ("-Wno-unused-local-typedefs")
 
 set( INCLUDE_BASE "../../includes" )
 include_directories( ${Boost_INCLUDE_DIRS} )

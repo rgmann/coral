@@ -7,99 +7,127 @@ using namespace liber::rpc;
 using namespace liber::netapp;
 
 //------------------------------------------------------------------------------
-RpcServer::RpcServer()
+RpcServer::RpcServer( DestinationID client_destination_id )
+   : client_destination_id_( client_destination_id )
 {
 }
 
 //------------------------------------------------------------------------------
-bool RpcServer::registerResource(RpcServerResource* pResource)
+bool RpcServer::registerResource( RpcServerResource* resource_ptr )
 {
-   if (pResource == NULL) return false;
-   if (mResourceMap.count(pResource->getName()) != 0) return false;
+   bool register_success = false;
 
-   mResourceMap[pResource->getName()] = pResource;
-   pResource->registerActions();
-
-   return true;
-}
-
-//------------------------------------------------------------------------------
-bool RpcServer::processPacket(const RpcPacket* pPacket)
-{
-   bool lbSuccess = false;
-   RpcObject lInput;
-
-   if (pPacket && pPacket->getObject(lInput))
+   if ( resource_ptr )
    {
-      RpcObject lOutput;
-      RpcServerResource* lpResource = getResource(lInput);
-
-      lInput.exception().pushFrame(TraceFrame("RpcServer", "processPacket",
-                                              __FILE__, __LINE__));
-
-      if (lpResource)
+      if ( resources_.count( resource_ptr->getName() ) == 0 )
       {
-         lbSuccess = lpResource->unmarshall(lInput, lOutput);
+         std::pair<ResourceMap::iterator,bool> insert_status;
+
+         insert_status = resources_.insert( std::make_pair(
+            resource_ptr->getName(),
+            resource_ptr
+         ));
+
+         register_success = insert_status.second;
+
+         if ( register_success )
+         {
+            resource_ptr->registerActions();
+         }
+      }
+   }
+
+   return register_success;
+}
+
+//------------------------------------------------------------------------------
+bool RpcServer::processPacket( const RpcPacket* packet_ptr )
+{
+   bool process_success = false;
+
+   RpcObject input_object;
+
+   if ( packet_ptr && packet_ptr->getObject( input_object ) )
+   {
+      RpcObject output_object;
+      RpcServerResource* resource_ptr = getResource( input_object );
+
+      input_object.exception().pushFrame( TraceFrame(
+         "RpcServer",
+         "processPacket",
+         __FILE__,
+         __LINE__
+      ));
+
+      if ( resource_ptr )
+      {
+         process_success = resource_ptr->unmarshall(
+            input_object, output_object );
       }
       else
       {
-         lInput.exception().reporter = RpcException::Server;
-         lInput.exception().id = UnknownResource;
+         input_object.exception().reporter = RpcException::Server;
+         input_object.exception().id       = UnknownResource;
 
-         lInput.getResponse(lOutput);
+         input_object.getResponse( output_object );
       }
 
-      lInput.exception().popFrame();
+      input_object.exception().popFrame();
                    
-      sendObject(lOutput);
+      sendObject( output_object );
    }
    else
    {
-     liber::log::error("RpcServer::processPacket - "
-                       "Failed to deserialize RpcObject\n");
+      log::error(
+         "RpcServer::processPacket - "
+         "Failed to deserialize RpcObject\n" );
    }
 
-   return lbSuccess;
+   return process_success;
 }
 
 //------------------------------------------------------------------------------
-bool RpcServer::put(const char* pData, ui32 nLength)
+bool RpcServer::put( DestinationID destination, const void* data_ptr, ui32 length )
 {
-  bool lbSuccess = false;
-  RpcPacket* lpPacket = new RpcPacket();
+   bool route_success = false;
+   // RpcPacket* lpPacket = new RpcPacket();
+   RpcPacket packet;
 
-  if (pData)
-  {
-    if (lpPacket->unpack(pData, nLength))
-    {
-      lbSuccess = processPacket(lpPacket);
-    }
-    else
-    {
-      log::error("RpcServer::put: Fail to unpack packet of size %u\n", nLength);
-    }
-  }
-
-  return lbSuccess;
-}
-
-//------------------------------------------------------------------------------
-RpcServerResource* RpcServer::getResource(const RpcObject &object)
-{
-   RpcServerResource* lpResource = NULL;
-
-   if (mResourceMap.count(object.callInfo().resource) == 1)
+   if ( data_ptr )
    {
-      lpResource = mResourceMap[object.callInfo().resource];
+      if ( packet.unpack( data_ptr, length ) )
+      {
+         route_success = processPacket( &packet );
+      }
+      else
+      {
+         log::error("RpcServer::put: Fail to unpack packet of size %u\n", length );
+      }
    }
 
-   return lpResource;
+   return route_success;
 }
 
 //------------------------------------------------------------------------------
-void RpcServer::sendObject(const RpcObject &object)
+RpcServerResource* RpcServer::getResource( const RpcObject& object )
 {
-  sendPacket(new RpcPacket(object));
+   RpcServerResource* resource_ptr = NULL;
+
+   ResourceMap::iterator resource_iterator = resources_.find(
+         object.callInfo().resource );
+
+   if ( resource_iterator != resources_.end() )
+   {
+      resource_ptr = resource_iterator->second;
+   }
+
+   return resource_ptr;
+}
+
+//------------------------------------------------------------------------------
+void RpcServer::sendObject( const RpcObject &object )
+{
+   sendTo( client_destination_id_, new RpcPacket( object ) );
 }
 
 

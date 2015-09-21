@@ -6,7 +6,8 @@ using namespace liber::rpc;
 using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
-RpcClient::RpcClient()
+RpcClient::RpcClient( DestinationID server_destination_id )
+   : server_destination_id_( server_destination_id )
 {
 }
 
@@ -48,7 +49,7 @@ RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
 
       // The RPC client and server always have the same subscriber ID,
       // so there is no need to send the packet to a particular subscriber ID.
-      sendPacket( lpPacket );
+      sendTo( server_destination_id_, lpPacket );
     }
     else
     {

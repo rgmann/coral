@@ -3,7 +3,6 @@
 #include <sstream>
 #include <boost/uuid/random_generator.hpp>
 #include "Log.h"
-//#include "Md5Hash.h"
 #include "Timestamp.h"
 #include "RpcServerResource.h"
 
@@ -12,239 +11,268 @@ using namespace liber::rpc;
 
 //------------------------------------------------------------------------------
 RpcServerResource::RpcServerResource(const std::string &name)
-:  mName(name),
-   mnInstanceCount(0)
+   : resource_name_(name)
+   , mnInstanceCount(0)
 {
 }
 
 //------------------------------------------------------------------------------
 std::string RpcServerResource::getName() const
 {
-   return mName;
+   return resource_name_;
 }
 
 //------------------------------------------------------------------------------
-bool RpcServerResource::unmarshall(RpcObject &input, RpcObject &output)
+bool RpcServerResource::unmarshall( RpcObject &input, RpcObject &output )
 {
-   bool lbSuccess = true;
+   bool unmarshall_success = true;
    
-   boost::uuids::uuid lUuid = input.callInfo().uuid;
+   boost::uuids::uuid call_uuid = input.callInfo().uuid;
 
-   input.exception().pushFrame(TraceFrame("RpcServerResource", "unmarshall",
-                                          __FILE__, __LINE__));
-   
-   if (!input.isValid())
-   {
-      exception(input, output, MissingParameters);
-      return false;
-   }
+   input.exception().pushFrame( TraceFrame(
+      "RpcServerResource",
+      "unmarshall",
+      __FILE__, __LINE__));
 
-   if (input.callInfo().action == "construct")
+
+   if ( input.isValid() )
    {
-      lbSuccess = construct(input, output);
-   }
-   else if (input.callInfo().action == "destroy")
-   {
-      lbSuccess = destroy(input, output);
-   }
-   else
-   {
-      if (isValidInstance(lUuid))
+      if ( input.callInfo().action == "construct" )
       {
-         lbSuccess = invoke(lUuid, input, output);
+         unmarshall_success = construct( input, output );
+      }
+      else if ( input.callInfo().action == "destroy" )
+      {
+         unmarshall_success = destroy( input, output );
       }
       else
       {
-         exception(input, output, InvalidUIID, "Invalid instance UIID");
-         lbSuccess = false;
+         if ( isValidInstance( call_uuid ) )
+         {
+            unmarshall_success = invoke( call_uuid, input, output );
+         }
+         else
+         {
+            exception( input, output, InvalidUIID, "Invalid instance UIID" );
+            unmarshall_success = false;
+         }
       }
-   }
 
-   input.exception().popFrame();
+      input.exception().popFrame();
+   }
+   else
+   {
+      exception( input, output, MissingParameters );
+   }
    
-   return lbSuccess;
+   return unmarshall_success;
 }
 
 //------------------------------------------------------------------------------
-//bool RpcServerResource::isValidInstance(Md5Hash& uiid)
-bool RpcServerResource::isValidInstance(boost::uuids::uuid& uuid)
+bool RpcServerResource::isValidInstance( boost::uuids::uuid& uuid )
 {
-   return (getInstance(uuid) != NULL);
+   return ( getInstance( uuid ) != NULL);
 }
 
 //------------------------------------------------------------------------------
 bool RpcServerResource::construct(RpcObject &input, RpcObject &output)
 {
-   bool lbSuccess = false;
-   std::string lParamList;
+   bool construct_success = false;
 
-   input.exception().pushFrame(TraceFrame("RpcServerResource", "construct",
-                                           __FILE__, __LINE__));
+   std::string parameter_list;
 
-   boost::uuids::uuid lUUID = boost::uuids::random_generator()();
-   
-   if (mInstances.count(lUUID) != 0)
+   input.exception().pushFrame( TraceFrame(
+      "RpcServerResource",
+      "construct",
+      __FILE__,
+      __LINE__
+   ));
+
+   boost::uuids::uuid instance_uuid = boost::uuids::random_generator()();
+
+   if ( instances_.count( instance_uuid ) == 0 )
    {
-      exception(input, output, UIIDAssignmentErr);
-      return false;
-   }
-   
-   input.getParams(lParamList);
+      input.getParams( parameter_list );
 
-   InstanceWrapper* lpWrapper = createInstance();
-   if (lpWrapper == NULL)
-   {
-      exception(input, output, NullInstance,
-                "Failed to instantiate new \"" +
-                input.callInfo().resource + "\" resource");
-      return false;
-   }
+      InstanceWrapper* wrapper_ptr = createInstance();
 
-   mInstances.insert(std::make_pair(lUUID, lpWrapper));
-
-   lbSuccess = lpWrapper->initialize(lParamList);
-   tugCtorHook(lpWrapper);
- 
-   input.getResponse(output);
-   output.callInfo().uuid = lUUID;
-
-   mnInstanceCount++;
-
-   input.exception().popFrame();
-
-   return lbSuccess;
-}
-
-//------------------------------------------------------------------------------
-bool RpcServerResource::invoke(boost::uuids::uuid&   uuid,
-                               RpcObject& input,
-                               RpcObject& output)
-{
-   bool lbSuccess = (mMethodMap.count(input.callInfo().action) != 0);
-
-   input.exception().pushFrame(TraceFrame("RpcServerResource", "invoke",
-                                           __FILE__, __LINE__));
-
-   if (lbSuccess)
-   {
-      std::string lInParams;
-      std::string lOutParams;
-
-      InstanceWrapper::Method wrapper = NULL;
-      input.getParams(lInParams);
-
-      wrapper = mMethodMap.find(input.callInfo().action)->second;
-      if (wrapper)
+      if ( wrapper_ptr == NULL )
       {
-         wrapper(getInstance(uuid), lInParams, lOutParams, input.exception());
-         input.getResponse(output, lOutParams);
+         exception(input, output, NullInstance,
+                   "Failed to instantiate new \"" +
+                   input.callInfo().resource + "\" resource");
       }
       else
       {
-         exception(input, output, NullInstance,
-                   "Null reference for \"" + 
-                   input.callInfo().action + "\" action");
-         lbSuccess = false;
+         instances_.insert( std::make_pair( instance_uuid, wrapper_ptr ) );
+
+         construct_success = wrapper_ptr->initialize( parameter_list );
+         tugCtorHook( wrapper_ptr );
+       
+         input.getResponse( output );
+         output.callInfo().uuid = instance_uuid;
+
+         mnInstanceCount++;
+
+         input.exception().popFrame();
       }
    }
    else
    {
-      exception(input, output, UnknownMethod,
-                "Unrecognized action \"" + input.callInfo().action + "\"");
+      exception( input, output, UIIDAssignmentErr );
+   }
+
+   return construct_success;
+}
+
+//------------------------------------------------------------------------------
+bool RpcServerResource::invoke(
+   boost::uuids::uuid&  uuid,
+   RpcObject&           input,
+   RpcObject&           output
+)
+{
+   bool invoke_success = false;
+
+   input.exception().pushFrame( TraceFrame(
+      "RpcServerResource",
+      "invoke",
+      __FILE__,
+      __LINE__
+   ));
+
+   MethodMap::iterator method_iterator = methods_.find( input.callInfo().action );
+
+   if ( method_iterator != methods_.end() )
+   {
+      std::string input_params;
+      std::string output_params;
+
+      InstanceWrapper::Method wrapper = method_iterator->second;
+
+      input.getParams( input_params );
+
+      if ( wrapper )
+      {
+         wrapper( getInstance( uuid ), input_params, output_params, input.exception() );
+         input.getResponse( output, output_params );
+
+         invoke_success = true;
+      }
+      else
+      {
+         exception(
+            input, output,
+            NullInstance,
+            "Null reference for \"" + input.callInfo().action + "\" action"
+         );
+
+         invoke_success = false;
+      }
    }
 
    input.exception().popFrame();
    
-   return lbSuccess;
+   return invoke_success;
 }
 
 //------------------------------------------------------------------------------
-bool RpcServerResource::destroy(RpcObject &input, RpcObject &output)
+bool RpcServerResource::destroy( RpcObject &input, RpcObject &output )
 {
-   input.exception().pushFrame(TraceFrame("RpcServerResource", "destroy",
-                                           __FILE__, __LINE__));
+   input.exception().pushFrame( TraceFrame(
+      "RpcServerResource",
+      "destroy",
+      __FILE__,
+      __LINE__
+   ));
 
-   boost::uuids::uuid lUuid = input.callInfo().uuid;
-   if (mInstances.count(lUuid) == 0)
+   bool destroy_success = false;
+   boost::uuids::uuid call_uuid = input.callInfo().uuid;
+
+   InstanceMap::iterator instance_iterator = instances_.find( call_uuid );
+   if ( instance_iterator != instances_.end() )
    {
-      exception(input, output, InvalidUIID, "Invalid instance UIID");
-      return false;
+      std::string input_params;
+
+      input.getParams( input_params );
+
+      InstanceWrapper* wrapper_ptr = instance_iterator->second;
+
+      if ( wrapper_ptr == NULL )
+      {
+         exception(input, output, NullInstance, "Null wrapper reference");
+         return false;
+      }
+      else
+      {
+         tugDtorHook(lpWrapper);
+         wrapper_ptr->destroy( input_params );
+
+         delete wrapper_ptr;
+         instances_.erase( call_uuid );
+         
+         input.getResponse( output );
+         mnInstanceCount--;
+
+         destroy_success = true;
+      }
    }
-
-   std::string lInParams;
-   input.getParams(lInParams);
-
-   InstanceWrapper* lpWrapper = mInstances.find(lUuid)->second;
-
-   if (lpWrapper == NULL)
+   else
    {
-      exception(input, output, NullInstance, "Null wrapper reference");
-      return false;
+      exception( input, output, InvalidUIID, "Invalid instance UIID" );
    }
-
-   tugDtorHook(lpWrapper);
-   lpWrapper->destroy(lInParams);
-
-   delete lpWrapper;
-   mInstances.erase(lUuid);
-   
-   input.getResponse(output);
-   mnInstanceCount--;
 
    input.exception().popFrame();
    
-   return true;
+   return destroy_success;
 }
 
 //------------------------------------------------------------------------------
-InstanceWrapper* RpcServerResource::getInstance(boost::uuids::uuid& uuid)
+InstanceWrapper* RpcServerResource::getInstance( boost::uuids::uuid& uuid )
 {
-   InstanceWrapper* lpInstance = NULL;
+   InstanceWrapper* wrapper_ptr = NULL;
+   InstanceMap::iterator instance_iterator = instances_.find( uuid );
    
-   if (mInstances.count(uuid) != 0)
+   if ( instance_iterator != instances_.end() )
    {
-      lpInstance = mInstances.find(uuid)->second;
+      wrapper_ptr = instance_iterator->second;
    }
    
-   return lpInstance;
+   return wrapper_ptr;
 }
 
 //------------------------------------------------------------------------------
-bool RpcServerResource::addAction(const std::string &actionName,
-                                  InstanceWrapper::Method method)
+bool RpcServerResource::addAction(
+   const std::string&      action_name,
+   InstanceWrapper::Method method
+)
 {
-   bool lbMethodExists = (mMethodMap.count(actionName) != 0);
+   bool add_action_success = false;
    
-   if (!lbMethodExists)
+   if ( methods_.count( action_name ) != 0 )
    {
-      mMethodMap.insert(std::make_pair(actionName, method));
+      MethodMap::iterator method_iterator = methods_.insert( std::make_pair(
+         action_name, method
+      ));
+
+      add_action_success = method_iterator.second;
    }
    
-   return lbMethodExists;
+   return add_action_success;
 }
 
 //------------------------------------------------------------------------------
-void RpcServerResource::exception(RpcObject&         request,
-                                  RpcObject&         response,
-                                  RpcErrorId         eid,
-                                  const std::string& message)
+void RpcServerResource::exception(
+   RpcObject&         request,
+   RpcObject&         response,
+   RpcErrorId         eid,
+   const std::string& message
+)
 {
    request.exception().reporter = RpcException::Server;
    request.exception().id       = eid;
    request.exception().message  = message;
 
-   request.getResponse(response);
+   request.getResponse( response );
 }
-
-//------------------------------------------------------------------------------
-/*void RpcServerResource::createUIID(Md5Hash& hash)
-{
-   std::stringstream stream;
-
-   ++mnCurrentInstId;
-   stream << mName << Timestamp::Now().toMicroseconds() << mnCurrentInstId;
-   std::string lUiidBlock = stream.str();
-
-   hash.hashify((ui8*)lUiidBlock.data(), lUiidBlock.size());
-}*/
 

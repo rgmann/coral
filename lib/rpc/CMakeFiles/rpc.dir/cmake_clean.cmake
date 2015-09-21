@@ -1,4 +1,4 @@
-FILE(REMOVE_RECURSE
+file(REMOVE_RECURSE
   "CMakeFiles/rpc.dir/Users/vaughanbiker/Development/liber/src/common/rpc/AsyncRpcSupervisor.cpp.o"
   "CMakeFiles/rpc.dir/Users/vaughanbiker/Development/liber/src/common/rpc/BlockingRpcSupervisor.cpp.o"
   "CMakeFiles/rpc.dir/Users/vaughanbiker/Development/liber/src/common/rpc/RpcClient.cpp.o"
@@ -14,6 +14,6 @@ FILE(REMOVE_RECURSE
 )
 
 # Per-language clean rules from dependency scanning.
-FOREACH(lang CXX)
-  INCLUDE(CMakeFiles/rpc.dir/cmake_clean_${lang}.cmake OPTIONAL)
-ENDFOREACH(lang)
+foreach(lang CXX)
+  include(CMakeFiles/rpc.dir/cmake_clean_${lang}.cmake OPTIONAL)
+endforeach()

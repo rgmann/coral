@@ -5,7 +5,7 @@
 #include <string>
 #include <boost/uuid/uuid.hpp>
 #include "Queue.h"
-#include "Mutex.h"
+#include <boost/thread/mutex.hpp>
 #include "RpcObject.h"
 #include "InstanceWrapper.h"
 #include "Md5Hash.h"
@@ -52,15 +52,17 @@ protected:
 
 protected:
  
-   Mutex mHookMutex;
+   boost::mutex mHookMutex;
 
 private:
    
-   std::string mName;
+   std::string resource_name_;
    
-   std::map<boost::uuids::uuid, InstanceWrapper*> mInstances;
-   
-   std::map<std::string, InstanceWrapper::Method> mMethodMap;
+   typedef  std::map<boost::uuids::uuid,InstanceWrapper*> InstanceMap;
+   InstanceMap instances_;
+
+   typedef  std::map<std::string,InstanceWrapper::Method> MethodMap;
+   MethodMap methods_;
    
    int mnInstanceCount;
 };

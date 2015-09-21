@@ -10,7 +10,6 @@
 #include <boost/asio.hpp>
 #include "Log.h"
 #include "ArgParser.h"
-// #include "AsioTcpPacketRouter.h"
 #include "AsioTcpServer.h"
 #include "RsyncNode.h"
 
@@ -19,6 +18,7 @@
 using boost::asio::ip::tcp;
 using namespace liber::netapp;
 using namespace liber::rsync;
+using namespace liber::cli;
 
 //----------------------------------------------------------------------
 

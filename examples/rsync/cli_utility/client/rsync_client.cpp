@@ -19,7 +19,6 @@ using namespace liber::netapp;
 using namespace liber::rsync;
 using namespace liber::cli;
 
-// typedef std::deque<NetAppPacket*> packet_queue;
 
 #define  RSYNC_SUB_ID  ( 1 )
 

@@ -1,6 +1,4 @@
 #include <iostream>
-#include "Thread.h"
-#include "BinarySem.h"
 #include "RpcClient.h"
 #include "RpcServer.h"
 #include "SearchServiceClientStub.h"
@@ -101,16 +99,16 @@ int main()
   remoteRouter.launch();
 
 
-  liber::rpc::RpcClient client;
+  liber::rpc::RpcClient client( RPC_ID );
 
-  liber::rpc::RpcServer server;
+  liber::rpc::RpcServer server( RPC_ID );
   SearchServiceServerStub searchService;
   searchService.registerCtorHook(tor_hook, (void*)"ctor_hook");
   searchService.registerDtorHook(tor_hook, (void*)"dtor_hook");
   server.registerResource(&searchService);
 
-  if (localRouter.addSubscriber(RPC_ID, &client) &&
-      remoteRouter.addSubscriber(RPC_ID, &server))
+  if (localRouter.subscribe(RPC_ID, &client) &&
+      remoteRouter.subscribe(RPC_ID, &server))
   {
     liber::log::status("RPC test:\n");
 

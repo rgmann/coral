@@ -13,12 +13,12 @@ namespace rpc {
 class RpcServer : public liber::netapp::PacketSubscriber {
 public:
 
-  RpcServer();
+  RpcServer( liber::netapp::DestinationID client_destination_id );
 
-  bool registerResource(RpcServerResource* pResource);
+  bool registerResource( RpcServerResource* resource_ptr );
 
-  bool processPacket(const RpcPacket* pPacket);
-  bool put(const char* pData, ui32 nLength);
+  bool processPacket(const RpcPacket* packet_ptr );
+  bool put( liber::netapp::DestinationID, const void* data_ptr, ui32 length );
 
 private:
 
@@ -28,7 +28,11 @@ private:
 
 private:
 
-  std::map<std::string, RpcServerResource*> mResourceMap;
+  typedef  std::map<std::string, RpcServerResource*>  ResourceMap;
+
+  ResourceMap resources_;
+
+  liber::netapp::DestinationID client_destination_id_;
 };
 
 }}
