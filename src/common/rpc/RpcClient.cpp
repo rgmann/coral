@@ -14,125 +14,140 @@ RpcClient::RpcClient( DestinationID server_destination_id )
 //-----------------------------------------------------------------------------
 RpcClient::~RpcClient()
 {
-   std::map<i64, RpcMarshalledCall*>::iterator lRpcIt;
+   boost::mutex::scoped_lock guard( mRpcMutex );
 
-   mRpcMutex.lock();
-
-   lRpcIt = mRpcMap.begin();
-   while (lRpcIt != mRpcMap.end())
+   CallMap::iterator rpc_iterator = mRpcMap.begin();
+   while ( rpc_iterator != mRpcMap.end() )
    {
-      if (lRpcIt->second)
+      if ( rpc_iterator->second )
       {
-         delete lRpcIt->second;
+         delete rpc_iterator->second;
       }
 
-      mRpcMap.erase(lRpcIt++);
+      mRpcMap.erase( rpc_iterator++ );
    }
-
-   mRpcMutex.unlock();
 }
 
 //-----------------------------------------------------------------------------
 RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
 {
-  RpcMarshalledCall* lpCall = new (std::nothrow) RpcMarshalledCall(object);
+   RpcMarshalledCall* call_ptr = new (std::nothrow) RpcMarshalledCall(object);
 
-  if (lpCall)
-  {
-    if (mRpcMap.count(lpCall->getRpcId()) == 0)
-    {
-      mRpcMutex.lock();
-      mRpcMap.insert(std::make_pair(lpCall->getRpcId(), lpCall));
-      mRpcMutex.unlock();
-      
-      RpcPacket* lpPacket = lpCall->getRpcPacket();
+   if ( call_ptr )
+   {
+      const boost::uuids::uuid& call_id = call_ptr->input().callInfo().uuid;
 
-      // The RPC client and server always have the same subscriber ID,
-      // so there is no need to send the packet to a particular subscriber ID.
-      sendTo( server_destination_id_, lpPacket );
-    }
-    else
-    {
-      log::error("RpcClient::invokeRpc - "
-                 "RPC call with same UUID already exists\n");
-    }
-  }
-  else
-  {
-    log::error("RpcClient::invokeRpc - Failed to create RpcMarshalledCall\n");
-  }
+      if ( mRpcMap.count( call_id ) == 0 )
+      {
+         {
+            boost::mutex::scoped_lock guard( mRpcMutex );
 
-  return lpCall;
+            mRpcMap.insert( std::make_pair( call_id, call_ptr ) );
+         }
+
+         RpcPacket* packet_ptr = call_ptr->getRpcPacket();
+
+         if ( packet_ptr )
+         {
+            if ( packet_ptr->isAllocated() )
+            {
+               log::status("RpcClient::invokeRpc: Send request - %d\n", packet_ptr->allocatedSize() );
+               // The RPC client and server always have the same subscriber ID,
+               // so there is no need to send the packet to a particular subscriber ID.
+               sendTo( server_destination_id_, packet_ptr );
+            }
+            else
+            {
+               delete packet_ptr;
+            }
+         }
+         else
+         {
+            log::error("RpcClient::invokeRpc: NULL RPC packet\n");
+         }
+      }
+      else
+      {
+         log::error("RpcClient::invokeRpc - "
+                    "RPC call with same UUID already exists\n");
+      }
+   }
+   else
+   {
+      log::error("RpcClient::invokeRpc - Failed to create RpcMarshalledCall\n");
+   }
+
+   return call_ptr;
 }
 
 //-----------------------------------------------------------------------------
 bool RpcClient::put( DestinationID destination_id, const void* data_ptr, ui32 length )
 {
-  bool lbSuccess = false;
-  RpcPacket* lpPacket = new RpcPacket();
-  RpcObject lRxObject;
+   bool success = false;
 
-  if ( lpPacket->unpack( data_ptr, length ) )
-  {
-    if (lpPacket->getObject(lRxObject))
-    {
-      RpcMarshalledCall* lpCall = NULL;
-      
-      if (mRpcMap.count(lRxObject.callInfo().rpcId) > 0)
-      {
-        lpCall = mRpcMap.find(lRxObject.callInfo().rpcId)->second;
-      }
+   RpcPacket packet;
+   RpcObject receive_object;
 
-      if (lpCall)
+   if ( packet.unpack( data_ptr, length ) )
+   {
+      if ( packet.getObject( receive_object ) )
       {
-        lpCall->notify(lRxObject);
-        lbSuccess = true;
+         RpcMarshalledCall* call_ptr = NULL;
+
+         const boost::uuids::uuid& call_id = receive_object.callInfo().uuid;
+
+         CallMap::iterator call_iterator = mRpcMap.find( call_id );
+         if ( call_iterator != mRpcMap.end() )
+         {
+            call_ptr = call_iterator->second;
+         }
+
+         if ( call_ptr )
+         {
+            call_ptr->notify( receive_object );
+            success = true;
+         }
+         else
+         {
+            log::error("Failed to find RPC with ID\n");
+         }
       }
       else
       {
-        log::error("Failed to find RPC with ID = %d\n", 
-                   lRxObject.callInfo().rpcId);
+         log::error("RpcClient::put: Failed to get RpcObject\n");
       }
-    }
-    else
-    {
-      log::error("RpcClient::put: Failed to get RpcObject\n");
-    }
-  }
-  else
-  {
-    log::error("RpcClient::put: Failed to unpack RpcPacket\n");
-  }
+   }
+   else
+   {
+      log::error("RpcClient::put: Failed to unpack RpcPacket\n");
+   }
 
-  processCancellations();
-  delete lpPacket;
+   processCancellations();
 
-  return lbSuccess;
+   return success;
 }
 
 //-----------------------------------------------------------------------------
 void RpcClient::processCancellations()
 {
-  std::map<i64, RpcMarshalledCall*>::iterator lRpcIt;
+   boost::mutex::scoped_lock guard( mRpcMutex );
 
-  mRpcMutex.lock();
-  lRpcIt = mRpcMap.begin();
-  while (lRpcIt != mRpcMap.end())
-  {
-    if (lRpcIt->second->isDisposed())
-    {
-      if (lRpcIt->second)
+   CallMap::iterator rpc_iterator = mRpcMap.begin();
+   while ( rpc_iterator != mRpcMap.end() )
+   {
+      if ( rpc_iterator->second->isDisposed() )
       {
-        delete lRpcIt->second;
-      }
+         if (rpc_iterator->second)
+         {
+            delete rpc_iterator->second;
+         }
 
-      mRpcMap.erase(lRpcIt++);
-    }
-    else
-    {
-      ++lRpcIt;
-    }
-  }
-  mRpcMutex.unlock();
+         mRpcMap.erase(rpc_iterator++);
+      }
+      else
+      {
+         ++rpc_iterator;
+      }
+   }
 }
 

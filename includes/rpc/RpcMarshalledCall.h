@@ -20,13 +20,13 @@ public:
 
    void getResult(RpcObject &result);
 
-   i64 getRpcId() const;
+   const RpcObject& input() const;
 
    void notify(const RpcObject &object);
    void cancel();
    bool cancelled() const;
 
-   bool wait(ui32 nTimeoutMs, bool bCancelOnTimeout = true);
+   bool wait( ui32 timeout_ms, bool cancel_on_timeout = true );
    
    // Indicates that the caller is no longer waiting.  This call can be
    // garbage collected.
@@ -37,15 +37,13 @@ public:
 
 private:
    
-   static i64 ourCurrentRpcId;
-
    BinarySem mSem;
 
    RpcObject mParamObj;
    RpcObject mResultObj;
  
-   bool mbIsDisposed;
-   bool mbCancelled;
+   bool is_disposed_;
+   bool cancelled_;
 };
 
 }}

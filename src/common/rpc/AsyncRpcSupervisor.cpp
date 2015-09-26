@@ -113,6 +113,7 @@ void AsyncRpcSupervisor::run(const bool& bShutdown)
     else
     {
       mpCall->getResult(mResponseObject);
+      liber::log::status("AsyncRpcSupervisor::run: %s\n", mResponseObject.exception().toString().c_str());
 
       if (mResponseObject.exception().id == NoException)
       {

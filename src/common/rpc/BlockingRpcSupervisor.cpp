@@ -5,8 +5,7 @@ using namespace liber;
 using namespace liber::rpc;
 
 //----------------------------------------------------------------------------
-BlockingRpcSupervisor::BlockingRpcSupervisor()
-: RpcSupervisor()
+BlockingRpcSupervisor::BlockingRpcSupervisor() : RpcSupervisor()
 {
 }
 
@@ -16,42 +15,50 @@ BlockingRpcSupervisor::~BlockingRpcSupervisor()
 }
 
 //----------------------------------------------------------------------------
-bool BlockingRpcSupervisor::
-invoke(RpcClient& rClient, const RpcObject& request, PbMessage* pResponse, int nTimeoutMs)
+bool BlockingRpcSupervisor::invoke(
+   RpcClient&        rClient,
+   const RpcObject&  request,
+   PbMessage*        pResponse,
+   int               nTimeoutMs)
 {
-  mException.pushFrame(TraceFrame("BlockingRpcSupervisor", "invoke",
-                       __FILE__, __LINE__));
+   mException.pushFrame( TraceFrame(
+      "BlockingRpcSupervisor",
+      "invoke",
+      __FILE__,
+      __LINE__
+   ));
 
-  // Send the marshalled RPC to the RpcClient.
-  RpcMarshalledCall* lpCall = rClient.invokeRpc(request);
+   // Send the marshalled RPC to the RpcClient.
+   RpcMarshalledCall* call_ptr = rClient.invokeRpc( request );
 
-  if (lpCall->wait(nTimeoutMs))
-  {
-    lpCall->getResult(mResponseObject);
+   if ( call_ptr->wait( nTimeoutMs ) )
+   {
+      call_ptr->getResult( mResponseObject );
+      liber::log::status("BlockingRpcSupervisor::invoke: %s\n", mResponseObject.exception().toString().c_str());
 
-    if (mResponseObject.exception().id == NoException)
-    {
-      if (pResponse)
+      if ( mResponseObject.exception().id == NoException )
       {
-        mResponseObject.getParams(*pResponse);
+         if ( pResponse )
+         {
+            mResponseObject.getParams(*pResponse);
+         }
       }
-    }
-    else
-    {
-      mException.pushTrace(mResponseObject.exception());
-    }
-  }
-  else
-  {
-    mException.reporter = RpcException::Client;
-    mException.id       = RpcCallTimeout;
-    mException.message  = "Time out elapsed waiting for resource response.";
-  }
+      else
+      {
+         mException.pushTrace(mResponseObject.exception());
+      }
+   }
+   else
+   {
+      mException.reporter = RpcException::Client;
+      mException.id       = RpcCallTimeout;
+      mException.message  = "Time out elapsed waiting for resource response.";
+   }
 
-  lpCall->dispose();
-  mException.popFrame();
+   call_ptr->dispose();
+   mException.popFrame();
 
-  return (mException.id == NoException);
+   return ( mException.id == NoException );
 }
 
 

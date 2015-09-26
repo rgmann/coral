@@ -4,7 +4,7 @@ project( librpc )
 find_package( Boost 1.46 REQUIRED )
 
 set( LIBNAME rpc )
-add_definitions ("-Wall")
+add_definitions ("-Wall -g")
 add_definitions ("-Wno-unused-local-typedefs")
 
 set( INCLUDE_BASE "../../includes" )
@@ -25,6 +25,7 @@ include_directories( "${INCLUDE_BASE}/rpc" )
 set( SOURCE_BASE "../.." )
 set( SOURCES
 "${SOURCE_BASE}/src/common/${LIBNAME}/AsyncRpcSupervisor.cpp"
+"${SOURCE_BASE}/src/common/${LIBNAME}/RpcPacket.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/BlockingRpcSupervisor.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RpcClient.cpp"
 "${SOURCE_BASE}/src/common/${LIBNAME}/RpcClientResource.cpp"

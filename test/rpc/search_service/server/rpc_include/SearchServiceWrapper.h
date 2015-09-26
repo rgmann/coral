@@ -1,32 +1,44 @@
 #ifndef SEARCHSERVICE_WRAPPER_H
 #define SEARCHSERVICE_WRAPPER_H
 
-#include "InstanceWrapper.h"
+#include "RpcServerResource.h"
 #include "tutorial.pb.h"
 
 namespace tutorial {
 
-class SearchServiceWrapper
-: public liber::rpc::InstanceWrapper {
+class SearchServiceSearchAction : public liber::rpc::RpcServiceAction {
 public:
 
-  explicit SearchServiceWrapper();
-  ~SearchServiceWrapper();
 
-  bool initialize(const std::string& params);
-  bool destroy(const std::string& params);
-
-  static void DELEGATE(SearchDelegate);
+   void operator() ( const std::string& request, std::string& response, liber::rpc::RpcException& e );
 
 private:
 
-  void ACTION(Search, Person, Person_PhoneNumber);
+   void Search( const Person& request, Person_PhoneNumber& response, liber::rpc::RpcException& e);
+};
 
-private:
+// class SearchServiceWrapper
+// : public liber::rpc::InstanceWrapper {
+// public:
 
-  // TODO: Add additional instance variables here.
+//   explicit SearchServiceWrapper();
+//   ~SearchServiceWrapper();
 
-}; // End SearchServiceWrapper
+//   // bool initialize(const std::string& params);
+//   // bool destroy(const std::string& params);
+
+//   static void DELEGATE(SearchDelegate);
+
+// private:
+
+//   void ACTION(Search, Person, Person_PhoneNumber);
+
+// private:
+
+//   // TODO: Add additional instance variables here.
+//    static SearchService service_;
+
+// }; // End SearchServiceWrapper
 
 }  // End namespace tutorial
 

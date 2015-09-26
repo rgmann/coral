@@ -85,22 +85,27 @@ bool PacketSubscriber::sendTo( DestinationID destination_id, GenericPacket* pack
 
    bool success = false;
 
-   RegisteredRouterMap::iterator router_iterator = routers_.begin();
-   for (; router_iterator != routers_.end(); ++router_iterator )
+   if ( packet_ptr && packet_ptr->isAllocated() )
    {
-      PacketContainer* container_ptr = new PacketContainer( destination_id, packet_ptr );
-
-      RegisteredRouter& router_info = router_iterator->second;
-      if ( router_info.mode == kSubscriberModeReadWrite )
+      RegisteredRouterMap::iterator router_iterator = routers_.begin();
+      for (; router_iterator != routers_.end(); ++router_iterator )
       {
-         PacketReceiver* receiver_ptr = router_info.receiver_ptr;
-         if ( receiver_ptr != NULL )
+         PacketContainer* container_ptr = new PacketContainer( destination_id, packet_ptr );
+
+         RegisteredRouter& router_info = router_iterator->second;
+         if ( router_info.mode == kSubscriberModeReadWrite )
          {
-            success = receiver_ptr->send( container_ptr );
+            PacketReceiver* receiver_ptr = router_info.receiver_ptr;
+            if ( receiver_ptr != NULL )
+            {
+               success = receiver_ptr->send( container_ptr );
+            }
          }
       }
-
-      delete container_ptr;
+   }
+   else
+   {
+      log::error( "PacketSubscriber::sendTo: NULL packet_ptr\n" );
    }
 
   return success;

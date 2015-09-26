@@ -15,30 +15,28 @@ static const char MarkerData[RpcPacket::RpcMarkerSize] = {'r', 'p', 'c',
 
 //------------------------------------------------------------------------------
 RpcPacket::RpcPacket()
-: GenericPacket(sizeof(RpcPacket::Data), 0)
+: GenericPacket(sizeof(RpcPacket::Data), 0)//sizeof(RpcPacket::Data)
 {
 }
 
 //------------------------------------------------------------------------------
 RpcPacket::RpcPacket(const RpcObject &object)
-: GenericPacket(sizeof(RpcPacket::Data), 0)
+: GenericPacket(sizeof(RpcPacket::Data), 0)//sizeof(RpcPacket::Data)
 {
-   std::string lSerialObject;
-   
-   lSerialObject = object.serialize();
+   std::string serialized_object = object.serialize();
 
-   if (lSerialObject.empty())
+   if ( serialized_object.empty() )
    {
      log::error("RpcPacket - Empty RpcObject. No allocation performed.\n");
    }
    else
    {
-     if (allocate(sizeof(Data), lSerialObject.size()))
+     if (allocate(sizeof(Data), serialized_object.size()))
      {
        memcpy(data()->marker, MarkerData, RpcMarkerSize);
-       data()->length = lSerialObject.size();
+       data()->length = serialized_object.size();
       
-       memcpy(dataPtr(), lSerialObject.data(), lSerialObject.size());
+       memcpy( dataPtr(), serialized_object.data(), serialized_object.size() );
      }
      else
      {
@@ -48,20 +46,22 @@ RpcPacket::RpcPacket(const RpcObject &object)
 }
 
 //------------------------------------------------------------------------------
-bool RpcPacket::getObject(RpcObject &object) const
+bool RpcPacket::getObject( RpcObject &object ) const
 {
-   bool lbSuccess = false;
+   bool deserialize_success = false;
    
-   if (isAllocated())
+   if ( isAllocated() )
    {
-      lbSuccess = object.deserialize((char*)dataPtr(), data()->length);
-      if (lbSuccess == false)
+      deserialize_success =
+         object.deserialize( (char*)dataPtr(), data()->length );
+
+      if ( deserialize_success == false )
       {
          log::error("RpcPacket::getObject: Failed to deserialize.\n");
       }
    }
    
-   return lbSuccess;
+   return deserialize_success;
 }
 
 //------------------------------------------------------------------------------

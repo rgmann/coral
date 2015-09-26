@@ -52,7 +52,7 @@ bool GenericPacket::allocate()
 {
    if (m_nSizeBytes == 0)
    {
-      printf("GenericPacket::allocate: Already allocated!\n");
+      log::debug("GenericPacket::allocate: Already allocated!\n");
       return false;
    }
 

@@ -61,7 +61,6 @@ struct RpcCallInfo {
    std::string resource;
    std::string action;
    boost::uuids::uuid uuid; // Unique Instance ID
-   i64         rpcId;
 };
 
 }}

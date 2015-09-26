@@ -14,16 +14,6 @@ using namespace liber::rpc;
 using namespace liber::netapp;
 using namespace tutorial;
 
-void tor_hook(SearchServiceWrapper* pInst, void* pUserData)
-{
-   std::string userMsg;
-
-   if (pUserData)
-   {
-      userMsg = (char*)pUserData;
-      liber::log::status("%s: ", userMsg.c_str());
-   }
-}
 
 void search_run(liber::rpc::RpcClient &client)
 {
@@ -91,6 +81,7 @@ int main()
 
   IntraRouter localRouter;
   IntraRouter remoteRouter;
+  liber::log::status("local = %p, remote=%p\n", &localRouter, &remoteRouter);
 
   localRouter.setCounterpart(&remoteRouter);
   remoteRouter.setCounterpart(&localRouter);
@@ -102,9 +93,8 @@ int main()
   liber::rpc::RpcClient client( RPC_ID );
 
   liber::rpc::RpcServer server( RPC_ID );
+  
   SearchServiceServerStub searchService;
-  searchService.registerCtorHook(tor_hook, (void*)"ctor_hook");
-  searchService.registerDtorHook(tor_hook, (void*)"dtor_hook");
   server.registerResource(&searchService);
 
   if (localRouter.subscribe(RPC_ID, &client) &&

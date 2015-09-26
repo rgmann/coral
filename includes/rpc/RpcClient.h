@@ -3,8 +3,8 @@
 
 #include <map>
 #include <boost/thread/mutex.hpp>
+#include <boost/uuid/uuid.hpp>
 #include "Queue.h"
-// #include "Mutex.h"
 #include "RpcPacket.h"
 #include "RpcMarshalledCall.h"
 #include "PacketSubscriber.h"
@@ -35,7 +35,8 @@ private:
    
    // Map each call to a unique identifier so that we can look up the
    // call when a response is received.
-   std::map<i64, RpcMarshalledCall*> mRpcMap;
+   typedef std::map<boost::uuids::uuid, RpcMarshalledCall*> CallMap;
+   CallMap mRpcMap;
 
    liber::netapp::DestinationID server_destination_id_;
 };

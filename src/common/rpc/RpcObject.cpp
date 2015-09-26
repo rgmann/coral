@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <boost/uuid/random_generator.hpp>
 #include "Log.h"
 #include "RpcObject.h"
 
@@ -11,6 +12,7 @@ using namespace liber::netapp;
 //-----------------------------------------------------------------------------
 RpcObject::RpcObject()
 {
+  mCallInfo.uuid = boost::uuids::random_generator()();
 }
 
 //-----------------------------------------------------------------------------
@@ -110,7 +112,7 @@ void RpcObject::pack(liber::netapp::SerialStream& stream) const
    stream.writeCString(callInfo().action);
 
    stream.write((const char*)callInfo().uuid.data, callInfo().uuid.size());
-   stream.write((ui64)callInfo().rpcId);
+   // stream.write((ui64)callInfo().rpcId);
    mException.serialize(stream);
    stream.write(mMessage);
 }
@@ -144,11 +146,11 @@ bool RpcObject::unpack(liber::netapp::SerialStream &stream)
     return false;
   }
 
-  if (stream.read(callInfo().rpcId) == false)
-  {
-    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-    return false;
-  }
+  // if (stream.read(callInfo().rpcId) == false)
+  // {
+  //   log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+  //   return false;
+  // }
 
   // Read the exception.
   if (exception().deserialize(stream) == false)

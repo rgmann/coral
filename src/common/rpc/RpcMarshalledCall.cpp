@@ -1,17 +1,17 @@
 #include <iostream>
+#include "Log.h"
 #include "RpcMarshalledCall.h"
 
 using namespace liber::rpc;
+using namespace liber::thread;
 
-i64 RpcMarshalledCall::ourCurrentRpcId = 0;
 
 //-----------------------------------------------------------------------------
-RpcMarshalledCall::RpcMarshalledCall(const RpcObject &object)
-: mbIsDisposed(false)
-, mbCancelled(false)
+RpcMarshalledCall::RpcMarshalledCall( const RpcObject &object )
+   : is_disposed_( false )
+   , cancelled_( false )
 {
    mParamObj = object;
-   mParamObj.callInfo().rpcId = ++ourCurrentRpcId;
 }
 
 //-----------------------------------------------------------------------------
@@ -27,54 +27,55 @@ void RpcMarshalledCall::getResult(RpcObject &result)
 }
 
 //-----------------------------------------------------------------------------
-i64 RpcMarshalledCall::getRpcId() const
+const RpcObject& RpcMarshalledCall::input() const
 {
-   return mParamObj.callInfo().rpcId;
+   return mParamObj;
 }
 
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::dispose()
 {
-   mbIsDisposed = true;
+   is_disposed_ = true;
 }
 
 //-----------------------------------------------------------------------------
 bool RpcMarshalledCall::isDisposed() const
 {
-   return mbIsDisposed;
+   return is_disposed_;
 }
 
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::notify(const RpcObject &object)
 {
    mResultObj = object;
+   liber::log::status("RpcMarshalledCall::notify: %s\n", mResultObj.exception().toString().c_str());
    mSem.give();
 }
 
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::cancel()
 {
-  mbCancelled = true;
-  mSem.give();
+   cancelled_ = true;
+   mSem.give();
 }
 
 //-----------------------------------------------------------------------------
 bool RpcMarshalledCall::cancelled() const
 {
-  return mbCancelled;
+  return cancelled_;
 }
 
 //-----------------------------------------------------------------------------
-bool RpcMarshalledCall::wait(ui32 nTimeoutMs, bool bCancelOnTimeout)
+bool RpcMarshalledCall::wait( ui32 timeout_ms, bool cancel_on_timeout )
 {
-   bool lbSuccess = mSem.take(nTimeoutMs);
+   bool success = ( mSem.take( timeout_ms ) == Semaphore::SemAcquired );
 
-   if (!lbSuccess && bCancelOnTimeout)
+   if ( success && cancel_on_timeout )
    {
-     mbIsDisposed = true;
+     is_disposed_ = true;
    }
 
-   return lbSuccess;
+   return success;
 }
 
 

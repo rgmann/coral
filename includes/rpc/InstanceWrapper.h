@@ -5,7 +5,7 @@
 #include "RpcException.h"
 
 #define DELEGATE(action_delegate)                        \
-  action_delegate(InstanceWrapper *pInst,                \
+  action_delegate(                                       \
               const std::string& request,                \
               std::string& response,                     \
               liber::rpc::RpcException& e)
@@ -22,13 +22,13 @@ namespace rpc {
 class InstanceWrapper {
 public:
 
-  typedef void (*Method)(InstanceWrapper*, const std::string&, std::string&, RpcException&);
+  typedef void (*Method)( const std::string&, std::string&, RpcException& );
    
   InstanceWrapper(){};
   virtual ~InstanceWrapper(){};
    
-  virtual bool initialize(const std::string &params) = 0;
-  virtual bool destroy(const std::string &params) = 0;
+  // virtual bool initialize(const std::string &params) = 0;
+  // virtual bool destroy(const std::string &params) = 0;
 
   const boost::uuids::uuid& uuid();
 

@@ -13,13 +13,13 @@ RpcClientResource::RpcClientResource(RpcClient&         client,
 , mClassname(classname)
 , mnTimeoutMs(3000)
 {
-   construct();
+   // construct();
 }
 
 //-----------------------------------------------------------------------------
 RpcClientResource::~RpcClientResource()
 {
-   destroy();
+   // destroy();
 }
 
 //-----------------------------------------------------------------------------
@@ -35,114 +35,125 @@ RpcException RpcClientResource::getLastError()
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::construct()
-{
-   bool lbSuccess = false;
-   BlockingRpcSupervisor lSupervisor;
-   RpcObject lRequestObject;
+// bool RpcClientResource::construct()
+// {
+//    bool lbSuccess = false;
+//    BlockingRpcSupervisor lSupervisor;
+//    RpcObject lRequestObject;
    
-   marshallRequest(lRequestObject, "construct");
+//    marshallRequest(lRequestObject, "construct");
    
-   lbSuccess = lSupervisor.invoke(mrClient,
-                                  lRequestObject,
-                                  NULL,
-                                  mnTimeoutMs);
+//    lbSuccess = lSupervisor.invoke(mrClient,
+//                                   lRequestObject,
+//                                   NULL,
+//                                   mnTimeoutMs);
 
-   if (lbSuccess)
-   {
-      mUuid = lSupervisor.response().callInfo().uuid;
-      log::debug("RpcClientResource::construct: success\n");
-   }
+//    if (lbSuccess)
+//    {
+//       mUuid = lSupervisor.response().callInfo().uuid;
+//       log::debug("RpcClientResource::construct: success\n");
+//    }
    
-   return lbSuccess;   
-}
-
-//-----------------------------------------------------------------------------
-bool RpcClientResource::destroy()
-{
-   bool lbSuccess = false;
-   BlockingRpcSupervisor lSupervisor;
-   RpcObject lRequestObject;
-   
-   marshallRequest(lRequestObject, "destroy");
-
-   lbSuccess = lSupervisor.invoke(mrClient,
-                                  lRequestObject,
-                                  NULL,
-                                  mnTimeoutMs);
-
-   if (lbSuccess)
-   {
-      mUuid = boost::uuids::nil_uuid();
-   }
-   
-   return lbSuccess;
-}
+//    return lbSuccess;   
+// }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::call(const std::string&  methodName,
+// bool RpcClientResource::destroy()
+// {
+//    bool lbSuccess = false;
+//    BlockingRpcSupervisor lSupervisor;
+//    RpcObject lRequestObject;
+   
+//    marshallRequest(lRequestObject, "destroy");
+
+//    lbSuccess = lSupervisor.invoke(mrClient,
+//                                   lRequestObject,
+//                                   NULL,
+//                                   mnTimeoutMs);
+
+//    if (lbSuccess)
+//    {
+//       mUuid = boost::uuids::nil_uuid();
+//    }
+   
+//    return lbSuccess;
+// }
+
+//-----------------------------------------------------------------------------
+bool RpcClientResource::call(const std::string&  action,
                              const PbMessage&    request,
                              PbMessage&          response,
-                             AsyncRpcSupervisor* pAsyncSupervisor)
+                             AsyncRpcSupervisor* async_supervisor_ptr )
 {
-   bool lbSuccess = false;
-   RpcObject lRequestObject;
+   bool call_success = false;
+   RpcObject request_object;
 
-   BlockingRpcSupervisor lBlockingSupervisor;
-   RpcSupervisor* lpSupervisor = &lBlockingSupervisor;
+   BlockingRpcSupervisor blocking_supervisor;
+   RpcSupervisor* supervisor_ptr = &blocking_supervisor;
 
    mLastError.reset();
-   mLastError.pushFrame(TraceFrame("RpcClientResource", "call",
-                                   __FILE__, __LINE__));
+   mLastError.pushFrame( TraceFrame(
+      "RpcClientResource", "call",
+      __FILE__, __LINE__
+   ));
 
-   if (pAsyncSupervisor != NULL)
+   if ( async_supervisor_ptr != NULL )
    {
-     lpSupervisor = pAsyncSupervisor;
+     supervisor_ptr = async_supervisor_ptr;
    }
 
-   marshallRequest(lRequestObject, methodName, &request);
+   marshallRequest( request_object, action, &request );
    
-   lbSuccess = lpSupervisor->invoke(mrClient, lRequestObject, &response, mnTimeoutMs);
+   call_success = supervisor_ptr->invoke(
+      mrClient, 
+      request_object,
+      &response,
+      mnTimeoutMs
+   );
 
-   if (!lbSuccess)
+   if ( call_success == false )
    {
-     mLastError.pushTrace(lpSupervisor->exception());
+      mLastError.pushTrace( supervisor_ptr->exception() );
    }
 
    mLastError.popFrame();
    
-   return lbSuccess;
+   return call_success;
 }
 
 //-----------------------------------------------------------------------------
-void RpcClientResource::
-marshallRequest(RpcObject&         requestObject,
-                const std::string& methodName,
-                const PbMessage*   pRequestParameters)
+void RpcClientResource::marshallRequest(
+   RpcObject&         requestObject,
+   const std::string& methodName,
+   const PbMessage*   pRequestParameters)
 {
-  requestObject.callInfo().resource = mClassname;
-  requestObject.callInfo().uuid = mUuid;
-  requestObject.callInfo().action = methodName;
-  if (pRequestParameters) requestObject.setParams(*pRequestParameters);
+   requestObject.callInfo().resource = mClassname;
+   // requestObject.callInfo().uuid = mUuid;
+   requestObject.callInfo().action   = methodName;
+   if ( pRequestParameters )
+   {
+      requestObject.setParams( *pRequestParameters );
+   }
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClientResource::invoke(const RpcObject& object,
-                               RpcObject&       result,
-                               ui32             nTimeoutMs)
+bool RpcClientResource::invoke(
+   const RpcObject& object,
+   RpcObject&       result,
+   ui32             nTimeoutMs)
 {
-   bool lbSuccess = false;
+   bool success = false;
 
    // Send the marshalled RPC to the RpcClient.
-   RpcMarshalledCall* lpCall = mrClient.invokeRpc(object);
+   RpcMarshalledCall* marshalled_call = mrClient.invokeRpc( object );
 
-   if ((lbSuccess = lpCall->wait(nTimeoutMs)) == true)
+   if ( ( success = marshalled_call->wait( nTimeoutMs ) ) == true )
    {
-      lpCall->getResult(result);
+      marshalled_call->getResult( result );
    }
 
-   lpCall->dispose();
+   marshalled_call->dispose();
 
-   return lbSuccess;
+   return success;
 }
 

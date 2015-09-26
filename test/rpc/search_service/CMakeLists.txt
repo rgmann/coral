@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project( search_service )
 
 cmake_policy(SET CMP0015 NEW)
-add_definitions ("-Wall")
+add_definitions ("-Wall -g")
 add_definitions ("-Wno-unused-local-typedefs")
 
 # GPBUFLIB = `pkg-config --cflags --libs protobuf` 
@@ -14,7 +14,7 @@ find_package( Protobuf REQUIRED )
 
 set( INCLUDE_BASE "../../../includes" )
 include_directories( ${Boost_INCLUDE_DIRS} )
-include_directories(${PROTOBUF_INCLUDE_DIRS})
+include_directories( ${PROTOBUF_INCLUDE_DIRS} )
 
 include_directories( "../../third_party/gtest-1.7.0/include" )
 include_directories( "${INCLUDE_BASE}/base" )
@@ -40,18 +40,19 @@ link_directories( ../../../lib/rpc )
 link_directories( "../../../third_party/gtest-1.7.0/" )
 
 add_executable( search_service
-search_service.cpp
 "common/rpc_source/tutorial.pb.cc"
 "client/rpc_source/SearchServiceClientStub.cpp"
 "server/rpc_source/SearchServiceServerStub.cpp"
 "server/rpc_source/SearchServiceWrapper.cpp"
-"server/rpc_source/user.SearchServiceWrapper.cpp" )
+"server/rpc_source/user.SearchServiceWrapper.cpp"
+search_service.cpp )
 
 target_link_libraries( search_service rpc )
 target_link_libraries( search_service base )
 target_link_libraries( search_service netapp_common )
 target_link_libraries( search_service gtest )
 target_link_libraries( search_service ${Boost_LIBRARIES} )
+target_link_libraries( search_service ${PROTOBUF_LIBRARIES} )
 target_link_libraries( search_service pthread )
 
 if(APPLE)

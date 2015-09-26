@@ -26,11 +26,12 @@ void IntraRouter::setCounterpart(IntraRouter* pCounterpart)
 }
 
 //-----------------------------------------------------------------------------
-void IntraRouter::run(const bool& bShutdown)
+void IntraRouter::run(const bool& shutdown)
 {
-   while (!bShutdown)
+   while ( shutdown == false )
    {
       PacketContainer* container_ptr = NULL;
+
       if ( ( container_ptr = mReceiver.pop() ) != NULL )
       {
          if ( mpCounterpart )
@@ -39,7 +40,7 @@ void IntraRouter::run(const bool& bShutdown)
          }
          else
          {
-           log::error("IntraRouter - no counterpart set\n");
+            log::error("IntraRouter - no counterpart set\n");
          }
 
          if ( container_ptr->packet_ptr_ )
@@ -54,7 +55,7 @@ void IntraRouter::run(const bool& bShutdown)
 }
 
 //-----------------------------------------------------------------------------
-void IntraRouter::routePacket(PacketContainer* pContainer)
+void IntraRouter::routePacket( PacketContainer* pContainer )
 {
    publish(
       pContainer->destination_id_,

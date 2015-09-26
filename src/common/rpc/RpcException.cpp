@@ -123,7 +123,7 @@ void RpcException::reset()
   mCallInfo.resource = "";
   mCallInfo.action = "";
   mCallInfo.uuid = boost::uuids::nil_generator()();
-  mCallInfo.rpcId = 0;
+  // mCallInfo.rpcId = 0;
 
   mTrace.clear();
 }

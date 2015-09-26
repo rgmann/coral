@@ -13,6 +13,12 @@
 namespace liber {
 namespace rpc {
 
+class RpcServiceAction {
+public:
+
+   virtual void operator() ( const std::string& request, std::string& response, RpcException& e ) = 0;
+};
+
 class RpcServerResource {
 public:
    
@@ -25,12 +31,6 @@ public:
    virtual void registerActions() = 0;
 
 protected:
-
-   virtual bool isValidInstance(boost::uuids::uuid& uuid);
-   
-   bool construct(RpcObject &input, RpcObject &output);
-   
-   bool destroy(RpcObject &input, RpcObject &output);
    
    bool invoke(boost::uuids::uuid& uuid, RpcObject &input, RpcObject &output);
       
@@ -38,17 +38,10 @@ protected:
                   RpcObject&         output,
                   RpcErrorId         eid,
                   const std::string& message = "");
-   
-
-   virtual InstanceWrapper* createInstance() = 0;
-   InstanceWrapper* getInstance(boost::uuids::uuid& uuid);
       
    bool addAction(const std::string &name,
-                  InstanceWrapper::Method wrapper);
+                  RpcServiceAction* action_ptr );
 
-   static const i32 HookRegTimeoutMs = 500;  
-   virtual bool tugCtorHook(InstanceWrapper* pInst) = 0;
-   virtual bool tugDtorHook(InstanceWrapper* pInst) = 0;
 
 protected:
  
@@ -57,14 +50,10 @@ protected:
 private:
    
    std::string resource_name_;
-   
-   typedef  std::map<boost::uuids::uuid,InstanceWrapper*> InstanceMap;
-   InstanceMap instances_;
 
-   typedef  std::map<std::string,InstanceWrapper::Method> MethodMap;
-   MethodMap methods_;
+   typedef  std::map<std::string,RpcServiceAction*> ActionMap;
+   ActionMap actions_;
    
-   int mnInstanceCount;
 };
 
 }}
