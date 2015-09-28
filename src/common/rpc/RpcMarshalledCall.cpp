@@ -11,25 +11,25 @@ RpcMarshalledCall::RpcMarshalledCall( const RpcObject &object )
    : is_disposed_( false )
    , cancelled_( false )
 {
-   mParamObj = object;
+   param_object_ = object;
 }
 
 //-----------------------------------------------------------------------------
 RpcPacket* RpcMarshalledCall::getRpcPacket() const
 {
-   return new (std::nothrow) RpcPacket(mParamObj);
+   return new (std::nothrow) RpcPacket(param_object_);
 }
 
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::getResult(RpcObject &result)
 {
-   result = mResultObj;
+   result = result_object_;
 }
 
 //-----------------------------------------------------------------------------
 const RpcObject& RpcMarshalledCall::input() const
 {
-   return mParamObj;
+   return param_object_;
 }
 
 //-----------------------------------------------------------------------------
@@ -47,8 +47,7 @@ bool RpcMarshalledCall::isDisposed() const
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::notify(const RpcObject &object)
 {
-   mResultObj = object;
-   liber::log::status("RpcMarshalledCall::notify: %s\n", mResultObj.exception().toString().c_str());
+   result_object_ = object;
    mSem.give();
 }
 

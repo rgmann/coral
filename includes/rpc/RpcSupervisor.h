@@ -9,8 +9,8 @@ namespace rpc {
 class RpcSupervisor {
 public:
 
-  inline RpcSupervisor() {};
-  inline virtual ~RpcSupervisor() {};
+  RpcSupervisor() {};
+  virtual ~RpcSupervisor() {};
 
   virtual bool invoke(RpcClient&       rClient,
                       const RpcObject& rMarshalledCall,
@@ -28,8 +28,8 @@ private:
 
 protected:
 
-  RpcObject    mResponseObject;
-  RpcException mException;
+  RpcObject    response_object_;
+  RpcException exception_;
 
 }; // End class RpcSupervisor
 

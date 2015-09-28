@@ -16,7 +16,16 @@ namespace rpc {
 class RpcServiceAction {
 public:
 
+   RpcServiceAction( const std::string& action_name )
+      :action_name_( action_name ){}
+
+   const std::string& getName() const { return action_name_; }
+
    virtual void operator() ( const std::string& request, std::string& response, RpcException& e ) = 0;
+
+private:
+
+   std::string action_name_;
 };
 
 class RpcServerResource {
@@ -30,6 +39,8 @@ public:
 
    virtual void registerActions() = 0;
 
+   bool addAction( RpcServiceAction* action_ptr );
+
 protected:
    
    bool invoke(boost::uuids::uuid& uuid, RpcObject &input, RpcObject &output);
@@ -38,9 +49,6 @@ protected:
                   RpcObject&         output,
                   RpcErrorId         eid,
                   const std::string& message = "");
-      
-   bool addAction(const std::string &name,
-                  RpcServiceAction* action_ptr );
 
 
 protected:

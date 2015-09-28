@@ -36,14 +36,18 @@ private:
   bool generateServerResourceStubImp(
               const google::protobuf::ServiceDescriptor* pDescriptor);
 
-  bool generateServerInstanceWrapperHeader(
-              const google::protobuf::ServiceDescriptor* pDescriptor);
+  // bool generateServerInstanceWrapperHeader(
+  //             const google::protobuf::ServiceDescriptor* pDescriptor);
 
-  bool generateServerInstanceWrapperImp(
-              const google::protobuf::ServiceDescriptor* pDescriptor);
+  // bool generateServerInstanceWrapperImp(
+  //             const google::protobuf::ServiceDescriptor* pDescriptor);
 
-  bool generateServerInstanceWrapperUserImp(
-              const google::protobuf::ServiceDescriptor* pDescriptor);
+  // bool generateServerInstanceWrapperUserImp(
+  //             const google::protobuf::ServiceDescriptor* pDescriptor);
+  bool generate_server_action_headers(
+    const google::protobuf::ServiceDescriptor* );
+  bool generate_server_action_imp(
+    const google::protobuf::ServiceDescriptor* );
 
   static std::string GetFullyQualifiedName(const google::protobuf::Descriptor* pDescriptor);
 

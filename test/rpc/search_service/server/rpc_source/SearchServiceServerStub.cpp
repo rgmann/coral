@@ -6,7 +6,7 @@ using namespace tutorial;
 
 //-----------------------------------------------------------------------------
 SearchServiceServerStub::SearchServiceServerStub()
-   : RpcServerResource("SearchService")
+   : RpcServerResource( "SearchService" )
 {
 }
 
@@ -18,5 +18,5 @@ SearchServiceServerStub::~SearchServiceServerStub()
 //-----------------------------------------------------------------------------
 void SearchServiceServerStub::registerActions()
 {
-   addAction( "Search", new SearchServiceSearchAction() );
+   addAction( &default_search_action_ );
 }

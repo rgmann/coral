@@ -7,10 +7,13 @@ using namespace liber::concurrency;
 
 //----------------------------------------------------------------------------
 AsyncRpcSupervisor::AsyncRpcSupervisor()
-: RpcSupervisor()
-, IThread("AsyncRpcSupervisor")
+   : RpcSupervisor()
+   , IThread( "AsyncRpcSupervisor" )
+   , cancelled_( false )
+   , marshalled_call_( NULL )
+   , response_message_ptr_( NULL )
+   , timeout_ms_( 0 )
 {
-  reset();
 }
 
 //----------------------------------------------------------------------------
@@ -21,129 +24,142 @@ AsyncRpcSupervisor::~AsyncRpcSupervisor()
 //----------------------------------------------------------------------------
 bool AsyncRpcSupervisor::isBusy()
 {
-  mCallMutex.lock();
-  bool lbIsBusy = (mpCall != NULL);
-  mCallMutex.unlock();
-  return lbIsBusy;
+  boost::mutex::scoped_lock guard( call_lock_ );
+  return ( marshalled_call_ != NULL );
 }
 
 //----------------------------------------------------------------------------
 void AsyncRpcSupervisor::cancel()
 {
-  mCallMutex.lock();
-  if (mpCall)
-  {
-    mpCall->cancel();
-  }
-  mCallMutex.unlock();
+   boost::mutex::scoped_lock guard( call_lock_ );
+
+   if ( marshalled_call_ )
+   {
+      marshalled_call_->cancel();
+   }
 }
 
 //----------------------------------------------------------------------------
 bool AsyncRpcSupervisor::cancelled() const
 {
-  return mbCancelled;
+  return cancelled_;
 }
 
 //----------------------------------------------------------------------------
 bool AsyncRpcSupervisor::reset()
 {
-  bool lbIsBusy = isBusy();
+   bool supervisor_busy = isBusy();
 
-  if (!lbIsBusy)
-  {
-    mbCancelled = false;
+   if ( supervisor_busy == false )
+   {
+      boost::mutex::scoped_lock guard( call_lock_ );
 
-    mCallMutex.lock();
-    mpCall = NULL;
-    mCallMutex.unlock();
+      cancelled_            = false;
+      marshalled_call_      = NULL;
+      response_message_ptr_ = NULL;
 
-    mpResponseMessage = NULL;
+      exception_.reset();
+   }
 
-    mException.reset();
-  }
-
-  return (lbIsBusy == false);
+   return ( supervisor_busy == false );
 }
 
 //----------------------------------------------------------------------------
 bool AsyncRpcSupervisor::failed() const
 {
-  return (mException.id != NoException);
+  return ( exception_.id != NoException );
 }
 
 //----------------------------------------------------------------------------
-bool AsyncRpcSupervisor::
-invoke(RpcClient& rClient, const RpcObject& request, PbMessage* pResponseMessage, int nTimeoutMs)
+bool AsyncRpcSupervisor::invoke(
+   RpcClient&        rpc_client,
+   const RpcObject&  request,
+   PbMessage*        response_message_ptr,
+   int               timeout_ms )
 {
-  bool lbSuccess = false;
+   bool success = false;
 
-  mException.pushFrame(TraceFrame("AsyncRpcSupervisor", "invoke",
-                       __FILE__, __LINE__));
+   exception_.pushFrame( TraceFrame(
+      "AsyncRpcSupervisor",
+      "invoke",
+      __FILE__,
+      __LINE__
+   ));
 
-  if (isBusy() == false)
-  {
-    mnTimeoutMs = nTimeoutMs;
-    mpResponseMessage = pResponseMessage;
+   log::status("AsyncRpcSupervisor::invoke\n");
+   if ( isBusy() == false )
+   {
+      timeout_ms_           = timeout_ms;
+      response_message_ptr_ = response_message_ptr;
 
-    // Send the marshalled RPC to the RpcClient.
-    mpCall = rClient.invokeRpc(request);
-    lbSuccess = (mpCall != NULL);
-    lbSuccess = (lbSuccess && launch());
-  }
+      // Send the marshalled RPC to the RpcClient.
+      marshalled_call_ = rpc_client.invokeRpc( request );
+      log::status("AsyncRpcSupervisor::invoke\n");
 
-  mException.popFrame();
-
-  return lbSuccess;
-}
-
-//----------------------------------------------------------------------------
-void AsyncRpcSupervisor::run(const bool& bShutdown)
-{
-  mException.pushFrame(TraceFrame("AsyncRpcSupervisor", "run",
-                       __FILE__, __LINE__));
-
-  if (mpCall->wait(mnTimeoutMs))
-  {
-    if (mpCall->cancelled())
-    {
-      mException.reporter = RpcException::Client;
-      mException.id       = RpcCallTimeout;
-      mException.message  = "Call was cancelled before a response was received.";
-    }
-    else
-    {
-      mpCall->getResult(mResponseObject);
-      liber::log::status("AsyncRpcSupervisor::run: %s\n", mResponseObject.exception().toString().c_str());
-
-      if (mResponseObject.exception().id == NoException)
+      if ( marshalled_call_ != NULL )
       {
-        if (mpResponseMessage)
-        {
-          mResponseObject.getParams(*mpResponseMessage);
-        }
+         success = launch();
+      }
+   }
+
+  exception_.popFrame();
+
+  return success;
+}
+
+//----------------------------------------------------------------------------
+void AsyncRpcSupervisor::run( const bool& bShutdown )
+{
+   exception_.pushFrame( TraceFrame(
+      "AsyncRpcSupervisor",
+      "run",
+      __FILE__,
+      __LINE__
+   ));
+
+   if ( marshalled_call_->wait( timeout_ms_ ) )
+   {
+      if ( marshalled_call_->cancelled() )
+      {
+         exception_.reporter = RpcException::Client;
+         exception_.id       = RpcCallTimeout;
+         exception_.message  = "Call was cancelled before a response was received.";
       }
       else
       {
-        mException.pushTrace(mResponseObject.exception());
+         marshalled_call_->getResult( response_object_ );
+
+         if ( response_object_.exception().id == NoException )
+         {
+            if (response_message_ptr_)
+            {
+               response_object_.getParams( *response_message_ptr_ );
+            }
+         }
+         else
+         {
+            exception_.pushTrace( response_object_.exception() );
+         }
       }
-    }
-  }
-  else
-  {
-    mException.reporter = RpcException::Client;
-    mException.id       = RpcCallTimeout;
-    mException.message  = "Time out elapsed waiting for resource response.";
-  }
+   }
+   else
+   {
+      exception_.reporter = RpcException::Client;
+      exception_.id       = RpcCallTimeout;
+      exception_.message  = "Time out elapsed waiting for resource response.";
+   }
 
-  mpCall->dispose();
+   marshalled_call_->dispose();
 
-  mCallMutex.lock();
-  mbCancelled = mpCall->cancelled();
-  mpCall = NULL;
-  mCallMutex.unlock();
+   {
+      boost::mutex::scoped_lock guard( call_lock_ );
 
-  mException.popFrame();
+      cancelled_       = marshalled_call_->cancelled();
+      marshalled_call_ = NULL;
+   }
 
-  callback();
+   exception_.popFrame();
+
+   callback();
 }
 

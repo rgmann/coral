@@ -7,19 +7,19 @@ using namespace liber;
 using namespace liber::rpc;
 
 //-----------------------------------------------------------------------------
-RpcClientResource::RpcClientResource(RpcClient&         client,
-                                     const std::string& classname)
-: mrClient(client)
-, mClassname(classname)
-, mnTimeoutMs(3000)
+RpcClientResource::RpcClientResource(
+   RpcClient&         client,
+   const std::string& classname
+)
+   : mrClient(client)
+   , mClassname(classname)
+   , mnTimeoutMs(3000)
 {
-   // construct();
 }
 
 //-----------------------------------------------------------------------------
 RpcClientResource::~RpcClientResource()
 {
-   // destroy();
 }
 
 //-----------------------------------------------------------------------------
@@ -33,51 +33,6 @@ RpcException RpcClientResource::getLastError()
 {
    return mLastError;
 }
-
-//-----------------------------------------------------------------------------
-// bool RpcClientResource::construct()
-// {
-//    bool lbSuccess = false;
-//    BlockingRpcSupervisor lSupervisor;
-//    RpcObject lRequestObject;
-   
-//    marshallRequest(lRequestObject, "construct");
-   
-//    lbSuccess = lSupervisor.invoke(mrClient,
-//                                   lRequestObject,
-//                                   NULL,
-//                                   mnTimeoutMs);
-
-//    if (lbSuccess)
-//    {
-//       mUuid = lSupervisor.response().callInfo().uuid;
-//       log::debug("RpcClientResource::construct: success\n");
-//    }
-   
-//    return lbSuccess;   
-// }
-
-//-----------------------------------------------------------------------------
-// bool RpcClientResource::destroy()
-// {
-//    bool lbSuccess = false;
-//    BlockingRpcSupervisor lSupervisor;
-//    RpcObject lRequestObject;
-   
-//    marshallRequest(lRequestObject, "destroy");
-
-//    lbSuccess = lSupervisor.invoke(mrClient,
-//                                   lRequestObject,
-//                                   NULL,
-//                                   mnTimeoutMs);
-
-//    if (lbSuccess)
-//    {
-//       mUuid = boost::uuids::nil_uuid();
-//    }
-   
-//    return lbSuccess;
-// }
 
 //-----------------------------------------------------------------------------
 bool RpcClientResource::call(const std::string&  action,

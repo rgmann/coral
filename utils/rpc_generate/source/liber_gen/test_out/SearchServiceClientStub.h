@@ -6,13 +6,17 @@
 
 namespace tutorial {
 
-class SearchServiceClientStub {
+class SearchServiceClientStub
+: public liber::rpc::RpcClientResource {
 public:
 
   explicit SearchServiceClientStub(liber::rpc::RpcClient &client);
   ~SearchServiceClientStub();
 
-  void Search(const Person& request, Person_PhoneNumber& response) throw (liber::rpc::RpcException);
+  void Search(const Person& request, Person_PhoneNumber& response, liber::rpc::AsyncRpcSupervisor* pSupervisor = NULL)
+         throw (liber::rpc::RpcException);
+  void Add(const Person& request, Person_PhoneNumber& response, liber::rpc::AsyncRpcSupervisor* pSupervisor = NULL)
+         throw (liber::rpc::RpcException);
 
 }; // End SearchServiceClientStub
 

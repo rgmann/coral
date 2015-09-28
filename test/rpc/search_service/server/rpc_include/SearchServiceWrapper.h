@@ -9,36 +9,14 @@ namespace tutorial {
 class SearchServiceSearchAction : public liber::rpc::RpcServiceAction {
 public:
 
+   SearchServiceSearchAction();
 
    void operator() ( const std::string& request, std::string& response, liber::rpc::RpcException& e );
 
-private:
+protected:
 
-   void Search( const Person& request, Person_PhoneNumber& response, liber::rpc::RpcException& e);
+   virtual void Search( const Person& request, Person_PhoneNumber& response, liber::rpc::RpcException& e);
 };
-
-// class SearchServiceWrapper
-// : public liber::rpc::InstanceWrapper {
-// public:
-
-//   explicit SearchServiceWrapper();
-//   ~SearchServiceWrapper();
-
-//   // bool initialize(const std::string& params);
-//   // bool destroy(const std::string& params);
-
-//   static void DELEGATE(SearchDelegate);
-
-// private:
-
-//   void ACTION(Search, Person, Person_PhoneNumber);
-
-// private:
-
-//   // TODO: Add additional instance variables here.
-//    static SearchService service_;
-
-// }; // End SearchServiceWrapper
 
 }  // End namespace tutorial
 

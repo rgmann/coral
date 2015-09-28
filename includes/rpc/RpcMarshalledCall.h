@@ -39,8 +39,8 @@ private:
    
    BinarySem mSem;
 
-   RpcObject mParamObj;
-   RpcObject mResultObj;
+   RpcObject param_object_;
+   RpcObject result_object_;
  
    bool is_disposed_;
    bool cancelled_;

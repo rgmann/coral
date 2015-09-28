@@ -89,7 +89,7 @@ bool RpcServerResource::invoke(
       {
          exception(
             input, output,
-            NullInstance,
+            NullAction,
             "Null reference for \"" + input.callInfo().action + "\" action"
          );
 
@@ -107,17 +107,18 @@ bool RpcServerResource::invoke(
 }
 
 //------------------------------------------------------------------------------
-bool RpcServerResource::addAction(
-   const std::string&      action_name,
-   RpcServiceAction*       action_ptr
-)
+bool RpcServerResource::addAction( RpcServiceAction* action_ptr )
 {
    bool add_action_success = false;
    
-   if ( actions_.count( action_name ) == 0 )
+   if ( actions_.count( action_ptr->getName() ) != 0 )
+   {
+      actions_.erase( action_ptr->getName() );
+   }
+
    {
       std::pair<ActionMap::iterator,bool> add_status =
-         actions_.insert( std::make_pair( action_name, action_ptr ) );
+         actions_.insert( std::make_pair( action_ptr->getName(), action_ptr ) );
 
       add_action_success = add_status.second;
    }

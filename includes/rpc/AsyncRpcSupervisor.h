@@ -1,8 +1,8 @@
 #ifndef ASYNC_RPC_SUPERVISOR_H
 #define ASYNC_RPC_SUPERVISOR_H
 
-#include "IThread.h"
 #include <boost/thread/mutex.hpp>
+#include "IThread.h"
 #include "RpcSupervisor.h"
 
 namespace liber {
@@ -44,11 +44,11 @@ private:
 
 private:
 
-  bool               mbCancelled;
-  RpcMarshalledCall* mpCall;
-  boost::mutex           mCallMutex;
-  PbMessage*         mpResponseMessage;
-  int                mnTimeoutMs;
+  bool               cancelled_;
+  RpcMarshalledCall* marshalled_call_;
+  boost::mutex       call_lock_;
+  PbMessage*         response_message_ptr_;
+  int                timeout_ms_;
 }; // End class AsyncRpcSupervisor
 
 } // End namespace rpc

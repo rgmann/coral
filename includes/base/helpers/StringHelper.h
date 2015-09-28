@@ -21,6 +21,8 @@ public:
    static std::string& Trim(std::string &s);
 
    static std::string ToUpper(const std::string& s);
+
+   static std::string ToLower(const std::string& s);
    
 private:
    

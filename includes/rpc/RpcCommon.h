@@ -25,7 +25,7 @@ enum RpcErrorId
    MissingParameters,
 
    // Instance ID was found byte the pointer is NULL
-   NullInstance,
+   NullAction,
    UnknownMethod,
 
    // Developer has not filled in an action's implementation.
@@ -47,7 +47,7 @@ inline std::string ToRpcErrorString(RpcErrorId error)
       case UIIDAssignmentErr: lsException = "UIIDAssignmentErr"; break;
       case InvalidUIID: lsException = "InvalidUIID"; break;
       case MissingParameters: lsException = "MissingParameters"; break;
-      case NullInstance: lsException = "NullInstance"; break;
+      case NullAction: lsException = "NullAction"; break;
       case UnknownMethod: lsException = "UnknownMethod"; break;
       case UnimplementedAction: lsException = "UnimplementedAction"; break;
       default: lsException = "Unknown"; break;

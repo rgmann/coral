@@ -135,9 +135,10 @@ void protobuf_AddDesc_tutorial_2eproto() {
     "pe\030\002 \001(\0162\032.tutorial.Person.PhoneType:\004HO"
     "ME\"+\n\tPhoneType\022\n\n\006MOBILE\020\000\022\010\n\004HOME\020\001\022\010\n"
     "\004WORK\020\002\"/\n\013AddressBook\022 \n\006person\030\001 \003(\0132\020"
-    ".tutorial.Person2I\n\rSearchService\0228\n\006Sea"
-    "rch\022\020.tutorial.Person\032\034.tutorial.Person."
-    "PhoneNumber", 371);
+    ".tutorial.Person2\200\001\n\rSearchService\0228\n\006Se"
+    "arch\022\020.tutorial.Person\032\034.tutorial.Person"
+    ".PhoneNumber\0225\n\003Add\022\020.tutorial.Person\032\034."
+    "tutorial.Person.PhoneNumber", 427);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "tutorial.proto", &protobuf_RegisterTypes);
   Person::default_instance_ = new Person();

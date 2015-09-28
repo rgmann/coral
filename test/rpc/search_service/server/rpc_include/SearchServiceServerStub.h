@@ -6,8 +6,6 @@
 
 namespace tutorial {
 
-struct SearchServiceHookCb;
-
 class SearchServiceServerStub
 : public liber::rpc::RpcServerResource {
 public:
@@ -17,12 +15,9 @@ public:
 
   virtual void registerActions();
 
-
-protected:
-
-
 private:
 
+  SearchServiceSearchAction default_search_action_;
 
 }; // End SearchServiceServerStub
 

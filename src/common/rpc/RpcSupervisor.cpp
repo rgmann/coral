@@ -5,12 +5,12 @@ using namespace liber::rpc;
 //----------------------------------------------------------------------------
 RpcException& RpcSupervisor::exception()
 {
-  return mException;
+  return exception_;
 }
 
 //----------------------------------------------------------------------------
 RpcObject& RpcSupervisor::response()
 {
-  return mResponseObject;
+  return response_object_;
 }
 

@@ -2,14 +2,13 @@
 #define SEARCHSERVICE_SERVER_STUB_H
 
 #include "RpcServerResource.h"
-#include "SearchServiceWrapper.h"
+#include "SearchServiceSearchAction"
+#include "SearchServiceAddAction"
 
 namespace tutorial {
 
-struct SearchServiceHookCb;
-
-class SearchServiceServerStub
-: public liber::rpc::RpcServerResource {
+class SearchServiceServerStub :
+public liber::rpc::RpcServerResource {
 public:
 
   explicit SearchServiceServerStub();
@@ -17,21 +16,10 @@ public:
 
   virtual void registerActions();
 
-  typedef void (*SearchServiceHook)(SearchServiceWrapper*, void*);
-  bool registerCtorHook(SearchServiceHook pFunc, void* pUserData = NULL);
-  bool registerDtorHook(SearchServiceHook pFunc, void* pUserData = NULL);
-
-protected:
-
-  liber::rpc::InstanceWrapper* createInstance();
-
-  bool tugCtorHook(liber::rpc::InstanceWrapper* pInst);
-  bool tugDtorHook(liber::rpc::InstanceWrapper* pInst);
-
 private:
 
-  struct SearchServiceHookCb* mpCreateHook;
-  struct SearchServiceHookCb* mpDestroyHook;
+  SearchServiceSearchAction default_search_action_;
+  SearchServiceAddAction default_add_action_;
 
 }; // End SearchServiceServerStub
 

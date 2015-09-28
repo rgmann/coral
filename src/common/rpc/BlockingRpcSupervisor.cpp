@@ -16,12 +16,12 @@ BlockingRpcSupervisor::~BlockingRpcSupervisor()
 
 //----------------------------------------------------------------------------
 bool BlockingRpcSupervisor::invoke(
-   RpcClient&        rClient,
+   RpcClient&        rpc_client,
    const RpcObject&  request,
-   PbMessage*        pResponse,
-   int               nTimeoutMs)
+   PbMessage*        response_message_ptr,
+   int               timeout_ms )
 {
-   mException.pushFrame( TraceFrame(
+   exception_.pushFrame( TraceFrame(
       "BlockingRpcSupervisor",
       "invoke",
       __FILE__,
@@ -29,36 +29,35 @@ bool BlockingRpcSupervisor::invoke(
    ));
 
    // Send the marshalled RPC to the RpcClient.
-   RpcMarshalledCall* call_ptr = rClient.invokeRpc( request );
+   RpcMarshalledCall* call_ptr = rpc_client.invokeRpc( request );
 
-   if ( call_ptr->wait( nTimeoutMs ) )
+   if ( call_ptr->wait( timeout_ms ) )
    {
-      call_ptr->getResult( mResponseObject );
-      liber::log::status("BlockingRpcSupervisor::invoke: %s\n", mResponseObject.exception().toString().c_str());
+      call_ptr->getResult( response_object_ );
 
-      if ( mResponseObject.exception().id == NoException )
+      if ( response_object_.exception().id == NoException )
       {
-         if ( pResponse )
+         if ( response_message_ptr )
          {
-            mResponseObject.getParams(*pResponse);
+            response_object_.getParams( *response_message_ptr );
          }
       }
       else
       {
-         mException.pushTrace(mResponseObject.exception());
+         exception_.pushTrace( response_object_.exception() );
       }
    }
    else
    {
-      mException.reporter = RpcException::Client;
-      mException.id       = RpcCallTimeout;
-      mException.message  = "Time out elapsed waiting for resource response.";
+      exception_.reporter = RpcException::Client;
+      exception_.id       = RpcCallTimeout;
+      exception_.message  = "Time out elapsed waiting for resource response.";
    }
 
    call_ptr->dispose();
-   mException.popFrame();
+   exception_.popFrame();
 
-   return ( mException.id == NoException );
+   return ( exception_.id == NoException );
 }
 
 
