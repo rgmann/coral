@@ -8,7 +8,7 @@ add_definitions ("-Wno-unused-local-typedefs")
 
 find_package( Protobuf REQUIRED )
 
-set( INCLUDE_BASE "../../../../includes" )
+set( INCLUDE_BASE "../../includes" )
 include_directories( ${PROTOBUF_INCLUDE_DIRS} )
 
 include_directories( "${INCLUDE_BASE}/base" )
@@ -18,7 +18,7 @@ include_directories( "${INCLUDE_BASE}/base/helpers" )
 include_directories( "${INCLUDE_BASE}/base/container" )
 
 
-link_directories( ../../../../lib/base )
+link_directories( "../../lib/base" )
 
 add_executable( protoc-gen-libergen
 LiberFileGenerator.cpp

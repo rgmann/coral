@@ -1,0 +1,11 @@
+*.o
+*.a
+*.dSYM
+.DS_Store
+*.sublime-*
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+protoc-gen-libergen
+
