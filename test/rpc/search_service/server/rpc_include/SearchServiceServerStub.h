@@ -2,12 +2,12 @@
 #define SEARCHSERVICE_SERVER_STUB_H
 
 #include "RpcServerResource.h"
-#include "SearchServiceWrapper.h"
+#include "SearchServiceSearchAction.h"
 
 namespace tutorial {
 
-class SearchServiceServerStub
-: public liber::rpc::RpcServerResource {
+class SearchServiceServerStub :
+public liber::rpc::RpcServerResource {
 public:
 
   explicit SearchServiceServerStub();

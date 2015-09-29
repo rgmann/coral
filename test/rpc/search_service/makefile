@@ -204,6 +204,33 @@ search_service.cpp.s:
 	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/search_service.cpp.s
 .PHONY : search_service.cpp.s
 
+server/rpc_source/SearchServiceSearchAction.o: server/rpc_source/SearchServiceSearchAction.cpp.o
+
+.PHONY : server/rpc_source/SearchServiceSearchAction.o
+
+# target to build an object file
+server/rpc_source/SearchServiceSearchAction.cpp.o:
+	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.o
+.PHONY : server/rpc_source/SearchServiceSearchAction.cpp.o
+
+server/rpc_source/SearchServiceSearchAction.i: server/rpc_source/SearchServiceSearchAction.cpp.i
+
+.PHONY : server/rpc_source/SearchServiceSearchAction.i
+
+# target to preprocess a source file
+server/rpc_source/SearchServiceSearchAction.cpp.i:
+	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.i
+.PHONY : server/rpc_source/SearchServiceSearchAction.cpp.i
+
+server/rpc_source/SearchServiceSearchAction.s: server/rpc_source/SearchServiceSearchAction.cpp.s
+
+.PHONY : server/rpc_source/SearchServiceSearchAction.s
+
+# target to generate assembly for a file
+server/rpc_source/SearchServiceSearchAction.cpp.s:
+	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.s
+.PHONY : server/rpc_source/SearchServiceSearchAction.cpp.s
+
 server/rpc_source/SearchServiceServerStub.o: server/rpc_source/SearchServiceServerStub.cpp.o
 
 .PHONY : server/rpc_source/SearchServiceServerStub.o
@@ -231,60 +258,6 @@ server/rpc_source/SearchServiceServerStub.cpp.s:
 	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceServerStub.cpp.s
 .PHONY : server/rpc_source/SearchServiceServerStub.cpp.s
 
-server/rpc_source/SearchServiceWrapper.o: server/rpc_source/SearchServiceWrapper.cpp.o
-
-.PHONY : server/rpc_source/SearchServiceWrapper.o
-
-# target to build an object file
-server/rpc_source/SearchServiceWrapper.cpp.o:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceWrapper.cpp.o
-.PHONY : server/rpc_source/SearchServiceWrapper.cpp.o
-
-server/rpc_source/SearchServiceWrapper.i: server/rpc_source/SearchServiceWrapper.cpp.i
-
-.PHONY : server/rpc_source/SearchServiceWrapper.i
-
-# target to preprocess a source file
-server/rpc_source/SearchServiceWrapper.cpp.i:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceWrapper.cpp.i
-.PHONY : server/rpc_source/SearchServiceWrapper.cpp.i
-
-server/rpc_source/SearchServiceWrapper.s: server/rpc_source/SearchServiceWrapper.cpp.s
-
-.PHONY : server/rpc_source/SearchServiceWrapper.s
-
-# target to generate assembly for a file
-server/rpc_source/SearchServiceWrapper.cpp.s:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceWrapper.cpp.s
-.PHONY : server/rpc_source/SearchServiceWrapper.cpp.s
-
-server/rpc_source/user.SearchServiceWrapper.o: server/rpc_source/user.SearchServiceWrapper.cpp.o
-
-.PHONY : server/rpc_source/user.SearchServiceWrapper.o
-
-# target to build an object file
-server/rpc_source/user.SearchServiceWrapper.cpp.o:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/user.SearchServiceWrapper.cpp.o
-.PHONY : server/rpc_source/user.SearchServiceWrapper.cpp.o
-
-server/rpc_source/user.SearchServiceWrapper.i: server/rpc_source/user.SearchServiceWrapper.cpp.i
-
-.PHONY : server/rpc_source/user.SearchServiceWrapper.i
-
-# target to preprocess a source file
-server/rpc_source/user.SearchServiceWrapper.cpp.i:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/user.SearchServiceWrapper.cpp.i
-.PHONY : server/rpc_source/user.SearchServiceWrapper.cpp.i
-
-server/rpc_source/user.SearchServiceWrapper.s: server/rpc_source/user.SearchServiceWrapper.cpp.s
-
-.PHONY : server/rpc_source/user.SearchServiceWrapper.s
-
-# target to generate assembly for a file
-server/rpc_source/user.SearchServiceWrapper.cpp.s:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/user.SearchServiceWrapper.cpp.s
-.PHONY : server/rpc_source/user.SearchServiceWrapper.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -303,15 +276,12 @@ help:
 	@echo "... search_service.o"
 	@echo "... search_service.i"
 	@echo "... search_service.s"
+	@echo "... server/rpc_source/SearchServiceSearchAction.o"
+	@echo "... server/rpc_source/SearchServiceSearchAction.i"
+	@echo "... server/rpc_source/SearchServiceSearchAction.s"
 	@echo "... server/rpc_source/SearchServiceServerStub.o"
 	@echo "... server/rpc_source/SearchServiceServerStub.i"
 	@echo "... server/rpc_source/SearchServiceServerStub.s"
-	@echo "... server/rpc_source/SearchServiceWrapper.o"
-	@echo "... server/rpc_source/SearchServiceWrapper.i"
-	@echo "... server/rpc_source/SearchServiceWrapper.s"
-	@echo "... server/rpc_source/user.SearchServiceWrapper.o"
-	@echo "... server/rpc_source/user.SearchServiceWrapper.i"
-	@echo "... server/rpc_source/user.SearchServiceWrapper.s"
 .PHONY : help
 
 

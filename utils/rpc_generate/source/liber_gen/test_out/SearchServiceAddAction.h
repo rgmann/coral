@@ -1,11 +1,11 @@
-#ifndef SEARCHSERVICE_SERVICE_ADD_ACTION_H
-#define SEARCHSERVICE_SERVICE_ADD_ACTION_H
+#ifndef SEARCHSERVICE_ADD_ACTION_H
+#define SEARCHSERVICE_ADD_ACTION_H
 #include "RpcServerResource.h"
 #include "tutorial.pb.h"
 
 namespace tutorial {
 
-class SearchServiceServiceAddAction : public liber::rpc::RpcServiceAction {
+class SearchServiceAddAction : public liber::rpc::RpcServiceAction {
 public:
 
    SearchServiceServiceAddAction();
@@ -25,4 +25,4 @@ protected:
 
 }  // End namespace tutorial
 
-#endif // SEARCHSERVICE_SERVICE_ADD_ACTION_H
+#endif // SEARCHSERVICE_ADD_ACTION_H

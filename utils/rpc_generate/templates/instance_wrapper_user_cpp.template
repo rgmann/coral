@@ -1,7 +1,0 @@
-#include "<%wrapped_class%>Wrapper.h"
-
-using namespace liber::rpc;
-using namespace <%nspace%>;
-
-<%actions%>
-

@@ -34,7 +34,7 @@ task :situate do
     destination = ''
     if filename.include? 'ClientStub'
       destination << File.join('client', file_type)
-    elsif filename.include? 'ServerStub' or filename.include? 'Wrapper'
+    elsif filename.include? 'ServerStub' or filename.include? 'Action'
       destination << File.join('server', file_type)
     elsif filename.include? '.pb.h'
       destination << File.join('common', file_type)

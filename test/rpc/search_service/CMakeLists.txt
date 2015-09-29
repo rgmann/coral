@@ -43,8 +43,7 @@ add_executable( search_service
 "common/rpc_source/tutorial.pb.cc"
 "client/rpc_source/SearchServiceClientStub.cpp"
 "server/rpc_source/SearchServiceServerStub.cpp"
-"server/rpc_source/SearchServiceWrapper.cpp"
-"server/rpc_source/user.SearchServiceWrapper.cpp"
+"server/rpc_source/SearchServiceSearchAction.cpp"
 search_service.cpp )
 
 target_link_libraries( search_service rpc )

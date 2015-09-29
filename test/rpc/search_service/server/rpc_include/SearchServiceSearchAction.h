@@ -8,7 +8,7 @@ namespace tutorial {
 class SearchServiceSearchAction : public liber::rpc::RpcServiceAction {
 public:
 
-   SearchServiceServiceSearchAction();
+   SearchServiceSearchAction();
 
    void operator() (
       const std::string&        request,

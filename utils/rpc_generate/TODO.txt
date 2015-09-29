@@ -1,3 +1,0 @@
-
-- Add "tab_size=" to set global tab size for all generated code
-

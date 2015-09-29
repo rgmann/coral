@@ -13,11 +13,11 @@ using namespace google::protobuf::io;
 using namespace google::protobuf::compiler;
 
 //-----------------------------------------------------------------------------
-LiberFileGenerator::
-LiberFileGenerator(
-  std::ofstream& debug,
+LiberFileGenerator::LiberFileGenerator(
+  std::ofstream&        debug,
   const FileDescriptor* pDescriptor,
-  GeneratorContext* pContext)
+  GeneratorContext*     pContext
+)
 : mDebug(debug)
 , mpDescriptor(pDescriptor)
 , mpContext(pContext)
@@ -34,37 +34,43 @@ bool LiberFileGenerator::generateServices()
 {
    bool lbSuccess = true;
 
-   mVars["method_separator"] = "//--------------------------------------"
-                              "---------------------------------------\n";
+   common_variables_["method_separator"] =
+      "//--------------------------------------"
+      "---------------------------------------\n";
 
-   int lnServiceCount = mpDescriptor->service_count();
-   for (int lnService = 0; lnService < lnServiceCount; lnService++)
+   for ( int service_index = 0;
+         service_index < mpDescriptor->service_count();
+         ++service_index )
    {
       const ServiceDescriptor* service_ptr = NULL;
 
-      service_ptr = mpDescriptor->service(lnService);
+      service_ptr = mpDescriptor->service( service_index );
 
-      mVars.insert(std::make_pair("service", service_ptr->name()));
+      common_variables_.insert( std::make_pair(
+         "service",
+         service_ptr->name()
+      ));
 
-      generateClientResourceStubHeader(service_ptr);
-      generateClientResourceStubImp(service_ptr);
+      generate_client_resource_stub_header(service_ptr);
+      generate_client_resource_stub_imp(service_ptr);
 
       generate_server_action_headers( service_ptr );
       generate_server_action_imp( service_ptr );
 
-      generateServerResourceStubHeader(service_ptr);
-      generateServerResourceStubImp(service_ptr);
+      generate_server_resource_stub_header(service_ptr);
+      generate_server_resource_stub_imp(service_ptr);
    }
 
    return lbSuccess;
 }
 
 //-----------------------------------------------------------------------------
-bool LiberFileGenerator::
-generateClientResourceStubHeader(const ServiceDescriptor* pService)
+bool LiberFileGenerator::generate_client_resource_stub_header(
+   const ServiceDescriptor* service_ptr )
 {
-   bool lbFailed = true;
-   std::string filename = pService->name() + "ClientStub.h";
+   bool success = false;
+
+   std::string filename = service_ptr->name() + "ClientStub.h";
 
    // Open a stream to the output file.
    ZeroCopyOutputStream* pStream = mpContext->Open(filename);
@@ -76,71 +82,73 @@ generateClientResourceStubHeader(const ServiceDescriptor* pService)
 
       // Compiler guard.
       printer.Print("#ifndef $service$_CLIENT_STUB_H\n", "service",
-                  StringHelper::ToUpper(pService->name())); 
+                  StringHelper::ToUpper(service_ptr->name())); 
       printer.Print("#define $service$_CLIENT_STUB_H\n", "service",
-                  StringHelper::ToUpper(pService->name())); 
+                  StringHelper::ToUpper(service_ptr->name())); 
       printer.Print("\n");
 
       printer.Print("#include \"RpcClientResource.h\"\n");
       printer.Print("#include \"$package$.pb.h\"\n", "package",
-                  pService->file()->package());
+                  service_ptr->file()->package());
       printer.Print("\n");
 
       // Add the service to the same namespace.
       printer.Print("namespace $package$ {\n", "package",
-                  pService->file()->package());
+                  service_ptr->file()->package());
       printer.Print("\n");
 
-      printer.Print(mVars, "class $service$ClientStub\n"
+      printer.Print(common_variables_, "class $service$ClientStub\n"
                   ": public liber::rpc::RpcClientResource {\n");
       printer.Print("public:\n");
       printer.Print("\n");
 
       // Constructor and desctructor.
       printer.Indent();
-      printer.Print(mVars, "explicit $service$ClientStub(liber::rpc::RpcClient &client);\n");
-      printer.Print(mVars, "~$service$ClientStub();\n");
+      printer.Print(common_variables_, "explicit $service$ClientStub(liber::rpc::RpcClient &client);\n");
+      printer.Print(common_variables_, "~$service$ClientStub();\n");
       printer.Print("\n");
 
-      int lnMethodCount = pService->method_count();
+      int lnMethodCount = service_ptr->method_count();
       for (int lnMethod = 0; lnMethod < lnMethodCount; lnMethod++)
       {
-         const MethodDescriptor* lpMethod = pService->method(lnMethod);
+         const MethodDescriptor* method_ptr = service_ptr->method(lnMethod);
          printer.Print("void $method$(const $request$& request, $response$& response, liber::rpc::AsyncRpcSupervisor* pSupervisor = NULL)"
                        "\n       throw (liber::rpc::RpcException);\n",
-                       "method", lpMethod->name(),
-                       "request", GetFullyQualifiedName(lpMethod->input_type()),
-                       "response", GetFullyQualifiedName(lpMethod->output_type()));
+                       "method", method_ptr->name(),
+                       "request", GetFullyQualifiedName(method_ptr->input_type()),
+                       "response", GetFullyQualifiedName(method_ptr->output_type()));
       }
       printer.Print("\n");
 
       // Close the resource definition.
       printer.Outdent();
-      printer.Print(mVars, "}; // End $service$ClientStub\n");
+      printer.Print(common_variables_, "}; // End $service$ClientStub\n");
       printer.Print("\n");
 
       // Close the namespace.
       printer.Print("}  // End namespace $package$\n", "package",
-                  pService->file()->package());
+                  service_ptr->file()->package());
       printer.Print("\n");
 
       // Close the compiler guard.
       printer.Print("\n#endif // $service$_CLIENT_STUB_H\n", "service",
-                  StringHelper::ToUpper(pService->name())); 
+                  StringHelper::ToUpper(service_ptr->name())); 
 
-      lbFailed = printer.failed();
+      success = ( printer.failed() == false );
+
       delete pStream;
    }
 
-   return (lbFailed == false); 
+   return success; 
 }
 
 //-----------------------------------------------------------------------------
-bool LiberFileGenerator::
-generateClientResourceStubImp(const ServiceDescriptor* pService)
+bool LiberFileGenerator::generate_client_resource_stub_imp(
+   const ServiceDescriptor* service_ptr )
 {
-   bool lbFailed = true;
-   std::string filename = pService->name() + "ClientStub.cpp";
+   bool success = false;
+
+   std::string filename = service_ptr->name() + "ClientStub.cpp";
 
    // Open a stream to the output file.
    ZeroCopyOutputStream* pStream = mpContext->Open(filename);
@@ -152,48 +160,48 @@ generateClientResourceStubImp(const ServiceDescriptor* pService)
 
       // Includes
       printer.Print("#include \"$service$ClientStub.h\"\n", "service",
-                  pService->name());
+                  service_ptr->name());
       printer.Print("\n");
 
       // Namespaces
       printer.Print("using namespace liber::rpc;\n");
       printer.Print("using namespace $package$;\n", "package",
-                  pService->file()->package());
+                  service_ptr->file()->package());
       printer.Print("\n");
 
       // Constructor
-      printer.Print(mVars, "$method_separator$");
-      printer.Print(mVars, "$service$ClientStub::\n"
+      printer.Print(common_variables_, "$method_separator$");
+      printer.Print(common_variables_, "$service$ClientStub::\n"
                   "$service$ClientStub(RpcClient &client)\n");
-      printer.Print(mVars, ": RpcClientResource(client, \"$service$\")\n");
+      printer.Print(common_variables_, ": RpcClientResource(client, \"$service$\")\n");
       printer.Print("{\n");
       printer.Print("}\n");
       printer.Print("\n");
 
       // Destructor
-      printer.Print(mVars, "$method_separator$");
-      printer.Print(mVars, "$service$ClientStub::\n"
+      printer.Print(common_variables_, "$method_separator$");
+      printer.Print(common_variables_, "$service$ClientStub::\n"
                   "~$service$ClientStub()\n");
       printer.Print("{\n");
       printer.Print("}\n");
       printer.Print("\n");
 
       // Methods.
-      int lnMethodCount = pService->method_count();
+      int lnMethodCount = service_ptr->method_count();
       for (int lnMethod = 0; lnMethod < lnMethodCount; lnMethod++)
       {
-         const MethodDescriptor* lpMethod = pService->method(lnMethod);
-         printer.Print(mVars, "$method_separator$");
-         printer.Print(mVars, "void $service$ClientStub::\n");
+         const MethodDescriptor* method_ptr = service_ptr->method(lnMethod);
+         printer.Print(common_variables_, "$method_separator$");
+         printer.Print(common_variables_, "void $service$ClientStub::\n");
          printer.Print("$method$(const $request$& request, $response$& response, AsyncRpcSupervisor* pSupervisor)\n"
                        " throw (RpcException)\n",
-                       "method", lpMethod->name(),
-                       "request", GetFullyQualifiedName(lpMethod->input_type()),
-                       "response", GetFullyQualifiedName(lpMethod->output_type()));
+                       "method", method_ptr->name(),
+                       "request", GetFullyQualifiedName(method_ptr->input_type()),
+                       "response", GetFullyQualifiedName(method_ptr->output_type()));
          printer.Print("{\n");
          printer.Indent();
          printer.Print("if (!call(\"$method$\", request, response, pSupervisor))\n",
-                       "method", lpMethod->name());
+                       "method", method_ptr->name());
          printer.Print("{\n");
          printer.Indent();
          printer.Print("throw getLastError();\n");
@@ -205,19 +213,21 @@ generateClientResourceStubImp(const ServiceDescriptor* pService)
       }
       printer.Print("\n");
 
-      lbFailed = printer.failed();
+      success = ( printer.failed() == false );
+
       delete pStream;
    }
 
-   return (lbFailed == false); 
+   return success; 
 }
 
 //-----------------------------------------------------------------------------
 bool LiberFileGenerator::
-generateServerResourceStubHeader(const ServiceDescriptor* pService)
+generate_server_resource_stub_header(const ServiceDescriptor* service_ptr)
 {
-   bool lbFailed = true;
-   std::string filename = pService->name() + "ServerStub.h";
+   bool success = false;
+
+   std::string filename = service_ptr->name() + "ServerStub.h";
 
    // Open a stream to the output file.
    ZeroCopyOutputStream* pStream = mpContext->Open(filename);
@@ -229,42 +239,42 @@ generateServerResourceStubHeader(const ServiceDescriptor* pService)
 
       // Compiler guard.
       printer.Print("#ifndef $service$_SERVER_STUB_H\n", "service",
-                  StringHelper::ToUpper(pService->name()));
+                  StringHelper::ToUpper(service_ptr->name()));
       printer.Print("#define $service$_SERVER_STUB_H\n", "service",
-                  StringHelper::ToUpper(pService->name()));
+                  StringHelper::ToUpper(service_ptr->name()));
       printer.Print("\n");
 
       // Includes
       printer.Print("#include \"RpcServerResource.h\"\n");
-      // printer.Print(mVars, "#include \"$service$Wrapper.h\"\n");
-      for (int method_index = 0; method_index < pService->method_count(); method_index++)
+      // printer.Print(common_variables_, "#include \"$service$Wrapper.h\"\n");
+      for (int method_index = 0; method_index < service_ptr->method_count(); method_index++)
       {
-         const MethodDescriptor* method_ptr = pService->method( method_index );
+         const MethodDescriptor* method_ptr = service_ptr->method( method_index );
 
-         printer.Print("#include \"$service$$action$Action\"\n",
+         printer.Print("#include \"$service$$action$Action.h\"\n",
                        "action", method_ptr->name(),
                        "action_downcase", StringHelper::ToLower(method_ptr->name()),
-                       "service", pService->name());
+                       "service", service_ptr->name());
       }
       printer.Print("\n");
 
       // Add the service to the same namespace.
       printer.Print("namespace $package$ {\n", "package",
-                  pService->file()->package());
+                  service_ptr->file()->package());
       printer.Print("\n");
 
-      // printer.Print(mVars, "struct $service$HookCb;\n");
+      // printer.Print(common_variables_, "struct $service$HookCb;\n");
       // printer.Print("\n");
 
-      printer.Print(mVars, "class $service$ServerStub :\n"
+      printer.Print(common_variables_, "class $service$ServerStub :\n"
                   "public liber::rpc::RpcServerResource {\n");
       printer.Print("public:\n");
       printer.Print("\n");
 
       // Constructor and desctructor.
       printer.Indent();
-      printer.Print(mVars, "explicit $service$ServerStub();\n");
-      printer.Print(mVars, "~$service$ServerStub();\n");
+      printer.Print(common_variables_, "explicit $service$ServerStub();\n");
+      printer.Print(common_variables_, "~$service$ServerStub();\n");
       printer.Print("\n");
 
       //
@@ -274,43 +284,45 @@ generateServerResourceStubHeader(const ServiceDescriptor* pService)
       printer.Print("private:\n\n");
       printer.Indent();
 
-      for (int method_index = 0; method_index < pService->method_count(); method_index++)
+      for (int method_index = 0; method_index < service_ptr->method_count(); method_index++)
       {
-         const MethodDescriptor* method_ptr = pService->method( method_index );
+         const MethodDescriptor* method_ptr = service_ptr->method( method_index );
 
          printer.Print("$service$$action$Action default_$action_downcase$_action_;\n",
                        "action", method_ptr->name(),
                        "action_downcase", StringHelper::ToLower(method_ptr->name()),
-                       "service", pService->name());
+                       "service", service_ptr->name());
       }
 
       // Close the resource definition.
       printer.Outdent();
-      printer.Print(mVars, "\n}; // End $service$ServerStub\n");
+      printer.Print(common_variables_, "\n}; // End $service$ServerStub\n");
       printer.Print("\n");
 
       // Close the namespace.
       printer.Print("}  // End namespace $package$\n", "package",
-                  pService->file()->package());
+                  service_ptr->file()->package());
       printer.Print("\n");
 
       // Close the compiler guard.
       printer.Print("\n#endif // $service$_SERVER_STUB_H\n", "service",
-                  StringHelper::ToUpper(pService->name()));
+                  StringHelper::ToUpper(service_ptr->name()));
 
-      lbFailed = printer.failed();
+      success = ( printer.failed() == false );
+
       delete pStream;
    }
 
-   return (lbFailed == false); 
+   return success; 
 }
 
 //-----------------------------------------------------------------------------
 bool LiberFileGenerator::
-generateServerResourceStubImp(const ServiceDescriptor* pService)
+generate_server_resource_stub_imp(const ServiceDescriptor* service_ptr)
 {
-   bool lbFailed = true;
-   std::string filename = pService->name() + "ServerStub.cpp";
+   bool success = false;
+
+   std::string filename = service_ptr->name() + "ServerStub.cpp";
 
    // Open a stream to the output file.
    ZeroCopyOutputStream* pStream = mpContext->Open(filename);
@@ -320,47 +332,48 @@ generateServerResourceStubImp(const ServiceDescriptor* pService)
       Printer printer(pStream, PRINTER_DELIMETER);
       mDebug << "LiberFileGenerator: Generating " << filename << "." << std::endl;
 
-      printer.Print(mVars, "#include \"$service$ServerStub.h\"\n");
+      printer.Print(common_variables_, "#include \"$service$ServerStub.h\"\n");
       printer.Print("\n");
       printer.Print("using namespace liber::rpc;\n");
       printer.Print("using namespace $package$;\n",
-                  "package", pService->file()->package());
+                  "package", service_ptr->file()->package());
       printer.Print("\n");
 
-      printer.Print(mVars, "$method_separator$");
-      printer.Print(mVars, "$service$ServerStub::$service$ServerStub()\n");
-      printer.Print(mVars, ": RpcServerResource(\"$service$\")\n");
+      printer.Print(common_variables_, "$method_separator$");
+      printer.Print(common_variables_, "$service$ServerStub::$service$ServerStub()\n");
+      printer.Print(common_variables_, ": RpcServerResource(\"$service$\")\n");
       printer.Print("{\n");
       printer.Print("}\n");
       printer.Print("\n");
 
-      printer.Print(mVars, "$method_separator$");
-      printer.Print(mVars, "$service$ServerStub::~$service$ServerStub()\n");
+      printer.Print(common_variables_, "$method_separator$");
+      printer.Print(common_variables_, "$service$ServerStub::~$service$ServerStub()\n");
       printer.Print("{\n");
       printer.Print("}\n");
       printer.Print("\n");
 
-      printer.Print(mVars, "$method_separator$");
-      printer.Print(mVars, "void $service$ServerStub::registerActions()\n");
+      printer.Print(common_variables_, "$method_separator$");
+      printer.Print(common_variables_, "void $service$ServerStub::registerActions()\n");
       printer.Print("{\n");
       printer.Indent();
-      for (int lnMethod = 0; lnMethod < pService->method_count(); lnMethod++)
+      for (int lnMethod = 0; lnMethod < service_ptr->method_count(); lnMethod++)
       {
-      const MethodDescriptor* lpMethod = pService->method(lnMethod);
-      printer.Print("addAction( "
-                    "&default_$method$_action_ );\n",
-                    "method", lpMethod->name(),
-                    "service", pService->name());
+         const MethodDescriptor* method_ptr = service_ptr->method(lnMethod);
+         printer.Print("addAction( "
+                       "&default_$action$_action_ );\n",
+                       "action", StringHelper::ToLower( method_ptr->name() ),
+                       "service", service_ptr->name());
       }
       printer.Outdent();
       printer.Print("}\n");
       printer.Print("\n");
 
-      lbFailed = printer.failed();
+      success = ( printer.failed() == false );
+
       delete pStream;
    }
 
-   return (lbFailed == false); 
+   return success; 
 }
 
 //-----------------------------------------------------------------------------
@@ -385,7 +398,7 @@ bool LiberFileGenerator::generate_server_action_headers(
       {
          Printer printer( stream, PRINTER_DELIMETER );
 
-         std::map<std::string,std::string> variables( mVars );
+         std::map<std::string,std::string> variables( common_variables_ );
          variables[ "package" ] = service_ptr->file()->package();
          variables[ "service_upper" ] = StringHelper::ToUpper( service_ptr->name() );
          variables[ "action_upper" ] = StringHelper::ToUpper( method_ptr->name() );
@@ -406,7 +419,7 @@ bool LiberFileGenerator::generate_server_action_headers(
 
             "class $service$$action$Action : public liber::rpc::RpcServiceAction {\n"
             "public:\n\n"
-            "   $service$Service$action$Action();\n\n"
+            "   $service$$action$Action();\n\n"
             "   void operator() (\n"
             "      const std::string&        request,\n"
             "      std::string&              response,\n"
@@ -452,7 +465,7 @@ bool LiberFileGenerator::generate_server_action_imp(
       {
          Printer printer( stream, PRINTER_DELIMETER );
 
-         std::map<std::string,std::string> variables( mVars );
+         std::map<std::string,std::string> variables( common_variables_ );
          variables[ "package" ] = service_ptr->file()->package();
          variables[ "service" ] = service_ptr->name();
          variables[ "action" ] = method_ptr->name();
@@ -461,8 +474,10 @@ bool LiberFileGenerator::generate_server_action_imp(
 
          printer.Print(
             variables,
-            "#include \"$package$.h\"\n"
-            "#include \"$service$Service$action$Action.h\"\n\n"
+            "#include \"$package$.pb.h\"\n"
+            "#include \"$service$$action$Action.h\"\n\n"
+            "using namespace liber::rpc;\n"
+            "using namespace $package$;\n\n"
             "$method_separator$"
             "$service$$action$Action::$service$$action$Action()\n"
             "   : liber::rpc::RpcServiceAction( \"Search\" )\n"
