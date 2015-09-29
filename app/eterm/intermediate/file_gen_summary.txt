@@ -1,7 +1,0 @@
-../../app/eterm/server/rpc_include/HeimdallControllerWrapper.h
-../../app/eterm/server/rpc_include/HeimdallControllerServerStub.h
-../../app/eterm/client/rpc_include/HeimdallControllerClientStub.h
-../../app/eterm/server/rpc_source/HeimdallControllerWrapper.cpp
-../../app/eterm/server/rpc_source/user.HeimdallControllerWrapper.cpp
-../../app/eterm/client/rpc_source/HeimdallControllerClientStub.cpp
-../../app/eterm/server/rpc_source/HeimdallControllerServerStub.cpp
