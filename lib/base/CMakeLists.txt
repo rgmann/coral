@@ -16,13 +16,11 @@ include_directories( "${INCLUDE_BASE}/base/time" )
 include_directories( "${INCLUDE_BASE}/base/logging" )
 include_directories( "${INCLUDE_BASE}/base/net" )
 
-#"${SOURCE_BASE}/nix/base/concurrency/*.cpp"
-#"${SOURCE_BASE}/nix/base/*.cpp"
 set( SOURCE_BASE "../../src" )
 file( GLOB SOURCES
 "${SOURCE_BASE}/nix/base/file_system/*.cpp"
 "${SOURCE_BASE}/nix/base/crypto/*.cpp"
-"${SOURCE_BASE}/nix/base/concurrency/IThread.cpp"
+"${SOURCE_BASE}/common/base/concurrency/IThread.cpp"
 "${SOURCE_BASE}/nix/base/time/*.cpp"
 "${SOURCE_BASE}/nix/base/net/*.cpp"
 "${SOURCE_BASE}/common/base/cli/*.cpp"
