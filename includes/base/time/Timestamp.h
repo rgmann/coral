@@ -4,6 +4,8 @@
 #include <time.h>
 #include "BaseTypes.h"
 
+namespace liber {
+
 class Timestamp {
 public:
 
@@ -59,5 +61,7 @@ private:
   time_t mSeconds;
   i32    mNanoseconds;
 };
+
+} // namespace liber
 
 #endif // TIMESTAMP_H

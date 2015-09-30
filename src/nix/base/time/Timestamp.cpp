@@ -13,6 +13,7 @@
 #define NSEC_PER_SEC       (1000000000)
 #endif
 
+using namespace liber;
 
 //------------------------------------------------------------------------------
 Timestamp::Timestamp()
@@ -166,6 +167,7 @@ Timestamp& Timestamp::operator= (const Timestamp& other)
 }
 
 //------------------------------------------------------------------------------
+namespace liber {
 Timestamp operator- (const Timestamp& lhs, const Timestamp& rhs)
 {
   Timestamp result;
@@ -242,4 +244,4 @@ bool operator>= (const Timestamp& lhs, const Timestamp& rhs)
 {
   return (lhs.toNanoseconds() >= rhs.toNanoseconds());
 }
-
+}

@@ -6,8 +6,9 @@
 #include "BaseTypes.h"
 #include "Timestamp.h"
 
-class Date
-{
+namespace liber {
+
+class Date {
 public:
    
    Date();
@@ -69,4 +70,5 @@ private:
    struct tm   myLocalTime;
 };
 
+} // namespace liber
 #endif // DATE_H
