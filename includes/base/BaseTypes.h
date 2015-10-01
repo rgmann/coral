@@ -1,12 +1,9 @@
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 
-/**
- * Conventions:
- *
- * If the data type is a c-style string just use 'char'.
- *
- */
+//
+// Type aliases
+//
 
 typedef signed char        i8;
 typedef signed short       i16;
