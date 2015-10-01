@@ -3,8 +3,7 @@
 
 #include "CryptoHashTypes.h"
 
-class CryptoHash
-{
+class CryptoHash {
 public:
    
    CryptoHash(){ m_bValid = false; };

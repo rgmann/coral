@@ -1,7 +1,9 @@
-#ifndef CIRCULAR_BUFFER_H
-#define CIRCULAR_BUFFER_H
+#ifndef  CIRCULAR_BUFFER_H
+#define  CIRCULAR_BUFFER_H
 
 #include <istream>
+
+namespace liber {
 
 class CircularBuffer {
 public:
@@ -132,5 +134,7 @@ private:
   // Number of bytes that may be stored in this CircularBuffer instance
   unsigned int capacity_;
 };
+
+} // namespace liber
 
 #endif // CIRCULAR_BUFFER_H

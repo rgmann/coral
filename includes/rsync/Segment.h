@@ -7,9 +7,11 @@
 #include "Md5Hash.h"
 #include "Serializable.h"
 
-class CircularBuffer;
 
 namespace liber {
+
+class CircularBuffer;
+  
 namespace rsync {
 
 
