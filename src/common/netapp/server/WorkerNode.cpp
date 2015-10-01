@@ -1,6 +1,7 @@
 #include "Log.h"
 #include "WorkerNode.h"
 
+using namespace liber;
 using namespace liber::net;
 using namespace liber::concurrency;
 using namespace liber::netapp;

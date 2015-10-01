@@ -19,7 +19,7 @@ public:
 
   void addWorker(ApplicationWorker* pWorker);
 
-  const Timestamp& getLaunchTime() const;
+  const liber::Timestamp& getLaunchTime() const;
   ui32 getWorkerCount() const;
 
   bool launch();
@@ -35,7 +35,7 @@ private:
 
 private:
 
-  Timestamp mLaunchTime;
+  liber::Timestamp mLaunchTime;
 
   WorkerRemovalAgent mRemover;
 

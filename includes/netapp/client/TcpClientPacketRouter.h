@@ -4,7 +4,7 @@
 #include "TcpSocket.h"
 #include "ClientPacketRouter.h"
 #include "IThread.h"
-#include "Callback.h"
+// #include "Callback.h"
 
 namespace liber {
 namespace netapp {
@@ -30,6 +30,11 @@ private:
   int         mnPort;
 };
 
+class DisconnectCallback {
+public:
+  ~DisconnectCallback(){}
+  virtual void call( void* pData ) = 0;
+};
 
 class TcpClientPacketRouter : public liber::netapp::ClientPacketRouter {
 public:
@@ -42,7 +47,7 @@ public:
 
   liber::net::TcpSocket& socket();
 
-  bool setDisconnectCallback(liber::Callback* pCallback);
+  bool setDisconnectCallback(DisconnectCallback* pCallback);
 
 protected:
 
@@ -64,7 +69,7 @@ private:
 
   TcpSocketReconnectTask mReconnectTask;
 
-  liber::Callback* mpDisconnectCallback;
+  DisconnectCallback* mpDisconnectCallback;
   Mutex mCallbackLock;
 };
 
