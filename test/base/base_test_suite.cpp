@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 #include "arg_parser_test.cpp"
 #include "interactive_command_router_test.cpp"
-#include "date_test.cpp"
+#include "date_time_test.cpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

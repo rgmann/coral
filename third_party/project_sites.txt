@@ -1,2 +1,0 @@
-Cryptopp: http://www.cryptopp.com/
-ForemanDp: http://www.codeproject.com/Articles/19307/Generic-TCP-IP-Client-Server?msg=4404112#xx4404112xx

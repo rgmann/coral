@@ -5,10 +5,6 @@ cmake_policy(SET CMP0015 NEW)
 add_definitions ("-Wall -g")
 add_definitions ("-Wno-unused-local-typedefs")
 
-# GPBUFLIB = `pkg-config --cflags --libs protobuf` 
-# LIBS += $(GPBUFLIB)
-#
-
 find_package( Boost 1.46 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 find_package( Protobuf REQUIRED )
 
