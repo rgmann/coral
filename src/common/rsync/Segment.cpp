@@ -391,19 +391,24 @@ computeWeak(Adler32Checksum& next,
    printf("ComputeWeak: offs=%u, size=%u\n", nOffset, nBlockSizeBytes);
 #endif
 
+   //
+   // The following implementation of the Adler 32 checksum is based on:
+   // https://rsync.samba.org/tech_report/node3.html
+   //
+
    next.k = nOffset;
    next.l = (nOffset + nBlockSizeBytes - 1);
 
    next.a = 0;
    for (ui32 lnByte = 0; lnByte < nBlockSizeBytes; ++lnByte)
    {
-    next.a += (int)getByte(lnByte);
+      next.a += (int)getByte(lnByte);
    }
 
    next.b = 0;
    for (ui32 lnByte = 0; lnByte < nBlockSizeBytes; ++lnByte)
    {
-    next.b += (next.l - (next.k + lnByte) + 1) * (int)getByte(lnByte);
+      next.b += ( next.l - ( next.k + lnByte ) + 1 ) * (int)getByte(lnByte);
    }
 
 
@@ -425,6 +430,11 @@ void Segment::rollWeak(
    ui32                   nBlockSizeBytes,
    const Adler32Checksum& prev)
 {
+   //
+   // The following implementation of the rolling Adler 32 checksum is based
+   // on: https://rsync.samba.org/tech_report/node3.html
+   //
+
    next.k = prev.k + 1;
    next.l = prev.l + 1;
 
