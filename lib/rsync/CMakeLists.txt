@@ -7,60 +7,67 @@ set( LIBNAME rsync )
 add_definitions ("-Wall")
 add_definitions ("-Wno-unused-local-typedefs")
 
-set( INCLUDE_BASE "../../includes" )
+#
+# Third party includes
+#
 include_directories( ${Boost_INCLUDE_DIRS} )
-include_directories( "${INCLUDE_BASE}/base" )
-include_directories( "${INCLUDE_BASE}/base/crypto" )
-include_directories( "${INCLUDE_BASE}/base/file_system" )
-include_directories( "${INCLUDE_BASE}/base/cli" )
-include_directories( "${INCLUDE_BASE}/base/helpers" )
-include_directories( "${INCLUDE_BASE}/base/container" )
-include_directories( "${INCLUDE_BASE}/base/concurrency" )
-include_directories( "${INCLUDE_BASE}/base/time" )
-include_directories( "${INCLUDE_BASE}/base/logging" )
-include_directories( "${INCLUDE_BASE}/base/net" )
-include_directories( "${INCLUDE_BASE}/netapp/common" )
-include_directories( "${INCLUDE_BASE}/rsync" )
 
-set( SOURCE_BASE "../.." )
+set( INCLUDE_ROOT "../../includes" )
+set( CORE_INCLUDE "${INCLUDE_ROOT}/core" )
+set( NETAPP_INCLUDE "${INCLUDE_ROOT}/netapp" )
+include_directories( "${CORE_INCLUDE}" )
+include_directories( "${CORE_INCLUDE}/crypto" )
+include_directories( "${CORE_INCLUDE}/file_system" )
+include_directories( "${CORE_INCLUDE}/cli" )
+include_directories( "${CORE_INCLUDE}/helpers" )
+include_directories( "${CORE_INCLUDE}/container" )
+include_directories( "${CORE_INCLUDE}/concurrency" )
+include_directories( "${CORE_INCLUDE}/time" )
+include_directories( "${CORE_INCLUDE}/logging" )
+include_directories( "${CORE_INCLUDE}/net" )
+include_directories( "${NETAPP_INCLUDE}/common" )
+include_directories( "${INCLUDE_ROOT}/rsync" )
+
+set( SOURCE_ROOT "../../src" )
+set( COMMON_SOURCE "${SOURCE_ROOT}/common")
 set( SOURCES
-"${SOURCE_BASE}/src/common/${LIBNAME}/ResourcePath.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/JobDescriptor.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/JobReport.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RemoteJobResult.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/FileSystemInterface.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncPacketRouter.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncJob.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/Segment.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncPacket.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncPacketSubscriber.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/Assembler.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/AssemblerThread.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/Authority.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/LocalAuthorityInterface.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RemoteAuthorityInterface.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RemoteAuthorityService.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/AuthorityThread.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/Instruction.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/InstructionReceiver.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/InstructionList.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/InstructionQueue.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/InstructionHook.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/Segmenter.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmenterThread.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmentAccessor.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmentHook.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmentReceiver.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmentFile.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmentList.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/SegmentQueue.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncNode.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/JobAgent.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RsyncQueryResponse.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/Worker.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/WorkerGroup.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/RemoteAuthorityServiceThread.cpp"
-"${SOURCE_BASE}/src/common/${LIBNAME}/JobRequestCallback.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/ResourcePath.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/JobDescriptor.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/JobReport.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RemoteJobResult.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/FileSystemInterface.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RsyncPacketRouter.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RsyncJob.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/Segment.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RsyncPacket.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RsyncPacketSubscriber.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/Assembler.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/AssemblerThread.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/Authority.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/LocalAuthorityInterface.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RemoteAuthorityInterface.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RemoteAuthorityService.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/AuthorityThread.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/Instruction.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/InstructionReceiver.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/InstructionList.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/InstructionQueue.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/InstructionHook.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/Segmenter.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/SegmenterThread.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/SegmentAccessor.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/SegmentHook.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/SegmentReceiver.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/SegmentFile.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/SegmentList.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/SegmentQueue.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RsyncNode.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/JobAgent.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RsyncQueryResponse.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/Worker.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/WorkerGroup.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/RemoteAuthorityServiceThread.cpp"
+"${COMMON_SOURCE}/${LIBNAME}/JobRequestCallback.cpp"
 )
 
 add_library( rsync STATIC ${SOURCES} )
