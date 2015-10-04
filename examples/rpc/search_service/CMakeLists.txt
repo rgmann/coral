@@ -14,7 +14,6 @@ set( INCLUDE_BASE "../../../includes" )
 include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories( ${PROTOBUF_INCLUDE_DIRS} )
 
-#include_directories( "../../third_party/gtest-1.7.0/include" )
 set( INCLUDE_ROOT ../../../includes )
 set( CORE_INCLUDE ${INCLUDE_ROOT}/core )
 set( NETAPP_INCLUDE ${INCLUDE_ROOT}/netapp )
@@ -39,7 +38,6 @@ set( LIB_ROOT ../../../lib )
 link_directories( ${LIB_ROOT}/core )
 link_directories( ${LIB_ROOT}/netapp )
 link_directories( ${LIB_ROOT}/rpc )
-#link_directories( "../../../third_party/gtest-1.7.0/" )
 
 add_executable( ${TARGET}
 "common/rpc_source/tutorial.pb.cc"
@@ -51,7 +49,6 @@ ${TARGET}.cpp )
 target_link_libraries( ${TARGET} rpc )
 target_link_libraries( ${TARGET} liber_core )
 target_link_libraries( ${TARGET} netapp_common )
-#target_link_libraries( ${TARGET} gtest )
 target_link_libraries( ${TARGET} ${Boost_LIBRARIES} )
 target_link_libraries( ${TARGET} ${PROTOBUF_LIBRARIES} )
 target_link_libraries( ${TARGET} pthread )
