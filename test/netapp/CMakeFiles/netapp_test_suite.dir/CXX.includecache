@@ -6,27 +6,27 @@
 
 #IncludeRegexTransform: 
 
-../../includes/base/BaseTypes.h
+../../includes/core/BaseTypes.h
 
-../../includes/base/concurrency/CountingSem.h
+../../includes/core/concurrency/CountingSem.h
 Semaphore.h
-../../includes/base/concurrency/Semaphore.h
+../../includes/core/concurrency/Semaphore.h
 
-../../includes/base/concurrency/IThread.h
+../../includes/core/concurrency/IThread.h
 boost/thread.hpp
 -
 BaseTypes.h
-../../includes/base/concurrency/BaseTypes.h
+../../includes/core/concurrency/BaseTypes.h
 
-../../includes/base/concurrency/Semaphore.h
+../../includes/core/concurrency/Semaphore.h
 boost/thread/mutex.hpp
 -
 boost/thread/condition_variable.hpp
 -
 BaseTypes.h
-../../includes/base/concurrency/BaseTypes.h
+../../includes/core/concurrency/BaseTypes.h
 
-../../includes/base/container/Queue.h
+../../includes/core/container/Queue.h
 string
 -
 queue
@@ -34,11 +34,11 @@ queue
 boost/thread/mutex.hpp
 -
 BaseTypes.h
-../../includes/base/container/BaseTypes.h
+../../includes/core/container/BaseTypes.h
 CountingSem.h
-../../includes/base/container/CountingSem.h
+../../includes/core/container/CountingSem.h
 
-../../includes/base/logging/Log.h
+../../includes/core/logging/Log.h
 stdio.h
 -
 stdarg.h
@@ -50,21 +50,21 @@ fstream
 boost/thread/mutex.hpp
 -
 Queue.h
-../../includes/base/logging/Queue.h
+../../includes/core/logging/Queue.h
 IThread.h
-../../includes/base/logging/IThread.h
+../../includes/core/logging/IThread.h
 Timestamp.h
-../../includes/base/logging/Timestamp.h
+../../includes/core/logging/Timestamp.h
 BaseTypes.h
-../../includes/base/logging/BaseTypes.h
+../../includes/core/logging/BaseTypes.h
 CountingSem.h
-../../includes/base/logging/CountingSem.h
+../../includes/core/logging/CountingSem.h
 
-../../includes/base/time/Timestamp.h
+../../includes/core/time/Timestamp.h
 time.h
 -
 BaseTypes.h
-../../includes/base/time/BaseTypes.h
+../../includes/core/time/BaseTypes.h
 
 ../../includes/netapp/common/GenericPacket.h
 BaseTypes.h

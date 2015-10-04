@@ -157,7 +157,7 @@ CMAKE_OSX_DEPLOYMENT_TARGET:STRING=
 CMAKE_OSX_SYSROOT:STRING=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=netapp_test
+CMAKE_PROJECT_NAME:STATIC=netapp_test_suite
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -227,10 +227,22 @@ GTEST_MAIN_LIBRARY:FILEPATH=/Users/vaughanbiker/Development/gtest-1.7.0/libgtest
 GTEST_MAIN_LIBRARY_DEBUG:FILEPATH=GTEST_MAIN_LIBRARY_DEBUG-NOTFOUND
 
 //Value Computed by CMake
+core_test_suite_BINARY_DIR:STATIC=/Users/vaughanbiker/Development/liber/test/netapp
+
+//Value Computed by CMake
+core_test_suite_SOURCE_DIR:STATIC=/Users/vaughanbiker/Development/liber/test/netapp
+
+//Value Computed by CMake
 netapp_test_BINARY_DIR:STATIC=/Users/vaughanbiker/Development/liber/test/netapp
 
 //Value Computed by CMake
 netapp_test_SOURCE_DIR:STATIC=/Users/vaughanbiker/Development/liber/test/netapp
+
+//Value Computed by CMake
+netapp_test_suite_BINARY_DIR:STATIC=/Users/vaughanbiker/Development/liber/test/netapp
+
+//Value Computed by CMake
+netapp_test_suite_SOURCE_DIR:STATIC=/Users/vaughanbiker/Development/liber/test/netapp
 
 
 ########################

@@ -8,23 +8,24 @@ add_definitions ("-Wno-unused-local-typedefs")
 
 find_package( Protobuf REQUIRED )
 
-set( INCLUDE_BASE "../../includes" )
+set( INCLUDE_ROOT "../../includes" )
+set( CORE_INCLUDE "${INCLUDE_ROOT}/core")
 include_directories( ${PROTOBUF_INCLUDE_DIRS} )
 
-include_directories( "${INCLUDE_BASE}/base" )
-include_directories( "${INCLUDE_BASE}/base/file_system" )
-include_directories( "${INCLUDE_BASE}/base/cli" )
-include_directories( "${INCLUDE_BASE}/base/helpers" )
-include_directories( "${INCLUDE_BASE}/base/container" )
+include_directories( "${CORE_INCLUDE}" )
+include_directories( "${CORE_INCLUDE}/file_system" )
+include_directories( "${CORE_INCLUDE}/cli" )
+include_directories( "${CORE_INCLUDE}/helpers" )
+include_directories( "${CORE_INCLUDE}/container" )
 
 
-link_directories( "../../lib/base" )
+link_directories( "../../lib/core" )
 
 add_executable( protoc-gen-libergen
 LiberFileGenerator.cpp
 libergen.cpp )
 
-target_link_libraries( protoc-gen-libergen base )
+target_link_libraries( protoc-gen-libergen liber_core )
 target_link_libraries( protoc-gen-libergen ${PROTOBUF_LIBRARIES} )
 target_link_libraries( protoc-gen-libergen protoc )
 target_link_libraries( protoc-gen-libergen pthread )

@@ -48,10 +48,10 @@ RM = /opt/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/liber/test/base
+CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/liber/test/core
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/liber/test/base
+CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/liber/test/core
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -91,9 +91,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/test/base/CMakeFiles /Users/vaughanbiker/Development/liber/test/base/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/test/core/CMakeFiles /Users/vaughanbiker/Development/liber/test/core/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/test/base/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/test/core/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -122,44 +122,44 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named base_test_suite
+# Target rules for targets named core_test_suite
 
 # Build rule for target.
-base_test_suite: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 base_test_suite
-.PHONY : base_test_suite
+core_test_suite: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 core_test_suite
+.PHONY : core_test_suite
 
 # fast build rule for target.
-base_test_suite/fast:
-	$(MAKE) -f CMakeFiles/base_test_suite.dir/build.make CMakeFiles/base_test_suite.dir/build
-.PHONY : base_test_suite/fast
+core_test_suite/fast:
+	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/build
+.PHONY : core_test_suite/fast
 
-base_test_suite.o: base_test_suite.cpp.o
+core_test_suite.o: core_test_suite.cpp.o
 
-.PHONY : base_test_suite.o
+.PHONY : core_test_suite.o
 
 # target to build an object file
-base_test_suite.cpp.o:
-	$(MAKE) -f CMakeFiles/base_test_suite.dir/build.make CMakeFiles/base_test_suite.dir/base_test_suite.cpp.o
-.PHONY : base_test_suite.cpp.o
+core_test_suite.cpp.o:
+	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/core_test_suite.cpp.o
+.PHONY : core_test_suite.cpp.o
 
-base_test_suite.i: base_test_suite.cpp.i
+core_test_suite.i: core_test_suite.cpp.i
 
-.PHONY : base_test_suite.i
+.PHONY : core_test_suite.i
 
 # target to preprocess a source file
-base_test_suite.cpp.i:
-	$(MAKE) -f CMakeFiles/base_test_suite.dir/build.make CMakeFiles/base_test_suite.dir/base_test_suite.cpp.i
-.PHONY : base_test_suite.cpp.i
+core_test_suite.cpp.i:
+	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/core_test_suite.cpp.i
+.PHONY : core_test_suite.cpp.i
 
-base_test_suite.s: base_test_suite.cpp.s
+core_test_suite.s: core_test_suite.cpp.s
 
-.PHONY : base_test_suite.s
+.PHONY : core_test_suite.s
 
 # target to generate assembly for a file
-base_test_suite.cpp.s:
-	$(MAKE) -f CMakeFiles/base_test_suite.dir/build.make CMakeFiles/base_test_suite.dir/base_test_suite.cpp.s
-.PHONY : base_test_suite.cpp.s
+core_test_suite.cpp.s:
+	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/core_test_suite.cpp.s
+.PHONY : core_test_suite.cpp.s
 
 # Help Target
 help:
@@ -170,10 +170,10 @@ help:
 	@echo "... test"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... base_test_suite"
-	@echo "... base_test_suite.o"
-	@echo "... base_test_suite.i"
-	@echo "... base_test_suite.s"
+	@echo "... core_test_suite"
+	@echo "... core_test_suite.o"
+	@echo "... core_test_suite.i"
+	@echo "... core_test_suite.s"
 .PHONY : help
 
 
