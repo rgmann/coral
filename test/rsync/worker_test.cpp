@@ -1,3 +1,6 @@
+#ifndef  WORKER_TEST_CPP
+#define  WORKER_TEST_CPP
+
 #include <fstream>
 #include <iostream>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -279,3 +282,5 @@ TEST_F( WorkerTest, MultiWorkerPipelineTest ) {
    serverRouter.cancel(true);
    clientRouter.cancel(true);
 }
+
+#endif  // WORKER_TEST_CPP

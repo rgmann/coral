@@ -4,6 +4,7 @@
 #include "worker_test.cpp"
 #include "node_test.cpp"
 #include "instruction_test.cpp"
+#include "file_system_test.cpp"
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

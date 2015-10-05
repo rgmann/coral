@@ -71,3 +71,4 @@ set( SOURCES
 )
 
 add_library( rsync STATIC ${SOURCES} )
+#add_library( rsync SHARED ${SOURCES} )

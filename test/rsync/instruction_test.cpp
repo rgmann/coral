@@ -1,3 +1,6 @@
+#ifndef  INSTRUCTION_TEST_CPP
+#define  INSTRUCTION_TEST_CPP
+
 #include <boost/current_function.hpp>
 #include <string.h>
 #include "Log.h"
@@ -163,3 +166,4 @@ TEST_F( InstructionTest, TestEndInstructionCancel ) {
    EXPECT_EQ( kRsyncDestinationNotWritable, recv_instruction.error() );
 }
 
+#endif // INSTRUCTION_TEST_CPP

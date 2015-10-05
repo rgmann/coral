@@ -1,3 +1,6 @@
+#ifndef  NODE_TEST_CPP
+#define  NODE_TEST_CPP
+
 #include <boost/current_function.hpp>
 #include "Log.h"
 #include "RsyncNode.h"
@@ -147,3 +150,5 @@ TEST_F( NodeTest, RemoteSourceDoesNotExist ) {
 
    router_.setCounterpart( NULL );
 }
+
+#endif  // NODE_TEST_CPP
