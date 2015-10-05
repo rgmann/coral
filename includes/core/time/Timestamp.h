@@ -58,8 +58,8 @@ public:
 
 private:
    
-  time_t mSeconds;
-  i32    mNanoseconds;
+  time_t seconds_;
+  i32    nanoseconds_;
 };
 
 } // namespace liber
