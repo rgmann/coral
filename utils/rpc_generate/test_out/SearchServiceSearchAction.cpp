@@ -1,5 +1,11 @@
-#include "tutorial.h"
-#include "SearchServiceServiceSearchAction.h"
+// %% license-end-token %%
+
+// WARNING: Auto-generated code. Do not modify.
+#include "tutorial.pb.h"
+#include "SearchServiceSearchAction.h"
+
+using namespace liber::rpc;
+using namespace tutorial;
 
 //-----------------------------------------------------------------------------
 SearchServiceSearchAction::SearchServiceSearchAction()

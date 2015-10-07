@@ -17,17 +17,17 @@ using namespace liber;
 
 //------------------------------------------------------------------------------
 Timestamp::Timestamp()
-: seconds_(0)
-, nanoseconds_(0)
+   : seconds_(0)
+   , nanoseconds_(0)
 {
 }
 
 //------------------------------------------------------------------------------
 Timestamp::Timestamp(const Timestamp& other)
-: seconds_(0)
-, nanoseconds_(0)
+   : seconds_(0)
+   , nanoseconds_(0)
 {
-  *this = other;
+   *this = other;
 }
 
 //------------------------------------------------------------------------------
@@ -47,21 +47,24 @@ Timestamp Timestamp::Now()
 void Timestamp::sample()
 {
 #if defined(__APPLE__) && defined(__MACH__)
-   clock_serv_t cclock;
+
+   clock_serv_t    cclock;
    mach_timespec_t mts;
-   //host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &cclock);
-   host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-   clock_get_time(cclock, &mts);
-   mach_port_deallocate(mach_task_self(), cclock);
+   host_get_clock_service( mach_host_self(), CALENDAR_CLOCK, &cclock );
+   clock_get_time( cclock, &mts );
+   mach_port_deallocate( mach_task_self(), cclock );
 
    seconds_     = mts.tv_sec;
    nanoseconds_ = mts.tv_nsec;
+
 #else
+
    struct timespec ts;
-   clock_gettime(CLOCK_REALTIME, &ts);
+   clock_gettime( CLOCK_REALTIME, &ts );
    
    seconds_     = ts.tv_sec;
    nanoseconds_ = ts.tv_nsec;
+
 #endif
 }
 
@@ -158,9 +161,9 @@ i64 Timestamp::diffInMs(const Timestamp &start)
 //------------------------------------------------------------------------------
 Timestamp& Timestamp::operator= (const Timestamp& other)
 {
-   if (this != &other)
+   if ( this != &other )
    {
-      seconds_ = other.seconds_;
+      seconds_     = other.seconds_;
       nanoseconds_ = other.nanoseconds_;
    }
 
@@ -169,30 +172,31 @@ Timestamp& Timestamp::operator= (const Timestamp& other)
 
 //------------------------------------------------------------------------------
 namespace liber {
-Timestamp operator- (const Timestamp& lhs, const Timestamp& rhs)
+Timestamp operator- ( const Timestamp& lhs, const Timestamp& rhs )
 {
    Timestamp result;
 
-   Timestamp x = lhs;
-   Timestamp y = rhs;
+   Timestamp left( lhs );
+   Timestamp right( rhs );
 
    // Perform the carry for the later subtraction by updating y.
-   if (x.nanoseconds_ < y.nanoseconds_)
+   if ( left.nanoseconds_ < right.nanoseconds_)
    {
-      int nsec = (y.nanoseconds_ - x.nanoseconds_) / NSEC_PER_SEC + 1;
-      y.nanoseconds_ -= NSEC_PER_SEC * nsec;
-      y.seconds_ += nsec;
+      i32 nsec = ( right.nanoseconds_ - left.nanoseconds_) / NSEC_PER_SEC + 1;
+      right.nanoseconds_ -= NSEC_PER_SEC * nsec;
+      right.seconds_     += nsec;
    }
-   if (x.nanoseconds_ - y.nanoseconds_ > NSEC_PER_SEC)
+
+   if ( ( left.nanoseconds_ - right.nanoseconds_ ) > NSEC_PER_SEC )
    {
-      int nsec = (x.nanoseconds_ - y.nanoseconds_) / NSEC_PER_SEC;
-      y.nanoseconds_ += NSEC_PER_SEC * nsec;
-      y.seconds_ -= nsec;
+      i32 nsec = ( left.nanoseconds_ - right.nanoseconds_ ) / NSEC_PER_SEC;
+      right.nanoseconds_ += NSEC_PER_SEC * nsec;
+      right.seconds_     -= nsec;
    }
      
    // Compute the time remaining to wait. tv_usec is certainly positive.
-   result.seconds_ = x.seconds_ - y.seconds_;
-   result.nanoseconds_ = x.nanoseconds_ - y.nanoseconds_;
+   result.seconds_     = left.seconds_ - right.seconds_;
+   result.nanoseconds_ = left.nanoseconds_ - right.nanoseconds_;
 
    return result;
 }
@@ -200,7 +204,7 @@ Timestamp operator- (const Timestamp& lhs, const Timestamp& rhs)
 //-----------------------------------------------------------------------------
 Timestamp& Timestamp::operator -= (const Timestamp& other)
 {
-   *this = (*this - other);
+   *this = ( *this - other );
    return *this;
 }
 

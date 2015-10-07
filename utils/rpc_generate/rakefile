@@ -1,13 +1,15 @@
 #require 'FileUtils'
 require 'open3'
 
-liberrpc_path = '/Users/vaughanbiker/Development/liber/utils/rpc_generate/source/liber_gen/protoc-gen-libergen'
+RPC_GENERATOR_NAME = 'protoc-gen-libergen'
+rpc_generator_path = File.expand_path( "./#{RPC_GENERATOR_NAME}" )
+# liberrpc_path = '/Users/vaughanbiker/Development/liber/utils/rpc_generate/source/liber_gen/protoc-gen-libergen'
 proto_dir = 'proto/'
 gen_stage = 'test_out/'
 
 task :generate do
   command = "protoc "
-  command << "--plugin=protoc-gen-libergen=#{liberrpc_path} "
+  command << "--plugin=protoc-gen-libergen=#{rpc_generator_path} "
   command << "--proto_path=#{proto_dir} "
   command << "--cpp_out=#{gen_stage} "
   command << "--libergen_out=#{gen_stage} "
@@ -44,8 +46,6 @@ task :situate do
 
     unless destination.empty?
       source = File.join(gen_stage, filename)
-#      destination = File.join(destination, filename)
-#      puts "Moving #{source} to #{destination}"
       FileUtils.mv(source, destination)
     end
   end

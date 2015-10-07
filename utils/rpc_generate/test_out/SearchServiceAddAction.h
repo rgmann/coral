@@ -1,5 +1,9 @@
+// %% license-end-token %%
+
+// WARNING: Auto-generated code. Do not modify.
 #ifndef SEARCHSERVICE_ADD_ACTION_H
 #define SEARCHSERVICE_ADD_ACTION_H
+
 #include "RpcServerResource.h"
 #include "tutorial.pb.h"
 
@@ -8,7 +12,7 @@ namespace tutorial {
 class SearchServiceAddAction : public liber::rpc::RpcServiceAction {
 public:
 
-   SearchServiceServiceAddAction();
+   SearchServiceAddAction();
 
    void operator() (
       const std::string&        request,
@@ -21,6 +25,7 @@ protected:
       const Person& request,
       Person_PhoneNumber& response,
       liber::rpc::RpcException& e );
+
 };
 
 }  // End namespace tutorial

@@ -1,3 +1,7 @@
+// %% license-end-token %%
+
+// WARNING: Auto-generated code. Do not modify.
+
 #include "SearchServiceServerStub.h"
 
 using namespace liber::rpc;
@@ -5,7 +9,7 @@ using namespace tutorial;
 
 //-----------------------------------------------------------------------------
 SearchServiceServerStub::SearchServiceServerStub()
-: RpcServerResource("SearchService")
+   : RpcServerResource("SearchService")
 {
 }
 
@@ -17,7 +21,7 @@ SearchServiceServerStub::~SearchServiceServerStub()
 //-----------------------------------------------------------------------------
 void SearchServiceServerStub::registerActions()
 {
-  addAction( &default_Search_action_ );
-  addAction( &default_Add_action_ );
+   addAction( &default_Search_action_ );
+   addAction( &default_Add_action_ );
 }
 
