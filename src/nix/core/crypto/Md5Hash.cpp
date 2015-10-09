@@ -1,3 +1,37 @@
+// 
+// Copyright (c) 2015, Robert Glissmann
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 
+// * Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+// 
+// * Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// 
+
+// %% license-end-token %%
+// 
+// Author: Robert.Glissmann@gmail.com (Robert Glissmann)
+// 
+// 
+
+
+
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -130,107 +164,3 @@ void Md5Hash::compute(unsigned char *pData, unsigned int nBlockSizeBytes)
    MD5_Update(&ctx, pData, nBlockSizeBytes);
    MD5_Final(m_Hash.b, &ctx);
 }
-//void Md5Hash::compute(unsigned char *pData, unsigned int nBlockSizeBytes)
-//{
-//   // Message (to prepare)
-//   unsigned char *msg = NULL;
-//   
-//   // Note: All variables are unsigned 32 bit and wrap modulo 2^32 when calculating
-//   
-//   // r specifies the per-round shift amounts
-//   const unsigned int r[] = {7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22,
-//      5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20, 5,  9, 14, 20,
-//      4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23,
-//      6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21};
-//   
-//   // Initialize variables - simple count in nibbles:
-//   m_Hash.w[0] = 0x67452301;
-//   m_Hash.w[1] = 0xefcdab89;
-//   m_Hash.w[2] = 0x98badcfe;
-//   m_Hash.w[3] = 0x10325476;
-//   
-//   // Pre-processing: adding a single 1 bit
-//   //append "1" bit to message    
-//   /* Notice: the input bytes are considered as bits strings,
-//    where the first bit is the most significant bit of the byte.[37] */
-//   
-//   // Pre-processing: padding with zeros
-//   //append "0" bit until message length in bit ≡ 448 (mod 512)
-//   //append length mod (2 pow 64) to message
-//   
-//   int new_len;
-//   for(new_len = nBlockSizeBytes*8 + 1; new_len%512!=448; new_len++);
-//   new_len /= 8;
-//   printf("newlen: %d\n", new_len);
-//   
-//   msg = new unsigned char[new_len + 64]; //calloc(new_len + 64, 1); // also appends "0" bits 
-//   memset(msg, 0, new_len + 64);
-//   
-//   // (we alloc also 64 extra bytes...)
-//   memcpy(msg, pData, nBlockSizeBytes);
-//   msg[nBlockSizeBytes] = 128; // write the "1" bit
-//   
-//   unsigned int bits_len = 8*nBlockSizeBytes; // note, we append the len
-//   memcpy(msg + new_len, &bits_len, 4);           // in bits at the end of the buffer
-//   
-//   // Process the message in successive 512-bit chunks:
-//   //for each 512-bit chunk of message:
-//   int offset;
-//   for(offset=0; offset<new_len; offset += (512/8)) {
-//      
-//      // break chunk into sixteen 32-bit words w[j], 0 ≤ j ≤ 15
-//      unsigned int *w = (unsigned int*) (msg + offset);
-////#define DEBUG
-//#ifdef DEBUG
-//      printf("offset: %d %x\n", offset, offset);
-//      
-//      int j;
-//      for(j =0; j < 64; j++) printf("%x ", ((unsigned char *) w)[j]);
-//      puts("");
-//#endif
-//      
-//      // Initialize hash value for this chunk:
-//      unsigned int a = m_Hash.w[0];
-//      unsigned int b = m_Hash.w[1];
-//      unsigned int c = m_Hash.w[2];
-//      unsigned int d = m_Hash.w[3];
-//      
-//      // Main loop:
-//      unsigned int i;
-//      for(i = 0; i<64; i++) {
-//         
-//         unsigned int f, g;
-//         
-//         if (i < 16) {
-//            f = (b & c) | ((~b) & d);
-//            g = i;
-//         } else if (i < 32) {
-//            f = (d & b) | ((~d) & c);
-//            g = (5*i + 1) % 16;
-//         } else if (i < 48) {
-//            f = b ^ c ^ d;
-//            g = (3*i + 5) % 16;          
-//         } else {
-//            f = c ^ (b | (~d));
-//            g = (7*i) % 16;
-//         }
-//         
-//         unsigned int temp = d;
-//         d = c;
-//         c = b;
-//         b = b + LEFTROTATE((a + f + k[i] + w[g]), r[i]);
-//         a = temp;
-//         
-//      }
-//      
-//      // Add this chunk's hash to result so far:
-//      m_Hash.w[0] += a;
-//      m_Hash.w[1] += b;
-//      m_Hash.w[2] += c;
-//      m_Hash.w[3] += d;
-//      
-//   }
-//   
-//   // cleanup
-//   delete[] msg;
-//}
