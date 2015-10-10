@@ -22,7 +22,7 @@ include_directories( "${CORE_INCLUDE}/container" )
 link_directories( "../../lib/core" )
 
 add_executable( protoc-gen-libergen
-LiberFileGenerator.cpp
+RpcServiceGenerator.cpp
 libergen.cpp )
 
 target_link_libraries( protoc-gen-libergen liber_core )

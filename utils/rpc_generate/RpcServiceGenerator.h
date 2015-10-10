@@ -12,15 +12,15 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 
-class LiberFileGenerator {
+class RpcServiceGenerator {
 public:
 
-   LiberFileGenerator(
+   RpcServiceGenerator(
       std::ofstream& debug,
       const google::protobuf::FileDescriptor*       descriptor,
       google::protobuf::compiler::GeneratorContext* context );
 
-   ~LiberFileGenerator();
+   ~RpcServiceGenerator();
 
    bool generateServices();
 

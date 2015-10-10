@@ -1,9 +1,8 @@
-#require 'FileUtils'
 require 'open3'
 
 RPC_GENERATOR_NAME = 'protoc-gen-libergen'
 rpc_generator_path = File.expand_path( "./#{RPC_GENERATOR_NAME}" )
-# liberrpc_path = '/Users/vaughanbiker/Development/liber/utils/rpc_generate/source/liber_gen/protoc-gen-libergen'
+
 proto_dir = 'proto/'
 gen_stage = 'test_out/'
 

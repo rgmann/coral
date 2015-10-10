@@ -21,7 +21,7 @@ if license_path && File.exist?( license_path )
     end
 
     # Add a line before and after.
-    text_to_insert = "\n#{text_to_insert}\n\n"
+    text_to_insert = "\n#{text_to_insert}\n"
 
     license_text_lines = []
     text_to_insert.lines.each do |line|
