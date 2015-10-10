@@ -1,8 +1,0 @@
-LiberCodeGenerator:
-  name:    tutorial.proto
-  package: tutorial
-
-LiberFileGenerator: Generating SearchServiceClientStub.h.
-LiberFileGenerator: Generating SearchServiceClientStub.cpp.
-LiberFileGenerator: Generating SearchServiceServerStub.h.
-LiberFileGenerator: Generating SearchServiceServerStub.cpp.

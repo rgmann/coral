@@ -44,7 +44,7 @@ using namespace liber::netapp;
 GenericPacket::GenericPacket()
 : m_pPkt(NULL)
 , mnDataSizeBytes(0)
-, m_nSizeBytes(0)
+, size_bytes_(0)
 {
 }
 
@@ -52,7 +52,7 @@ GenericPacket::GenericPacket()
 GenericPacket::GenericPacket(const GenericPacket &other)
 : m_pPkt(NULL)
 , mnDataSizeBytes(0)
-, m_nSizeBytes(0)
+, size_bytes_(0)
 {
    *this = other;
 }
@@ -61,7 +61,7 @@ GenericPacket::GenericPacket(const GenericPacket &other)
 GenericPacket::GenericPacket(ui32 nSizeBytes)
 : m_pPkt(NULL)
 , mnDataSizeBytes(0)
-, m_nSizeBytes(nSizeBytes)
+, size_bytes_(nSizeBytes)
 {
    allocate();
 }
@@ -70,7 +70,7 @@ GenericPacket::GenericPacket(ui32 nSizeBytes)
 GenericPacket::GenericPacket(ui32 nDataSizeBytes, ui32 nBodySizeBytes)
 : m_pPkt(NULL)
 , mnDataSizeBytes(nDataSizeBytes)
-, m_nSizeBytes(nDataSizeBytes + nBodySizeBytes)
+, size_bytes_(nDataSizeBytes + nBodySizeBytes)
 {
    allocate();
 }
@@ -84,7 +84,7 @@ GenericPacket::~GenericPacket()
 //------------------------------------------------------------------------------
 bool GenericPacket::allocate()
 {
-   if (m_nSizeBytes == 0)
+   if (size_bytes_ == 0)
    {
       log::debug("GenericPacket::allocate: Already allocated!\n");
       return false;
@@ -96,8 +96,8 @@ bool GenericPacket::allocate()
     m_pPkt = NULL;
   }
    
-   m_pPkt = new unsigned char[m_nSizeBytes];
-   memset(m_pPkt, 0, m_nSizeBytes);
+   m_pPkt = new unsigned char[size_bytes_];
+   memset(m_pPkt, 0, size_bytes_);
    
    return (m_pPkt != NULL);
 }
@@ -106,7 +106,7 @@ bool GenericPacket::allocate()
 bool GenericPacket::allocate(ui32 sizeBytes)
 {
    mnDataSizeBytes = 0;
-   m_nSizeBytes = sizeBytes;
+   size_bytes_ = sizeBytes;
    return allocate();
 }
 
@@ -114,7 +114,7 @@ bool GenericPacket::allocate(ui32 sizeBytes)
 bool GenericPacket::allocate(ui32 nDataSizeBytes, ui32 nBodySizeBytes)
 {
   mnDataSizeBytes = nDataSizeBytes;
-  m_nSizeBytes = nDataSizeBytes + nBodySizeBytes;
+  size_bytes_ = nDataSizeBytes + nBodySizeBytes;
   return allocate();
 }
 
@@ -133,7 +133,7 @@ void GenericPacket::deallocate()
       m_pPkt = NULL;
    }
    
-   m_nSizeBytes = 0;
+   size_bytes_ = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ void GenericPacket::destroy()
 //------------------------------------------------------------------------------
 ui32 GenericPacket::allocatedSize() const
 {
-   return m_nSizeBytes;
+   return size_bytes_;
 }
 
 //------------------------------------------------------------------------------
@@ -275,7 +275,7 @@ GenericPacket& GenericPacket::operator= (const GenericPacket &other)
    
    deallocate();
    
-   m_nSizeBytes = other.m_nSizeBytes;
+   size_bytes_ = other.size_bytes_;
    
    if (allocate())
    {

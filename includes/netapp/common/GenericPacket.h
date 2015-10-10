@@ -107,7 +107,7 @@ protected:
    unsigned char* m_pPkt;
 
    ui32   mnDataSizeBytes;      
-   ui32   m_nSizeBytes;
+   ui32   size_bytes_;
 };
 
 }}
