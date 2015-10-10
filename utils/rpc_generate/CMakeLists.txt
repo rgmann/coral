@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
-project( protoc-gen-libergen )
 
-cmake_policy(SET CMP0015 NEW)
-add_definitions ("-Wall -g")
-add_definitions ("-Wno-unused-local-typedefs")
+
+set( TARGET_NAME protoc-gen-coralrpc )
+project( ${TARGET_NAME} )
+
+cmake_policy( SET CMP0015 NEW )
+add_definitions( "-Wall -g" )
+add_definitions( "-Wno-unused-local-typedefs" )
 
 
 find_package( Protobuf REQUIRED )
@@ -21,16 +24,13 @@ include_directories( "${CORE_INCLUDE}/container" )
 
 link_directories( "../../lib/core" )
 
-add_executable( protoc-gen-libergen
-RpcServiceGenerator.cpp
-libergen.cpp )
+add_executable(
+  ${TARGET_NAME}
+  RpcServiceGenerator.cpp
+  rpc_generator.cpp
+)
 
-target_link_libraries( protoc-gen-libergen liber_core )
-target_link_libraries( protoc-gen-libergen ${PROTOBUF_LIBRARIES} )
-target_link_libraries( protoc-gen-libergen protoc )
-target_link_libraries( protoc-gen-libergen pthread )
-
-if(APPLE)
-elseif(UNIX)
-  # target_link_libraries( protoc-gen-libergen rt )
-endif()
+target_link_libraries( ${TARGET_NAME} liber_core )
+target_link_libraries( ${TARGET_NAME} ${PROTOBUF_LIBRARIES} )
+target_link_libraries( ${TARGET_NAME} protoc )
+target_link_libraries( ${TARGET_NAME} pthread )

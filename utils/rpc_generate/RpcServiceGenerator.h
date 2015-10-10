@@ -51,7 +51,7 @@ private:
 
 private:
 
-   std::ofstream& mDebug;
+   std::ofstream& debug_stream_;
    const google::protobuf::FileDescriptor*       descriptor_; 
    google::protobuf::compiler::GeneratorContext* context_;
    std::map<std::string, std::string>            common_variables_;

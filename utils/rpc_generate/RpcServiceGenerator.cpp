@@ -15,13 +15,13 @@ using namespace google::protobuf::compiler;
 
 //-----------------------------------------------------------------------------
 RpcServiceGenerator::RpcServiceGenerator(
-  std::ofstream&        debug,
-  const FileDescriptor* descriptor,
-  GeneratorContext*     context
+   std::ofstream&        debug,
+   const FileDescriptor* descriptor,
+   GeneratorContext*     context
 )
-: mDebug(debug)
-, descriptor_( descriptor )
-, context_( context )
+   : debug_stream_( debug )
+   , descriptor_( descriptor )
+   , context_( context )
 {
 }
 
@@ -33,7 +33,7 @@ RpcServiceGenerator::~RpcServiceGenerator()
 //-----------------------------------------------------------------------------
 bool RpcServiceGenerator::generateServices()
 {
-   bool lbSuccess = true;
+   bool success = true;
 
    common_variables_.insert( std::make_pair(
       "method_separator",
@@ -67,19 +67,19 @@ bool RpcServiceGenerator::generateServices()
          service_ptr->name()
       ));
 
-      generate_client_resource_stub_header(service_ptr);
-      generate_client_resource_stub_imp(service_ptr);
+      generate_client_resource_stub_header( service_ptr );
+      generate_client_resource_stub_imp( service_ptr );
 
       generate_server_action_headers( service_ptr );
       generate_server_action_imp( service_ptr );
 
-      generate_server_resource_stub_header(service_ptr);
-      generate_server_resource_stub_imp(service_ptr);
+      generate_server_resource_stub_header( service_ptr );
+      generate_server_resource_stub_imp( service_ptr );
 
       common_variables_.erase( "service" );
    }
 
-   return lbSuccess;
+   return success;
 }
 
 //-----------------------------------------------------------------------------
@@ -96,7 +96,8 @@ bool RpcServiceGenerator::generate_client_resource_stub_header(
    if ( stream )
    {
       Printer printer( stream.get(), PRINTER_DELIMETER );
-      mDebug << "RpcServiceGenerator: Generating " << filename << "." << std::endl;
+
+      debug_stream_ << "RpcServiceGenerator: Generating " << filename << "." << std::endl;
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
@@ -131,13 +132,20 @@ bool RpcServiceGenerator::generate_client_resource_stub_header(
       {
          const MethodDescriptor* method_ptr = service_ptr->method( method_index );
 
+         std::map<std::string,std::string> local_variables( variables );
+         variables[ "method" ] = method_ptr->name();
+         variables[ "request_type" ] =
+            GetFullyQualifiedName( method_ptr->input_type() );
+         variables[ "response_type" ] =
+            GetFullyQualifiedName( method_ptr->output_type() );
+
          printer.Print(
+            variables,
             "   void $method$(\n"
-            "      const $request$& request, $response$& response,\n"
-            "      liber::rpc::AsyncRpcSupervisor* supervisor = NULL ) throw (liber::rpc::RpcException);\n\n",
-           "method", method_ptr->name(),
-           "request", GetFullyQualifiedName( method_ptr->input_type() ),
-           "response", GetFullyQualifiedName( method_ptr->output_type() )
+            "      const $request_type$& request,\n"
+            "      $response_type$& response,\n"
+            "      liber::rpc::AsyncRpcSupervisor* supervisor = NULL )"
+            " throw (liber::rpc::RpcException);\n\n"
          );
       }
 
@@ -170,7 +178,9 @@ bool RpcServiceGenerator::generate_client_resource_stub_imp(
    if ( stream )
    {
       Printer printer( stream.get(), PRINTER_DELIMETER );
-      mDebug << "RpcServiceGenerator: Generating " << filename << "." << std::endl;
+
+      debug_stream_ << "RpcServiceGenerator: Generating " << filename
+                    << "." << std::endl;
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
@@ -202,7 +212,7 @@ bool RpcServiceGenerator::generate_client_resource_stub_imp(
       );
 
       int method_count = service_ptr->method_count();
-      for (int method_index = 0; method_index < method_count; ++method_index )
+      for ( int method_index = 0; method_index < method_count; ++method_index )
       {
          const MethodDescriptor* method_ptr = service_ptr->method( method_index );
 
@@ -249,7 +259,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_header(
    if ( stream )
    {
       Printer printer( stream.get(), PRINTER_DELIMETER );
-      mDebug << "RpcServiceGenerator: Generating " << filename << "." << std::endl;
+      debug_stream_ << "RpcServiceGenerator: Generating " << filename << "." << std::endl;
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
@@ -349,7 +359,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_imp(
    if ( stream )
    {
       Printer printer( stream.get(), PRINTER_DELIMETER );
-      mDebug << "RpcServiceGenerator: Generating " << filename << "." << std::endl;
+      debug_stream_ << "RpcServiceGenerator: Generating " << filename << "." << std::endl;
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
