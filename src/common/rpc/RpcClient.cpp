@@ -85,7 +85,6 @@ RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
          {
             if ( packet_ptr->isAllocated() )
             {
-               log::status("RpcClient::invokeRpc: Send request - %d\n", packet_ptr->allocatedSize() );
                // The RPC client and server always have the same subscriber ID,
                // so there is no need to send the packet to a particular subscriber ID.
                sendTo( server_destination_id_, packet_ptr );

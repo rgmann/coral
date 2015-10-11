@@ -23,6 +23,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+// %% license-end-token %%
+// 
+// Author: Robert.Glissmann@gmail.com (Robert Glissmann)
+// 
+// 
+
 #include <string>
 #include <iostream>
 #include <fstream>

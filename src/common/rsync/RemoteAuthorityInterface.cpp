@@ -124,7 +124,8 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
    // Subscribe to the jobs packet subscriber.
    if ( job_ptr->packetRouter().subscribe(
       RsyncPacket::RsyncAuthorityInterface, this,
-      kSubscriberModeReadWrite ) == false ) {
+      kSubscriberModeReadWrite ) == false )
+   {
       liber::log::error("RemoteAuthorityInterface::process: FAILED to register\n");
    }
 
@@ -244,6 +245,7 @@ RsyncError RemoteAuthorityInterface::waitForEndInstruction(int nTimeoutMs)
          // Check whether an instruction has been received recently.
          boost::posix_time::time_duration deltaTime =
             boost::posix_time::microsec_clock::local_time() - last_instruction_time_;
+
          if ( deltaTime.total_milliseconds() >= JOB_TIMEOUT_MS )
          {
             status = kRsyncRemoteJobTimeout;
@@ -267,8 +269,6 @@ void RemoteAuthorityInterface::sendAssemblyInstruction(
 
    if ( instruction_ptr )
    {
-      // container_ptr->stream().assign( data_ptr, byte_count );
-
       boost::mutex::scoped_lock guard( activeJobLock() );
 
       // Send the instruction to the assembler.
@@ -334,6 +334,9 @@ RsyncError RemoteAuthorityInterface::startRemoteJob( RsyncJob* job_ptr )
    RsyncError query_status = kRsyncSuccess;
 
    setActiveJob( job_ptr );
+
+   // Initialize the last instruction time to start time of the current job.
+   last_instruction_time_ = boost::posix_time::microsec_clock::local_time();
 
    std::string packet_data = job_ptr->descriptor().serialize();
    bool send_success = sendTo(

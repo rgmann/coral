@@ -32,19 +32,18 @@
 
 
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include "Log.h"
 #include "GenericPacket.h"
 
+using namespace liber;
 using namespace liber::netapp;
 
 //------------------------------------------------------------------------------
 GenericPacket::GenericPacket()
-   : packet_base_ptr_(NULL)
-   , base_size_bytes_(0)
-   , allocated_size_bytes_(0)
+   : packet_base_ptr_( NULL )
+   , base_size_bytes_( 0 )
+   , allocated_size_bytes_( 0 )
 {
 }
 
@@ -52,9 +51,9 @@ GenericPacket::GenericPacket()
 GenericPacket::GenericPacket( ui32 base_size_bytes, ui32 data_size_bytes )
    : packet_base_ptr_( NULL )
    , base_size_bytes_( base_size_bytes )
-   , allocated_size_bytes_( base_size_bytes + data_size_bytes )
+   , allocated_size_bytes_( 0 )
 {
-   allocate();
+   allocate( data_size_bytes );
 }
 
 //------------------------------------------------------------------------------
@@ -64,53 +63,48 @@ GenericPacket::~GenericPacket()
 }
 
 //------------------------------------------------------------------------------
-bool GenericPacket::allocate()
-{
-   bool success = false;
-
-   // This overload of allocate expects the allocated size to be precomputed,
-   // so if it is zero, something is wrong.
-   if ( allocated_size_bytes_ != 0 )
-   {
-      // Deallocate the buffer if it is currently allocated.
-      if ( packet_base_ptr_ != NULL )
-      {
-         delete[] packet_base_ptr_;
-         packet_base_ptr_ = NULL;
-      }
-
-      packet_base_ptr_ = new (std::nothrow) ui8[ allocated_size_bytes_ ];
-
-      if ( ( success = ( packet_base_ptr_ != NULL ) ) )
-      {
-         memset( packet_base_ptr_, 0, allocated_size_bytes_ );
-      }
-      else
-      {
-         log::error(
-            "GenericPacket::allocate: "
-            "Failed to allocate buffer of size %u.\n",
-            allocated_size_bytes_
-         );
-      }
-   }
-   else
-   {
-      log::debug( "GenericPacket::allocate: Already allocated!\n" );
-   }
-   
-   return success;
-}
-
-//------------------------------------------------------------------------------
 bool GenericPacket::allocate( ui32 size_bytes )
 {
    bool success = false;
 
-   if ( ( size_bytes > 0 ) && ( size_bytes >= base_size_bytes_ ) )
+   ui32 new_allocated_size_bytes = base_size_bytes_ + size_bytes;
+
+   if ( new_allocated_size_bytes > 0 )
    {
-      allocated_size_bytes_ = size_bytes;
-      success = allocate();
+      if ( new_allocated_size_bytes != allocated_size_bytes_ )
+      {
+         if ( isAllocated() )
+         {
+            delete[] packet_base_ptr_;
+            packet_base_ptr_ = NULL;
+         }
+
+         allocated_size_bytes_ = new_allocated_size_bytes;
+         packet_base_ptr_ = new (std::nothrow) ui8[ allocated_size_bytes_ ];
+
+         if ( ( success = ( packet_base_ptr_ != NULL ) ) )
+         {
+            memset( packet_base_ptr_, 0, allocated_size_bytes_ );
+            success = true;
+         }
+         else
+         {
+            log::error(
+               "GenericPacket::allocate: "
+               "Failed to allocate buffer of size %u.\n",
+               allocated_size_bytes_
+            );
+         }
+      }
+      else
+      {
+         success = true;
+      }
+   }
+   else
+   {
+      log::error(
+         "GenericPacket::allocate: Cannot allocate packet of size zero.\n" );
    }
 
    return success;
@@ -208,13 +202,13 @@ bool GenericPacket::allocate( const void* packet_ptr, ui32 size_bytes )
 
    if ( packet_ptr != NULL )
    {
+      // The buffer must be at least as large as the base-segment size.
       if ( size_bytes >= base_size_bytes_ )
       {
-         // Begin by destroying the packet if it is already allocated.
-         deallocate();
+         // Compute the data-segment size required to accommodate this packet.
+         ui32 data_size_bytes = size_bytes - base_size_bytes_;
 
-         // The header size is known since it is supplied...
-         if ( allocate( size_bytes ) )
+         if ( allocate( data_size_bytes ) )
          {
             // Copy the packet.
             memcpy( packet_base_ptr_, packet_ptr, allocatedSize() );

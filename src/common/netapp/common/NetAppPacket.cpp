@@ -46,56 +46,54 @@ NetAppPacket::NetAppPacket()
 }
 
 //-----------------------------------------------------------------------------
-NetAppPacket::NetAppPacket(int type, ui32 length)
-: GenericPacket(sizeof(NetAppPacket::Data), length)
+NetAppPacket::NetAppPacket( int type, ui32 length)
+   : GenericPacket( sizeof(NetAppPacket::Data), length )
 {
-  if (isAllocated())
-  {
-    data()->type = type;
-    data()->length = length;
-  }
+   if ( isAllocated() )
+   {
+      data()->type   = type;
+      data()->length = length;
+   }
 }
 
 //-----------------------------------------------------------------------------
 bool NetAppPacket::allocate(const NetAppPacket::Data& rData)
 {
-  // bool lbSuccess = GenericPacket::allocate(sizeof(NetAppPacket::Data), 
-  //                                          rData.length);
-  bool success = GenericPacket::allocate( sizeof(NetAppPacket::Data) + rData.length );
+   bool success = GenericPacket::allocate( rData.length );
 
-  if (success)
-  {
-    data()->type = rData.type;
-    data()->length = rData.length;
-  }
+   if ( success )
+   {
+      data()->type   = rData.type;
+      data()->length = rData.length;
+   }
 
-  return success;
+   return success;
 }
 
 //-----------------------------------------------------------------------------
 NetAppPacket::Data* const NetAppPacket::data()
 {
-  Data* lpHeader = NULL;
+   Data* header_ptr = NULL;
 
-  if (isAllocated())
-  {
-    lpHeader = reinterpret_cast<Data*>(basePtr());
-  }
+   if ( isAllocated() )
+   {
+      header_ptr = reinterpret_cast<Data*>(basePtr());
+   }
 
-  return lpHeader;
+   return header_ptr;
 }
 
 //-----------------------------------------------------------------------------
-void NetAppPacket::swap(void* pData, ui32 nSizeBytes)
+void NetAppPacket::swap(void* data_ptr, ui32 nSizeBytes)
 {
-  NetAppPacket::Data* lpHeader = NULL;
+   Data* header_ptr = NULL;
 
-  if (pData && (nSizeBytes >= sizeof(NetAppPacket::Data)))
-  {
-    lpHeader = reinterpret_cast<NetAppPacket::Data*>(pData);
+   if ( data_ptr && ( nSizeBytes >= sizeof( Data ) ) )
+   {
+      header_ptr = reinterpret_cast<Data*>( data_ptr );
 
-    lpHeader->type   = ByteOrder::NetSwap(lpHeader->type);
-    lpHeader->length = ByteOrder::NetSwap(lpHeader->length);
-  }
+      header_ptr->type   = ByteOrder::NetSwap( header_ptr->type );
+      header_ptr->length = ByteOrder::NetSwap( header_ptr->length );
+   }
 }
 

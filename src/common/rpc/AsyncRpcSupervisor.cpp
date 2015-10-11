@@ -120,7 +120,6 @@ bool AsyncRpcSupervisor::invoke(
       __LINE__
    ));
 
-   log::status("AsyncRpcSupervisor::invoke\n");
    if ( isBusy() == false )
    {
       timeout_ms_           = timeout_ms;
@@ -128,7 +127,6 @@ bool AsyncRpcSupervisor::invoke(
 
       // Send the marshalled RPC to the RpcClient.
       marshalled_call_ = rpc_client.invokeRpc( request );
-      log::status("AsyncRpcSupervisor::invoke\n");
 
       if ( marshalled_call_ != NULL )
       {

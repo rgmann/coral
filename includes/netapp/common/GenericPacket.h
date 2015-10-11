@@ -40,6 +40,32 @@
 namespace liber {
 namespace netapp {
 
+
+///
+/// GenericPacket is an interface for allocating, and accessing the contents
+/// of, a buffer-backed packet.
+///
+/// All packets adhere to the following structure:
+///
+///          *********************************
+///          *                               *
+///          *                               *
+///          *          BASE SEGMENT         *
+///          *          (fixed size)         *
+///          *                               *
+///          *********************************
+///          *                               *
+///          *                               *
+///          *          DATA SEGMENT         *
+///          *         (dynamic size)        *
+///          *                               *
+///          *********************************
+///
+/// The size of the BASE segment is fixed for any given implementation of the
+/// GenericPacket interface (i.e. the BASE segment size is a class attribute
+/// rather than an instance attribute).  The size of the DATA segment varies
+/// between packet instances.
+///
 class GenericPacket {
 public:
    
@@ -57,11 +83,11 @@ public:
    virtual ~GenericPacket();
    
    ///
-   /// Allocate the packet to the specified size in bytes. If the packet is
-   /// currently allocated, it will first be deallocated. If the specified
-   /// size is smaller than the base segment size, no action is taken.
+   /// Allocate the packet with the specified data-segment size in bytes. The
+   /// base segment is automatically allocated. If the packet is currently
+   /// allocated to a different size, it will first be deallocated.
    ///
-   /// @param  size_bytes  Total size of packet in bytes (base + data)
+   /// @param  size_bytes  Size of data segment
    /// @return bool        True if allocation succeeded; false otherwise.
    ///
    virtual bool allocate( ui32 size_bytes );
@@ -155,13 +181,11 @@ public:
 protected:
 
    ///
-   ///
-   ///
-   bool allocate();
-
-   ///
    /// Swap the byte order of the packet buffer in place. The base
    /// implementation takes no action.
+   ///
+   /// @param  data_ptr  Pointer base of packet
+   /// @param  ui32      Packet size in bytes
    ///
    virtual void swap( void* data_ptr, ui32 size_bytes ) {};
 
@@ -173,6 +197,16 @@ private:
    /// the correct base-segment size must be set during construction.
    ///
    GenericPacket();
+
+   ///
+   /// Unimplemented copy constructor.
+   ///
+   GenericPacket( const GenericPacket& );
+
+   ///
+   /// Unimplemented copy operator.
+   ///
+   GenericPacket& operator= ( const GenericPacket& );
 
 
 private:
@@ -189,6 +223,8 @@ private:
 
 };
 
-}}
+} // end namespace netapp
+} // end namespace liber
+
 
 #endif // GENERIC_PACKET_H

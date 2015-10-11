@@ -44,15 +44,11 @@ namespace rpc {
 class RpcPacket : public liber::netapp::GenericPacket {
 public:
 
-   enum Type
-   {
-      // TODO: add types
-   };
-
-   static const ui32 RpcMarkerSize = 7;
+   static const ui32 kRpcMarkerSize = 7;
+   
    struct __attribute ((__packed__)) Data
    {
-      char marker[RpcMarkerSize];
+      char marker[ kRpcMarkerSize ];
       ui32 rpcId;
       ui32 length;
       ui32 format;
@@ -61,23 +57,33 @@ public:
 
    RpcPacket();
    
-   RpcPacket(const RpcObject &object); 
+   RpcPacket( const RpcObject &object ); 
    
-   bool  getObject(RpcObject &object) const;
+   bool getObject(RpcObject &object) const;
 
-   // bool  unpack(const void* pPkt, ui32 nSizeBytes);
-   bool  allocate(const void* pPkt, ui32 nSizeBytes);
+   bool allocate( const void* pPkt, ui32 nSizeBytes );
    
+   ///
+   /// Get a pointer to the packet header. If the packet has not been
+   /// allocated, NULL is returned.
+   ///
+   /// @return Data*  Pointer to packet header
+   ///
    Data* const data() const;
 
-   void swap(void* pData, ui32 nSizeBytes);
-   
+
+protected:
+
+   void swap( void* pData, ui32 nSizeBytes );
+
+
 private:
 
    typedef liber::netapp::GenericPacket inherited;
 
 };
 
-}}
+} // end namespace rpc
+} // end namespace liber
 
 #endif // RPC_PACKET_H

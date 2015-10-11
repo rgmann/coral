@@ -96,14 +96,11 @@ bool RpcServer::processPacket( const RpcPacket* packet_ptr )
 
       if ( resource_ptr )
       {
-         log::status("RpcServer::processPacket: Found resource\n");
-
          process_success = resource_ptr->unmarshall(
             input_object, output_object );
       }
       else
       {
-         log::status("RpcServer::processPacket: Resource not found\n");
          input_object.exception().reporter = RpcException::Server;
          input_object.exception().id       = UnknownResource;
 
@@ -134,8 +131,6 @@ bool RpcServer::put( DestinationID destination, const void* data_ptr, ui32 lengt
    {
       if ( packet.allocate( data_ptr, length ) )
       {
-         log::status("RpcServer::put: "
-            "Processing request - packet_size=%d, data_size=%d\n", length, packet.data()->length );
          route_success = processPacket( &packet );
       }
       else

@@ -45,8 +45,13 @@ using namespace liber::rsync;
 
 
 //-----------------------------------------------------------------------------
-RsyncTransportPacket::RsyncTransportPacket( int type, const GenericPacket* packet_ptr )
-   : GenericPacket( sizeof( RsyncTransportPacket::Data ), packet_ptr->allocatedSize() )
+RsyncTransportPacket::RsyncTransportPacket(
+   int type,
+   const GenericPacket* packet_ptr
+)
+   : GenericPacket(
+      sizeof( RsyncTransportPacket::Data ),
+      packet_ptr->allocatedSize() )
 {
    if ( isAllocated() )
    {
@@ -55,7 +60,8 @@ RsyncTransportPacket::RsyncTransportPacket( int type, const GenericPacket* packe
 
       if ( packet_ptr->allocatedSize() > 0 )
       {
-         memcpy(dataPtr(), packet_ptr->basePtr(), packet_ptr->allocatedSize());
+         // Copy the entire packet into the data segment of this packet.
+         memcpy( dataPtr(), packet_ptr->basePtr(), packet_ptr->allocatedSize() );
       }
    }
 }
@@ -63,14 +69,14 @@ RsyncTransportPacket::RsyncTransportPacket( int type, const GenericPacket* packe
 //-----------------------------------------------------------------------------
 void RsyncTransportPacket::swap( void* data_ptr, ui32 length )
 {
-   RsyncTransportPacket::Data* header_ptr = NULL;
+   Data* header_ptr = NULL;
 
-   if ( data_ptr && (length >= sizeof(RsyncTransportPacket::Data)) )
+   if ( data_ptr && ( length >= sizeof( Data ) ) )
    {
-      header_ptr = reinterpret_cast<RsyncTransportPacket::Data*>(data_ptr);
+      header_ptr = reinterpret_cast<Data*>( data_ptr );
 
-      header_ptr->type   = ByteOrder::NetSwap(header_ptr->type);
-      header_ptr->length = ByteOrder::NetSwap(header_ptr->length);
+      header_ptr->type   = ByteOrder::NetSwap( header_ptr->type );
+      header_ptr->length = ByteOrder::NetSwap( header_ptr->length );
    }
 }
 
@@ -95,17 +101,17 @@ RsyncPacket::RsyncPacket()
 }
 
 //-----------------------------------------------------------------------------
-RsyncPacket::RsyncPacket(int type, ui32 length, const void* pData)
-   : GenericPacket(sizeof(RsyncPacket::Data), length)
+RsyncPacket::RsyncPacket( int type, ui32 length, const void* data_ptr )
+   : GenericPacket( sizeof(RsyncPacket::Data), length )
 {
    if (isAllocated())
    {
-      data()->type = type;
+      data()->type   = type;
       data()->length = length;
 
-      if (pData)
+      if ( data_ptr != NULL )
       {
-         memcpy(dataPtr(), pData, length);
+         memcpy( dataPtr(), data_ptr, length );
       }
    }
 }
@@ -116,12 +122,14 @@ RsyncPacket::RsyncPacket(int type, const std::string& rData)
 {
    if ( isAllocated() )
    {
-      data()->type = type;
+      data()->type   = type;
       data()->length = rData.size();
 
-      if ( rData.size() > 0 )
+      ui32 data_size_bytes = rData.size();
+      
+      if ( data_size_bytes > 0 )
       {
-         memcpy( dataPtr(), rData.data(), rData.size() );
+         memcpy( dataPtr(), rData.data(), data_size_bytes );
       }
    }
 }

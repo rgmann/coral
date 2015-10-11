@@ -69,7 +69,6 @@ bool RpcServerResource::unmarshall( RpcObject &input, RpcObject &output )
       __LINE__
    ));
 
-   log::status("RpcServerResource::unmarshall: %d\n", input.isValid() );
    if ( input.isValid() )
    {
       unmarshall_success = invoke( call_uuid, input, output );
@@ -103,7 +102,6 @@ bool RpcServerResource::invoke(
 
    if ( method_iterator != actions_.end() )
    {
-      log::status("RpcServerResource::invoke: Found action\n");
       std::string input_params;
       std::string output_params;
 

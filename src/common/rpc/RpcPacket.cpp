@@ -44,18 +44,18 @@ using namespace liber::rpc;
 using namespace liber::netapp;
 using namespace liber::net;
 
-static const char MarkerData[RpcPacket::RpcMarkerSize] = {'r', 'p', 'c',
-                                             'm', 's', 'g', '\0'};
+static const char MarkerData[ RpcPacket::kRpcMarkerSize ] =
+   { 'r', 'p', 'c', 'm', 's', 'g', '\0' };
 
 //------------------------------------------------------------------------------
 RpcPacket::RpcPacket()
-   : GenericPacket( sizeof(RpcPacket::Data), 0 )//sizeof(RpcPacket::Data)
+   : GenericPacket( sizeof(RpcPacket::Data), 0 )
 {
 }
 
 //------------------------------------------------------------------------------
 RpcPacket::RpcPacket(const RpcObject &object)
-   : GenericPacket( sizeof(RpcPacket::Data), 0 )//sizeof(RpcPacket::Data)
+   : GenericPacket( sizeof(RpcPacket::Data), 0 )
 {
    std::string serialized_object = object.serialize();
 
@@ -65,10 +65,9 @@ RpcPacket::RpcPacket(const RpcObject &object)
    }
    else
    {
-     // if (allocate( sizeof(Data), serialized_object.size()))
-      if (GenericPacket::allocate( sizeof(Data) + serialized_object.size()))
+      if ( GenericPacket::allocate( serialized_object.size() ) )
       {
-         memcpy(data()->marker, MarkerData, RpcMarkerSize);
+         memcpy( data()->marker, MarkerData, kRpcMarkerSize );
          data()->length = serialized_object.size();
 
          memcpy( dataPtr(), serialized_object.data(), serialized_object.size() );
@@ -102,42 +101,37 @@ bool RpcPacket::getObject( RpcObject &object ) const
 //------------------------------------------------------------------------------
 RpcPacket::Data* const RpcPacket::data() const
 {
-   return reinterpret_cast<Data* const>(basePtr());
+   return reinterpret_cast<Data* const>( basePtr() );
 }
 
 //------------------------------------------------------------------------------
-// bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
-bool RpcPacket::allocate(const void* pPkt, ui32 nSizeBytes)
+bool RpcPacket::allocate( const void* data_ptr, ui32 size_bytes )
 {
-   if (!inherited::allocate(pPkt, nSizeBytes))
-   {
-      log::error("RpcPacket::unpack: inherited unpack failed.\n");
-      return false;
-   }
-   
-   // Verify that the packet is at least large enough to contain the
-   // RsyncAssemblyInstr data segment and all preceding data segments.
-   // if (nSizeBytes < sizeof(Data))
-   // {
-   //    log::error("RpcPacket::unpack: too small\n");
-   //    return false;
-   // }
+   bool success = false;
 
-   if (strncmp(data()->marker, MarkerData, RpcPacket::RpcMarkerSize) != 0)
+   if ( inherited::allocate( data_ptr, size_bytes ) )
    {
-      log::error("RpcPacket::unpack: Invalid marker\n");
-      return false;
+      if ( strncmp( data()->marker, MarkerData, kRpcMarkerSize ) == 0)
+      {
+         // Validate the size of the packet against the indicated payload size.
+         if ( ( size_bytes - sizeof( Data ) ) == data()->length )
+         {
+            success = true;
+         }
+         else
+         {
+            log::error(
+               "RpcPacket::unpack: size mismatch - size = %u, exp = %u\n",
+               ( size_bytes - sizeof( Data ) ), data()->length);
+         }
+      }
+      else
+      {
+         log::error("RpcPacket::unpack: Invalid marker\n");
+      }
    }
-       
-   // Validate the size of the packet against the indicated payload size.
-   if ((nSizeBytes - sizeof(Data)) != data()->length)
-   {
-      log::error("RpcPacket::unpack: size mismatch - size = %u, exp = %u\n",
-             (nSizeBytes - sizeof(Data)), data()->length);
-      return false;
-   }
-       
-   return true;
+
+   return success;
 }
 
 //------------------------------------------------------------------------------
@@ -153,5 +147,3 @@ void RpcPacket::swap(void* pData, ui32 nSizeBytes)
     liber::netapp::swapInPlace(lpData->encoding);
   }
 }
-
-

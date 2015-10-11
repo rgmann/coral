@@ -60,9 +60,19 @@ public:
 
    RsyncTransportPacket( int type, const GenericPacket* packet_ptr );
 
+   ///
+   /// Get a pointer to the packet header, or NULL if the packet is not
+   /// allocated.
+   ///
+   /// @return Data*  Pointer to packet header
+   ///
    Data* const data() const;
 
-   void swap(void* data_ptr, ui32 length );
+
+protected:
+
+   void swap( void* data_ptr, ui32 length );
+
 
 private:
 
@@ -111,9 +121,19 @@ public:
    RsyncPacket(int type, ui32 nLength, const void* pData = NULL);
    RsyncPacket(int type, const std::string& rData);
 
+   ///
+   /// Get a pointer to the packet header, or NULL if the packet is not
+   /// allocated.
+   ///
+   /// @return Data*  Pointer to packet header
+   ///
    Data* const data() const;
 
-   void swap(void* pData, ui32 nSizeBytes);
+
+protected:
+
+   void swap( void* data_ptr, ui32 size_bytes );
+
 
 private:
 
@@ -145,6 +165,7 @@ private:
    ui32 length_;
 };
 
-}}
+} // end namespace rsync
+} // end namespace liber
 
 #endif // RSYNC_PACKET_H
