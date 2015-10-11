@@ -65,7 +65,8 @@ public:
    
    bool  getObject(RpcObject &object) const;
 
-   bool  unpack(const void* pPkt, ui32 nSizeBytes);
+   // bool  unpack(const void* pPkt, ui32 nSizeBytes);
+   bool  allocate(const void* pPkt, ui32 nSizeBytes);
    
    Data* const data() const;
 

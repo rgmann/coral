@@ -49,33 +49,34 @@ static const char MarkerData[RpcPacket::RpcMarkerSize] = {'r', 'p', 'c',
 
 //------------------------------------------------------------------------------
 RpcPacket::RpcPacket()
-: GenericPacket(sizeof(RpcPacket::Data), 0)//sizeof(RpcPacket::Data)
+   : GenericPacket( sizeof(RpcPacket::Data), 0 )//sizeof(RpcPacket::Data)
 {
 }
 
 //------------------------------------------------------------------------------
 RpcPacket::RpcPacket(const RpcObject &object)
-: GenericPacket(sizeof(RpcPacket::Data), 0)//sizeof(RpcPacket::Data)
+   : GenericPacket( sizeof(RpcPacket::Data), 0 )//sizeof(RpcPacket::Data)
 {
    std::string serialized_object = object.serialize();
 
    if ( serialized_object.empty() )
    {
-     log::error("RpcPacket - Empty RpcObject. No allocation performed.\n");
+      log::error("RpcPacket - Empty RpcObject. No allocation performed.\n");
    }
    else
    {
-     if (allocate(sizeof(Data), serialized_object.size()))
-     {
-       memcpy(data()->marker, MarkerData, RpcMarkerSize);
-       data()->length = serialized_object.size();
-      
-       memcpy( dataPtr(), serialized_object.data(), serialized_object.size() );
-     }
-     else
-     {
-       log::error("RpcPacket - Allocation failed.\n");
-     }
+     // if (allocate( sizeof(Data), serialized_object.size()))
+      if (GenericPacket::allocate( sizeof(Data) + serialized_object.size()))
+      {
+         memcpy(data()->marker, MarkerData, RpcMarkerSize);
+         data()->length = serialized_object.size();
+
+         memcpy( dataPtr(), serialized_object.data(), serialized_object.size() );
+      }
+      else
+      {
+         log::error("RpcPacket - Allocation failed.\n");
+      }
    }
 }
 
@@ -105,9 +106,10 @@ RpcPacket::Data* const RpcPacket::data() const
 }
 
 //------------------------------------------------------------------------------
-bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
+// bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
+bool RpcPacket::allocate(const void* pPkt, ui32 nSizeBytes)
 {
-   if (!inherited::unpack(pPkt, nSizeBytes))
+   if (!inherited::allocate(pPkt, nSizeBytes))
    {
       log::error("RpcPacket::unpack: inherited unpack failed.\n");
       return false;
@@ -115,11 +117,11 @@ bool RpcPacket::unpack(const void* pPkt, ui32 nSizeBytes)
    
    // Verify that the packet is at least large enough to contain the
    // RsyncAssemblyInstr data segment and all preceding data segments.
-   if (nSizeBytes < sizeof(Data))
-   {
-      log::error("RpcPacket::unpack: too small\n");
-      return false;
-   }
+   // if (nSizeBytes < sizeof(Data))
+   // {
+   //    log::error("RpcPacket::unpack: too small\n");
+   //    return false;
+   // }
 
    if (strncmp(data()->marker, MarkerData, RpcPacket::RpcMarkerSize) != 0)
    {

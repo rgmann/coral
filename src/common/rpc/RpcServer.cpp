@@ -132,7 +132,7 @@ bool RpcServer::put( DestinationID destination, const void* data_ptr, ui32 lengt
 
    if ( data_ptr )
    {
-      if ( packet.unpack( data_ptr, length ) )
+      if ( packet.allocate( data_ptr, length ) )
       {
          log::status("RpcServer::put: "
             "Processing request - packet_size=%d, data_size=%d\n", length, packet.data()->length );

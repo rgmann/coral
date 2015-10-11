@@ -42,35 +42,17 @@ using namespace liber::netapp;
 
 //------------------------------------------------------------------------------
 GenericPacket::GenericPacket()
-: m_pPkt(NULL)
-, mnDataSizeBytes(0)
-, size_bytes_(0)
+   : packet_base_ptr_(NULL)
+   , base_size_bytes_(0)
+   , allocated_size_bytes_(0)
 {
 }
 
 //------------------------------------------------------------------------------
-GenericPacket::GenericPacket(const GenericPacket &other)
-: m_pPkt(NULL)
-, mnDataSizeBytes(0)
-, size_bytes_(0)
-{
-   *this = other;
-}
-
-//------------------------------------------------------------------------------
-GenericPacket::GenericPacket(ui32 nSizeBytes)
-: m_pPkt(NULL)
-, mnDataSizeBytes(0)
-, size_bytes_(nSizeBytes)
-{
-   allocate();
-}
-
-//------------------------------------------------------------------------------
-GenericPacket::GenericPacket(ui32 nDataSizeBytes, ui32 nBodySizeBytes)
-: m_pPkt(NULL)
-, mnDataSizeBytes(nDataSizeBytes)
-, size_bytes_(nDataSizeBytes + nBodySizeBytes)
+GenericPacket::GenericPacket( ui32 base_size_bytes, ui32 data_size_bytes )
+   : packet_base_ptr_( NULL )
+   , base_size_bytes_( base_size_bytes )
+   , allocated_size_bytes_( base_size_bytes + data_size_bytes )
 {
    allocate();
 }
@@ -84,210 +66,185 @@ GenericPacket::~GenericPacket()
 //------------------------------------------------------------------------------
 bool GenericPacket::allocate()
 {
-   if (size_bytes_ == 0)
+   bool success = false;
+
+   // This overload of allocate expects the allocated size to be precomputed,
+   // so if it is zero, something is wrong.
+   if ( allocated_size_bytes_ != 0 )
    {
-      log::debug("GenericPacket::allocate: Already allocated!\n");
-      return false;
+      // Deallocate the buffer if it is currently allocated.
+      if ( packet_base_ptr_ != NULL )
+      {
+         delete[] packet_base_ptr_;
+         packet_base_ptr_ = NULL;
+      }
+
+      packet_base_ptr_ = new (std::nothrow) ui8[ allocated_size_bytes_ ];
+
+      if ( ( success = ( packet_base_ptr_ != NULL ) ) )
+      {
+         memset( packet_base_ptr_, 0, allocated_size_bytes_ );
+      }
+      else
+      {
+         log::error(
+            "GenericPacket::allocate: "
+            "Failed to allocate buffer of size %u.\n",
+            allocated_size_bytes_
+         );
+      }
+   }
+   else
+   {
+      log::debug( "GenericPacket::allocate: Already allocated!\n" );
+   }
+   
+   return success;
+}
+
+//------------------------------------------------------------------------------
+bool GenericPacket::allocate( ui32 size_bytes )
+{
+   bool success = false;
+
+   if ( ( size_bytes > 0 ) && ( size_bytes >= base_size_bytes_ ) )
+   {
+      allocated_size_bytes_ = size_bytes;
+      success = allocate();
    }
 
-  if (m_pPkt)
-  {
-    delete[] m_pPkt;
-    m_pPkt = NULL;
-  }
-   
-   m_pPkt = new unsigned char[size_bytes_];
-   memset(m_pPkt, 0, size_bytes_);
-   
-   return (m_pPkt != NULL);
-}
-
-//------------------------------------------------------------------------------
-bool GenericPacket::allocate(ui32 sizeBytes)
-{
-   mnDataSizeBytes = 0;
-   size_bytes_ = sizeBytes;
-   return allocate();
-}
-
-//------------------------------------------------------------------------------
-bool GenericPacket::allocate(ui32 nDataSizeBytes, ui32 nBodySizeBytes)
-{
-  mnDataSizeBytes = nDataSizeBytes;
-  size_bytes_ = nDataSizeBytes + nBodySizeBytes;
-  return allocate();
+   return success;
 }
 
 //------------------------------------------------------------------------------
 bool GenericPacket::isAllocated() const
 {
-   return (basePtr() != NULL);
+   return ( packet_base_ptr_ != NULL );
 }
 
 //------------------------------------------------------------------------------
 void GenericPacket::deallocate()
 {
-   if (m_pPkt)
+   if ( packet_base_ptr_ != NULL )
    {
-      delete[] m_pPkt;
-      m_pPkt = NULL;
+      delete[] packet_base_ptr_;
+      packet_base_ptr_ = NULL;
    }
    
-   size_bytes_ = 0;
+   allocated_size_bytes_ = 0;
+
+   // Note:
+   // Do not clear the base_size_bytes_ member as that is an attribute
+   // of the type rather than the instance and must always be set.
 }
 
 //------------------------------------------------------------------------------
-void GenericPacket::destroy()
+ui32 GenericPacket::baseSize() const
 {
-   if (m_pPkt)
-   {
-      delete[] m_pPkt;
-      m_pPkt = NULL;
-   }
+   return base_size_bytes_;
 }
 
 //------------------------------------------------------------------------------
 ui32 GenericPacket::allocatedSize() const
 {
-   return size_bytes_;
+   return allocated_size_bytes_;
 }
 
 //------------------------------------------------------------------------------
 ui32 GenericPacket::dataSize() const
 {
-   return mnDataSizeBytes;
+   ui32 data_size_bytes = allocated_size_bytes_;
+
+   if ( isAllocated() )
+   {
+      data_size_bytes -= base_size_bytes_;
+   }
+
+   return data_size_bytes;
 }
 
 //------------------------------------------------------------------------------
 void* GenericPacket::basePtr()
 {
-   return reinterpret_cast<void*>(m_pPkt);
+   return reinterpret_cast<void*>(packet_base_ptr_);
 }
 
 //------------------------------------------------------------------------------
 void* const GenericPacket::basePtr() const
 {
-   return reinterpret_cast<void* const>(m_pPkt);
+   return reinterpret_cast<void* const>(packet_base_ptr_);
 }
 
 //------------------------------------------------------------------------------
 void* GenericPacket::dataPtr()
 {
-   char* lpData = NULL;
+   ui8* data_ptr = NULL;
 
-   if (m_pPkt)
+   if ( packet_base_ptr_ != NULL )
    {
-      lpData = reinterpret_cast<char*>(basePtr());
-      lpData += mnDataSizeBytes;
+      data_ptr = reinterpret_cast<ui8*>( basePtr() ) + base_size_bytes_;
    }
    
-   return lpData;
+   return data_ptr;
 }
 
 //------------------------------------------------------------------------------
 void* const GenericPacket::dataPtr() const
 {
-   char* lpData = NULL;
+   ui8* data_ptr = NULL;
    
-   if (m_pPkt)
+   if ( packet_base_ptr_ != NULL )
    {
-      lpData = reinterpret_cast<char*>(basePtr());
-      lpData += mnDataSizeBytes;
+      data_ptr = reinterpret_cast<ui8*>( basePtr() ) + base_size_bytes_;
    }
 
-   return (void* const)lpData;
+   return data_ptr;
 }
 
 //------------------------------------------------------------------------------
-bool GenericPacket::pack(void** pPkt, ui32 &nSizeBytes) const
+bool GenericPacket::allocate( const void* packet_ptr, ui32 size_bytes )
 {
-   //unsigned char* l_pPkt = (unsigned char*)(*pPkt);
-   
-   //if (l_pPkt != NULL)
-   if (*pPkt != NULL)
+   bool success = false;
+
+   if ( packet_ptr != NULL )
    {
-      printf("GenericPacket::pack: Pointer already allocated\n");
-      return false;
-   }
-   
-//   l_pPkt = new unsigned char[size()];
-   *pPkt = new unsigned char[allocatedSize()];
-   if (*pPkt == NULL)
-   {
-      printf("GenericPacket::pack: Failed to allocate pointer\n");
-      nSizeBytes = 0;
-      return false;
-   }
-   
-//   memcpy(l_pPkt, m_pPkt, size());
-   memcpy(*pPkt, m_pPkt, allocatedSize());
-   nSizeBytes = allocatedSize();
-      
-   return true;
-}
-
-//------------------------------------------------------------------------------
-bool GenericPacket::unpack(const void* pPkt, ui32 nSizeBytes)
-{
-  bool lbSuccess = false;
-
-  if (pPkt != NULL)
-  {
-    ui32 lnDataSizeBytes = mnDataSizeBytes;
-
-    if (nSizeBytes >= mnDataSizeBytes)
-    {
-      // Begin by destroying the packet if it is already allocated.
-      destroy();
-
-      // The header size is known since it is supplied...
-      if (allocate(lnDataSizeBytes, nSizeBytes - lnDataSizeBytes))
+      if ( size_bytes >= base_size_bytes_ )
       {
-        // Copy the packet.
-        memcpy(m_pPkt, pPkt, allocatedSize());
-        lbSuccess = true;
+         // Begin by destroying the packet if it is already allocated.
+         deallocate();
+
+         // The header size is known since it is supplied...
+         if ( allocate( size_bytes ) )
+         {
+            // Copy the packet.
+            memcpy( packet_base_ptr_, packet_ptr, allocatedSize() );
+            success = true;
+         }
+         else
+         {
+            log::error("GenericPacket::unpack: Allocation failed\n");
+         }
       }
       else
       {
-        log::error("GenericPacket::unpack: Allocation failed\n");
+         log::error("GenericPacket::unpack - "
+                    "Buffer smaller than minimum data size.\n");
       }
-    }
-    else
-    {
-      log::error("GenericPacket::unpack - "
-                 "Buffer smaller than minimum data size.\n");
-    }
-  }
-  else
-  {
-    log::error("GenericPacket::unpack: NULL\n");
-  }
-   
-  return lbSuccess;
-}
-
-//------------------------------------------------------------------------------
-GenericPacket& GenericPacket::operator= (const GenericPacket &other)
-{
-   // Check for self-assignment!
-   if (this == &other)
-      return *this;
-   
-   deallocate();
-   
-   size_bytes_ = other.size_bytes_;
-   
-   if (allocate())
-   {
-      memcpy(m_pPkt, other.m_pPkt, allocatedSize());
    }
-   
-   return *this;
+   else
+   {
+      log::error("GenericPacket::unpack: NULL\n");
+   }
+
+   return success;
 }
 
 //-----------------------------------------------------------------------------
 void GenericPacket::swapByteOrder()
 {
-  swap(m_pPkt, allocatedSize());
+   if ( isAllocated() )
+   {
+      swap( packet_base_ptr_, allocatedSize() );
+   }
 }
 

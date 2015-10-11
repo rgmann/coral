@@ -230,12 +230,15 @@ void CircularBuffer::clear()
 //------------------------------------------------------------------------------
 CircularBuffer& CircularBuffer::operator=( const CircularBuffer& other )
 {
-   allocate( other.capacity_ );
+   if ( this != &other )
+   {
+      allocate( other.capacity_ );
 
-   // Once allocated, the head and tail positions will be reset, but they should
-   // actually be set to the same positions as in the source instance.
-   head_position_ = other.head_position_;
-   tail_position_ = other.tail_position_;
+      // Once allocated, the head and tail positions will be reset, but they should
+      // actually be set to the same positions as in the source instance.
+      head_position_ = other.head_position_;
+      tail_position_ = other.tail_position_;
+   }
 
    return *this;
 }

@@ -159,7 +159,7 @@ void AsioTcpPacketRouter::handleReadBody(const boost::system::error_code& error)
          read_packet_.dataPtr(),
          read_packet_.data()->length );
 
-      read_packet_.destroy();
+      read_packet_.deallocate();
 
       startReadHeader();
    }

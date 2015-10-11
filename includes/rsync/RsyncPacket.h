@@ -56,7 +56,6 @@ public:
    {
       ui32 length;
       ui32 type;
-      // ui8  job_id[ sizeof(boost::uuids::uuid) ];
    };
 
    RsyncTransportPacket( int type, const GenericPacket* packet_ptr );
@@ -111,14 +110,10 @@ public:
    RsyncPacket();
    RsyncPacket(int type, ui32 nLength, const void* pData = NULL);
    RsyncPacket(int type, const std::string& rData);
-   // RsyncPacket(int type, const GenericPacket* pPacket);
-
 
    Data* const data() const;
 
    void swap(void* pData, ui32 nSizeBytes);
-
-   bool unpack(const void* pData, ui32 nSizeBytes);
 
 private:
 

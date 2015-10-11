@@ -122,7 +122,7 @@ bool RpcClient::put( DestinationID destination_id, const void* data_ptr, ui32 le
    RpcPacket packet;
    RpcObject receive_object;
 
-   if ( packet.unpack( data_ptr, length ) )
+   if ( packet.allocate( data_ptr, length ) )
    {
       if ( packet.getObject( receive_object ) )
       {

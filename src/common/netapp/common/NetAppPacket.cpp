@@ -41,6 +41,7 @@ using namespace liber::netapp;
 
 //-----------------------------------------------------------------------------
 NetAppPacket::NetAppPacket()
+   : GenericPacket( sizeof(NetAppPacket::Data), 0 )
 {
 }
 
@@ -58,16 +59,17 @@ NetAppPacket::NetAppPacket(int type, ui32 length)
 //-----------------------------------------------------------------------------
 bool NetAppPacket::allocate(const NetAppPacket::Data& rData)
 {
-  bool lbSuccess = GenericPacket::allocate(sizeof(NetAppPacket::Data), 
-                                           rData.length);
+  // bool lbSuccess = GenericPacket::allocate(sizeof(NetAppPacket::Data), 
+  //                                          rData.length);
+  bool success = GenericPacket::allocate( sizeof(NetAppPacket::Data) + rData.length );
 
-  if (lbSuccess)
+  if (success)
   {
     data()->type = rData.type;
     data()->length = rData.length;
   }
 
-  return lbSuccess;
+  return success;
 }
 
 //-----------------------------------------------------------------------------
