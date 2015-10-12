@@ -49,7 +49,7 @@ TEST_F( ArgParserTest, RequiredOption ) {
    EXPECT_EQ( "Set port number", argument_ptr->description() );
    EXPECT_EQ( Argument::ArgRequired, argument_ptr->policy() );
    EXPECT_EQ( Argument::ArgOption, argument_ptr->type() );
-   EXPECT_EQ( Argument::ArgInt, argument_ptr->valtype() );
+   EXPECT_EQ( Argument::ArgInt, argument_ptr->valueType() );
 
    delete argument_ptr;
 }
@@ -66,7 +66,7 @@ TEST_F( ArgParserTest, OptionalOption ) {
    EXPECT_EQ( "Set port number", argument_ptr->description() );
    EXPECT_EQ( Argument::ArgOptional, argument_ptr->policy() );
    EXPECT_EQ( Argument::ArgOption, argument_ptr->type() );
-   EXPECT_EQ( Argument::ArgString, argument_ptr->valtype() );
+   EXPECT_EQ( Argument::ArgString, argument_ptr->valueType() );
 
    delete argument_ptr;
 }
@@ -105,21 +105,21 @@ TEST_F( ArgParserTest, ParseOptionalArg ) {
    int port_int = 0;
    EXPECT_EQ( true, arg_parser.parse( argv_1, argc_1 ) );
    EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( port_string, Argument::ArgName, "Port" ) );
+   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    // Test "-p" option expects a value (it is not just a flag).
    const char* argv_2[] = { "test_program", "-p" };
    int argc_2 = 2;
    EXPECT_EQ( false, arg_parser.parse( argv_2, argc_2 ) );
    EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( port_string, Argument::ArgName, "Port" ) );
+   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    const char* argv_3[] = { "test_program", "-p", "4567"  };
    int argc_3 = 3;
    EXPECT_EQ( true, arg_parser.parse( argv_3, argc_3 ) );
    EXPECT_EQ( true, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( true, arg_parser.getArgVal( port_string, Argument::ArgName, "Port" ) );
-   EXPECT_EQ( true, arg_parser.getArgVal( port_int, Argument::ArgName, "Port" ) );
+   EXPECT_EQ( true, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
+   EXPECT_EQ( true, arg_parser.getArgVal( Argument::ArgName, "Port", port_int ) );
    EXPECT_EQ( "4567", port_string );
    EXPECT_EQ( 4567, port_int );
 }
@@ -138,21 +138,21 @@ TEST_F( ArgParserTest, ParseRequiredArg ) {
    int port_int = 0;
    EXPECT_EQ( false, arg_parser.parse( argv_1, argc_1 ) );
    EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( port_string, Argument::ArgName, "Port" ) );
+   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    // Test "-p" option expects a value (it is not just a flag).
    const char* argv_2[] = { "test_program", "-p" };
    int argc_2 = 2;
    EXPECT_EQ( false, arg_parser.parse( argv_2, argc_2 ) );
    EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( port_string, Argument::ArgName, "Port" ) );
+   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    const char* argv_3[] = { "test_program", "-p", "4567" };
    int argc_3 = 3;
    EXPECT_EQ( true, arg_parser.parse( argv_3, argc_3 ) );
    EXPECT_EQ( true, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( true, arg_parser.getArgVal( port_string, Argument::ArgName, "Port" ) );
-   EXPECT_EQ( true, arg_parser.getArgVal( port_int, Argument::ArgName, "Port" ) );
+   EXPECT_EQ( true, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
+   EXPECT_EQ( true, arg_parser.getArgVal( Argument::ArgName, "Port", port_int ) );
    EXPECT_EQ( "4567", port_string );
    EXPECT_EQ( 4567, port_int );
 
@@ -163,12 +163,12 @@ TEST_F( ArgParserTest, ParseRequiredArg ) {
    int         argc_4 = 5;
    EXPECT_EQ( true, arg_parser.parse( argv_4, argc_4 ) );
    EXPECT_EQ( true, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( true, arg_parser.getArgVal( port_string, Argument::ArgName, "Port" ) );
-   EXPECT_EQ( true, arg_parser.getArgVal( port_int, Argument::ArgName, "Port" ) );
+   EXPECT_EQ( true, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
+   EXPECT_EQ( true, arg_parser.getArgVal( Argument::ArgName, "Port", port_int ) );
    EXPECT_EQ( "4567", port_string );
    EXPECT_EQ( 4567, port_int );
    float temperature = 0.0;
    EXPECT_EQ( true, arg_parser.isSet( Argument::ArgName, "Temperature" ) );
-   EXPECT_EQ( true, arg_parser.getArgVal( temperature, Argument::ArgName, "Temperature" ) );
+   EXPECT_EQ( true, arg_parser.getArgVal( Argument::ArgName, "Temperature", temperature ) );
    EXPECT_FLOAT_EQ( 45.867, temperature );
 }

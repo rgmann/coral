@@ -187,7 +187,7 @@ int main( int argc, char* argv[] )
       try
       {
          int host_port = 0;
-         args.getArgVal( host_port, Argument::ArgName, "Port");
+         args.getArgVal( Argument::ArgName, "Port", host_port );
 
          boost::asio::io_service io_service;
          tcp::endpoint endpoint( tcp::v4(), host_port );

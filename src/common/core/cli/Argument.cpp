@@ -31,31 +31,24 @@
 // 
 
 
-
 #include "Log.h"
 #include "Argument.h"
 #include "StringHelper.h"
 
-#define  NAME     0
-#define  VALUE    1
+#define  ARG_NAME_INDEX     0
+#define  ARG_VALUE_INDEX    1
 
 using namespace liber;
 using namespace liber::cli;
 
 //------------------------------------------------------------------------------
 Argument::Argument()
+   : type_        ( Argument::ArgFlag )
+   , policy_      ( Argument::ArgOptional )
+   , value_type_  ( Argument::ArgString )
+   , status_      ( Argument::ArgOmitted )
 {
-   m_sName = "";
-   m_sId = "";
-   m_sAltId = "";
-   m_sDescription = "";
-   m_Type = ArgOption;
-   m_Policy = ArgOptional;
-   m_ValType = ArgString;
-   
-   m_sValue = "";
-   m_sDefault = "";
-   m_Status = ArgOmitted;
+   // All string default to empty string.
 }
 
 //------------------------------------------------------------------------------
@@ -73,6 +66,19 @@ Argument* Argument::Create( const std::string &definition )
    }
    
    return argument_ptr;
+}
+
+//------------------------------------------------------------------------------
+std::string Argument::value() const
+{
+   // If this is an optional argument and the argument was not specified at the
+   // command line, return the default value.
+   if ( ( policy_ == ArgOptional ) && value_.empty() )
+   {
+      return default_value_;
+   }
+
+   return value_;
 }
 
 //------------------------------------------------------------------------------
@@ -103,7 +109,7 @@ bool Argument::parse( const std::string& definition )
          // Key-only attributes
          else if ( attributes_tokens.size() == 1 )
          {
-            std::string attribute_key = attributes_tokens[ NAME ];
+            std::string attribute_key = attributes_tokens[ ARG_NAME_INDEX ];
             
             if ( setAttribute( StringHelper::Trim( attribute_key ) ) == false )
             {
@@ -115,8 +121,8 @@ bool Argument::parse( const std::string& definition )
          // Key-value attributes
          else if ( attributes_tokens.size() == 2 )
          {
-            std::string attribute_key   = attributes_tokens[ NAME ];
-            std::string attribute_value = attributes_tokens[ VALUE ];
+            std::string attribute_key   = attributes_tokens[ ARG_NAME_INDEX ];
+            std::string attribute_value = attributes_tokens[ ARG_VALUE_INDEX ];
             
             if ( setAttribute( StringHelper::Trim( attribute_key ), 
                            StringHelper::Trim( attribute_value ) ) == false )
@@ -127,11 +133,18 @@ bool Argument::parse( const std::string& definition )
          }
       }
 
+      // Check for a couple of special cases.
+      if ( type_ == ArgFlag )
+      {
+         // Flag arguments are always optional.
+         policy_ = ArgOptional;
+      }
+
       // Validate the minimum set of attributes.
       if ( parse_success )
       {
-         parse_success &= ( m_sName.empty() == false );
-         parse_success &= ( m_sId.empty() == false );
+         parse_success &= ( name_.empty() == false );
+         parse_success &= ( id_.empty() == false );
       }
    }
    
@@ -152,10 +165,10 @@ bool Argument::setAttribute(const std::string &attribute_name,
       }
       else
       {
-         m_sName = attribute_value;
+         name_ = attribute_value;
       }
    }
-   else if (attribute_name.compare("primary") == 0)
+   else if ( attribute_name.compare( "primary" ) == 0 )
    {
       if (attribute_value.empty())
       {
@@ -163,18 +176,23 @@ bool Argument::setAttribute(const std::string &attribute_name,
       }
       else
       {
-         m_sId = attribute_value;
+         id_ = attribute_value;
       }
    }
    else if (attribute_name.compare("alt") == 0)
    {
-      if (attribute_value.empty())
+      if ( attribute_value.empty() )
       {
+         success = false;
+      }
+      else if ( attribute_value.compare("help") == 0 )
+      {
+         // "help" is reserved.
          success = false;
       }
       else
       {
-         m_sAltId = attribute_value;
+         alternate_id_ = attribute_value;
       }
    }
    else if (attribute_name.compare("desc") == 0 || 
@@ -186,7 +204,7 @@ bool Argument::setAttribute(const std::string &attribute_name,
       }
       else
       {
-         m_sDescription = attribute_value;
+         description_ = attribute_value;
       }
    }
    else if (attribute_name.compare("type") == 0)
@@ -199,12 +217,12 @@ bool Argument::setAttribute(const std::string &attribute_name,
       {
          if (attribute_value.compare("flag") == 0)
          {
-            m_Type = ArgFlag;
+            type_ = ArgFlag;
          }
          else if (attribute_value.compare("opt") == 0 || 
                   attribute_value.compare("option") == 0)
          {
-            m_Type = ArgOption;
+            type_ = ArgOption;
          }
          else
          {
@@ -214,7 +232,7 @@ bool Argument::setAttribute(const std::string &attribute_name,
    }
    else if (attribute_name.compare("required") == 0)
    {
-      m_Policy = ArgRequired;
+      policy_ = ArgRequired;
    }
    else if (attribute_name.compare("def") == 0 ||
             attribute_name.compare("default") == 0)
@@ -225,7 +243,7 @@ bool Argument::setAttribute(const std::string &attribute_name,
       }
       else
       {
-         m_sDefault = attribute_value;
+         default_value_ = attribute_value;
       }
    }
    else if (attribute_name.compare("valtype") == 0 ||
@@ -240,15 +258,15 @@ bool Argument::setAttribute(const std::string &attribute_name,
          if (attribute_value.compare("int") == 0 ||
              attribute_value.compare("integer") == 0)
          {
-            m_ValType = ArgInt;
+            value_type_ = ArgInt;
          }
          else if (attribute_value.compare("float") == 0)
          {
-            m_ValType = ArgFloat;
+            value_type_ = ArgFloat;
          }
          else if (attribute_value.compare("string") == 0)
          {
-            m_ValType = ArgString;
+            value_type_ = ArgString;
          }
          else
          {

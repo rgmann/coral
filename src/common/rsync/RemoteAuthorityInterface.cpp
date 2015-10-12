@@ -48,9 +48,10 @@ using namespace liber::thread;
 using namespace liber::netapp;
 
 
+//----------------------------------------------------------------------------
 RemoteAuthorityInterface::ActiveJob::ActiveJob()
-:  job_ptr_(NULL)
-,  query_response_(kRsyncSuccess)
+   : job_ptr_(NULL)
+   , query_response_(kRsyncSuccess)
 {
 }
 

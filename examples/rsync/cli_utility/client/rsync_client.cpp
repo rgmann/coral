@@ -149,10 +149,10 @@ int main(int argc, char* argv[])
    if ( args.parse( (const char**)argv, argc ) )
    {
       std::string host_name;
-      args.getArgVal( host_name, Argument::ArgName, "Host" );
-
       std::string host_port;
-      args.getArgVal( host_port, Argument::ArgName, "Port" );
+      
+      args.getArgVal( Argument::ArgName, "Host", host_name );
+      args.getArgVal( Argument::ArgName, "Port", host_port );
 
       try
       {
