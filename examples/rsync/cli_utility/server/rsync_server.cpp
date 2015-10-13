@@ -205,9 +205,17 @@ int main( int argc, char* argv[] )
    }
    else
    {
-      args.printArgErrors(true);
-      return 1;
+      if ( args.helpRequested() )
+      {
+         liber::log::raw( args.printHelp().c_str() );
+      }
+      else
+      {
+         liber::log::raw( args.printArgErrors(true).c_str() );
+      }
    }
+
+   liber::log::flush();
 
    return 0;
 }

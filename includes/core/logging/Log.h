@@ -49,192 +49,232 @@
 namespace liber  {
 namespace log    {
 
-  // Console field configuration options:
-  // Prepend the log message with the log level.
-  static const ui32 DisplayLogLevel  = 0x00000001;
-  // Prepend the log message with the message timestamp.
-  static const ui32 DisplayTimestamp = 0x00000002;
-  // Display all fields when printing the log message.
-  static const ui32 DisplayAll       = 0xFFFFFFFF;
+   // Console field configuration options:
+   // Prepend the log message with the log level.
+   static const ui32 DisplayLogLevel  = 0x00000001;
+   // Prepend the log message with the message timestamp.
+   static const ui32 DisplayTimestamp = 0x00000002;
+   // Display all fields when printing the log message.
+   static const ui32 DisplayAll       = 0xFFFFFFFF;
 
-  // Log message severity enumeration. The log level is additionally used to
-  // filter messages printed to the console. Only messages with a LogLevel
-  // lower than the Logger's log level are printed to the console.  All
-  // messages, regardless of level, are written to the log file.
-  enum LogLevel {
-    Supress = 0,
-    Raw,
-    Status,
-    Error,
-    Warn,
-    Debug,
-    MemDump,
-    Verbose
-  };
-
-
-  // Convert the LogLevel enumeration to a string representation.
-  inline std::string LogLevelToString(LogLevel level)
-  {
-    std::string levelString = "Unknown";
-    switch (level)
-    {
-      case Raw: levelString = ""; break;
-      case Status: levelString = "Status"; break;
-      case Error:  levelString = "Error";  break;
-      case Warn:   levelString = "Warn";   break;
-      case Debug:  levelString = "Debug";  break;
-      case MemDump:  levelString = "MemDump";  break;
-      case Verbose:  levelString = "Verbose";  break;
-      default: break;
-    }
-    return levelString;
-  };
+   // Log message severity enumeration. The log level is additionally used to
+   // filter messages printed to the console. Only messages with a LogLevel
+   // lower than the Logger's log level are printed to the console.  All
+   // messages, regardless of level, are written to the log file.
+   enum LogLevel {
+      Supress = 0,
+      Raw,
+      Status,
+      Error,
+      Warn,
+      Debug,
+      MemDump,
+      Verbose,
+      InvalidLogLevel
+   };
 
 
-  // Each log message has an associated severity, user-supplied log
-  // message, and finally a timestamp.  Log messages are queued
-  // by the logger and printed to a log file and the console.
-  class LogMessage {
-  public:
-
-    LogMessage() {};
-
-    /**
-     * Construct a message with a specified severity and message.
-     * The constructor automatically timestamps the message.
-     */
-    LogMessage(LogLevel level, const std::string& message);
-
-    /**
-     *
-     */
-    LogMessage(LogLevel level,
-               const char* header,
-               const char* data_ptr, ui32 length,
-               ui32 max_line_length);
-
-    /**
-     * Convert the message to a string. The message formate can be configured.
-     */
-    std::string toString(ui32 format = log::DisplayAll) const;
-
-    LogLevel    log_level_;
-    std::string message_;
-    Timestamp   timestamp_;
-  };
+   // Convert the LogLevel enumeration to a string representation.
+   const char* log_level_to_string( LogLevel level );
 
 
-  class Logger : public liber::concurrency::IThread {
-  public:
+   ///
+   /// Each log message has an associated severity, user-supplied log
+   /// message, and finally a timestamp.  Log messages are queued
+   /// by the logger and printed to a log file and the console.
+   ///
+   class LogMessage {
+   public:
 
-    /**
-     * Construct the Logger and launch the logging thread. By default,
-     * the logger does not send messages to a log file. Additionally, messages
-     * sent to the console are only prepended with the severity.
-     */
-    Logger();
+      ///
+      /// Default constructor
+      ///
+      LogMessage();
 
-    /**
-     * Shutdown the logging thread and close the opened log file.
-     * Note: The logger makes no guarrantee that all messages in the queue
-     * will logged since the thread is cancelled.
-     */
-    ~Logger();
+      ///
+      /// Construct a message with a specified severity and message.
+      ///
+      /// @param  level   Log message severity
+      /// @param  message Log message text
+      ///
+      LogMessage( LogLevel level, const std::string& message );
 
-    /**
-     * Sets the logging path. Defaults to the same directory
-     * as the executable.
-     */
-    void setLogFileEnabled(bool bEnable);
-    void setPath(const std::string& path);
-    void setSuffix(const std::string& suffix);
+      ///
+      /// Construct a memory dump message. A memory dump message prints each
+      /// byte in the buffer in hex format.
+      ///
+      /// @param  level    Log message severity
+      /// @param  header   Log message header text (null-terminated string)
+      /// @param  data_ptr Data buffer to dump
+      /// @param  length   Length of data buffer in bytes
+      /// @param  max_line_length  Maximum line length in characters
+      ///
+      LogMessage( LogLevel    level,
+                  const char* header,
+                  const char* data_ptr,
+                  ui32        length,
+                  ui32        max_line_length );
 
-    void setFilterLevel(LogLevel level);
+      ///
+      /// Build the full message string.
+      ///
+      /// @param  format  Message display format bitmap
+      ///
+      std::string toString( ui32 format = log::DisplayAll ) const;
 
-    /**
-     * Send a new message to the logging queue.
-     */
-    void send(const LogMessage& message);
+      // Message severity
+      LogLevel    log_level_;
 
-    /**
-     * Configure the display format for messages written to the console.
-     * Note: When a message is written to the log file, all fields are written.
-     */
-    void setConsoleDisplayOptions(ui32 displayOptions);
+      // Message text
+      std::string message_;
 
-    void flush();
+      // Message timestamp
+      Timestamp   timestamp_;
+   };
 
-  private:
 
-    void run(const bool& bShutdown);
+   class Logger : public liber::concurrency::IThread {
+   public:
 
-    /**
-     * Open a new log file in the directory specified by "path". The "suffix"
-     * can be used to make the log names more specific.
-     */
-    void openLogFile(const std::string& path, const std::string& suffix);
+      /**
+      * Construct the Logger and launch the logging thread. By default,
+      * the logger does not send messages to a log file. Additionally, messages
+      * sent to the console are only prepended with the severity.
+      */
+      Logger();
 
-  private:
+      /**
+      * Shutdown the logging thread and close the opened log file.
+      * Note: The logger makes no guarrantee that all messages in the queue
+      * will logged since the thread is cancelled.
+      */
+      ~Logger();
 
-    ui32 console_log_options_;
+      ///
+      /// Enable/disable logging of messages to file.
+      ///
+      /// @param  enable  Enable/disable log message logging
+      ///
+      void setLogFileEnabled( bool enable );
 
-    LogLevel log_level_;
-    Queue<LogMessage> messages_;
+      ///
+      /// Sets the logging path. Defaults to the same directory as the
+      /// executable.
+      ///
+      /// @param  path  Path to log directory
+      ///
+      void setPath( const std::string& path );
 
-    bool          allow_messages_;
+      ///
+      /// Log file name suffix string. The log file name format is as follows:
+      /// yyyy_mm_dd_HH_MM_ss_<suffix>_log.txt
+      ///
+      /// @param  suffix  Log file name suffix string
+      ///
+      void setSuffix( const std::string& suffix );
 
-    boost::mutex  file_attribute_lock_;
-    bool          log_file_enabled_;
-    std::string   path_;
-    std::string   suffix_;
-    std::ofstream log_file_;
-    ui32          current_log_file_size_;
-  };
+      ///
+      /// Set the threshold severity level for log messages written to the
+      /// console. Messages with a severity value =< the threshold are visible.
+      /// Messages with a severity value > the threshold are suppressed.
+      ///
+      /// Messages are not filtered when written to a log file.
+      ///
+      /// @param  level  Threshold log level
+      ///
+      void setFilterLevel(LogLevel level);
 
-  // Global Logger instance
-  extern Logger glog;
+      ///
+      /// Send a new message to the logging queue.
+      ///
+      /// @param  message  Add a log message to the queue
+      ///
+      void send( const LogMessage& message );
 
-  /**
+      ///
+      /// Configure the display format for messages written to the console.
+      /// Note: When a message is written to the log file, all fields are written.
+      ///
+      /// @param  display_format  Display format bitmap
+      ///
+      void setConsoleDisplayOptions( ui32 display_format );
+
+      ///
+      /// Flush all messages in from the queue to std out. This call blocks
+      /// caller as long as message can be received from the queue.
+      ///
+      void flush();
+
+   private:
+
+      void run( const bool& shutdown );
+
+      /**
+      * Open a new log file in the directory specified by "path". The "suffix"
+      * can be used to make the log names more specific.
+      */
+      void openLogFile(const std::string& path, const std::string& suffix);
+
+   private:
+
+      ui32 console_log_options_;
+
+      LogLevel log_level_;
+      Queue<LogMessage> messages_;
+
+      bool          allow_messages_;
+
+      boost::mutex  file_attribute_lock_;
+      bool          log_file_enabled_;
+      std::string   path_;
+      std::string   suffix_;
+      std::ofstream log_file_;
+      ui32          current_log_file_size_;
+   };
+
+   // Global Logger instance
+   extern Logger glog;
+
+   /**
    * Configure the log directory. By default, the directory is the current
    * working directory.
    */
-  void setPath(const std::string& path);
+   void setPath(const std::string& path);
 
-  /**
+   /**
    * Configure the log file suffix.
    */
-  void setSuffix(const std::string& suffix);
+   void setSuffix(const std::string& suffix);
 
-  /**
+   /**
    * Enable the Logger to write messages to a log file.
    */
-  void enable();
+   void enable();
 
-  /**
+   /**
    * Disable the Logger from writing messages to a log file.
    */
-  void disable();
+   void disable();
 
-  /**
+   /**
    * Configure how the Logger will print messages to console.
    */
-  void options(ui32 opts);
+   void options(ui32 opts);
 
-  /**
+   /**
    * Configure the Logger severity filter.
    */
-  void level(LogLevel level);
+   void level(LogLevel level);
 
-  void flush();
+   void flush();
 
-  void print(LogLevel level, const char* format, va_list arg);
-  void raw(const char* format, ...);
-  void status(const char* format, ...);
-  void error(const char* format, ...);
-  void warn(const char* format, ...);
-  void debug(const char* format, ...);
-  void mem_dump(const char* header, const char* pData, ui32 length, ui32 max_line_length = 16);
+   void print(LogLevel level, const char* format, va_list arg);
+   void raw(const char* format, ...);
+   void status(const char* format, ...);
+   void error(const char* format, ...);
+   void warn(const char* format, ...);
+   void debug(const char* format, ...);
+   void mem_dump(const char* header, const char* pData, ui32 length, ui32 max_line_length = 16);
 
 } // End of namespace log
 } // End of namespace liber

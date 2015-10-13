@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef QUEUE_H
 #define QUEUE_H
 
@@ -41,13 +40,18 @@
 #include "BaseTypes.h"
 #include "CountingSem.h"
 
+namespace liber {
+
+///
+/// Basic blocking template message queue class
+///
 template <class T>
 class Queue {
 public:
    
-   static const ui32 InfiniteQueue = 0;
+   static const ui32 kInfiniteQueue = 0;
    
-   Queue( ui32 max_elements = InfiniteQueue );
+   Queue( ui32 max_elements = kInfiniteQueue );
    
    ~Queue();
       
@@ -86,7 +90,7 @@ private:
 template <class T>
 Queue<T>::Queue( ui32 max_elements )
 : max_elements_( max_elements )
-, infinite_queue_( ( max_elements_ == InfiniteQueue ) )
+, infinite_queue_( ( max_elements_ == kInfiniteQueue ) )
 , push_semaphore_( 0 )
 , pop_semaphore_( max_elements_ )
 {
@@ -183,5 +187,7 @@ ui32 Queue<T>::size()
    boost::mutex::scoped_lock guard( queue_lock_ );
    return queue_.size();
 }
+
+} // end namespace liber
 
 #endif // QUEUE_H

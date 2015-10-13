@@ -112,7 +112,7 @@ private:
    // then it is a new file.
    std::map<std::string, FileNode> m_NodeLut;
    
-   Queue<FileSysDelta> m_deltaQueue;
+   liber::Queue<FileSysDelta> m_deltaQueue;
    FileNodeList        mAddedDirList;
    FileNodeList        mRemovedDirList;
 };

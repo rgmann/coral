@@ -44,6 +44,38 @@
 
 using namespace liber::log;
 
+const char* liber::log::log_level_to_string( LogLevel level )
+{
+   // Note:
+   // The following array must be manually synchronized with the LogLevel
+   // enumeration.
+   static const char* LOG_LEVELS[] = {
+      "",         // Suppress
+      "",         // Raw
+      "Status",   // Status
+      "Error",    // Error
+      "Warn",     // Warn
+      "Debug",    // Debug
+      "MemDump",  // MemDump
+      "Verbose",  // Verbose
+      "Unknown"
+   };
+
+   if ( ( level >= Supress ) && ( level < InvalidLogLevel ) )
+   {
+      return LOG_LEVELS[ level ];
+   }
+
+   return LOG_LEVELS[ InvalidLogLevel ];
+};
+
+//-----------------------------------------------------------------------------
+LogMessage::LogMessage()
+   : log_level_( InvalidLogLevel )
+   , timestamp_( Timestamp::Now() )
+{
+}
+
 //-----------------------------------------------------------------------------
 LogMessage::LogMessage(LogLevel level, const std::string& message)
    : log_level_( level )
@@ -109,7 +141,7 @@ std::string LogMessage::toString( ui32 format ) const
 
    if ( format & log::DisplayLogLevel )
    {
-      ss << LogLevelToString( log_level_ ) ;
+      ss << log_level_to_string( log_level_ ) ;
 
       if ( log_level_ != Raw )
       {
@@ -136,7 +168,7 @@ Logger::Logger()
    , suffix_               ( "" )
    , current_log_file_size_( 0 )
 {
-  launch();
+   launch();
 }
 
 //-----------------------------------------------------------------------------
