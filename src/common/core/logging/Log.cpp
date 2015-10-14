@@ -43,6 +43,7 @@
 #define MAX_MESSAGE_LEN_BYTES  (512)
 
 using namespace liber::log;
+using namespace liber::thread;
 
 const char* liber::log::log_level_to_string( LogLevel level )
 {
@@ -73,6 +74,7 @@ const char* liber::log::log_level_to_string( LogLevel level )
 LogMessage::LogMessage()
    : log_level_( InvalidLogLevel )
    , timestamp_( Timestamp::Now() )
+   , is_flush_marker_( true )
 {
 }
 
@@ -81,6 +83,7 @@ LogMessage::LogMessage(LogLevel level, const std::string& message)
    : log_level_( level )
    , message_  ( message )
    , timestamp_( Timestamp::Now() )
+   , is_flush_marker_( false )
 {
 }
 
@@ -94,6 +97,7 @@ LogMessage::LogMessage(
 )
    : log_level_( level )
    , timestamp_( Timestamp::Now() )
+   , is_flush_marker_( false )
 {
    char row_prefix[7];
    std::stringstream stream;
@@ -156,13 +160,35 @@ std::string LogMessage::toString( ui32 format ) const
    return ss.str();
 }
 
+//-----------------------------------------------------------------------------
+void LogMessage::signalFlushed()
+{
+   if ( is_flush_marker_ )
+   {
+      flush_signal_.give();
+   }
+}
+
+//-----------------------------------------------------------------------------
+bool LogMessage::waitFlush( i32 timeout_ms )
+{
+   bool flush_success = false;
+
+   if ( is_flush_marker_ )
+   {
+      flush_success =
+         ( flush_signal_.take( timeout_ms ) == Semaphore::SemAcquired );
+   }
+
+   return flush_success;
+}
+
 
 //-----------------------------------------------------------------------------
 Logger::Logger()
    : liber::concurrency::IThread("CommonLoggingThread")
    , console_log_options_  ( log::DisplayLogLevel )
    , log_level_            ( liber::log::Status )
-   , allow_messages_       ( true )
    , log_file_enabled_     ( false )
    , path_                 (boost::filesystem::current_path().generic_string())
    , suffix_               ( "" )
@@ -174,8 +200,7 @@ Logger::Logger()
 //-----------------------------------------------------------------------------
 Logger::~Logger()
 {
-  cancel( true );
-  log_file_.close();
+   cancel( true );
 }
 
 //-----------------------------------------------------------------------------
@@ -211,77 +236,77 @@ void Logger::setConsoleDisplayOptions( ui32 display_options )
 }
 
 //-----------------------------------------------------------------------------
-void Logger::send( const LogMessage& message )
+void Logger::send( LogMessagePtr message_ptr )
 {
-   if ( allow_messages_ )
-   {
-      messages_.push( message, 0 );
-   }
-}
-
-//-----------------------------------------------------------------------------
-void Logger::flush()
-{
-   allow_messages_ = false;
-
-   while ( messages_.size() > 0 )
-   {
-      usleep( 100000 );
-   }
-
-   allow_messages_ = true;
+   messages_.push( message_ptr, 0 );
 }
 
 //-----------------------------------------------------------------------------
 void Logger::run( const bool& shutdown )
-{
-   LogMessage message;
+{   
+   LogMessagePtr message;
    std::string path = path_;
    std::string suffix = suffix_;
 
+   std::ofstream log_file;
+
    while ( shutdown == false )
    {
-      if ( messages_.pop( message ) )
+      if ( messages_.pop( message ) && message )
       {
-         if ( message.log_level_ <= log_level_ )
+         if( message->is_flush_marker_ )
          {
-            std::cout << message.toString(console_log_options_);
-         }
-
-         if ( log_file_enabled_ )
-         {
-            {
-               boost::mutex::scoped_lock guard( file_attribute_lock_ );
-               path   = path_;
-               suffix = suffix_;
-            }
-
-            if ( log_file_.is_open() == false )
-            {
-               log_file_.close();
-               openLogFile( path, suffix );
-            }
-
-            if ( log_file_.is_open() )
-            {
-               std::string log_message = message.toString( log::DisplayAll );
-               current_log_file_size_ += log_message.size();
-               log_file_ << log_message;
-            }
+            message->signalFlushed();
          }
          else
          {
-            if ( log_file_.is_open() )
+            if ( message->log_level_ <= log_level_ )
             {
-               log_file_.close();
+               std::cout << message->toString( console_log_options_ );
+            }
+
+            if ( log_file_enabled_ )
+            {
+               {
+                  boost::mutex::scoped_lock guard( file_attribute_lock_ );
+                  path   = path_;
+                  suffix = suffix_;
+               }
+
+               if ( log_file.is_open() == false )
+               {
+                  log_file.close();
+
+                  // openLogFile( path, suffix );
+                  std::string full_log_filename = generateLogName( path, suffix );
+
+                  log_file.open( full_log_filename.c_str(), std::ofstream::out );
+               }
+
+               if ( log_file.is_open() )
+               {
+                  std::string log_message = message->toString( log::DisplayAll );
+                  current_log_file_size_ += log_message.size();
+                  log_file << log_message;
+               }
+            }
+            else
+            {
+               if ( log_file.is_open() )
+               {
+                  log_file.close();
+               }
             }
          }
       }
    }
+
+   // Make sure the log file is closed.
+   log_file.close();
 }
 
 //-----------------------------------------------------------------------------
-void Logger::openLogFile(
+std::string Logger::generateLogName(
    const std::string& path,
    const std::string& suffix
 )
@@ -308,19 +333,19 @@ void Logger::openLogFile(
    boost::filesystem::path log_path( path );
    log_path /= ss.str();
 
-   log_file_.open( log_path.string().c_str(), std::ofstream::out );
+   return log_path.string();
 }
 
 Logger liber::log::glog;
 
 //-----------------------------------------------------------------------------
-void liber::log::setPath(const std::string& path)
+void liber::log::set_path( const std::string& path )
 {
    liber::log::glog.setPath( path );
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::setSuffix(const std::string& suffix)
+void liber::log::set_suffix(const std::string& suffix)
 {
    liber::log::glog.setSuffix( suffix );
 }
@@ -350,9 +375,12 @@ void liber::log::level(LogLevel level)
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::flush()
+void liber::log::flush( i32 timeout_ms )
 {
-   liber::log::glog.flush();
+   LogMessagePtr flush_message_ptr( new LogMessage() );
+
+   liber::log::glog.send( flush_message_ptr );
+   flush_message_ptr->waitFlush( timeout_ms );
 }
 
 //-----------------------------------------------------------------------------
@@ -363,7 +391,12 @@ void liber::log::print(LogLevel level, const char* format, va_list args)
    if ( format )
    {
       vsnprintf( message_buffer, sizeof( message_buffer ), format, args );
-      liber::log::glog.send( LogMessage( level, std::string( message_buffer ) ) );
+
+      LogMessagePtr log_message_ptr( new LogMessage(
+         level, std::string( message_buffer )
+      ));
+
+      liber::log::glog.send( log_message_ptr );
    }
 }
 
@@ -380,7 +413,7 @@ void liber::log::raw( const char* format, ... )
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::status(const char* format, ...)
+void liber::log::status( const char* format, ... )
 {
    if (format)
    {
@@ -392,7 +425,7 @@ void liber::log::status(const char* format, ...)
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::error(const char* format, ...)
+void liber::log::error( const char* format, ... )
 {
    if ( format )
    {
@@ -404,7 +437,7 @@ void liber::log::error(const char* format, ...)
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::warn(const char* format, ...)
+void liber::log::warn( const char* format, ... )
 {
    if ( format )
    {
@@ -438,13 +471,15 @@ void liber::log::mem_dump(
    {
       try
       {
-         liber::log::glog.send( LogMessage(
+         LogMessagePtr log_message_ptr( new LogMessage(
             MemDump,
             header,
             data_ptr,
             length,
             max_line_length
          ));
+
+         liber::log::glog.send( log_message_ptr );
       }
       catch ( ... )
       {

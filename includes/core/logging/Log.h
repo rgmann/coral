@@ -40,11 +40,13 @@
 #include <string>
 #include <fstream>
 #include <boost/thread/mutex.hpp>
+#include <boost/shared_ptr.hpp>
 #include "Queue.h"
+#include "BinarySem.h"
 #include "IThread.h"
 #include "Timestamp.h"
 #include "BaseTypes.h"
-#include "CountingSem.h"
+// #include "CountingSem.h"
 
 namespace liber  {
 namespace log    {
@@ -122,32 +124,42 @@ namespace log    {
       ///
       std::string toString( ui32 format = log::DisplayAll ) const;
 
-      // Message severity
+      ///
+      ///
+      ///
+      void signalFlushed();
+
+      bool waitFlush( i32 timeout_ms );
+
       LogLevel    log_level_;
 
-      // Message text
       std::string message_;
 
-      // Message timestamp
       Timestamp   timestamp_;
+
+      bool is_flush_marker_;
+
+      BinarySem flush_signal_;
    };
+
+   typedef  boost::shared_ptr<LogMessage> LogMessagePtr;
 
 
    class Logger : public liber::concurrency::IThread {
    public:
 
-      /**
-      * Construct the Logger and launch the logging thread. By default,
-      * the logger does not send messages to a log file. Additionally, messages
-      * sent to the console are only prepended with the severity.
-      */
+      ///
+      /// Construct the Logger and launch the logging thread. By default,
+      /// the logger does not send messages to a log file. Additionally, messages
+      /// sent to the console are only prepended with the severity.
+      ///
       Logger();
 
-      /**
-      * Shutdown the logging thread and close the opened log file.
-      * Note: The logger makes no guarrantee that all messages in the queue
-      * will logged since the thread is cancelled.
-      */
+      ///
+      /// Shutdown the logging thread and close the opened log file.
+      /// Note: The logger makes no guarrantee that all messages in the queue
+      /// will logged since the thread is cancelled.
+      ///
       ~Logger();
 
       ///
@@ -189,7 +201,7 @@ namespace log    {
       ///
       /// @param  message  Add a log message to the queue
       ///
-      void send( const LogMessage& message );
+      void send( LogMessagePtr message );
 
       ///
       /// Configure the display format for messages written to the console.
@@ -199,74 +211,85 @@ namespace log    {
       ///
       void setConsoleDisplayOptions( ui32 display_format );
 
-      ///
-      /// Flush all messages in from the queue to std out. This call blocks
-      /// caller as long as message can be received from the queue.
-      ///
-      void flush();
-
    private:
 
+      ///
+      /// Thread loop
+      ///
       void run( const bool& shutdown );
 
-      /**
-      * Open a new log file in the directory specified by "path". The "suffix"
-      * can be used to make the log names more specific.
-      */
-      void openLogFile(const std::string& path, const std::string& suffix);
+      ///
+      // Open a new log file in the directory specified by "path". The "suffix"
+      /// can be used to make the log names more specific.
+      ///
+      std::string generateLogName( const std::string& path, const std::string& suffix );
 
    private:
 
+      // Display option bitmap
       ui32 console_log_options_;
 
+      // Console display severity threshold
       LogLevel log_level_;
-      Queue<LogMessage> messages_;
 
-      bool          allow_messages_;
+      // Log message message queue
+      Queue<LogMessagePtr> messages_;
 
+      // Mutex protecting access to log file suffix and root directory
       boost::mutex  file_attribute_lock_;
+
+      // Log enable/disable flag
       bool          log_file_enabled_;
+
+      // Log directory root path
       std::string   path_;
+
+      // Log file suffix
       std::string   suffix_;
-      std::ofstream log_file_;
-      ui32          current_log_file_size_;
+
+      // 
+      ui32 current_log_file_size_;
    };
 
    // Global Logger instance
    extern Logger glog;
 
-   /**
-   * Configure the log directory. By default, the directory is the current
-   * working directory.
-   */
-   void setPath(const std::string& path);
+   ///
+   /// Configure the log directory. By default, the directory is the current
+   /// working directory.
+   ///
+   void set_path( const std::string& path );
 
-   /**
-   * Configure the log file suffix.
-   */
-   void setSuffix(const std::string& suffix);
+   ///
+   /// Configure the log file suffix.
+   ///
+   void set_suffix(const std::string& suffix);
 
-   /**
-   * Enable the Logger to write messages to a log file.
-   */
+   ///
+   /// Enable the Logger to write messages to a log file.
+   ///
    void enable();
 
-   /**
-   * Disable the Logger from writing messages to a log file.
-   */
+   ///
+   /// Disable the Logger from writing messages to a log file.
+   ///
    void disable();
 
-   /**
-   * Configure how the Logger will print messages to console.
-   */
+   ///
+   /// Configure how the Logger will print messages to console.
+   ///
    void options(ui32 opts);
 
-   /**
-   * Configure the Logger severity filter.
-   */
+   ///
+   /// Configure the Logger severity filter.
+   ///
    void level(LogLevel level);
 
-   void flush();
+   ///
+   /// Wait for all messages preceding the call to flush to be written to the
+   /// console.
+   ///
+   void flush( i32 timeout_ms = liber::thread::Semaphore::SemWaitForever );
 
    void print(LogLevel level, const char* format, va_list arg);
    void raw(const char* format, ...);
