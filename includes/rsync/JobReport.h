@@ -40,10 +40,10 @@
 #include "Serializable.h"
 #include "RsyncError.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
-class SegmentationReport : public liber::netapp::Serializable {
+class SegmentationReport : public coral::netapp::Serializable {
 public:
   SegmentationReport();
 
@@ -62,12 +62,12 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream&);
-  void pack(liber::netapp::SerialStream&) const;
-  bool unpack(liber::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&) const;
+  bool unpack(coral::netapp::SerialStream&);
 };
 
-class AssemblyReport : public liber::netapp::Serializable {
+class AssemblyReport : public coral::netapp::Serializable {
 public:
   AssemblyReport();
 
@@ -84,12 +84,12 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream&);
-  void pack(liber::netapp::SerialStream&) const;
-  bool unpack(liber::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&) const;
+  bool unpack(coral::netapp::SerialStream&);
 };
 
-class AuthorityReport : public liber::netapp::Serializable {
+class AuthorityReport : public coral::netapp::Serializable {
 public:
   AuthorityReport();
 
@@ -111,12 +111,12 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream& ctor);
-  void pack(liber::netapp::SerialStream& ctor) const;
-  bool unpack(liber::netapp::SerialStream& dtor);
+  void pack(coral::netapp::SerialStream& ctor);
+  void pack(coral::netapp::SerialStream& ctor) const;
+  bool unpack(coral::netapp::SerialStream& dtor);
 };
 
-class DestinationReport : public liber::netapp::Serializable {
+class DestinationReport : public coral::netapp::Serializable {
 public:
 
   SegmentationReport segmentation;
@@ -124,12 +124,12 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream& ctor);
-  void pack(liber::netapp::SerialStream& ctor) const;
-  bool unpack(liber::netapp::SerialStream& dtor);
+  void pack(coral::netapp::SerialStream& ctor);
+  void pack(coral::netapp::SerialStream& ctor) const;
+  bool unpack(coral::netapp::SerialStream& dtor);
 };
 
-class SourceReport : public liber::netapp::Serializable {
+class SourceReport : public coral::netapp::Serializable {
 public:
 
   SegmentationReport segmentation;
@@ -137,12 +137,12 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream& ctor);
-  void pack(liber::netapp::SerialStream& ctor) const;
-  bool unpack(liber::netapp::SerialStream& dtor);
+  void pack(coral::netapp::SerialStream& ctor);
+  void pack(coral::netapp::SerialStream& ctor) const;
+  bool unpack(coral::netapp::SerialStream& dtor);
 };
 
-class JobReport : public liber::netapp::Serializable {
+class JobReport : public coral::netapp::Serializable {
 public:
 
   JobReport();
@@ -163,12 +163,12 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream&);
-  void pack(liber::netapp::SerialStream&) const;
-  bool unpack(liber::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&) const;
+  bool unpack(coral::netapp::SerialStream&);
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // JOB_REPORT_H

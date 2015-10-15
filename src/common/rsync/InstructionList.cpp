@@ -34,7 +34,7 @@
 
 #include "InstructionList.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 InstructionList::InstructionList()

@@ -13,8 +13,8 @@
 
 #define  RSYNC_SUB_ID  ( 1 )
 
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral::netapp;
+using namespace coral::rsync;
 
 
 class WorkerTestCallback : public RsyncJobCallback {
@@ -24,8 +24,8 @@ public:
 
   void call(const JobDescriptor& job, const JobReport& report)
   {
-    // liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
-    liber::log::status("%s Report:\n%s\n", mpName, report.toString().c_str() );
+    // coral::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
+    coral::log::status("%s Report:\n%s\n", mpName, report.toString().c_str() );
 
     mSem.give();
   }
@@ -181,7 +181,7 @@ protected:
 
    void SetUp()
    {
-    liber::log::level( liber::log::Verbose );
+    coral::log::level( coral::log::Verbose );
 
     DeleteContents( "./test_root/client" );
     DeleteContents( "./test_root/server" );
@@ -192,7 +192,7 @@ protected:
 
    void TearDown()
    {
-      liber::log::flush();
+      coral::log::flush();
    }
 };
 
@@ -266,14 +266,14 @@ TEST_F( WorkerTest, MultiWorkerPipelineTest ) {
    pathIt = operations.begin();
    for (; pathIt != operations.end(); pathIt++ )
    {
-      liber::log::status( "Waiting for %s\n", pathIt->path.c_str() );
+      coral::log::status( "Waiting for %s\n", pathIt->path.c_str() );
       if ( pathIt->status == kRsyncSuccess ) EXPECT_EQ( true, clientCallback.mSem.take() );
-      liber::log::status( "Checking %s\n", pathIt->path.c_str() );
+      coral::log::status( "Checking %s\n", pathIt->path.c_str() );
       EXPECT_EQ( true, CheckEqual(
          boost::filesystem::path( REMOTE_ROOT ) / pathIt->path,
          boost::filesystem::path( LOCAL_ROOT ) / pathIt->path ) );
 
-      liber::log::status( "Done checking %s\n", pathIt->path.c_str() );
+      coral::log::status( "Done checking %s\n", pathIt->path.c_str() );
    }
 
    ASSERT_EQ( true, clientRouter.unsubscribe(RSYNC_SUB_ID, &clientNode.subscriber() ) );

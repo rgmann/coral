@@ -38,11 +38,11 @@
 #include <vector>
 #include "SegmentReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 
-class SegmentList : public liber::rsync::SegmentReceiver {
+class SegmentList : public coral::rsync::SegmentReceiver {
 public:
 
   SegmentList();
@@ -60,6 +60,6 @@ private:
 
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // SEGMENT_LIST_H

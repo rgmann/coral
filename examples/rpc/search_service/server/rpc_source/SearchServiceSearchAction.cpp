@@ -1,12 +1,12 @@
 #include "tutorial.pb.h"
 #include "SearchServiceSearchAction.h"
 
-using namespace liber::rpc;
+using namespace coral::rpc;
 using namespace tutorial;
 
 //-----------------------------------------------------------------------------
 SearchServiceSearchAction::SearchServiceSearchAction()
-   : liber::rpc::RpcServiceAction( "Search" )
+   : coral::rpc::RpcServiceAction( "Search" )
 {
 }
 
@@ -42,7 +42,7 @@ void SearchServiceSearchAction::operator() (
 void SearchServiceSearchAction::Search(
    const Person& request,
    Person_PhoneNumber& response,
-   liber::rpc::RpcException& e )
+   coral::rpc::RpcException& e )
 {
    e.id = UnimplementedAction;
    e.message = "SearchServiceSearchAction has not been implemented.";

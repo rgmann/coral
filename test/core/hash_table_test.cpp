@@ -80,7 +80,7 @@ int main()
   strncpy(thing5->data(), "jumped", Thingy::DataSize);
   strncpy(thing6->data(), "over", Thingy::DataSize);
 
-  liber::HashTable<16, Thingy*> table;
+  coral::HashTable<16, Thingy*> table;
 
   table.insert(thing1->id(), thing1);
   table.insert(thing2->id(), thing2);

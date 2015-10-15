@@ -37,7 +37,7 @@
 
 #include "SegmentReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 // Particularly used by the FileAuthority to look up each of the Segments
@@ -64,7 +64,7 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 
 #endif // RSYNC_SEGMENT_HOOK_H

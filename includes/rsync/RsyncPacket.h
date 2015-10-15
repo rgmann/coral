@@ -39,10 +39,10 @@
 #include <boost/uuid/uuid.hpp>
 #include "GenericPacket.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
-class RsyncTransportPacket : public liber::netapp::GenericPacket {
+class RsyncTransportPacket : public coral::netapp::GenericPacket {
 public:
 
    enum Type {
@@ -76,11 +76,11 @@ protected:
 
 private:
 
-   typedef liber::netapp::GenericPacket inherited;
+   typedef coral::netapp::GenericPacket inherited;
 };
 
 
-class RsyncPacket : public liber::netapp::GenericPacket {
+class RsyncPacket : public coral::netapp::GenericPacket {
 public:
 
    enum Type
@@ -137,7 +137,7 @@ protected:
 
 private:
 
-   typedef liber::netapp::GenericPacket inherited;
+   typedef coral::netapp::GenericPacket inherited;
 
 };
 
@@ -166,6 +166,6 @@ private:
 };
 
 } // end namespace rsync
-} // end namespace liber
+} // end namespace coral
 
 #endif // RSYNC_PACKET_H

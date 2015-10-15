@@ -40,13 +40,13 @@
 #include "Serializable.h"
 #include "RpcException.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
 typedef ::google::protobuf::Message PbMessage;
 
 
-class RpcObject : public liber::netapp::Serializable {
+class RpcObject : public coral::netapp::Serializable {
 public:
 
    RpcObject();
@@ -81,9 +81,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream&);
-  void pack(liber::netapp::SerialStream&) const;
-  bool unpack(liber::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&) const;
+  bool unpack(coral::netapp::SerialStream&);
 
 private:
 

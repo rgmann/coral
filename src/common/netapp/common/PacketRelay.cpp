@@ -36,7 +36,7 @@
 #include "GenericPacket.h"
 #include "PacketRelay.h"
 
-using namespace liber::netapp;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 RelayReceiverHook::RelayReceiverHook()

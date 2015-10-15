@@ -38,9 +38,9 @@
 #include "FileSystemInterface.h"
 #include "SegmenterThread.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::concurrency;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::concurrency;
 
 //----------------------------------------------------------------------------
 SegmenterThread::SegmenterThread( JobAgentPairQueue& queue )

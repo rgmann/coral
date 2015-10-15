@@ -39,22 +39,22 @@
 #include "InteractiveCommandRouter.h"
 #include "StringHelper.h"
 
-using namespace liber::cli;
-using namespace liber::log;
+using namespace coral::cli;
+using namespace coral::log;
 
 //-----------------------------------------------------------------------------
 class QuitCommand : public InteractiveCommand {
 public:
 
    QuitCommand( bool& quit_signalled )
-      : liber::cli::InteractiveCommand( "quit", "Exit the terminal", "exit" )
+      : coral::cli::InteractiveCommand( "quit", "Exit the terminal", "exit" )
       , quit_signalled_( quit_signalled )
    {
    }
 
    ~QuitCommand() {};
 
-   void process( const liber::cli::ArgumentList& args )
+   void process( const coral::cli::ArgumentList& args )
    {
       quit_signalled_ = true;
    }
@@ -69,14 +69,14 @@ class ListCommand : public InteractiveCommand {
 public:
 
    ListCommand( const std::map<std::string, InteractiveCommand*>& command_map )
-   : liber::cli::InteractiveCommand( "list", "List supported commands" )
+   : coral::cli::InteractiveCommand( "list", "List supported commands" )
    , command_map_( command_map )
    {
    }
 
    ~ListCommand() {};
 
-   void process(const liber::cli::ArgumentList& args)
+   void process(const coral::cli::ArgumentList& args)
    {
       std::map<std::string, InteractiveCommand*>::const_iterator
       command_iterator = command_map_.begin();
@@ -222,7 +222,7 @@ void InteractiveCommandRouter::run()
    {
       raw( "%s ", prompt_.c_str() );
 
-      liber::log::flush();
+      coral::log::flush();
 
       processLine( std::cin );
    }
@@ -232,7 +232,7 @@ void InteractiveCommandRouter::run()
       raw( "\n%s\n", shutdown_message_.c_str() );
    }
 
-   liber::log::flush();
+   coral::log::flush();
 }
 
 //-----------------------------------------------------------------------------

@@ -34,7 +34,7 @@
 
 #include "SegmentAccessor.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 SegmentAccessor::SegmentAccessor()

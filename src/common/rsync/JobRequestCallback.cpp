@@ -37,8 +37,8 @@
 #include "FileSystemInterface.h"
 #include "JobRequestCallback.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 JobRequestCallback::JobRequestCallback( bool create_permitted )

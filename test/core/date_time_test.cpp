@@ -3,8 +3,8 @@
 #include "Date.h"
 #include "gtest/gtest.h"
 
-using namespace liber;
-using namespace liber::cli;
+using namespace coral;
+using namespace coral::cli;
 
 class DateTimeTest : public ::testing::Test {
 public:
@@ -16,12 +16,12 @@ protected:
 
    void SetUp()
    {
-      liber::log::level( liber::log::Warn );
+      coral::log::level( coral::log::Warn );
    }
 
    void TearDown()
    {
-      liber::log::flush();
+      coral::log::flush();
    }
 
 };

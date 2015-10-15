@@ -39,10 +39,10 @@
 #include "PacketRouter.h"
 #include "PacketQueue.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
-class IntraRouter : public PacketRouter, public liber::concurrency::IThread {
+class IntraRouter : public PacketRouter, public coral::concurrency::IThread {
 public:
 
   IntraRouter();
@@ -63,6 +63,6 @@ private:
 };
 
 } // End namespace netapp
-} // End namespace liber
+} // End namespace coral
 
 #endif // INTRA_ROUTE_H

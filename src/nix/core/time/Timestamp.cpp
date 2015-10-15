@@ -47,7 +47,7 @@
 #define NSEC_PER_SEC       (1000000000)
 #endif
 
-using namespace liber;
+using namespace coral;
 
 //------------------------------------------------------------------------------
 Timestamp::Timestamp()
@@ -205,7 +205,7 @@ Timestamp& Timestamp::operator= (const Timestamp& other)
 }
 
 //------------------------------------------------------------------------------
-namespace liber {
+namespace coral {
 Timestamp operator- ( const Timestamp& lhs, const Timestamp& rhs )
 {
    Timestamp result;

@@ -39,7 +39,7 @@
 #include <boost/thread/mutex.hpp>
 #include "PacketReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 class GenericPacket;
@@ -106,7 +106,7 @@ typedef std::list<PacketSubscriber*>  SubscriberList;
 typedef SubscriberList::iterator      SubscriberIterator;
 
 } // End namespace netapp
-} // End namespace liber
+} // End namespace coral
 
 #endif // PACKET_SUBSCRIBER_H
 

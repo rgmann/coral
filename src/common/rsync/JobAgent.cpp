@@ -44,9 +44,9 @@
 #include "RsyncPacketRouter.h"
 #include "JobAgent.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 typedef boost::uuids::uuid buuid;
 

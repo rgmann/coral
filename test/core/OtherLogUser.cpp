@@ -5,6 +5,6 @@
 
 void OtherLogUser::printAnInt(int anInt)
 {
-  liber::log::status("anInt = %d\n", anInt);
+  coral::log::status("anInt = %d\n", anInt);
 }
 

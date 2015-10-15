@@ -37,10 +37,10 @@
 
 #include "Semaphore.h"
 
-class CountingSem : public liber::thread::Semaphore {
+class CountingSem : public coral::thread::Semaphore {
 public:
    
-   CountingSem( i32 start ) : liber::thread::Semaphore( start ) {};
+   CountingSem( i32 start ) : coral::thread::Semaphore( start ) {};
 
 };
 

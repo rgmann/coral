@@ -38,10 +38,10 @@
 #include "Queue.h"
 #include "InstructionReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
-class InstructionQueue : public liber::rsync::InstructionReceiver {
+class InstructionQueue : public coral::rsync::InstructionReceiver {
 public:
 
   InstructionQueue();
@@ -67,6 +67,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_INSTRUCTION_QUEUE_H

@@ -36,9 +36,9 @@
 #include "RpcServer.h"
 #include "Log.h"
 
-using namespace liber;
-using namespace liber::rpc;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rpc;
+using namespace coral::netapp;
 
 //------------------------------------------------------------------------------
 RpcServer::RpcServer( DestinationID client_destination_id )

@@ -10,8 +10,8 @@
 #define RPC_ID     2
 // #define SYNC_RPC
 
-using namespace liber::rpc;
-using namespace liber::netapp;
+using namespace coral::rpc;
+using namespace coral::netapp;
 using namespace tutorial;
 
 
@@ -39,7 +39,7 @@ private:
 };
 
 
-void search_run(liber::rpc::RpcClient &client)
+void search_run(coral::rpc::RpcClient &client)
 {
    SearchServiceClientStub service(client);
 
@@ -52,32 +52,32 @@ void search_run(liber::rpc::RpcClient &client)
    try {
       service.Search(request, response);
 
-      liber::log::status(
+      coral::log::status(
          "%s's phone number is %s\n",
          request.name().c_str(),
          response.number().c_str() );
 
    } catch (RpcException& e) {
 
-     liber::log::status(e.trace().c_str());
+     coral::log::status(e.trace().c_str());
 
    }
 }
 
 
-class SearchSupervisor : public liber::rpc::AsyncRpcSupervisor {
+class SearchSupervisor : public coral::rpc::AsyncRpcSupervisor {
 public:
 
    void callback()
    {
-      liber::log::status("async rpc callback\n");
+      coral::log::status("async rpc callback\n");
       mSem.give();
    }
 
    BinarySem mSem;
 };
 
-void async_search_run(liber::rpc::RpcClient& client)
+void async_search_run(coral::rpc::RpcClient& client)
 {
    SearchServiceClientStub service(client);
    SearchSupervisor supervisor;
@@ -91,18 +91,18 @@ void async_search_run(liber::rpc::RpcClient& client)
    try {
       service.Search(request, response, &supervisor);
    } catch (RpcException& e) {
-      liber::log::status(e.trace().c_str());
+      coral::log::status(e.trace().c_str());
    }
 
    supervisor.mSem.take(10000);
 
    if ( supervisor.failed() )
    {
-      liber::log::status(supervisor.exception().trace().c_str());
+      coral::log::status(supervisor.exception().trace().c_str());
    }
    else
    {
-      liber::log::status(
+      coral::log::status(
          "%s's phone number is %s\n",
          request.name().c_str(),
          response.number().c_str());
@@ -118,7 +118,7 @@ public:
 protected:
 
    virtual void Search(
-      const Person& request, Person_PhoneNumber& response, liber::rpc::RpcException& e)
+      const Person& request, Person_PhoneNumber& response, coral::rpc::RpcException& e)
    {
       std::string phone_number;
 
@@ -134,8 +134,8 @@ protected:
 
 int main()
 {
-   liber::log::level( liber::log::Verbose );
-   liber::log::options(0);
+   coral::log::level( coral::log::Verbose );
+   coral::log::options(0);
 
    PersonDatabase person_database;
 
@@ -149,8 +149,8 @@ int main()
    remoteRouter.launch();
 
 
-   liber::rpc::RpcClient client( RPC_ID );
-   liber::rpc::RpcServer server( RPC_ID );
+   coral::rpc::RpcClient client( RPC_ID );
+   coral::rpc::RpcServer server( RPC_ID );
 
    SearchServiceServerStub searchService;
 
@@ -162,7 +162,7 @@ int main()
    if ( localRouter.subscribe( RPC_ID, &client ) &&
         remoteRouter.subscribe( RPC_ID, &server ) )
    {
-      liber::log::status("RPC test:\n");
+      coral::log::status("RPC test:\n");
 
 #ifdef SYNC_RPC
       search_run( client );
@@ -174,7 +174,7 @@ int main()
    localRouter.cancel(true);
    remoteRouter.cancel(true);
 
-   liber::log::flush();
+   coral::log::flush();
    return 0;
 }
 

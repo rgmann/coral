@@ -36,9 +36,9 @@
 #include "Log.h"
 #include "RemoteJobResult.h"
 
-using namespace liber;
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::netapp;
+using namespace coral::rsync;
 
 //----------------------------------------------------------------------------
 RemoteJobResult::RemoteJobResult()
@@ -82,7 +82,7 @@ void RemoteJobResult::pack(SerialStream& ctor) const
 //----------------------------------------------------------------------------
 bool RemoteJobResult::unpack(SerialStream& dtor)
 {
-  if (dtor.read((char*)mUUID.data, mUUID.size()) != liber::netapp::SerialStream::ReadOk)
+  if (dtor.read((char*)mUUID.data, mUUID.size()) != coral::netapp::SerialStream::ReadOk)
   {
     log::error("RemoteJobResult::unpack - failed to deserialize UUID\n");
     return false;

@@ -37,7 +37,7 @@
 
 #include "Segment.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 // Segment retrieval interface expected by the Assembler.
@@ -58,7 +58,7 @@ public:
   SegmentAccessor();
   virtual ~SegmentAccessor();
 
-  virtual Segment* getSegment(liber::rsync::Segment::ID id) = 0;
+  virtual Segment* getSegment(coral::rsync::Segment::ID id) = 0;
 
 private:
 
@@ -68,7 +68,7 @@ private:
 
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 
 #endif // RSYNC_SEGMENT_ACCESSOR_H

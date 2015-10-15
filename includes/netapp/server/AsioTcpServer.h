@@ -39,7 +39,7 @@
 #include <boost/shared_ptr.hpp>
 #include "AsioTcpPacketRouter.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 class AsioTcpServer {
@@ -73,6 +73,6 @@ typedef boost::shared_ptr<AsioTcpServer> AsioTcpServerPtr;
 
 
 } // namespace netapp
-} // namespace liber
+} // namespace coral
 
 #endif // ASIO_TCP_SERVER_H

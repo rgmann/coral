@@ -1,7 +1,7 @@
 #include <fstream>
 #include "InstructionList.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 void test_begin_instruction()
 {

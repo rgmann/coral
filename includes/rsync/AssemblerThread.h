@@ -41,13 +41,13 @@
 #include "SegmentFile.h"
 #include "Assembler.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class RsyncJob;
 class FileSystemInterface;
 
-class AssemblerThread : public liber::concurrency::IThread {
+class AssemblerThread : public coral::concurrency::IThread {
 public:
 
   AssemblerThread( JobAgentPairQueue& queue );
@@ -73,6 +73,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_ASSEMBLER_THREAD_H

@@ -6,16 +6,16 @@
 
 namespace tutorial {
 
-class SearchServiceSearchAction : public liber::rpc::RpcServiceAction {
+class SearchServiceSearchAction : public coral::rpc::RpcServiceAction {
 public:
 
    SearchServiceSearchAction();
 
-   void operator() ( const std::string& request, std::string& response, liber::rpc::RpcException& e );
+   void operator() ( const std::string& request, std::string& response, coral::rpc::RpcException& e );
 
 protected:
 
-   virtual void Search( const Person& request, Person_PhoneNumber& response, liber::rpc::RpcException& e);
+   virtual void Search( const Person& request, Person_PhoneNumber& response, coral::rpc::RpcException& e);
 };
 
 }  // End namespace tutorial

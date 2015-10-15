@@ -3,11 +3,11 @@
 #include "Log.h"
 #include "CircularBuffer.h"
 
-using namespace liber;
+using namespace coral;
 
 int main()
 {
-  liber::log::level(liber::log::Debug);
+  coral::log::level(coral::log::Debug);
 
   CircularBuffer buffer;
 
@@ -72,7 +72,7 @@ int main()
 
   printf("cbuff = %s\n", cbuff);
 
-  liber::log::flush();
+  coral::log::flush();
   return 0;
 }
 

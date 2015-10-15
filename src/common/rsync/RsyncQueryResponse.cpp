@@ -35,8 +35,8 @@
 #include "Log.h"
 #include "RsyncQueryResponse.h"
 
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral::netapp;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 RsyncQueryResponse::RsyncQueryResponse()
@@ -66,25 +66,25 @@ RsyncError RsyncQueryResponse::status() const
 }
 
 //-----------------------------------------------------------------------------
-void RsyncQueryResponse::pack(liber::netapp::SerialStream& ctor)
+void RsyncQueryResponse::pack(coral::netapp::SerialStream& ctor)
 {
   const_cast<const RsyncQueryResponse*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
-void RsyncQueryResponse::pack(liber::netapp::SerialStream& ctor) const
+void RsyncQueryResponse::pack(coral::netapp::SerialStream& ctor) const
 {
   ctor.write( (ui32)status_ );
   ctor.write((const char*)uuid_.data, uuid_.size());
 }
 
 //-----------------------------------------------------------------------------
-bool RsyncQueryResponse::unpack(liber::netapp::SerialStream& dtor)
+bool RsyncQueryResponse::unpack(coral::netapp::SerialStream& dtor)
 {
   ui32 temp_status = kRsyncCommError;
   if ( dtor.read( temp_status ) == false )
   {
-    liber::log::error(
+    coral::log::error(
       "RsyncQueryResponse::unpack: Failed to deserialize segment size.\n");
     return false;
   }
@@ -92,7 +92,7 @@ bool RsyncQueryResponse::unpack(liber::netapp::SerialStream& dtor)
 
   if ( dtor.read( (char*)uuid_.data, uuid_.size() ) != SerialStream::ReadOk )
   {
-    liber::log::error( "RsyncQueryResponse::unpack - failed to deserialize UUID\n" );
+    coral::log::error( "RsyncQueryResponse::unpack - failed to deserialize UUID\n" );
     return false;
   }
 

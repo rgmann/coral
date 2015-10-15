@@ -39,10 +39,10 @@
 #include "RpcPacket.h"
 #include "ByteOrder.h"
 
-using namespace liber;
-using namespace liber::rpc;
-using namespace liber::netapp;
-using namespace liber::net;
+using namespace coral;
+using namespace coral::rpc;
+using namespace coral::netapp;
+using namespace coral::net;
 
 static const char MarkerData[ RpcPacket::kRpcMarkerSize ] =
    { 'r', 'p', 'c', 'm', 's', 'g', '\0' };
@@ -141,9 +141,9 @@ void RpcPacket::swap(void* pData, ui32 nSizeBytes)
   {
     RpcPacket::Data* lpData = reinterpret_cast<RpcPacket::Data*>(pData);
 
-    liber::netapp::swapInPlace(lpData->rpcId);
-    liber::netapp::swapInPlace(lpData->length);
-    liber::netapp::swapInPlace(lpData->format);
-    liber::netapp::swapInPlace(lpData->encoding);
+    coral::netapp::swapInPlace(lpData->rpcId);
+    coral::netapp::swapInPlace(lpData->length);
+    coral::netapp::swapInPlace(lpData->format);
+    coral::netapp::swapInPlace(lpData->encoding);
   }
 }

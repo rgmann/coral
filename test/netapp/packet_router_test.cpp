@@ -6,8 +6,8 @@
 #include "NetAppPacket.h"
 #include "gtest/gtest.h"
 
-using namespace liber;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::netapp;
 
 
 class PacketTest : public ::testing::Test {
@@ -21,12 +21,12 @@ protected:
 
    void SetUp()
    {
-      liber::log::level( liber::log::Warn );
+      coral::log::level( coral::log::Warn );
    }
 
    void TearDown()
    {
-      liber::log::flush();
+      coral::log::flush();
    }
 };
 

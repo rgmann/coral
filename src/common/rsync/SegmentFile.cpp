@@ -37,8 +37,8 @@
 #include "JobDescriptor.h"
 #include "SegmentFile.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 SegmentFile::SegmentFile()
@@ -56,7 +56,7 @@ SegmentFile::~SegmentFile()
 //-----------------------------------------------------------------------------
 bool SegmentFile::open(
   FileSystemInterface&               file_sys_interface,
-  const liber::rsync::JobDescriptor& descriptor)
+  const coral::rsync::JobDescriptor& descriptor)
 {
   close();
   mpDescriptor = &descriptor;
@@ -70,7 +70,7 @@ void SegmentFile::close()
 }
 
 //-----------------------------------------------------------------------------
-Segment* SegmentFile::getSegment(liber::rsync::Segment::ID id)
+Segment* SegmentFile::getSegment(coral::rsync::Segment::ID id)
 {
   Segment* lpSegment = NULL;
 

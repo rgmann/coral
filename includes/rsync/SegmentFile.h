@@ -39,7 +39,7 @@
 #include "Segmenter.h"
 #include "SegmentAccessor.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class JobDescriptor;
@@ -68,7 +68,7 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 
 #endif // RSYNC_SEGMENT_FILE_H

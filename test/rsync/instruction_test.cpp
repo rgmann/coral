@@ -8,9 +8,9 @@
 #include "InstructionList.h"
 #include "gtest/gtest.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 class InstructionTest : public ::testing::Test {
 public:
@@ -27,12 +27,12 @@ protected:
 
    void SetUp()
    {
-      liber::log::level( liber::log::Verbose );
+      coral::log::level( coral::log::Verbose );
    }
 
    void TearDown()
    {
-      liber::log::flush();
+      coral::log::flush();
    }
 };
 

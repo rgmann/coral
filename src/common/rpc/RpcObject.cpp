@@ -39,9 +39,9 @@
 #include "Log.h"
 #include "RpcObject.h"
 
-using namespace liber;
-using namespace liber::rpc;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rpc;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 RpcObject::RpcObject()
@@ -140,7 +140,7 @@ bool RpcObject::getResponse(RpcObject &response,
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::pack(liber::netapp::SerialStream& stream) const
+void RpcObject::pack(coral::netapp::SerialStream& stream) const
 {
    stream.writeCString(callInfo().resource);
    stream.writeCString(callInfo().action);
@@ -152,13 +152,13 @@ void RpcObject::pack(liber::netapp::SerialStream& stream) const
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::pack(liber::netapp::SerialStream& stream)
+void RpcObject::pack(coral::netapp::SerialStream& stream)
 {
   const_cast<const RpcObject*>(this)->pack(stream);
 }
 
 //-----------------------------------------------------------------------------
-bool RpcObject::unpack(liber::netapp::SerialStream &stream)
+bool RpcObject::unpack(coral::netapp::SerialStream &stream)
 {
   // Read the resource name
   if (stream.readCString(callInfo().resource) == SerialStream::ReadFail)

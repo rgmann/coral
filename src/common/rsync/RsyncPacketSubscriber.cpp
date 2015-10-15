@@ -40,9 +40,9 @@
 
 #define  RSYNC_JOB_UUID_LENGTH      ( 16 )
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 RsyncPacketSubscriber::RsyncPacketSubscriber( bool require_active_job )

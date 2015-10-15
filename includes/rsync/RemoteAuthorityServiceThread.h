@@ -40,12 +40,12 @@
 #include "WorkerThreadTypes.h"
 #include "RemoteAuthorityService.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class RsyncJob;
 
-class RemoteAuthorityServiceThread : public liber::concurrency::IThread {
+class RemoteAuthorityServiceThread : public coral::concurrency::IThread {
 public:
 
   RemoteAuthorityServiceThread( JobAgentPairQueue& queue );
@@ -69,6 +69,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_AUTHORITY_SERVICE_THREAD_H

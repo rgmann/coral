@@ -37,7 +37,7 @@
 
 #include "RpcSupervisor.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
 class BlockingRpcSupervisor : public RpcSupervisor {
@@ -61,6 +61,6 @@ private:
 }; // End class BlockingRpcSupervisor
 
 } // End namespace rpc
-} // End namespace liber
+} // End namespace coral
 
 #endif // BLOCKING_RPC_SUPERVISOR_H

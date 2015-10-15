@@ -39,7 +39,7 @@
 #include "Queue.h"
 
 
-namespace liber {
+namespace coral {
 namespace rsync {
 class JobAgent;
 class RsyncJob;

@@ -34,7 +34,7 @@
 
 #include "SegmentReceiver.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 SegmentReceiver::SegmentReceiver()

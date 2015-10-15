@@ -37,7 +37,7 @@
 
 #include "PacketReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 class PacketReceiverHook : public PacketReceiver {
@@ -55,6 +55,6 @@ protected:
 };
 
 } // End namespace netapp
-} // End namespace liber
+} // End namespace coral
 
 #endif // PACKET_RECEIVER_HOOK_H

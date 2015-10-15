@@ -16,9 +16,9 @@
 #define  RSYNC_SUB_ID  ( 1 )
 
 using boost::asio::ip::tcp;
-using namespace liber::netapp;
-using namespace liber::rsync;
-using namespace liber::cli;
+using namespace coral::netapp;
+using namespace coral::rsync;
+using namespace coral::cli;
 
 //----------------------------------------------------------------------
 
@@ -39,13 +39,13 @@ public:
 
    void join( AsioRsyncClientPtr client )
    {
-    liber::log::status("JOINED\n");
+    coral::log::status("JOINED\n");
      clients_.insert( client );
    }
 
    void leave( AsioRsyncClientPtr client )
    {
-     liber::log::status("LEAVING\n");
+     coral::log::status("LEAVING\n");
      clients_.erase( client );
    }
 
@@ -98,7 +98,7 @@ public:
    {
       if ( rsync_node_.push( path ) != kRsyncSuccess )
       {
-         liber::log::status( "Failed to push file: %s\n", path.string().c_str() );
+         coral::log::status( "Failed to push file: %s\n", path.string().c_str() );
       }
    }
 
@@ -176,7 +176,7 @@ typedef std::list<AsioRsyncServerPtr>        AsioRsyncServerList;
 //----------------------------------------------------------------------
 int main( int argc, char* argv[] )
 {
-   liber::log::level( liber::log::Verbose );
+   coral::log::level( coral::log::Verbose );
 
    ArgParser args;
    args.addArg("name: Port, primary: p, alt: port, type: opt, \
@@ -192,7 +192,7 @@ int main( int argc, char* argv[] )
          boost::asio::io_service io_service;
          tcp::endpoint endpoint( tcp::v4(), host_port );
 
-         liber::log::status( "Starting server on port %d\n", host_port );
+         coral::log::status( "Starting server on port %d\n", host_port );
          AsioRsyncServerPtr server( new AsioRsyncServer( io_service, endpoint ) );
          server->startAccept();
 
@@ -200,22 +200,22 @@ int main( int argc, char* argv[] )
       }
       catch (std::exception& e)
       {
-         liber::log::error( "Exception: %s\n", e.what() );
+         coral::log::error( "Exception: %s\n", e.what() );
       }
    }
    else
    {
       if ( args.helpRequested() )
       {
-         liber::log::raw( args.printHelp().c_str() );
+         coral::log::raw( args.printHelp().c_str() );
       }
       else
       {
-         liber::log::raw( args.printArgErrors(true).c_str() );
+         coral::log::raw( args.printArgErrors(true).c_str() );
       }
    }
 
-   liber::log::flush();
+   coral::log::flush();
 
    return 0;
 }

@@ -42,15 +42,15 @@
   action_delegate(                                       \
               const std::string& request,                \
               std::string& response,                     \
-              liber::rpc::RpcException& e)
+              coral::rpc::RpcException& e)
 
 #define ACTION(action_name, request_type, response_type) \
   action_name(const request_type& request,               \
               response_type& response,                   \
-              liber::rpc::RpcException& e)
+              coral::rpc::RpcException& e)
 
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
 class InstanceWrapper {

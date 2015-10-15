@@ -37,7 +37,7 @@
 #include <string.h>
 #include "Date.h"
 
-using namespace liber;
+using namespace coral;
 
 //------------------------------------------------------------------------------
 Date::Date()

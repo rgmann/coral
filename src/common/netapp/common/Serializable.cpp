@@ -36,34 +36,34 @@
 #include "Log.h"
 #include "Serializable.h"
 
-using namespace liber;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::netapp;
 
-void liber::netapp::swapInPlace(i8& val) {}
-void liber::netapp::swapInPlace(ui8& val) {}
-void liber::netapp::swapInPlace(i16& val)
+void coral::netapp::swapInPlace(i8& val) {}
+void coral::netapp::swapInPlace(ui8& val) {}
+void coral::netapp::swapInPlace(i16& val)
 {
   val = htons(val);
 }
-void liber::netapp::swapInPlace(ui16& val)
+void coral::netapp::swapInPlace(ui16& val)
 {
   val = htons(val);
 }
-void liber::netapp::swapInPlace(i32& val)
+void coral::netapp::swapInPlace(i32& val)
 {
   val = htonl(val);
 }
-void liber::netapp::swapInPlace(ui32& val)
+void coral::netapp::swapInPlace(ui32& val)
 {
   val = htonl(val);
 }
-void liber::netapp::swapInPlace(i64& val)
+void coral::netapp::swapInPlace(i64& val)
 {
   i64 upper = (i64)htonl((ui32)((val >> 32) & 0x00000000FFFFFFFF));
   i64 lower = (i64)htonl((ui32)(val & 0x00000000FFFFFFFF));
   val = (lower << 32) | upper;
 }
-void liber::netapp::swapInPlace(ui64& val)
+void coral::netapp::swapInPlace(ui64& val)
 {
   ui64 upper = (ui64)htonl((ui32)((val >> 32) & 0x00000000FFFFFFFF));
   ui64 lower = (ui64)htonl((ui32)(val & 0x00000000FFFFFFFF));

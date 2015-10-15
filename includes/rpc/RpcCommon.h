@@ -40,7 +40,7 @@
 #include "BaseTypes.h"
 #include "CryptoHashTypes.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
 enum RpcErrorId

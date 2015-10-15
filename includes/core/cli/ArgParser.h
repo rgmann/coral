@@ -39,7 +39,7 @@
 #include <map>
 #include "Argument.h"
 
-namespace liber {
+namespace coral {
 namespace cli {
 
 class ArgParser {
@@ -317,6 +317,6 @@ private:
 };
 
 } // namespace cli
-} // namespace liber
+} // namespace coral
 
 #endif // ARG_PARSER_H

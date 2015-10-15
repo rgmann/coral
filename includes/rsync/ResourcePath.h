@@ -42,11 +42,11 @@
 #include "Serializable.h"
 
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 
-class ResourcePath : public liber::netapp::Serializable {
+class ResourcePath : public coral::netapp::Serializable {
 public:
 
    ResourcePath();
@@ -61,9 +61,9 @@ public:
 
 protected:
 
-   void pack(liber::netapp::SerialStream& rCtor);
-   void pack(liber::netapp::SerialStream& rCtor) const;
-   bool unpack(liber::netapp::SerialStream& rDtor);
+   void pack(coral::netapp::SerialStream& rCtor);
+   void pack(coral::netapp::SerialStream& rCtor) const;
+   bool unpack(coral::netapp::SerialStream& rDtor);
 
 private:
 
@@ -88,6 +88,6 @@ public:
 };
 
 } // namespace rsync
-} // namespace liber
+} // namespace coral
 
 #endif // RESOURCE_PATH_H

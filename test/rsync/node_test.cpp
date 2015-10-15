@@ -7,8 +7,8 @@
 #include "IntraRouter.h"
 #include "gtest/gtest.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 class NodeTest : public ::testing::Test {
 public:
@@ -29,7 +29,7 @@ protected:
 
    void SetUp()
    {
-      liber::log::level( liber::log::Warn );
+      coral::log::level( coral::log::Warn );
 
       workgroup_ = new WorkerGroup();
       node_ = new RsyncNode( LOCAL_ROOT, *workgroup_ );
@@ -87,7 +87,7 @@ TEST_F( NodeTest, RemoteAuthRequestTimeout ) {
 
       void call(const JobDescriptor& job, const JobReport& report)
       {
-         liber::log::status("%s\n", BOOST_CURRENT_FUNCTION);
+         coral::log::status("%s\n", BOOST_CURRENT_FUNCTION);
          error_ = report.source.authority.status;
          sem_.give();
       }

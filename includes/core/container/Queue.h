@@ -40,7 +40,7 @@
 #include "BaseTypes.h"
 #include "CountingSem.h"
 
-namespace liber {
+namespace coral {
 
 ///
 /// Basic blocking template message queue class
@@ -55,9 +55,9 @@ public:
    
    ~Queue();
       
-   bool  push(const T &item, int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
+   bool  push(const T &item, int nTimeoutMs = coral::thread::Semaphore::SemWaitForever);
    
-   bool  pop(T &item, int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
+   bool  pop(T &item, int nTimeoutMs = coral::thread::Semaphore::SemWaitForever);
    
    bool  peek(T &item);
    
@@ -111,7 +111,7 @@ bool Queue<T>::push( const T &item, int nTimeoutMs )
    if ( !infinite_queue_ )
    {
       can_push = (
-         pop_semaphore_.take( nTimeoutMs ) != liber::thread::Semaphore::SemAcquired
+         pop_semaphore_.take( nTimeoutMs ) != coral::thread::Semaphore::SemAcquired
       );
    }
       
@@ -137,7 +137,7 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
 {
    bool pop_success = false;
       
-   if ( push_semaphore_.take( nTimeoutMs ) == liber::thread::Semaphore::SemAcquired )
+   if ( push_semaphore_.take( nTimeoutMs ) == coral::thread::Semaphore::SemAcquired )
    {
       {
          boost::mutex::scoped_lock guard( queue_lock_ );
@@ -188,6 +188,6 @@ ui32 Queue<T>::size()
    return queue_.size();
 }
 
-} // end namespace liber
+} // end namespace coral
 
 #endif // QUEUE_H

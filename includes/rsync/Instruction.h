@@ -45,7 +45,7 @@
 #include "Serializable.h"
 #include "RsyncError.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 
@@ -186,12 +186,12 @@ public:
    //
    //
    //
-   BeginInstruction(liber::rsync::JobDescriptor& descriptor );
+   BeginInstruction(coral::rsync::JobDescriptor& descriptor );
 
    //
    //
    //
-   bool descriptor( liber::rsync::JobDescriptor& descriptor );
+   bool descriptor( coral::rsync::JobDescriptor& descriptor );
 
 };
 
@@ -209,12 +209,12 @@ public:
    //
    //
    //
-   SegmentInstruction(liber::rsync::Segment::ID id);
+   SegmentInstruction(coral::rsync::Segment::ID id);
 
    //
    //
    //
-   liber::rsync::Segment::ID segmentId() const;
+   coral::rsync::Segment::ID segmentId() const;
 
 };
 
@@ -290,7 +290,7 @@ public:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 
 #endif // RSYNC_INSTRUCTION_H

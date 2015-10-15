@@ -37,7 +37,7 @@
 
 #include <istream>
 
-namespace liber {
+namespace coral {
 
 class CircularBuffer {
 public:
@@ -169,6 +169,6 @@ private:
   unsigned int capacity_;
 };
 
-} // namespace liber
+} // namespace coral
 
 #endif // CIRCULAR_BUFFER_H

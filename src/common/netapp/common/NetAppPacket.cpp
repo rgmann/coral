@@ -36,8 +36,8 @@
 #include "NetAppPacket.h"
 #include "ByteOrder.h"
 
-using namespace liber::net;
-using namespace liber::netapp;
+using namespace coral::net;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 NetAppPacket::NetAppPacket()

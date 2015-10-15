@@ -39,10 +39,10 @@
 #include "Serializable.h"
 #include "JobReport.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
-class RemoteJobResult : public liber::netapp::Serializable {
+class RemoteJobResult : public coral::netapp::Serializable {
 public:
 
   RemoteJobResult();
@@ -54,9 +54,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream&);
-  void pack(liber::netapp::SerialStream&) const;
-  bool unpack(liber::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&) const;
+  bool unpack(coral::netapp::SerialStream&);
 
 private:
 
@@ -66,6 +66,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // REMOTE_JOB_RESULT_H

@@ -37,8 +37,8 @@
 #include "PacketSubscriber.h"
 #include "IntraRouter.h"
 
-using namespace liber;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 IntraRouter::IntraRouter()

@@ -42,10 +42,10 @@
 
 #define MAX_MESSAGE_LEN_BYTES  (512)
 
-using namespace liber::log;
-using namespace liber::thread;
+using namespace coral::log;
+using namespace coral::thread;
 
-const char* liber::log::log_level_to_string( LogLevel level )
+const char* coral::log::log_level_to_string( LogLevel level )
 {
    // Note:
    // The following array must be manually synchronized with the LogLevel
@@ -186,9 +186,9 @@ bool LogMessage::waitFlush( i32 timeout_ms )
 
 //-----------------------------------------------------------------------------
 Logger::Logger()
-   : liber::concurrency::IThread("CommonLoggingThread")
+   : coral::concurrency::IThread("CommonLoggingThread")
    , console_log_options_  ( log::DisplayLogLevel )
-   , log_level_            ( liber::log::Status )
+   , log_level_            ( coral::log::Status )
    , log_file_enabled_     ( false )
    , path_                 (boost::filesystem::current_path().generic_string())
    , suffix_               ( "" )
@@ -336,55 +336,55 @@ std::string Logger::generateLogName(
    return log_path.string();
 }
 
-Logger liber::log::glog;
+Logger coral::log::glog;
 
 //-----------------------------------------------------------------------------
-void liber::log::set_path( const std::string& path )
+void coral::log::set_path( const std::string& path )
 {
-   liber::log::glog.setPath( path );
+   coral::log::glog.setPath( path );
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::set_suffix(const std::string& suffix)
+void coral::log::set_suffix(const std::string& suffix)
 {
-   liber::log::glog.setSuffix( suffix );
+   coral::log::glog.setSuffix( suffix );
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::enable()
+void coral::log::enable()
 {
-   liber::log::glog.setLogFileEnabled(true);
+   coral::log::glog.setLogFileEnabled(true);
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::disable()
+void coral::log::disable()
 {
-   liber::log::glog.setLogFileEnabled(false);
+   coral::log::glog.setLogFileEnabled(false);
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::options(ui32 opts)
+void coral::log::options(ui32 opts)
 {
-   liber::log::glog.setConsoleDisplayOptions(opts);
+   coral::log::glog.setConsoleDisplayOptions(opts);
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::level(LogLevel level)
+void coral::log::level(LogLevel level)
 {
-   liber::log::glog.setFilterLevel(level);
+   coral::log::glog.setFilterLevel(level);
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::flush( i32 timeout_ms )
+void coral::log::flush( i32 timeout_ms )
 {
    LogMessagePtr flush_message_ptr( new LogMessage() );
 
-   liber::log::glog.send( flush_message_ptr );
+   coral::log::glog.send( flush_message_ptr );
    flush_message_ptr->waitFlush( timeout_ms );
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::print(LogLevel level, const char* format, va_list args)
+void coral::log::print(LogLevel level, const char* format, va_list args)
 {
    static char message_buffer[ MAX_MESSAGE_LEN_BYTES ];
 
@@ -396,72 +396,72 @@ void liber::log::print(LogLevel level, const char* format, va_list args)
          level, std::string( message_buffer )
       ));
 
-      liber::log::glog.send( log_message_ptr );
+      coral::log::glog.send( log_message_ptr );
    }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::raw( const char* format, ... )
+void coral::log::raw( const char* format, ... )
 {
    if (format)
    {
       va_list args;
       va_start( args, format );
-      liber::log::print( Raw, format, args );
+      coral::log::print( Raw, format, args );
       va_end( args );
    }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::status( const char* format, ... )
+void coral::log::status( const char* format, ... )
 {
    if (format)
    {
       va_list args;
       va_start( args, format );
-      liber::log::print( Status, format, args );
+      coral::log::print( Status, format, args );
       va_end( args );
    }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::error( const char* format, ... )
+void coral::log::error( const char* format, ... )
 {
    if ( format )
    {
       va_list args;
       va_start( args, format );
-      liber::log::print( Error, format, args );
+      coral::log::print( Error, format, args );
       va_end( args );
    }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::warn( const char* format, ... )
+void coral::log::warn( const char* format, ... )
 {
    if ( format )
    {
       va_list args;
       va_start( args, format );
-      liber::log::print( Warn, format, args );
+      coral::log::print( Warn, format, args );
       va_end( args );
    }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::debug( const char* format, ... )
+void coral::log::debug( const char* format, ... )
 {
    if ( format )
    {
       va_list args;
       va_start( args, format );
-      liber::log::print( Debug, format, args );
+      coral::log::print( Debug, format, args );
       va_end( args );
    }
 }
 
 //-----------------------------------------------------------------------------
-void liber::log::mem_dump(
+void coral::log::mem_dump(
    const char* header,
    const char* data_ptr,
    ui32        length,
@@ -479,12 +479,12 @@ void liber::log::mem_dump(
             max_line_length
          ));
 
-         liber::log::glog.send( log_message_ptr );
+         coral::log::glog.send( log_message_ptr );
       }
       catch ( ... )
       {
-         liber::log::error(
-            "liber::log::mem_dump - exception while logging dump\n" );
+         coral::log::error(
+            "coral::log::mem_dump - exception while logging dump\n" );
       }
    }
 }

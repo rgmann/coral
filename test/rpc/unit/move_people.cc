@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
   // compatible with the version of the headers we compiled against.
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-  liber::rpc::RpcObject srcObject;
-  liber::rpc::RpcObject dstObject;
+  coral::rpc::RpcObject srcObject;
+  coral::rpc::RpcObject dstObject;
 
   char* pTBuff = NULL;
   unsigned int nBuffSize = 0;

@@ -40,9 +40,9 @@
 #include "Log.h"
 #include "RpcException.h"
 
-using namespace liber;
-using namespace liber::rpc;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rpc;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 TraceFrame::TraceFrame(const std::string& className,
@@ -71,7 +71,7 @@ std::string TraceFrame::toString() const
 }
 
 //-----------------------------------------------------------------------------
-void TraceFrame::pack(liber::netapp::SerialStream& stream) const
+void TraceFrame::pack(coral::netapp::SerialStream& stream) const
 {
    stream.writeCString(mClassName);
    stream.writeCString(mMethodName);
@@ -80,25 +80,25 @@ void TraceFrame::pack(liber::netapp::SerialStream& stream) const
 }
 
 //-----------------------------------------------------------------------------
-void TraceFrame::pack(liber::netapp::SerialStream& stream)
+void TraceFrame::pack(coral::netapp::SerialStream& stream)
 {
   const_cast<const TraceFrame*>(this)->pack(stream);
 }
 
 //-----------------------------------------------------------------------------
-bool TraceFrame::unpack(liber::netapp::SerialStream& stream)
+bool TraceFrame::unpack(coral::netapp::SerialStream& stream)
 {
-   if (stream.readCString(mClassName) == liber::netapp::SerialStream::ReadFail)
+   if (stream.readCString(mClassName) == coral::netapp::SerialStream::ReadFail)
    {
       log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
-   if (stream.readCString(mMethodName) == liber::netapp::SerialStream::ReadFail)
+   if (stream.readCString(mMethodName) == coral::netapp::SerialStream::ReadFail)
    {
       log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
    }
-   if (stream.readCString(mFileName) == liber::netapp::SerialStream::ReadFail)
+   if (stream.readCString(mFileName) == coral::netapp::SerialStream::ReadFail)
    {
       log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
       return false;
@@ -163,7 +163,7 @@ void RpcException::reset()
 }
 
 //-----------------------------------------------------------------------------
-void RpcException::pack(liber::netapp::SerialStream& stream) const
+void RpcException::pack(coral::netapp::SerialStream& stream) const
 {
    stream.write((ui32)reporter);
    stream.write((ui32)id);
@@ -187,13 +187,13 @@ void RpcException::pack(liber::netapp::SerialStream& stream) const
 }
 
 //-----------------------------------------------------------------------------
-void RpcException::pack(liber::netapp::SerialStream& stream)
+void RpcException::pack(coral::netapp::SerialStream& stream)
 {
   const_cast<const RpcException*>(this)->pack(stream);
 }
 
 //-----------------------------------------------------------------------------
-bool RpcException::unpack(liber::netapp::SerialStream& stream)
+bool RpcException::unpack(coral::netapp::SerialStream& stream)
 {
    i32 tI32Field = -1;
    if (stream.read(tI32Field) == false)
@@ -210,7 +210,7 @@ bool RpcException::unpack(liber::netapp::SerialStream& stream)
    }
    id = (RpcErrorId)tI32Field;
 
-   if (stream.readCString(message) == liber::netapp::SerialStream::ReadFail)
+   if (stream.readCString(message) == coral::netapp::SerialStream::ReadFail)
    {
       log::error("RpcException::deserialize failure at %d\n", __LINE__);
       return false;

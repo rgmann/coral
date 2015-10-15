@@ -38,7 +38,7 @@
 #include <string>
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 namespace cli {
 
 class Argument {
@@ -261,6 +261,6 @@ private:
 };
 
 } // namespace cli
-} // namespace liber
+} // namespace coral
 
 #endif // ARGUMENT_H

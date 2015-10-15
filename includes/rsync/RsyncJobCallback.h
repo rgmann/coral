@@ -35,7 +35,7 @@
 #ifndef  RSYNC_JOB_CALLBACK_H
 #define  RSYNC_JOB_CALLBACK_H
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class JobDescriptor;

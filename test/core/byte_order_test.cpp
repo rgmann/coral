@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 
-using namespace liber::net;
+using namespace coral::net;
 
 int main(int argc, char *argv[])
 {

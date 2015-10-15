@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project( libliber_core )
+project( libcoral_core )
 
 find_package( Boost 1.46 REQUIRED )
 
@@ -34,4 +34,4 @@ file( GLOB SOURCES
 "${COMMON_SOURCE}/concurrency/*.cpp"
 )
 
-add_library( liber_core STATIC ${SOURCES} )
+add_library( coral_core STATIC ${SOURCES} )

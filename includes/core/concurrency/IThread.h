@@ -38,7 +38,7 @@
 #include <boost/thread.hpp>
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 namespace concurrency {
 
 // Abstract Implementable Thread
@@ -127,6 +127,6 @@ private:
 };
 
 } // end namespace concurrency
-} // end namespace liber
+} // end namespace coral
 
 #endif // ITHREAD_H

@@ -37,9 +37,9 @@
 #include "JobReport.h"
 #include "Assembler.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 Assembler::Assembler( SegmentAccessor& segment_accessor )

@@ -34,7 +34,7 @@
 
 #include "PacketReceiverHook.h"
 
-using namespace liber::netapp;
+using namespace coral::netapp;
 
 //----------------------------------------------------------------------------
 PacketReceiverHook::PacketReceiverHook()

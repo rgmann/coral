@@ -39,10 +39,10 @@
 #include "Serializable.h"
 #include "RsyncError.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
-class RsyncQueryResponse : public liber::netapp::Serializable {
+class RsyncQueryResponse : public coral::netapp::Serializable {
 public:
 
   RsyncQueryResponse();
@@ -54,9 +54,9 @@ public:
 
 private:
 
-  void pack(liber::netapp::SerialStream& rCtor );
-  void pack(liber::netapp::SerialStream& rCtor ) const;
-  bool unpack(liber::netapp::SerialStream& rDtor);
+  void pack(coral::netapp::SerialStream& rCtor );
+  void pack(coral::netapp::SerialStream& rCtor ) const;
+  bool unpack(coral::netapp::SerialStream& rDtor);
 
 private:
 
@@ -66,6 +66,6 @@ private:
 };
 
 } // end namepsace rsync
-} // end namespace liber
+} // end namespace coral
 
 #endif // RsyncQueryResponse

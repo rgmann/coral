@@ -34,7 +34,7 @@
 
 #include "SegmentList.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 SegmentList::SegmentList()

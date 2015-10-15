@@ -39,10 +39,10 @@
 #include "IThread.h"
 #include "RpcSupervisor.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
-class AsyncRpcSupervisor : public RpcSupervisor, public liber::concurrency::IThread {
+class AsyncRpcSupervisor : public RpcSupervisor, public coral::concurrency::IThread {
 public:
 
   AsyncRpcSupervisor();
@@ -86,6 +86,6 @@ private:
 }; // End class AsyncRpcSupervisor
 
 } // End namespace rpc
-} // End namespace liber
+} // End namespace coral
 
 #endif // ASYNC_RPC_SUPERVISOR_H

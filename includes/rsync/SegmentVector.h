@@ -32,10 +32,10 @@
 
 
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
-class SegmentVector : public liber::rsync::SegmentAccessor {
+class SegmentVector : public coral::rsync::SegmentAccessor {
 public:
 
   SegmentVector();
@@ -50,5 +50,5 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 

@@ -45,7 +45,7 @@
 #include "Timestamp.h"
 
 
-namespace liber {
+namespace coral {
 
 template<int KeySize, typename Type>
 class HashTable {

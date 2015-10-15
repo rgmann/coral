@@ -35,8 +35,8 @@
 #include "Log.h"
 #include "SegmentQueue.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 //----------------------------------------------------------------------------
 SegmentQueue::SegmentQueue()

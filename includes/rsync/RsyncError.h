@@ -35,7 +35,7 @@
 #ifndef RSYNC_ERROR_H
 #define RSYNC_ERROR_H
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 enum RsyncError {

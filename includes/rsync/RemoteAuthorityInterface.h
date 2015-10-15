@@ -50,7 +50,7 @@
 #include "InstructionQueue.h"
 #include "SegmentQueue.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class RsyncPacketLite;
@@ -129,6 +129,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_REMOTE_AUTHORITY_INTERFACE_H

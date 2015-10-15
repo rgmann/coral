@@ -49,7 +49,7 @@
 #include "WorkerGroup.h"
 #include "RsyncJobCallback.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class RsyncJob;
@@ -85,7 +85,7 @@ public:
 
    RsyncError pull( const boost::filesystem::path& filepath );
 
-   liber::netapp::PacketSubscriber& subscriber();
+   coral::netapp::PacketSubscriber& subscriber();
 
 
 private:
@@ -97,7 +97,7 @@ private:
 };
 
 } // End namespace rsync
-} // End namesapce liber
+} // End namesapce coral
 
 #endif // RSYNC_NODE_H
 

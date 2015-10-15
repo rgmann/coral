@@ -7,7 +7,7 @@
 namespace tutorial {
 
 class SearchServiceServerStub :
-public liber::rpc::RpcServerResource {
+public coral::rpc::RpcServerResource {
 public:
 
   explicit SearchServiceServerStub();

@@ -34,7 +34,7 @@
 
 #include "InstructionReceiver.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 InstructionReceiver::InstructionReceiver()

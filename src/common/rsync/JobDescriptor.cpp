@@ -36,9 +36,9 @@
 #include "Log.h"
 #include "JobDescriptor.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 
 //-----------------------------------------------------------------------------
@@ -182,13 +182,13 @@ ui32 JobDescriptor::getMaximumChunkSize() const
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::pack(liber::netapp::SerialStream& ctor)
+void JobDescriptor::pack(coral::netapp::SerialStream& ctor)
 {
    const_cast<const JobDescriptor*>(this)->pack(ctor);
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::pack(liber::netapp::SerialStream& ctor) const
+void JobDescriptor::pack(coral::netapp::SerialStream& ctor) const
 {
    if ( isValid() )
    {
@@ -207,7 +207,7 @@ void JobDescriptor::pack(liber::netapp::SerialStream& ctor) const
 }
 
 //-----------------------------------------------------------------------------
-bool JobDescriptor::unpack(liber::netapp::SerialStream& dtor)
+bool JobDescriptor::unpack(coral::netapp::SerialStream& dtor)
 {
    if ( dtor.read( limits_.segment_size_bytes ) == false )
    {

@@ -48,7 +48,7 @@
 #include "BaseTypes.h"
 // #include "CountingSem.h"
 
-namespace liber  {
+namespace coral  {
 namespace log    {
 
    // Console field configuration options:
@@ -145,7 +145,7 @@ namespace log    {
    typedef  boost::shared_ptr<LogMessage> LogMessagePtr;
 
 
-   class Logger : public liber::concurrency::IThread {
+   class Logger : public coral::concurrency::IThread {
    public:
 
       ///
@@ -289,7 +289,7 @@ namespace log    {
    /// Wait for all messages preceding the call to flush to be written to the
    /// console.
    ///
-   void flush( i32 timeout_ms = liber::thread::Semaphore::SemWaitForever );
+   void flush( i32 timeout_ms = coral::thread::Semaphore::SemWaitForever );
 
    void print(LogLevel level, const char* format, va_list arg);
    void raw(const char* format, ...);
@@ -300,6 +300,6 @@ namespace log    {
    void mem_dump(const char* header, const char* pData, ui32 length, ui32 max_line_length = 16);
 
 } // End of namespace log
-} // End of namespace liber
+} // End of namespace coral
 
 #endif // LOG_H

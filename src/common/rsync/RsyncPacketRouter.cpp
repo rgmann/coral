@@ -36,9 +36,9 @@
 #include "RsyncPacket.h"
 #include "RsyncPacketRouter.h"
 
-using namespace liber;
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::netapp;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 RsyncPacketReceiverHook::RsyncPacketReceiverHook()

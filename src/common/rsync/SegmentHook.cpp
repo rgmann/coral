@@ -34,7 +34,7 @@
 
 #include "SegmentHook.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 SegmentHook::SegmentHook()

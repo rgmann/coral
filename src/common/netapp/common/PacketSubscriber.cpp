@@ -38,7 +38,7 @@
 #include "PacketReceiver.h"
 #include "PacketSubscriber.h"
 
-using namespace liber::netapp;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 PacketSubscriber::PacketSubscriber()

@@ -37,8 +37,8 @@
 #include "ArgParser.h"
 #include "Log.h"
 
-using namespace liber;
-using namespace liber::cli;
+using namespace coral;
+using namespace coral::cli;
 
 //------------------------------------------------------------------------------
 ArgParser::ArgParser()

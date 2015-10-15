@@ -36,8 +36,8 @@
 #include "Log.h"
 #include "RpcMarshalledCall.h"
 
-using namespace liber::rpc;
-using namespace liber::thread;
+using namespace coral::rpc;
+using namespace coral::thread;
 
 
 //-----------------------------------------------------------------------------

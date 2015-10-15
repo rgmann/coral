@@ -38,7 +38,7 @@
 #include "Queue.h"
 #include "SegmentReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class SegmentQueue : public SegmentReceiver {
@@ -63,6 +63,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_SEGMENT_QUEUE_H

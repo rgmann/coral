@@ -37,10 +37,10 @@
 #include "RsyncPacket.h"
 #include "ByteOrder.h"
 
-using namespace liber;
-using namespace liber::net;
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::net;
+using namespace coral::netapp;
+using namespace coral::rsync;
 
 
 

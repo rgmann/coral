@@ -41,7 +41,7 @@
 #include "RsyncPacketSubscriber.h"
 #include "JobRequestCallback.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class RsyncJob;
@@ -119,6 +119,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_JOB_AGENT_H

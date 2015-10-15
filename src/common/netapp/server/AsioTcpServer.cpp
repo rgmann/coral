@@ -34,7 +34,7 @@
 
 #include "AsioTcpServer.h"
 
-using namespace liber::netapp;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 AsioTcpServer::AsioTcpServer(

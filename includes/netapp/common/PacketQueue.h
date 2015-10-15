@@ -38,7 +38,7 @@
 #include "Queue.h"
 #include "PacketReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 class PacketQueue : public PacketReceiver {
@@ -48,7 +48,7 @@ public:
   virtual ~PacketQueue();
 
   bool send( PacketContainer* pContainer );
-  PacketContainer* pop(int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
+  PacketContainer* pop(int nTimeoutMs = coral::thread::Semaphore::SemWaitForever);
 
 private:
 
@@ -57,6 +57,6 @@ private:
 };
 
 } // End namespace netapp
-} // End namespace liber
+} // End namespace coral
 
 #endif // PACKET_QUEUE_H

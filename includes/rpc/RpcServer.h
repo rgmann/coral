@@ -41,18 +41,18 @@
 #include "RpcServerResource.h"
 #include "PacketSubscriber.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
-class RpcServer : public liber::netapp::PacketSubscriber {
+class RpcServer : public coral::netapp::PacketSubscriber {
 public:
 
-  RpcServer( liber::netapp::DestinationID client_destination_id );
+  RpcServer( coral::netapp::DestinationID client_destination_id );
 
   bool registerResource( RpcServerResource* resource_ptr );
 
   bool processPacket(const RpcPacket* packet_ptr );
-  bool put( liber::netapp::DestinationID, const void* data_ptr, ui32 length );
+  bool put( coral::netapp::DestinationID, const void* data_ptr, ui32 length );
 
 private:
 
@@ -66,7 +66,7 @@ private:
 
   ResourceMap resources_;
 
-  liber::netapp::DestinationID client_destination_id_;
+  coral::netapp::DestinationID client_destination_id_;
 };
 
 }}

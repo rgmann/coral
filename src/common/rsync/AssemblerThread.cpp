@@ -40,9 +40,9 @@
 #include "FileSystemInterface.h"
 #include "AssemblerThread.h"
 
-using namespace liber;
-using namespace liber::concurrency;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::concurrency;
+using namespace coral::rsync;
 
 //----------------------------------------------------------------------------
 AssemblerThread::AssemblerThread( JobAgentPairQueue& queue )

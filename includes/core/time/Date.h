@@ -40,7 +40,7 @@
 #include "BaseTypes.h"
 #include "Timestamp.h"
 
-namespace liber {
+namespace coral {
 
 class Date {
 public:
@@ -104,5 +104,5 @@ private:
    struct tm   myLocalTime;
 };
 
-} // namespace liber
+} // namespace coral
 #endif // DATE_H

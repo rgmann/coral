@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project( librpc )
+project( libcoral_rpc )
 
 find_package( Boost 1.46 REQUIRED )
 
@@ -45,4 +45,4 @@ set( SOURCES
 "${COMMON_SOURCE}/${LIBNAME}/RpcSupervisor.cpp"
 )
 
-add_library( rpc STATIC ${SOURCES} )
+add_library( libcoral_rpc STATIC ${SOURCES} )

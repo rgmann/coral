@@ -38,7 +38,7 @@
 #include <string>
 #include <vector>
 
-namespace liber {
+namespace coral {
 namespace cli {
 
 typedef std::vector<std::string> ArgumentList;
@@ -94,7 +94,7 @@ private:
 };
 
 } // namespace cli
-} // namespace liber
+} // namespace coral
 
 #endif // INTERACTIVE_COMMAND_H
 

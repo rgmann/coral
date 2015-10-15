@@ -44,7 +44,7 @@
 #include "LocalAuthorityInterface.h"
 #include "InstructionHook.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class JobDescriptor;
@@ -85,6 +85,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_REMOTE_AUTHORITY_SERVICE_H

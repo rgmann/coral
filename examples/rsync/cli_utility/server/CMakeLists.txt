@@ -31,8 +31,8 @@ link_directories( ${BASE_DIR}/lib/rsync )
 add_executable( rsync_server rsync_server.cpp )
 
 
-target_link_libraries( rsync_server rsync )
-target_link_libraries( rsync_server liber_core )
+target_link_libraries( rsync_server coral_rsync )
+target_link_libraries( rsync_server coral_core )
 target_link_libraries( rsync_server netapp_common )
 target_link_libraries( rsync_server netapp_server )
 target_link_libraries( rsync_server ${Boost_LIBRARIES})

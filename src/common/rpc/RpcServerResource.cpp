@@ -40,8 +40,8 @@
 #include "Timestamp.h"
 #include "RpcServerResource.h"
 
-using namespace liber;
-using namespace liber::rpc;
+using namespace coral;
+using namespace coral::rpc;
 
 //------------------------------------------------------------------------------
 RpcServerResource::RpcServerResource(const std::string &name)

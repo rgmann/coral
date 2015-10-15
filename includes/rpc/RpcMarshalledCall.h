@@ -40,7 +40,7 @@
 #include "RpcObject.h"
 #include "RpcPacket.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
 class RpcMarshalledCall {

@@ -43,7 +43,7 @@
 #include <boost/uuid/uuid.hpp>
 
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
 class RpcClientResource {

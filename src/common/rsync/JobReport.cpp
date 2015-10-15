@@ -37,9 +37,9 @@
 #include "Log.h"
 #include "JobReport.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 void serialize_ts( SerialStream& ctor, const Timestamp& ts )
 {
@@ -95,13 +95,13 @@ void SegmentationReport::print(std::ostream& stream, ui8 tab_size ) const
 }
 
 //----------------------------------------------------------------------------
-void SegmentationReport::pack(liber::netapp::SerialStream& ctor)
+void SegmentationReport::pack(coral::netapp::SerialStream& ctor)
 {
    const_cast<const SegmentationReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
-void SegmentationReport::pack( liber::netapp::SerialStream& ctor ) const
+void SegmentationReport::pack( coral::netapp::SerialStream& ctor ) const
 {
    ctor.write((ui32)status);
    ctor.write(complete);
@@ -374,7 +374,7 @@ void DestinationReport::pack( SerialStream& ctor ) const
 }
 
 //----------------------------------------------------------------------------
-bool DestinationReport::unpack(liber::netapp::SerialStream& dtor)
+bool DestinationReport::unpack(coral::netapp::SerialStream& dtor)
 {
    if (segmentation.deserialize(dtor) == false)
    {
@@ -400,14 +400,14 @@ void SourceReport::pack(SerialStream& ctor)
 }
 
 //----------------------------------------------------------------------------
-void SourceReport::pack(liber::netapp::SerialStream& ctor) const
+void SourceReport::pack(coral::netapp::SerialStream& ctor) const
 {
    segmentation.serialize(ctor);
    authority.serialize(ctor);
 }
 
 //----------------------------------------------------------------------------
-bool SourceReport::unpack(liber::netapp::SerialStream& dtor)
+bool SourceReport::unpack(coral::netapp::SerialStream& dtor)
 {
    if (segmentation.deserialize(dtor) == false)
    {
@@ -466,7 +466,7 @@ void JobReport::pack(SerialStream& ctor)
 }
 
 //----------------------------------------------------------------------------
-void JobReport::pack(liber::netapp::SerialStream& ctor) const
+void JobReport::pack(coral::netapp::SerialStream& ctor) const
 {
    destination.segmentation.serialize(ctor);
    destination.assembly.serialize(ctor);
@@ -475,7 +475,7 @@ void JobReport::pack(liber::netapp::SerialStream& ctor) const
 }
 
 //----------------------------------------------------------------------------
-bool JobReport::unpack(liber::netapp::SerialStream& dtor)
+bool JobReport::unpack(coral::netapp::SerialStream& dtor)
 {
    if (destination.deserialize(dtor) == false)
    {

@@ -37,7 +37,7 @@
 
 #include "Segment.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 // Common interface expected by Segmenter. Encapsulates output of segmentation
@@ -63,6 +63,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // SEGMENT_RECEIVER_H

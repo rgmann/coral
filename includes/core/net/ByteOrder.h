@@ -37,7 +37,7 @@
 
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 namespace net {
 
 namespace ByteOrder {

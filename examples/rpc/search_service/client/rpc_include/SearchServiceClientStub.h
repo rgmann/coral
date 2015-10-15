@@ -7,14 +7,14 @@
 namespace tutorial {
 
 class SearchServiceClientStub
-: public liber::rpc::RpcClientResource {
+: public coral::rpc::RpcClientResource {
 public:
 
-  explicit SearchServiceClientStub(liber::rpc::RpcClient &client);
+  explicit SearchServiceClientStub(coral::rpc::RpcClient &client);
   ~SearchServiceClientStub();
 
-  void Search(const Person& request, Person_PhoneNumber& response, liber::rpc::AsyncRpcSupervisor* pSupervisor = NULL)
-         throw (liber::rpc::RpcException);
+  void Search(const Person& request, Person_PhoneNumber& response, coral::rpc::AsyncRpcSupervisor* pSupervisor = NULL)
+         throw (coral::rpc::RpcException);
 
 }; // End SearchServiceClientStub
 

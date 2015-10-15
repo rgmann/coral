@@ -37,7 +37,7 @@
 
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 
@@ -224,7 +224,7 @@ private:
 };
 
 } // end namespace netapp
-} // end namespace liber
+} // end namespace coral
 
 
 #endif // GENERIC_PACKET_H

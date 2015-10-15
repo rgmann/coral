@@ -38,8 +38,8 @@
 #define  ARG_NAME_INDEX     0
 #define  ARG_VALUE_INDEX    1
 
-using namespace liber;
-using namespace liber::cli;
+using namespace coral;
+using namespace coral::cli;
 
 //------------------------------------------------------------------------------
 Argument::Argument()

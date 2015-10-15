@@ -44,7 +44,7 @@
 #include "InstanceWrapper.h"
 #include "Md5Hash.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
 class RpcServiceAction {

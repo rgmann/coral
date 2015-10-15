@@ -41,8 +41,8 @@
 #include "JobReport.h"
 #include "Segmenter.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 bool Segmenter::processFullStride(

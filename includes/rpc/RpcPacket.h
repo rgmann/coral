@@ -38,10 +38,10 @@
 #include "GenericPacket.h"
 #include "RpcObject.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
-class RpcPacket : public liber::netapp::GenericPacket {
+class RpcPacket : public coral::netapp::GenericPacket {
 public:
 
    static const ui32 kRpcMarkerSize = 7;
@@ -79,11 +79,11 @@ protected:
 
 private:
 
-   typedef liber::netapp::GenericPacket inherited;
+   typedef coral::netapp::GenericPacket inherited;
 
 };
 
 } // end namespace rpc
-} // end namespace liber
+} // end namespace coral
 
 #endif // RPC_PACKET_H

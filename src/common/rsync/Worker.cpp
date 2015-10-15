@@ -35,7 +35,7 @@
 #include "RsyncJobCallback.h"
 #include "Worker.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 Worker::Worker(

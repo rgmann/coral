@@ -42,10 +42,10 @@
 #define  DEFAULT_SEGMENT_TIMEOUT_MS    ( 10000 )
 #define  JOB_TIMEOUT_MS                ( 2000 )
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::thread;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::thread;
+using namespace coral::netapp;
 
 
 //----------------------------------------------------------------------------
@@ -71,13 +71,13 @@ void RemoteAuthorityInterface::ActiveJob::setQueryResponse(
       else
       {
          query_response_ = kRsyncRemoteQueryError;
-         liber::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Invalid UUID\n");
+         coral::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Invalid UUID\n");
       }
    }
    else
    {
       query_response_ = kRsyncRemoteQueryError;
-      liber::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Failed to deserialize\n");
+      coral::log::error("RemoteAuthorityInterface::ActiveJob::setQueryResponse: Failed to deserialize\n");
    }
 
    job_start_signal_.give();
@@ -127,7 +127,7 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
       RsyncPacket::RsyncAuthorityInterface, this,
       kSubscriberModeReadWrite ) == false )
    {
-      liber::log::error("RemoteAuthorityInterface::process: FAILED to register\n");
+      coral::log::error("RemoteAuthorityInterface::process: FAILED to register\n");
    }
 
    // Send the JobDescriptor and then wait for an acknowledgement from the
@@ -144,7 +144,7 @@ void RemoteAuthorityInterface::process( RsyncJob* job_ptr )
    if ( flushSegments( job_ptr->segments(), ( process_status == kRsyncSuccess ) ) == false )
    {
       process_status = kRsyncCommError;
-      liber::log::debug("RemoteAuthorityInterface::process: kRsyncCommError\n");
+      coral::log::debug("RemoteAuthorityInterface::process: kRsyncCommError\n");
    }
 
    // If the remote Authority job was successfully started,

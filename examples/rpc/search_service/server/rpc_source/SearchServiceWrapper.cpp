@@ -2,11 +2,11 @@
 #include "tutorial.pb.h"
 #include "SearchServiceWrapper.h"
 
-using namespace liber::rpc;
+using namespace coral::rpc;
 using namespace tutorial;
 
 SearchServiceSearchAction::SearchServiceSearchAction()
-   : liber::rpc::RpcServiceAction( "Search" )
+   : coral::rpc::RpcServiceAction( "Search" )
 {
 }
 
@@ -35,7 +35,7 @@ void SearchServiceSearchAction::operator() ( const std::string& request, std::st
 }
 
 void SearchServiceSearchAction::Search(
-   const Person& request, Person_PhoneNumber& response, liber::rpc::RpcException& e)
+   const Person& request, Person_PhoneNumber& response, coral::rpc::RpcException& e)
 {
    e.id = UnimplementedAction;
    e.message = "SearchServiceWrapper::Search has not been implemented.";

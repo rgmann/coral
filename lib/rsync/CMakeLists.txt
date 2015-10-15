@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project( librsync )
+project( libcoral_rsync )
 
 find_package( Boost 1.46 REQUIRED )
 
@@ -70,5 +70,5 @@ set( SOURCES
 "${COMMON_SOURCE}/${LIBNAME}/JobRequestCallback.cpp"
 )
 
-add_library( rsync STATIC ${SOURCES} )
-#add_library( rsync SHARED ${SOURCES} )
+add_library( coral_rsync STATIC ${SOURCES} )
+#add_library( coral_rsync SHARED ${SOURCES} )

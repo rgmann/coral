@@ -37,11 +37,11 @@
 
 #include "InstructionReceiver.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 // Common interface expected by Segmenter.
-class InstructionHook : public liber::rsync::InstructionReceiver {
+class InstructionHook : public coral::rsync::InstructionReceiver {
 public:
 
   InstructionHook();
@@ -60,6 +60,6 @@ protected:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // INSTRUCTION_HOOK_H

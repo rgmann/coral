@@ -37,7 +37,7 @@
 #include "Log.h"
 #include "CircularBuffer.h"
 
-using namespace liber;
+using namespace coral;
 
 //------------------------------------------------------------------------------
 CircularBuffer::CircularBuffer()

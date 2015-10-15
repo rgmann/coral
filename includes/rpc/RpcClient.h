@@ -43,19 +43,19 @@
 #include "RpcMarshalledCall.h"
 #include "PacketSubscriber.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
-class RpcClient : public liber::netapp::PacketSubscriber {
+class RpcClient : public coral::netapp::PacketSubscriber {
 public:
 
-   RpcClient( liber::netapp::DestinationID server_destination_id );
+   RpcClient( coral::netapp::DestinationID server_destination_id );
    
    ~RpcClient();
 
    RpcMarshalledCall* invokeRpc(const RpcObject &object);
 
-   bool put( liber::netapp::DestinationID destination_id, const void* data_ptr, ui32 length );
+   bool put( coral::netapp::DestinationID destination_id, const void* data_ptr, ui32 length );
 
 private:
 
@@ -72,7 +72,7 @@ private:
    typedef std::map<boost::uuids::uuid, RpcMarshalledCall*> CallMap;
    CallMap mRpcMap;
 
-   liber::netapp::DestinationID server_destination_id_;
+   coral::netapp::DestinationID server_destination_id_;
 };
 
 }}

@@ -37,10 +37,10 @@
 
 #include "GenericPacket.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
-class NetAppPacket : public liber::netapp::GenericPacket {
+class NetAppPacket : public coral::netapp::GenericPacket {
 public:
 
   struct __attribute__((__packed__)) Data {

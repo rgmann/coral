@@ -36,7 +36,7 @@
 #include <arpa/inet.h>
 #include "ByteOrder.h"
 
-using namespace liber::net;
+using namespace coral::net;
 
 #define NET_SWAP_IP(type) \
 void ByteOrder::NetSwapInPlace(type& val) \

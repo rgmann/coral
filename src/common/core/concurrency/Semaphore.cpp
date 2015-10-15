@@ -36,7 +36,7 @@
 #include <boost/thread/locks.hpp>
 #include "Semaphore.h"
 
-using namespace liber::thread;
+using namespace coral::thread;
 
 //------------------------------------------------------------------------------
 Semaphore::Semaphore( i32 start, i32 max )

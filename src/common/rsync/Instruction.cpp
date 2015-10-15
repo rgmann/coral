@@ -38,8 +38,8 @@
 
 #undef DEBUG_RSYNC_INSTRUCTIONS
 
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 const ui32 BeginInstruction::Type;
 const ui32 SegmentInstruction::Type;
@@ -253,7 +253,7 @@ void RawInstruction::dump()
 {
    if ( valid() )
    {
-      liber::log::mem_dump("", (const char*)data(), length() );
+      coral::log::mem_dump("", (const char*)data(), length() );
    }
 }
 
@@ -267,7 +267,7 @@ BeginInstruction::BeginInstruction( RawInstructionPtr instruction_ptr )
 }
 
 //-----------------------------------------------------------------------------
-BeginInstruction::BeginInstruction(liber::rsync::JobDescriptor& descriptor )
+BeginInstruction::BeginInstruction(coral::rsync::JobDescriptor& descriptor )
 :  Instruction( BeginInstruction::Type, RawInstructionPtr() )
 {
    std::string packed = descriptor.serialize();
@@ -279,7 +279,7 @@ BeginInstruction::BeginInstruction(liber::rsync::JobDescriptor& descriptor )
 }
 
 //-----------------------------------------------------------------------------
-bool BeginInstruction::descriptor( liber::rsync::JobDescriptor& descriptor )
+bool BeginInstruction::descriptor( coral::rsync::JobDescriptor& descriptor )
 {
    bool success = false;
 
@@ -302,7 +302,7 @@ SegmentInstruction::SegmentInstruction( RawInstructionPtr instruction_ptr )
 }
 
 //-----------------------------------------------------------------------------
-SegmentInstruction::SegmentInstruction( liber::rsync::Segment::ID id )
+SegmentInstruction::SegmentInstruction( coral::rsync::Segment::ID id )
 : Instruction( SegmentInstruction::Type, RawInstructionPtr() )
 {
    instruction_ptr_ =
@@ -312,7 +312,7 @@ SegmentInstruction::SegmentInstruction( liber::rsync::Segment::ID id )
 }
 
 // //-----------------------------------------------------------------------------
-liber::rsync::Segment::ID SegmentInstruction::segmentId() const
+coral::rsync::Segment::ID SegmentInstruction::segmentId() const
 {
    Segment::ID segment_id = -1;
 

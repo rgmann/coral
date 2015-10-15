@@ -42,7 +42,7 @@
 #include "Serializable.h"
 
 
-namespace liber {
+namespace coral {
 
 class CircularBuffer;
   
@@ -67,7 +67,7 @@ struct Adler32Checksum {
 };
 
 
-class Segment : public liber::netapp::Serializable {
+class Segment : public coral::netapp::Serializable {
 public:
 
   typedef i32 ID;
@@ -122,9 +122,9 @@ protected:
 
   bool resize( ui32 virtual_segment_size );
 
-  void pack(liber::netapp::SerialStream&) const;
-  void pack(liber::netapp::SerialStream&);
-  bool unpack(liber::netapp::SerialStream& dtor);
+  void pack(coral::netapp::SerialStream&) const;
+  void pack(coral::netapp::SerialStream&);
+  bool unpack(coral::netapp::SerialStream& dtor);
 
 private:
 
@@ -192,7 +192,7 @@ public:
 
 
 } // End of namespace rsync
-} // End of namespace liber
+} // End of namespace coral
 
 
 #endif // RSYNC_SEGMENT_H

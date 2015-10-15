@@ -39,7 +39,7 @@
 #include <boost/filesystem.hpp>
 #include "Authority.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class Segment;
@@ -81,6 +81,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_LOCAL_AUTHORITY_INTERFACE_H

@@ -42,7 +42,7 @@
 #include "SegmentHook.h"
 #include "CircularBuffer.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class Instruction;
@@ -69,7 +69,7 @@ public:
     SourceReport&         report
   );
 
-  liber::HashTable<16, Segment*>& hash();
+  coral::HashTable<16, Segment*>& hash();
 
 private:
 
@@ -89,7 +89,7 @@ private:
   //
   // Hash of segments received from the Segmenter
   //
-  liber::HashTable<16, Segment*>  segment_hash_;
+  coral::HashTable<16, Segment*>  segment_hash_;
 
   //
   // Number of skipped Segments
@@ -116,6 +116,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_AUTHORITY_H

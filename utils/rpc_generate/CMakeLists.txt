@@ -30,7 +30,7 @@ add_executable(
   rpc_generator.cpp
 )
 
-target_link_libraries( ${TARGET_NAME} liber_core )
+target_link_libraries( ${TARGET_NAME} coral_core )
 target_link_libraries( ${TARGET_NAME} ${PROTOBUF_LIBRARIES} )
 target_link_libraries( ${TARGET_NAME} protoc )
 target_link_libraries( ${TARGET_NAME} pthread )

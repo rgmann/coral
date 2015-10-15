@@ -40,10 +40,10 @@
 #include "Serializable.h"
 #include "RpcCommon.h"
 
-namespace liber {
+namespace coral {
 namespace rpc {
 
-class TraceFrame : public liber::netapp::Serializable {
+class TraceFrame : public coral::netapp::Serializable {
 public:
 
    std::string mClassName;
@@ -64,8 +64,8 @@ protected:
    /**
     * Serialize the Trace Frame to a binary string.
     */
-   void pack(liber::netapp::SerialStream&);
-   void pack(liber::netapp::SerialStream&) const;
+   void pack(coral::netapp::SerialStream&);
+   void pack(coral::netapp::SerialStream&) const;
 
    /**
     * Deserialize a Trace Frame from a binary string.
@@ -73,11 +73,11 @@ protected:
     *
     * @return bool True if successful; false otherwise.
     */
-   bool unpack(liber::netapp::SerialStream&);
+   bool unpack(coral::netapp::SerialStream&);
 };
 
 
-class RpcException : public liber::netapp::Serializable {
+class RpcException : public coral::netapp::Serializable {
 public:
 
    RpcException();
@@ -111,9 +111,9 @@ public:
 
 protected:
 
-  void pack(liber::netapp::SerialStream&);
-  void pack(liber::netapp::SerialStream&) const;
-  bool unpack(liber::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&);
+  void pack(coral::netapp::SerialStream&) const;
+  bool unpack(coral::netapp::SerialStream&);
 
 private:
 

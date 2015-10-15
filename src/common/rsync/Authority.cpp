@@ -41,8 +41,8 @@
 #include "InstructionReceiver.h"
 #include "Authority.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 
 //-----------------------------------------------------------------------------

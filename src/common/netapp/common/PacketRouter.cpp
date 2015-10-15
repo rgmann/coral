@@ -37,8 +37,8 @@
 #include "PacketReceiver.h"
 #include "PacketRouter.h"
 
-using namespace liber;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 PacketRouter::PacketRouter(PacketReceiver* pReceiver)

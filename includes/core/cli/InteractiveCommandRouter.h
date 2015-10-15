@@ -40,7 +40,7 @@
 #include "BaseTypes.h"
 #include "InteractiveCommand.h"
 
-namespace liber {
+namespace coral {
 namespace cli {
 
 class InteractiveCommandRouter {
@@ -102,6 +102,6 @@ private:
 };
 
 } // namespace cli
-} // namespace liber
+} // namespace coral
 
 #endif // INTERACTIVE_COMMAND_ROUTER_H

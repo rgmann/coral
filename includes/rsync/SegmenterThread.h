@@ -39,12 +39,12 @@
 // #include "Queue.h"
 #include "WorkerThreadTypes.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class RsyncJob;
 
-class SegmenterThread : public liber::concurrency::IThread {
+class SegmenterThread : public coral::concurrency::IThread {
 public:
 
   SegmenterThread( JobAgentPairQueue& queue );
@@ -70,6 +70,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_SEGMENTER_THREAD_H

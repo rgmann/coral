@@ -11,8 +11,8 @@
 
 #define  RSYNC_SUB_ID  ( 1 )
 
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral::netapp;
+using namespace coral::rsync;
 using namespace rsync_test_helper;
 
 class TestCallback : public RsyncJobCallback {
@@ -22,11 +22,11 @@ public:
 
   void call(const JobDescriptor& job, const JobReport& report)
   {
-    liber::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
+    coral::log::status("%s: Completed %s\n", mpName, job.getDestination().path().string().c_str());
 
     // if ( report.source.authority.complete && (report.source.authority.status != kRsyncSuccess ))
     // {
-    //   liber::log::status("%s Report:\n%s\n", mpName, report.toString().c_str() );
+    //   coral::log::status("%s Report:\n%s\n", mpName, report.toString().c_str() );
     // }
 
     mSem.give();
@@ -59,7 +59,7 @@ public:
 
     void SetUp()
     {
-      liber::log::level( liber::log::Warn );
+      coral::log::level( coral::log::Warn );
 
       DeleteContents( "./test_root/client" );
       DeleteContents( "./test_root/server" );

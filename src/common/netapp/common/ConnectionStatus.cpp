@@ -35,8 +35,8 @@
 #include "ConnectionStatus.h"
 #include "ByteOrder.h"
 
-using namespace liber::netapp;
-using namespace liber::net;
+using namespace coral::netapp;
+using namespace coral::net;
 
 //-----------------------------------------------------------------------------
 KeepalivePacket::KeepalivePacket()

@@ -39,7 +39,7 @@
 #include "GenericPacket.h"
 #include "PacketSubscriber.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 

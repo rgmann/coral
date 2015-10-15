@@ -38,7 +38,7 @@
 #include <vector>
 #include "Worker.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class WorkerGroup {
@@ -63,6 +63,6 @@ private:
 };
 
 } // namespace rsync
-} // namesapce liber
+} // namesapce coral
 
 #endif // WORKER_GROUP_H

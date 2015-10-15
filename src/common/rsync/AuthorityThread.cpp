@@ -37,10 +37,10 @@
 #include "AuthorityThread.h"
 #include "PacketRouter.h"
 
-using namespace liber;
-using namespace liber::concurrency;
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::concurrency;
+using namespace coral::netapp;
+using namespace coral::rsync;
 
 //----------------------------------------------------------------------------
 AuthorityThread::AuthorityThread( JobAgentPairQueue& queue )

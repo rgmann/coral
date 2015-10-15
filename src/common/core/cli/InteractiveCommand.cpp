@@ -34,7 +34,7 @@
 
 #include "InteractiveCommand.h"
 
-using namespace liber::cli;
+using namespace coral::cli;
 
 //-----------------------------------------------------------------------------
 InteractiveCommand::InteractiveCommand(

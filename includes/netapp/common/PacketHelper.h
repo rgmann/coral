@@ -40,7 +40,7 @@
 #include <sstream>
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 enum ByteOrder {
@@ -135,7 +135,7 @@ protected:
 };
 
 } // End namespace netapp
-} // End namespace liber
+} // End namespace coral
 
 #endif // PACKET_HELPER_H
 

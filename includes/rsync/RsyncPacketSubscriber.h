@@ -38,12 +38,12 @@
 
 #include "PacketSubscriber.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class RsyncJob;
 
-class RsyncPacketSubscriber : public liber::netapp::PacketSubscriber {
+class RsyncPacketSubscriber : public coral::netapp::PacketSubscriber {
 public:
 
    RsyncPacketSubscriber( bool require_active_job = true );
@@ -56,7 +56,7 @@ public:
    // RsyncPacketSubscriber expects the first sixteen bytes to be occupied by
    // the job UUID.
    //
-   bool put( liber::netapp::DestinationID destination_id, const void* data_ptr, ui32 length );
+   bool put( coral::netapp::DestinationID destination_id, const void* data_ptr, ui32 length );
 
 
 protected:
@@ -72,7 +72,7 @@ protected:
 
    boost::mutex& activeJobLock();
 
-   bool sendTo( liber::netapp::DestinationID destination_id, int type, const void* data_ptr, ui32 length );
+   bool sendTo( coral::netapp::DestinationID destination_id, int type, const void* data_ptr, ui32 length );
 
    virtual bool processPacket( const void* data_ptr, ui32 length ) = 0;
 

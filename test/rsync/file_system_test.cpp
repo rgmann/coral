@@ -8,8 +8,8 @@
 #include "gtest/gtest.h"
 #include "rsync_test_helper.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 using namespace rsync_test_helper;
 
 class FileSystemInterfaceTest : public ::testing::Test {
@@ -28,13 +28,13 @@ protected:
 
    void SetUp()
    {
-      liber::log::level( liber::log::Verbose );
+      coral::log::level( coral::log::Verbose );
       DeleteContents( TEST_ROOT.c_str() );
    }
 
    void TearDown()
    {
-      liber::log::flush();
+      coral::log::flush();
    }
 };
 

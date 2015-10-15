@@ -35,9 +35,9 @@
 #include "AsyncRpcSupervisor.h"
 #include "Log.h"
 
-using namespace liber;
-using namespace liber::rpc;
-using namespace liber::concurrency;
+using namespace coral;
+using namespace coral::rpc;
+using namespace coral::concurrency;
 
 //----------------------------------------------------------------------------
 AsyncRpcSupervisor::AsyncRpcSupervisor()

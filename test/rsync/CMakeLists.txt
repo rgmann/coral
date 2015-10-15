@@ -40,8 +40,8 @@ link_directories( ../../lib/rsync )
 
 add_executable( ${TEST_TARGET} ${TEST_TARGET}.cpp )
 
-target_link_libraries( ${TEST_TARGET} rsync )
-target_link_libraries( ${TEST_TARGET} liber_core )
+target_link_libraries( ${TEST_TARGET} coral_rsync )
+target_link_libraries( ${TEST_TARGET} coral_core )
 target_link_libraries( ${TEST_TARGET} netapp_common )
 target_link_libraries( ${TEST_TARGET} ${GTEST_BOTH_LIBRARIES})
 target_link_libraries( ${TEST_TARGET} ${Boost_LIBRARIES} )

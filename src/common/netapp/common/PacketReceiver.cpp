@@ -36,7 +36,7 @@
 #include "GenericPacket.h"
 #include "PacketReceiver.h"
 
-using namespace liber::netapp;
+using namespace coral::netapp;
 
 //----------------------------------------------------------------------------
 PacketContainer::PacketContainer()

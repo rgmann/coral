@@ -34,7 +34,7 @@
 
 #include "InstructionHook.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 InstructionHook::InstructionHook()

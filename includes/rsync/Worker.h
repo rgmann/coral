@@ -44,7 +44,7 @@
 #include "AssemblerThread.h"
 #include "RemoteAuthorityServiceThread.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class Worker {

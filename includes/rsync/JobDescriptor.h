@@ -43,7 +43,7 @@
 #include "ResourcePath.h"
 
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 struct JobLimits {
@@ -58,7 +58,7 @@ struct JobLimits {
    {}
 };
 
-class JobDescriptor : public liber::netapp::Serializable {
+class JobDescriptor : public coral::netapp::Serializable {
 public:
 
    JobDescriptor();
@@ -95,9 +95,9 @@ public:
 
 protected:
 
-   void  pack( liber::netapp::SerialStream& ctor );
-   void  pack( liber::netapp::SerialStream& ctor ) const;
-   bool  unpack( liber::netapp::SerialStream& dtor );
+   void  pack( coral::netapp::SerialStream& ctor );
+   void  pack( coral::netapp::SerialStream& ctor ) const;
+   bool  unpack( coral::netapp::SerialStream& dtor );
 
 private:
 
@@ -112,6 +112,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_JOB_DESCRIPTOR_H

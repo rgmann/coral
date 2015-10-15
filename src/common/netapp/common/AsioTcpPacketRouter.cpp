@@ -36,8 +36,8 @@
 #include "AsioTcpPacketRouter.h"
 
 using boost::asio::ip::tcp;
-using namespace liber;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 AsioTcpPacketRouter::AsioTcpPacketRouter( boost::asio::io_service& io_service )
@@ -212,7 +212,7 @@ void AsioTcpPacketRouter::writePacket( const PacketContainer* container_ptr )
          container_ptr->packet_ptr_->basePtr(),
          container_ptr->packet_ptr_->allocatedSize() );
 
-   // liber::log::status("write_packet:\n  header.length = %d\n  header.type = %d\n",
+   // coral::log::status("write_packet:\n  header.length = %d\n  header.type = %d\n",
    //       packet_ptr->data()->length,
    //       packet_ptr->data()->type );
 
@@ -231,7 +231,7 @@ void AsioTcpPacketRouter::doWrite( NetAppPacket* packet_ptr )
    write_packets_.push_back( packet_ptr );
    if ( !write_in_progress )
    {
-      // liber::log::status("do_write:\n  header.length = %d\n  header.type = %d\n",
+      // coral::log::status("do_write:\n  header.length = %d\n  header.type = %d\n",
       //     write_packets_.front()->data()->length,
       //     write_packets_.front()->data()->type );
       boost::asio::async_write( socket_,

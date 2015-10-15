@@ -37,10 +37,10 @@
 
 #include "Semaphore.h"
 
-class BinarySem : public liber::thread::Semaphore {
+class BinarySem : public coral::thread::Semaphore {
 public:
    
-  BinarySem() : liber::thread::Semaphore( 0, 1 ) {};
+  BinarySem() : coral::thread::Semaphore( 0, 1 ) {};
 
 };
 

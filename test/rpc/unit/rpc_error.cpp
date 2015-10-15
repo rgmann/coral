@@ -31,10 +31,10 @@ void print_summary()
 
 int main()
 {
-   liber::rpc::RpcError srcError;
-   liber::rpc::RpcError dstError;
+   coral::rpc::RpcError srcError;
+   coral::rpc::RpcError dstError;
 
-   srcError.reporter = liber::rpc::RpcError::Server;
+   srcError.reporter = coral::rpc::RpcError::Server;
    srcError.exceptionId = InvalidClassname;
    srcError.message = "Invalid class name.";
 
@@ -43,7 +43,7 @@ int main()
    ASSERT_EQUAL(bool, true, dstError.deserialize(data));
 
    std::cout << "data.size() = " << data.size() << std::endl;
-   ASSERT_EQUAL(i32, liber::rpc::RpcError::Server, dstError.reporter);
+   ASSERT_EQUAL(i32, coral::rpc::RpcError::Server, dstError.reporter);
    ASSERT_EQUAL(i32, InvalidClassname, dstError.exceptionId);
    ASSERT_EQUAL(std::string, "Invalid class name.", dstError.message);
 

@@ -49,7 +49,7 @@
 #include "PacketRouter.h"
 #include "PacketReceiverHook.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 class AsioTcpPacketRouter :
@@ -114,7 +114,7 @@ private:
 typedef boost::shared_ptr<AsioTcpPacketRouter> AsioTcpPacketRouterPtr;
 
 } // namespace netapp
-} // namespace liber
+} // namespace coral
 
 
 #endif // ASIO_TCP_PACKET_ROUTER_H

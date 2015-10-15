@@ -41,8 +41,8 @@
 
 #define  DEFAULT_SEGMENT_TIMEOUT_MS     (100000)
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 //----------------------------------------------------------------------------
 LocalAuthorityInterface::LocalAuthorityInterface()

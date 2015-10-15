@@ -34,7 +34,7 @@
 
 #include "WorkerGroup.h"
 
-using namespace liber::rsync;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 WorkerGroup::WorkerGroup( int worker_count )

@@ -39,7 +39,7 @@
 #include <boost/thread/condition_variable.hpp>
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 namespace thread {
 
 class Semaphore {

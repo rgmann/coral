@@ -37,7 +37,7 @@
 
 #include <boost/filesystem.hpp>
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class FileSystemInterface {
@@ -128,6 +128,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_FS_INTERFACE_H

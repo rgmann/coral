@@ -42,7 +42,7 @@
 #include "SegmentQueue.h"
 #include "InstructionQueue.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class FileSystemInterface;
@@ -71,7 +71,7 @@ public:
   void signalAllDone();
 
   bool done() const;
-  bool waitDone(int nTimeoutMs = liber::thread::Semaphore::SemWaitForever);
+  bool waitDone(int nTimeoutMs = coral::thread::Semaphore::SemWaitForever);
 
   RsyncPacketRouter& packetRouter(){ return router_; };
 
@@ -100,6 +100,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_JOB_H

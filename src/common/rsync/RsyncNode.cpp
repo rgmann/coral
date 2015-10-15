@@ -38,9 +38,9 @@
 #include "RsyncNode.h"
 #include "PacketRouter.h"
 
-using namespace liber;
-using namespace liber::netapp;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::netapp;
+using namespace coral::rsync;
 
 //----------------------------------------------------------------------------
 RsyncNode::RsyncNode(
@@ -54,11 +54,11 @@ RsyncNode::RsyncNode(
    bool subscribe_success = router_.subscribe(
       RsyncPacket::RsyncJobAgent,
       &job_agent_,
-      liber::netapp::kSubscriberModeReadWrite );
+      coral::netapp::kSubscriberModeReadWrite );
 
    if ( subscribe_success == false )
    {
-      liber::log::error(
+      coral::log::error(
          "RsyncNode: Failed to register JobAgent as packet subscriber!\n");
    }
 }

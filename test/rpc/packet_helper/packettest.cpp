@@ -1,7 +1,7 @@
 #include <iostream>
 #include "RpcObject.h"
 
-using namespace liber::rpc;
+using namespace coral::rpc;
 
 void traceframetest_run()
 {

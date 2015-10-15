@@ -41,7 +41,7 @@
 #include "PacketSubscriber.h"
 
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 // The RelayReceiverHook class simply receives PacketContainers from
@@ -125,6 +125,6 @@ private:
 
 
 } // End namespace netapp
-} // End namespace liber
+} // End namespace coral
 
 #endif // PACKET_RELAY_H

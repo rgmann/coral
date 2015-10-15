@@ -39,9 +39,9 @@
 #include "Segment.h"
 #include "CircularBuffer.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 struct PackedSegment {
   Segment::ID id;

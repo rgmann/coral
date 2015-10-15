@@ -37,8 +37,8 @@
 #include "JobAgent.h"
 #include "RemoteAuthorityServiceThread.h"
 
-using namespace liber;
-using namespace liber::rsync;
+using namespace coral;
+using namespace coral::rsync;
 
 //-----------------------------------------------------------------------------
 RemoteAuthorityServiceThread::RemoteAuthorityServiceThread( JobAgentPairQueue& queue )

@@ -38,7 +38,7 @@
 #include <string>
 #include "RsyncError.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class JobDescriptor;

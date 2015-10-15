@@ -31,8 +31,8 @@ void print_summary()
 
 int main()
 {
-   liber::rpc::RpcObject srcObject;
-   liber::rpc::RpcObject dstObject;
+   coral::rpc::RpcObject srcObject;
+   coral::rpc::RpcObject dstObject;
 
    srcObject.resource = "calculator";
    srcObject.action = "add";

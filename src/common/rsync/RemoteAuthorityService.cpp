@@ -42,9 +42,9 @@
 #include "RsyncPacketRouter.h"
 #include "RemoteAuthorityService.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 
 //-----------------------------------------------------------------------------
@@ -72,7 +72,7 @@ void RemoteAuthorityService::process( RsyncJob* job_ptr )
    bool subscribed = job_ptr->packetRouter().subscribe(
       RsyncPacket::RsyncAuthorityService,
       this,
-      liber::netapp::kSubscriberModeReadWrite
+      coral::netapp::kSubscriberModeReadWrite
    );
 
    if ( subscribed )

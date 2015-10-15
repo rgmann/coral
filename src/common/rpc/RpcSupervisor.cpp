@@ -34,7 +34,7 @@
 
 #include "RpcSupervisor.h"
 
-using namespace liber::rpc;
+using namespace coral::rpc;
 
 //----------------------------------------------------------------------------
 RpcException& RpcSupervisor::exception()

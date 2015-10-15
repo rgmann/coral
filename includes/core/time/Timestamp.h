@@ -38,7 +38,7 @@
 #include <time.h>
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 
 class Timestamp {
 public:
@@ -96,6 +96,6 @@ private:
    i32    nanoseconds_;
 };
 
-} // namespace liber
+} // namespace coral
 
 #endif // TIMESTAMP_H

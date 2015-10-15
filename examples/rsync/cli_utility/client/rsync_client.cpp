@@ -15,9 +15,9 @@
 
 
 using boost::asio::ip::tcp;
-using namespace liber::netapp;
-using namespace liber::rsync;
-using namespace liber::cli;
+using namespace coral::netapp;
+using namespace coral::rsync;
+using namespace coral::cli;
 
 
 #define  RSYNC_SUB_ID  ( 1 )
@@ -31,7 +31,7 @@ public:
 
    void call(const JobDescriptor& job, const JobReport& report)
    {
-      liber::log::status("%s: Completed %s\n", name_, job.getDestination().path().c_str());
+      coral::log::status("%s: Completed %s\n", name_, job.getDestination().path().c_str());
 
       semaphore_.give();
    }
@@ -71,17 +71,17 @@ public:
      : InteractiveCommand( "push", "Push a file to the server" )
      , attributes_( attributes ) {};
 
-   void process(const liber::cli::ArgumentList& args)
+   void process(const coral::cli::ArgumentList& args)
    {
       if ( attributes_.is_connected() ) {
          if ( attributes_.node_ptr_->push( args[ 0 ] ) == kRsyncSuccess ) {
             attributes_.semaphore_.take();
-            liber::log::status("Done\n");
+            coral::log::status("Done\n");
          } else {
-            liber::log::status("Failed\n");
+            coral::log::status("Failed\n");
          }
       } else {
-         liber::log::status("Push failed: client is not connected\n");
+         coral::log::status("Push failed: client is not connected\n");
       }
    }
 
@@ -97,16 +97,16 @@ public:
      : InteractiveCommand( "pull", "Push a file to the server" )
      , attributes_( attributes ) {};
 
-   void process(const liber::cli::ArgumentList& args) {
+   void process(const coral::cli::ArgumentList& args) {
       if ( attributes_.is_connected() ) {
          if ( attributes_.node_ptr_->pull( args[ 0 ] ) == kRsyncSuccess ) {
             attributes_.semaphore_.take();
-            liber::log::status("Done\n");
+            coral::log::status("Done\n");
          } else {
-            liber::log::status("Failed\n");
+            coral::log::status("Failed\n");
          }
       } else {
-         liber::log::status("Pull failed: client is not connected\n");
+         coral::log::status("Pull failed: client is not connected\n");
       }
    }
 
@@ -122,11 +122,11 @@ public:
       : InteractiveCommand( "status", "Check connection status" )
       , attributes_( attributes ) {}
 
-   void process( const liber::cli::ArgumentList& args ) {
+   void process( const coral::cli::ArgumentList& args ) {
       if ( attributes_.is_connected() ) {
-         liber::log::status("Connected to server.\n");
+         coral::log::status("Connected to server.\n");
       } else {
-         liber::log::status("Not connected to server.\n");
+         coral::log::status("Not connected to server.\n");
       }
    }
 
@@ -138,7 +138,7 @@ private:
 
 int main(int argc, char* argv[])
 {
-   liber::log::level( liber::log::Verbose );
+   coral::log::level( coral::log::Verbose );
 
    ArgParser args;
    args.addArg("name: Port, primary: p, alt: port, type: opt, \
@@ -195,23 +195,23 @@ int main(int argc, char* argv[])
       }
       catch (std::exception& e)
       {
-         liber::log::error( "Exception: %s\n", e.what() );
+         coral::log::error( "Exception: %s\n", e.what() );
       }
    }
    else
    {
       if ( args.helpRequested() )
       {
-         liber::log::raw( args.printHelp().c_str() );
+         coral::log::raw( args.printHelp().c_str() );
       }
       else
       {
-         liber::log::raw( args.printArgErrors(true).c_str() );
+         coral::log::raw( args.printArgErrors(true).c_str() );
       }
       
    }
 
-   liber::log::flush();
+   coral::log::flush();
 
    return 0;
 }

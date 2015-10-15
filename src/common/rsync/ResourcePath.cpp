@@ -35,9 +35,9 @@
 #include "Log.h"
 #include "ResourcePath.h"
 
-using namespace liber;
-using namespace liber::rsync;
-using namespace liber::netapp;
+using namespace coral;
+using namespace coral::rsync;
+using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 //
@@ -79,21 +79,21 @@ void ResourcePath::setRemote( bool remote )
 }
 
 //-----------------------------------------------------------------------------
-void ResourcePath::pack(liber::netapp::SerialStream& rCtor)
+void ResourcePath::pack(coral::netapp::SerialStream& rCtor)
 {
   rCtor.writeCString( path_.string() );
   rCtor.write( remote_ );
 }
 
 //-----------------------------------------------------------------------------
-void ResourcePath::pack(liber::netapp::SerialStream& rCtor) const
+void ResourcePath::pack(coral::netapp::SerialStream& rCtor) const
 {
   rCtor.writeCString( path_.string() );
   rCtor.write( remote_ );
 }
 
 //-----------------------------------------------------------------------------
-bool ResourcePath::unpack(liber::netapp::SerialStream& rDtor)
+bool ResourcePath::unpack(coral::netapp::SerialStream& rDtor)
 {
   std::string path_string;
   if (rDtor.readCString(path_string) != SerialStream::ReadOk)

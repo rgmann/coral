@@ -39,7 +39,7 @@
 #include <boost/filesystem.hpp>
 #include "BaseTypes.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 class SegmentReceiver;
@@ -64,7 +64,7 @@ namespace Segmenter {
 } // End namespace Segmenter
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 
 #endif // RSYNC_SEGMENTER_H

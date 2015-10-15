@@ -36,7 +36,7 @@
 #include "Log.h"
 #include "IThread.h"
 
-using namespace liber::concurrency;
+using namespace coral::concurrency;
 
 ui32 IThread::ournThreadId = 0;
 

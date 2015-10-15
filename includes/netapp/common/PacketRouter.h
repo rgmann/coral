@@ -40,7 +40,7 @@
 #include "PacketReceiver.h"
 #include "PacketSubscriber.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 class PacketContainer;

@@ -1,6 +1,6 @@
 #include "SearchServiceClientStub.h"
 
-using namespace liber::rpc;
+using namespace coral::rpc;
 using namespace tutorial;
 
 //-----------------------------------------------------------------------------

@@ -38,7 +38,7 @@
 #include <boost/asio.hpp>
 #include "AsioTcpPacketRouter.h"
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 // class AsioTcpClient {
@@ -81,7 +81,7 @@ private:
 typedef  boost::shared_ptr<AsioTcpClientRouter>  AsioTcpClientRouterPtr;
 
 } // namespace netapp
-} // namespace liber
+} // namespace coral
 
 
 #endif // ASIO_TCP_CLIENT_H

@@ -35,7 +35,7 @@
 #ifndef PACKET_RECEIVER_H
 #define PACKET_RECEIVER_H
 
-namespace liber {
+namespace coral {
 namespace netapp {
 
 typedef unsigned int DestinationID;
@@ -62,6 +62,6 @@ public:
 };
 
 } // End namespace netapp
-} // End namespace liber
+} // End namespace coral
 
 #endif // PACKET_RECEIVER_H

@@ -43,13 +43,13 @@
 #include "LocalAuthorityInterface.h"
 #include "PacketRouter.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
 // Forward declarations
 class RsyncJob;
 
-class AuthorityThread : public liber::concurrency::IThread {
+class AuthorityThread : public coral::concurrency::IThread {
 public:
 
   AuthorityThread( JobAgentPairQueue& queue );
@@ -57,7 +57,7 @@ public:
 
   // void addJob( RsyncJob* job_ptr );
 
-  liber::netapp::PacketSubscriber& getSubscriber();
+  coral::netapp::PacketSubscriber& getSubscriber();
   // void setRequestID( int request_id );
 
 private:
@@ -75,6 +75,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_AUTHORITY_THREAD_H

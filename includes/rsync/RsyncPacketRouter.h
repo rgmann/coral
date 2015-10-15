@@ -38,10 +38,10 @@
 #include "PacketReceiverHook.h"
 #include "PacketRelay.h"
 
-namespace liber {
+namespace coral {
 namespace rsync {
 
-class RsyncPacketReceiverHook : public liber::netapp::RelayReceiverHook {
+class RsyncPacketReceiverHook : public coral::netapp::RelayReceiverHook {
 public:
 
   RsyncPacketReceiverHook();
@@ -50,16 +50,16 @@ public:
 
 protected:
 
-  liber::netapp::PacketContainer* translate(
-    liber::netapp::DestinationID destination_id,
-    liber::netapp::PacketContainer* in_container_ptr );
+  coral::netapp::PacketContainer* translate(
+    coral::netapp::DestinationID destination_id,
+    coral::netapp::PacketContainer* in_container_ptr );
 
 private:
 
   int mnSubscriberID;
 };
 
-class RsyncPacketRouter : public liber::netapp::PacketRelay {
+class RsyncPacketRouter : public coral::netapp::PacketRelay {
 public:
 
   RsyncPacketRouter();
@@ -69,7 +69,7 @@ public:
 
 protected:
 
-  // liber::netapp::PacketContainer* toContainer(const char* pData, ui32 nSizeBytes);
+  // coral::netapp::PacketContainer* toContainer(const char* pData, ui32 nSizeBytes);
   RelayInfo* extract( const RelayInfo& input );
 
 private:
@@ -78,6 +78,6 @@ private:
 };
 
 } // End namespace rsync
-} // End namespace liber
+} // End namespace coral
 
 #endif // RSYNC_PACKET_ROUTER_H

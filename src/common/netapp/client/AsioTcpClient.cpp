@@ -35,7 +35,7 @@
 #include "AsioTcpClient.h"
 
 using boost::asio::ip::tcp;
-using namespace liber::netapp;
+using namespace coral::netapp;
 
 // //-----------------------------------------------------------------------------
 // AsioTcpClient::AsioTcpClient( boost::asio::io_service& io_service )
