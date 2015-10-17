@@ -37,7 +37,7 @@
 
 using namespace coral;
 using namespace coral::rpc;
-using namespace coral::concurrency;
+using namespace coral::thread;
 
 //----------------------------------------------------------------------------
 AsyncRpcSupervisor::AsyncRpcSupervisor()

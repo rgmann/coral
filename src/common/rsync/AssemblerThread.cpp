@@ -41,7 +41,7 @@
 #include "AssemblerThread.h"
 
 using namespace coral;
-using namespace coral::concurrency;
+using namespace coral::thread;
 using namespace coral::rsync;
 
 //----------------------------------------------------------------------------

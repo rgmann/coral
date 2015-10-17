@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
@@ -68,9 +67,9 @@ public:
   template<typename Destroyer>
   void clear(Destroyer& destroy);
 
-  /**
-   * Get the number of items stored in the HashTable.
-   */
+  ///
+  /// Get the number of items stored in the HashTable.
+  ///
   inline size_t size() const { return item_count_; };
 
   inline size_t buckets() const { return bucket_count_; };
@@ -82,10 +81,13 @@ private:
   typedef std::pair<int, Type> Item;
   typedef std::list<Item> Bucket;
 
-  /**
-   * Extremely simple hash function.
-   */
-  size_t hash(int key) { return (size_t)(key % bucket_count_); };
+  ///
+  /// Extremely simple hash function.
+  ///
+  /// TODO: Consider a more sophisticated hash function to more
+  /// evenly distribute elements to buckets.
+  ///
+  size_t hash(int key) { return (size_t)( key % bucket_count_ ); };
 
   /**
    * Access an item by item by key and comparison functor.

@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef RSYNC_REMOTE_AUTHORITY_INTERFACE_H
 #define RSYNC_REMOTE_AUTHORITY_INTERFACE_H
 
@@ -113,8 +112,8 @@ private:
 
     boost::mutex job_lock_;
 
-    BinarySem job_start_signal_;
-    BinarySem job_end_signal_;
+    thread::BinarySem job_start_signal_;
+    thread::BinarySem job_end_signal_;
 
     RsyncError query_response_;
 

@@ -44,7 +44,7 @@ namespace rsync {
 
 class RsyncJob;
 
-class SegmenterThread : public coral::concurrency::IThread {
+class SegmenterThread : public coral::thread::IThread {
 public:
 
   SegmenterThread( JobAgentPairQueue& queue );

@@ -47,7 +47,7 @@ namespace rsync {
 class RsyncJob;
 class FileSystemInterface;
 
-class AssemblerThread : public coral::concurrency::IThread {
+class AssemblerThread : public coral::thread::IThread {
 public:
 
   AssemblerThread( JobAgentPairQueue& queue );

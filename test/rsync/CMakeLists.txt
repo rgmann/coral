@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 set( TEST_TARGET rsync_test_suite )
 project( ${TEST_TARGET} )
 
-set( GTEST_ROOT "/Users/vaughanbiker/Development/gtest-1.7.0" )
 
 cmake_policy(SET CMP0015 NEW)
 add_definitions ("-Wall -g")

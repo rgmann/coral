@@ -31,17 +31,22 @@
 // 
 
 
-
 #ifndef COUNTING_SEM_H
 #define COUNTING_SEM_H
 
 #include "Semaphore.h"
 
-class CountingSem : public coral::thread::Semaphore {
+namespace coral {
+namespace thread {
+
+class CountingSem : public Semaphore {
 public:
    
-   CountingSem( i32 start ) : coral::thread::Semaphore( start ) {};
+   CountingSem( i32 start ) : Semaphore( start ) {};
 
 };
+
+} // end namespace thread
+} // end namespace coral
 
 #endif // COUNTING_SEM_H

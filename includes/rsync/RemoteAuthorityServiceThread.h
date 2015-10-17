@@ -45,7 +45,7 @@ namespace rsync {
 
 class RsyncJob;
 
-class RemoteAuthorityServiceThread : public coral::concurrency::IThread {
+class RemoteAuthorityServiceThread : public coral::thread::IThread {
 public:
 
   RemoteAuthorityServiceThread( JobAgentPairQueue& queue );

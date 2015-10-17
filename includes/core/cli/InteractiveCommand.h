@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef INTERACTIVE_COMMAND_H
 #define INTERACTIVE_COMMAND_H
 
@@ -43,9 +42,9 @@ namespace cli {
 
 typedef std::vector<std::string> ArgumentList;
 
-//
-// InteractiveCommand abstract base class.
-//
+///
+/// InteractiveCommand abstract base class.
+///
 class InteractiveCommand {
 public:
 
@@ -54,30 +53,30 @@ public:
                       const std::string& alias = "");
    virtual ~InteractiveCommand();
 
-   //
-   // Command processing method invoked when the user enters the associated
-   // command name at the prompt.
-   //
+   ///
+   /// Command processing method invoked when the user enters the associated
+   /// command name at the prompt.
+   ///
    virtual void process( const ArgumentList& args ) = 0;
 
-   //
-   // Command name accessor.
-   //
+   ///
+   /// Command name accessor.
+   ///
    const std::string& command() const;
 
-   //
-   // Command alias.
-   //
+   ///
+   /// Command alias.
+   ///
    const std::string& alias() const;
 
-   //
-   // Check whether this command has an alias.
-   //
+   ///
+   /// Check whether this command has an alias.
+   ///
    bool hasAlias() const;
 
-   //
-   // Command description accessor.
-   //
+   ///
+   /// Command description accessor.
+   ///
    std::string& brief();
 
 

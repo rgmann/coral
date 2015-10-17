@@ -1,3 +1,38 @@
+// 
+// Copyright (c) 2015, Robert Glissmann
+// All rights reserved.
+// 
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+// 
+// * Redistributions of source code must retain the above copyright notice, this
+// list of conditions and the following disclaimer.
+// 
+// * Redistributions in binary form must reproduce the above copyright notice,
+// this list of conditions and the following disclaimer in the documentation
+// and/or other materials provided with the distribution.
+// 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+// DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+// FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+// DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+// SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+// CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+// OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+// 
+
+// %% license-end-token %%
+// 
+// Author: Robert.Glissmann@gmail.com (Robert Glissmann)
+// 
+// 
+
+#ifndef  BASE_TYPE_TEST_CPP
+#define  BASE_TYPE_TEST_CPP
+
 #include <unistd.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -6,15 +41,35 @@
 #include <string>
 #include "BaseTypes.h"
 
-int main(int argc, char *argv[])
-{
-   std::cout << "sizeof(i8)," << sizeof(i8) << std::endl;
-   std::cout << "sizeof(u8)," << sizeof(ui8) << std::endl;
-   std::cout << "sizeof(i16)," << sizeof(i16) << std::endl;
-   std::cout << "sizeof(ui16)," << sizeof(ui16) << std::endl;
-   std::cout << "sizeof(i32)," << sizeof(i32) << std::endl;
-   std::cout << "sizeof(ui32)," << sizeof(ui32) << std::endl;
-   std::cout << "sizeof(i64)," << sizeof(i64) << std::endl;
-   std::cout << "sizeof(ui64)," << sizeof(ui64) << std::endl;
-   return 0;
+class BaseTypeTest : public ::testing::Test {
+public:
+
+   BaseTypeTest() {}
+
+protected:
+
+   void SetUp()
+   {
+      coral::log::level( coral::log::Verbose );
+   }
+
+   void TearDown()
+   {
+      coral::log::flush();
+   }
+};
+
+TEST_F( BaseTypeTest, BaseTypeSizes ) {
+   EXPECT_EQ( 1, sizeof( i8 ) );
+   EXPECT_EQ( 1, sizeof( ui8 ) );
+   EXPECT_EQ( 2, sizeof( i16 ) );
+   EXPECT_EQ( 2, sizeof( ui16 ) );
+   EXPECT_EQ( 4, sizeof( i32 ) );
+   EXPECT_EQ( 4, sizeof( ui32 ) );
+   EXPECT_EQ( 8, sizeof( i64 ) );
+   EXPECT_EQ( 8, sizeof( ui64 ) );
+   EXPECT_EQ( 4, sizeof( f32 ) );
+   EXPECT_EQ( 8, sizeof( f64 ) );
 }
+
+#endif // BASE_TYPE_TEST_CPP

@@ -44,28 +44,28 @@ namespace thread {
 
 class Semaphore {
 public:
-   
-  enum SemStatus
-  {
-    SemOk,
-    SemAcquired,
-    SemTimeout,
-    SemError
-  };
 
-  enum SemTimeout
-  {
+   enum SemStatus
+   {
+      SemOk,
+      SemAcquired,
+      SemTimeout,
+      SemError
+   };
+
+   enum SemTimeout
+   {
     SemWaitForever = -1
-  };
+   };
 
-  enum { kUnlimited = -1 };
+   enum { kUnlimited = -1 };
 
-  Semaphore( i32 start, i32 max = kUnlimited );
-  virtual ~Semaphore();
+   Semaphore( i32 start, i32 max = kUnlimited );
+   virtual ~Semaphore();
 
-  SemStatus take( int timeout_ms = SemWaitForever );
+   SemStatus take( i32 timeout_ms = SemWaitForever );
 
-  SemStatus give();
+   SemStatus give();
    
 private:
 
@@ -75,9 +75,10 @@ private:
 
   boost::mutex lock_;
   boost::condition_variable condition_;
+
 };
 
-}
-}
+} // end namespace thread
+} // end namespace coral
 
 #endif // SEM_H

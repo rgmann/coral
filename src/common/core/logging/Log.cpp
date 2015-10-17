@@ -186,7 +186,7 @@ bool LogMessage::waitFlush( i32 timeout_ms )
 
 //-----------------------------------------------------------------------------
 Logger::Logger()
-   : coral::concurrency::IThread("CommonLoggingThread")
+   : coral::thread::IThread("CommonLoggingThread")
    , console_log_options_  ( log::DisplayLogLevel )
    , log_level_            ( coral::log::Status )
    , log_file_enabled_     ( false )

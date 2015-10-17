@@ -51,25 +51,69 @@ public:
    
    static const ui32 kInfiniteQueue = 0;
    
+   ///
+   /// Construct a queue. The queue may be constructed to limit the number of
+   /// elements, in which case the producer will block on inserting a new item
+   /// into the queue.  If kInfiniteQueue is specified, the queue does not
+   /// bound growth the producer is never blocked.
+   ///
+   /// @param  max_elements  Maximum number of elements that may be stored
+   ///                       before the producer blocks on adding an item, or
+   ///                       kInfiniteQueue.
+   ///
    Queue( ui32 max_elements = kInfiniteQueue );
    
+   ///
+   /// Destructor
+   ///
    ~Queue();
       
-   bool  push(const T &item, int nTimeoutMs = coral::thread::Semaphore::SemWaitForever);
+   ///
+   /// Add one item to the end of the queue. If the queue capacity is bounder,
+   /// the caller is blocked until at least one item is popped from the queue,
+   /// or the timeout expires. If the queue size is unbounded, the timeout is
+   /// ignored and push always returns true.
+   ///
+   /// @param  item  Item to add to the queue
+   /// @param  timeout_ms  Maximum time, in milliseconds, to wait if the queue
+   ///                     capacity is bounded.
+   /// @return bool  True if the item was added to the queue; false on timeout.
+   ///
+   bool push( const T& item, i32 timeout_ms = coral::thread::Semaphore::SemWaitForever );
    
-   bool  pop(T &item, int nTimeoutMs = coral::thread::Semaphore::SemWaitForever);
-   
-   bool  peek(T &item);
-   
+   ///
+   /// Remove one item from the head of the queue. If the queue is empty, the
+   /// caller is blocked until at least one item is available, or timeout
+   /// period expires.
+   ///
+   /// @param  item  Item popped from the queue (only valid if pop returns true)
+   /// @param  timeout_ms  Timeout period for the pop operation in milliseconds
+   /// @return bool  True if an item is successfully popped; false on timeout.
+   ///
+   bool pop( T& item, i32 timeout_ms = coral::thread::Semaphore::SemWaitForever );
+
+   ///
+   /// Test whether the queue is empty.
+   ///
+   /// @return bool  True if the queue is currently empty; false otherwise.
+   ///
    bool  isEmpty();
-   
+
+   ///
+   /// Get the number of elements currently in the queue.
+   ///
+   /// @return ui32  Number of elements currently in the queue
+   ///
    ui32 size();
-   
+
+
 private:
    
-   Queue(const Queue& src);
-   
-   Queue & operator=(const Queue &rhs);
+   ///
+   /// Prevent copying
+   ///
+   Queue( const Queue& other );
+   Queue& operator=( const Queue& other );
    
 private:
    
@@ -78,9 +122,9 @@ private:
    
    std::queue<T>  queue_;
    
-   CountingSem  push_semaphore_;
+   thread::CountingSem  push_semaphore_;
    
-   CountingSem  pop_semaphore_;
+   thread::CountingSem  pop_semaphore_;
 
    boost::mutex queue_lock_;
 };
@@ -104,14 +148,14 @@ Queue<T>::~Queue()
 
 //------------------------------------------------------------------------------
 template <class T>
-bool Queue<T>::push( const T &item, int nTimeoutMs )
+bool Queue<T>::push( const T &item, int timeout_ms )
 {
    bool can_push = true;
 
-   if ( !infinite_queue_ )
+   if ( infinite_queue_ == false )
    {
       can_push = (
-         pop_semaphore_.take( nTimeoutMs ) != coral::thread::Semaphore::SemAcquired
+         pop_semaphore_.take( timeout_ms ) != coral::thread::Semaphore::SemAcquired
       );
    }
       
@@ -133,11 +177,11 @@ bool Queue<T>::push( const T &item, int nTimeoutMs )
 
 //------------------------------------------------------------------------------
 template <class T>
-bool Queue<T>::pop(T &item, int nTimeoutMs)
+bool Queue<T>::pop(T &item, int timeout_ms)
 {
    bool pop_success = false;
       
-   if ( push_semaphore_.take( nTimeoutMs ) == coral::thread::Semaphore::SemAcquired )
+   if ( push_semaphore_.take( timeout_ms ) == coral::thread::Semaphore::SemAcquired )
    {
       {
          boost::mutex::scoped_lock guard( queue_lock_ );
@@ -145,7 +189,7 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
          queue_.pop();
       }
       
-      if ( !infinite_queue_ )
+      if ( infinite_queue_ == false )
       {
          pop_semaphore_.give();
       }
@@ -154,22 +198,6 @@ bool Queue<T>::pop(T &item, int nTimeoutMs)
    }
    
    return pop_success;
-}
-
-//------------------------------------------------------------------------------
-template <class T>
-bool Queue<T>::peek(T &item)
-{
-   boost::mutex::scoped_lock guard( queue_lock_ );
-   bool peek_success = false;
-   
-   if ( queue_.empty() == false )
-   {
-      item = queue_.front();
-      peek_success = true;
-   }
-   
-   return peek_success;
 }
 
 //------------------------------------------------------------------------------

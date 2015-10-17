@@ -4,3 +4,7 @@
 .DS_Store
 *.sublime-*
 *.ign
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile

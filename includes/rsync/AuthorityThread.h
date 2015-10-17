@@ -49,7 +49,7 @@ namespace rsync {
 // Forward declarations
 class RsyncJob;
 
-class AuthorityThread : public coral::concurrency::IThread {
+class AuthorityThread : public coral::thread::IThread {
 public:
 
   AuthorityThread( JobAgentPairQueue& queue );

@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef INTERACTIVE_COMMAND_ROUTER_H
 #define INTERACTIVE_COMMAND_ROUTER_H
 
@@ -78,8 +77,6 @@ public:
    //
    void setShutdownMessage( const std::string& message );
 
-
-// private:
 
    void processLine( std::istream& stream );
 

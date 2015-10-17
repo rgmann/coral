@@ -31,17 +31,22 @@
 // 
 
 
-
 #ifndef BINARY_SEM_H
 #define BINARY_SEM_H
 
 #include "Semaphore.h"
 
-class BinarySem : public coral::thread::Semaphore {
+namespace coral {
+namespace thread {
+
+class BinarySem : public Semaphore {
 public:
    
-  BinarySem() : coral::thread::Semaphore( 0, 1 ) {};
+  BinarySem() : Semaphore( 0, 1 ) {};
 
 };
+
+} // end namespace thread
+} // end namespace coral
 
 #endif // BINARY_SEM_H

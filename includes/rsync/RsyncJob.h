@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef RSYNC_JOB_H
 #define RSYNC_JOB_H
 
@@ -94,9 +93,9 @@ private:
   SegmentQueue mSegments;
   InstructionQueue mInstructions;
 
-  BinarySem mSegmentationDone;
-  BinarySem mAuthDone;
-  BinarySem mAssemblyDone;
+  thread::BinarySem mSegmentationDone;
+  thread::BinarySem mAuthDone;
+  thread::BinarySem mAssemblyDone;
 };
 
 } // End namespace rsync

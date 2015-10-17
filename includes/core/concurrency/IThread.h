@@ -39,7 +39,7 @@
 #include "BaseTypes.h"
 
 namespace coral {
-namespace concurrency {
+namespace thread {
 
 // Abstract Implementable Thread
 class IThread {
@@ -126,7 +126,7 @@ private:
 
 };
 
-} // end namespace concurrency
+} // end namespace thread
 } // end namespace coral
 
 #endif // ITHREAD_H

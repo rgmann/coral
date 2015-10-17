@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef  LOG_H
 #define  LOG_H
 
@@ -46,7 +45,6 @@
 #include "IThread.h"
 #include "Timestamp.h"
 #include "BaseTypes.h"
-// #include "CountingSem.h"
 
 namespace coral  {
 namespace log    {
@@ -139,13 +137,13 @@ namespace log    {
 
       bool is_flush_marker_;
 
-      BinarySem flush_signal_;
+      thread::BinarySem flush_signal_;
    };
 
    typedef  boost::shared_ptr<LogMessage> LogMessagePtr;
 
 
-   class Logger : public coral::concurrency::IThread {
+   class Logger : public coral::thread::IThread {
    public:
 
       ///

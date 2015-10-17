@@ -38,7 +38,7 @@
 #include "PacketRouter.h"
 
 using namespace coral;
-using namespace coral::concurrency;
+using namespace coral::thread;
 using namespace coral::netapp;
 using namespace coral::rsync;
 

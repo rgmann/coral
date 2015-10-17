@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef RPC_MARSHALLED_CALL_H
 #define RPC_MARSHALLED_CALL_H
 
@@ -71,7 +70,7 @@ public:
 
 private:
    
-   BinarySem mSem;
+   thread::BinarySem mSem;
 
    RpcObject param_object_;
    RpcObject result_object_;

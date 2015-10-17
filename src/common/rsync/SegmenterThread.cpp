@@ -40,7 +40,7 @@
 
 using namespace coral;
 using namespace coral::rsync;
-using namespace coral::concurrency;
+using namespace coral::thread;
 
 //----------------------------------------------------------------------------
 SegmenterThread::SegmenterThread( JobAgentPairQueue& queue )

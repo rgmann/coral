@@ -42,7 +42,7 @@
 namespace coral {
 namespace rpc {
 
-class AsyncRpcSupervisor : public RpcSupervisor, public coral::concurrency::IThread {
+class AsyncRpcSupervisor : public RpcSupervisor, public coral::thread::IThread {
 public:
 
   AsyncRpcSupervisor();

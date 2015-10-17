@@ -42,7 +42,7 @@
 namespace coral {
 namespace netapp {
 
-class IntraRouter : public PacketRouter, public coral::concurrency::IThread {
+class IntraRouter : public PacketRouter, public coral::thread::IThread {
 public:
 
   IntraRouter();
