@@ -48,10 +48,10 @@ RM = /opt/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/liber/examples/rpc/search_service
+CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/coral
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/liber/examples/rpc/search_service
+CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/coral
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,14 +80,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/examples/rpc/search_service/CMakeFiles /Users/vaughanbiker/Development/liber/examples/rpc/search_service/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/liber/examples/rpc/search_service/CMakeFiles 0
+	cd /Users/vaughanbiker/Development/coral && $(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/coral/CMakeFiles /Users/vaughanbiker/Development/coral/examples/rpc/search_service/CMakeFiles/progress.marks
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/coral/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/clean
 .PHONY : clean
 
 # The main clean target
@@ -97,30 +97,32 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/vaughanbiker/Development/coral && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named search_service
+# Convenience name for target.
+examples/rpc/search_service/CMakeFiles/search_service.dir/rule:
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/CMakeFiles/search_service.dir/rule
+.PHONY : examples/rpc/search_service/CMakeFiles/search_service.dir/rule
 
-# Build rule for target.
-search_service: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 search_service
+# Convenience name for target.
+search_service: examples/rpc/search_service/CMakeFiles/search_service.dir/rule
+
 .PHONY : search_service
 
 # fast build rule for target.
 search_service/fast:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/build
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/build
 .PHONY : search_service/fast
 
 client/rpc_source/SearchServiceClientStub.o: client/rpc_source/SearchServiceClientStub.cpp.o
@@ -129,7 +131,7 @@ client/rpc_source/SearchServiceClientStub.o: client/rpc_source/SearchServiceClie
 
 # target to build an object file
 client/rpc_source/SearchServiceClientStub.cpp.o:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/client/rpc_source/SearchServiceClientStub.cpp.o
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/client/rpc_source/SearchServiceClientStub.cpp.o
 .PHONY : client/rpc_source/SearchServiceClientStub.cpp.o
 
 client/rpc_source/SearchServiceClientStub.i: client/rpc_source/SearchServiceClientStub.cpp.i
@@ -138,7 +140,7 @@ client/rpc_source/SearchServiceClientStub.i: client/rpc_source/SearchServiceClie
 
 # target to preprocess a source file
 client/rpc_source/SearchServiceClientStub.cpp.i:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/client/rpc_source/SearchServiceClientStub.cpp.i
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/client/rpc_source/SearchServiceClientStub.cpp.i
 .PHONY : client/rpc_source/SearchServiceClientStub.cpp.i
 
 client/rpc_source/SearchServiceClientStub.s: client/rpc_source/SearchServiceClientStub.cpp.s
@@ -147,7 +149,7 @@ client/rpc_source/SearchServiceClientStub.s: client/rpc_source/SearchServiceClie
 
 # target to generate assembly for a file
 client/rpc_source/SearchServiceClientStub.cpp.s:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/client/rpc_source/SearchServiceClientStub.cpp.s
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/client/rpc_source/SearchServiceClientStub.cpp.s
 .PHONY : client/rpc_source/SearchServiceClientStub.cpp.s
 
 common/rpc_source/tutorial.pb.o: common/rpc_source/tutorial.pb.cc.o
@@ -156,7 +158,7 @@ common/rpc_source/tutorial.pb.o: common/rpc_source/tutorial.pb.cc.o
 
 # target to build an object file
 common/rpc_source/tutorial.pb.cc.o:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/common/rpc_source/tutorial.pb.cc.o
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/common/rpc_source/tutorial.pb.cc.o
 .PHONY : common/rpc_source/tutorial.pb.cc.o
 
 common/rpc_source/tutorial.pb.i: common/rpc_source/tutorial.pb.cc.i
@@ -165,7 +167,7 @@ common/rpc_source/tutorial.pb.i: common/rpc_source/tutorial.pb.cc.i
 
 # target to preprocess a source file
 common/rpc_source/tutorial.pb.cc.i:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/common/rpc_source/tutorial.pb.cc.i
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/common/rpc_source/tutorial.pb.cc.i
 .PHONY : common/rpc_source/tutorial.pb.cc.i
 
 common/rpc_source/tutorial.pb.s: common/rpc_source/tutorial.pb.cc.s
@@ -174,7 +176,7 @@ common/rpc_source/tutorial.pb.s: common/rpc_source/tutorial.pb.cc.s
 
 # target to generate assembly for a file
 common/rpc_source/tutorial.pb.cc.s:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/common/rpc_source/tutorial.pb.cc.s
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/common/rpc_source/tutorial.pb.cc.s
 .PHONY : common/rpc_source/tutorial.pb.cc.s
 
 search_service.o: search_service.cpp.o
@@ -183,7 +185,7 @@ search_service.o: search_service.cpp.o
 
 # target to build an object file
 search_service.cpp.o:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/search_service.cpp.o
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/search_service.cpp.o
 .PHONY : search_service.cpp.o
 
 search_service.i: search_service.cpp.i
@@ -192,7 +194,7 @@ search_service.i: search_service.cpp.i
 
 # target to preprocess a source file
 search_service.cpp.i:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/search_service.cpp.i
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/search_service.cpp.i
 .PHONY : search_service.cpp.i
 
 search_service.s: search_service.cpp.s
@@ -201,7 +203,7 @@ search_service.s: search_service.cpp.s
 
 # target to generate assembly for a file
 search_service.cpp.s:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/search_service.cpp.s
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/search_service.cpp.s
 .PHONY : search_service.cpp.s
 
 server/rpc_source/SearchServiceSearchAction.o: server/rpc_source/SearchServiceSearchAction.cpp.o
@@ -210,7 +212,7 @@ server/rpc_source/SearchServiceSearchAction.o: server/rpc_source/SearchServiceSe
 
 # target to build an object file
 server/rpc_source/SearchServiceSearchAction.cpp.o:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.o
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.o
 .PHONY : server/rpc_source/SearchServiceSearchAction.cpp.o
 
 server/rpc_source/SearchServiceSearchAction.i: server/rpc_source/SearchServiceSearchAction.cpp.i
@@ -219,7 +221,7 @@ server/rpc_source/SearchServiceSearchAction.i: server/rpc_source/SearchServiceSe
 
 # target to preprocess a source file
 server/rpc_source/SearchServiceSearchAction.cpp.i:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.i
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.i
 .PHONY : server/rpc_source/SearchServiceSearchAction.cpp.i
 
 server/rpc_source/SearchServiceSearchAction.s: server/rpc_source/SearchServiceSearchAction.cpp.s
@@ -228,7 +230,7 @@ server/rpc_source/SearchServiceSearchAction.s: server/rpc_source/SearchServiceSe
 
 # target to generate assembly for a file
 server/rpc_source/SearchServiceSearchAction.cpp.s:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.s
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/server/rpc_source/SearchServiceSearchAction.cpp.s
 .PHONY : server/rpc_source/SearchServiceSearchAction.cpp.s
 
 server/rpc_source/SearchServiceServerStub.o: server/rpc_source/SearchServiceServerStub.cpp.o
@@ -237,7 +239,7 @@ server/rpc_source/SearchServiceServerStub.o: server/rpc_source/SearchServiceServ
 
 # target to build an object file
 server/rpc_source/SearchServiceServerStub.cpp.o:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceServerStub.cpp.o
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/server/rpc_source/SearchServiceServerStub.cpp.o
 .PHONY : server/rpc_source/SearchServiceServerStub.cpp.o
 
 server/rpc_source/SearchServiceServerStub.i: server/rpc_source/SearchServiceServerStub.cpp.i
@@ -246,7 +248,7 @@ server/rpc_source/SearchServiceServerStub.i: server/rpc_source/SearchServiceServ
 
 # target to preprocess a source file
 server/rpc_source/SearchServiceServerStub.cpp.i:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceServerStub.cpp.i
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/server/rpc_source/SearchServiceServerStub.cpp.i
 .PHONY : server/rpc_source/SearchServiceServerStub.cpp.i
 
 server/rpc_source/SearchServiceServerStub.s: server/rpc_source/SearchServiceServerStub.cpp.s
@@ -255,7 +257,7 @@ server/rpc_source/SearchServiceServerStub.s: server/rpc_source/SearchServiceServ
 
 # target to generate assembly for a file
 server/rpc_source/SearchServiceServerStub.cpp.s:
-	$(MAKE) -f CMakeFiles/search_service.dir/build.make CMakeFiles/search_service.dir/server/rpc_source/SearchServiceServerStub.cpp.s
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/search_service.dir/build.make examples/rpc/search_service/CMakeFiles/search_service.dir/server/rpc_source/SearchServiceServerStub.cpp.s
 .PHONY : server/rpc_source/SearchServiceServerStub.cpp.s
 
 # Help Target
@@ -293,6 +295,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/vaughanbiker/Development/coral && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

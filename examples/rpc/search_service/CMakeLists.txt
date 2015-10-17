@@ -46,8 +46,8 @@ add_executable( ${TARGET}
 "server/rpc_source/SearchServiceSearchAction.cpp"
 ${TARGET}.cpp )
 
-target_link_libraries( ${TARGET} rpc )
-target_link_libraries( ${TARGET} liber_core )
+target_link_libraries( ${TARGET} coral_rpc )
+target_link_libraries( ${TARGET} coral_core )
 target_link_libraries( ${TARGET} netapp_common )
 target_link_libraries( ${TARGET} ${Boost_LIBRARIES} )
 target_link_libraries( ${TARGET} ${PROTOBUF_LIBRARIES} )

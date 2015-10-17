@@ -12,6 +12,7 @@
 
 using namespace coral::rpc;
 using namespace coral::netapp;
+using namespace coral::thread;
 using namespace tutorial;
 
 

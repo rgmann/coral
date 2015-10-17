@@ -13,7 +13,9 @@
 
 using namespace coral::netapp;
 using namespace coral::rsync;
+using namespace coral::thread;
 using namespace rsync_test_helper;
+
 
 class TestCallback : public RsyncJobCallback {
 public:

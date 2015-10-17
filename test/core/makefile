@@ -48,24 +48,13 @@ RM = /opt/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/coral/test/core
+CMAKE_SOURCE_DIR = /Users/vaughanbiker/Development/coral
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/coral/test/core
+CMAKE_BINARY_DIR = /Users/vaughanbiker/Development/coral
 
 #=============================================================================
 # Targets provided globally by CMake.
-
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/opt/local/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
-
-# Special rule for the target test
-test/fast: test
-
-.PHONY : test/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -91,14 +80,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/coral/test/core/CMakeFiles /Users/vaughanbiker/Development/coral/test/core/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/coral/test/core/CMakeFiles 0
+	cd /Users/vaughanbiker/Development/coral && $(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/coral/CMakeFiles /Users/vaughanbiker/Development/coral/test/core/CMakeFiles/progress.marks
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 test/core/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/vaughanbiker/Development/coral/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 test/core/clean
 .PHONY : clean
 
 # The main clean target
@@ -108,30 +97,32 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 test/core/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 test/core/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /Users/vaughanbiker/Development/coral && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named core_test_suite
+# Convenience name for target.
+test/core/CMakeFiles/core_test_suite.dir/rule:
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 test/core/CMakeFiles/core_test_suite.dir/rule
+.PHONY : test/core/CMakeFiles/core_test_suite.dir/rule
 
-# Build rule for target.
-core_test_suite: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 core_test_suite
+# Convenience name for target.
+core_test_suite: test/core/CMakeFiles/core_test_suite.dir/rule
+
 .PHONY : core_test_suite
 
 # fast build rule for target.
 core_test_suite/fast:
-	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/build
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f test/core/CMakeFiles/core_test_suite.dir/build.make test/core/CMakeFiles/core_test_suite.dir/build
 .PHONY : core_test_suite/fast
 
 core_test_suite.o: core_test_suite.cpp.o
@@ -140,7 +131,7 @@ core_test_suite.o: core_test_suite.cpp.o
 
 # target to build an object file
 core_test_suite.cpp.o:
-	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/core_test_suite.cpp.o
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f test/core/CMakeFiles/core_test_suite.dir/build.make test/core/CMakeFiles/core_test_suite.dir/core_test_suite.cpp.o
 .PHONY : core_test_suite.cpp.o
 
 core_test_suite.i: core_test_suite.cpp.i
@@ -149,7 +140,7 @@ core_test_suite.i: core_test_suite.cpp.i
 
 # target to preprocess a source file
 core_test_suite.cpp.i:
-	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/core_test_suite.cpp.i
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f test/core/CMakeFiles/core_test_suite.dir/build.make test/core/CMakeFiles/core_test_suite.dir/core_test_suite.cpp.i
 .PHONY : core_test_suite.cpp.i
 
 core_test_suite.s: core_test_suite.cpp.s
@@ -158,7 +149,7 @@ core_test_suite.s: core_test_suite.cpp.s
 
 # target to generate assembly for a file
 core_test_suite.cpp.s:
-	$(MAKE) -f CMakeFiles/core_test_suite.dir/build.make CMakeFiles/core_test_suite.dir/core_test_suite.cpp.s
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f test/core/CMakeFiles/core_test_suite.dir/build.make test/core/CMakeFiles/core_test_suite.dir/core_test_suite.cpp.s
 .PHONY : core_test_suite.cpp.s
 
 # Help Target
@@ -167,7 +158,6 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... test"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... core_test_suite"
@@ -185,6 +175,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /Users/vaughanbiker/Development/coral && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

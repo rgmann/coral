@@ -8,7 +8,6 @@
 #include <boost/thread/locks.hpp>
 #include "Log.h"
 #include "ArgParser.h"
-// #include "AsioTcpPacketRouter.h"
 #include "AsioTcpClient.h"
 #include "RsyncNode.h"
 #include "InteractiveCommandRouter.h"
@@ -18,6 +17,7 @@ using boost::asio::ip::tcp;
 using namespace coral::netapp;
 using namespace coral::rsync;
 using namespace coral::cli;
+using namespace coral::thread;
 
 
 #define  RSYNC_SUB_ID  ( 1 )

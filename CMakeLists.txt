@@ -19,4 +19,11 @@ add_subdirectory( test/rsync )
 #
 # Build the RPC code generator
 #
-add_subdirectory( utils/rpc_generator )
+add_subdirectory( utils/rpc_generate )
+
+#
+# Examples
+#
+add_subdirectory( examples/rpc/search_service )
+add_subdirectory( examples/rsync/cli_utility/client )
+add_subdirectory( examples/rsync/cli_utility/server )

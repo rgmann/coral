@@ -45,4 +45,4 @@ set( SOURCES
 "${COMMON_SOURCE}/${LIBNAME}/RpcSupervisor.cpp"
 )
 
-add_library( libcoral_rpc STATIC ${SOURCES} )
+add_library( coral_rpc STATIC ${SOURCES} )
