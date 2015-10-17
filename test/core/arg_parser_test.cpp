@@ -74,11 +74,11 @@ TEST_F( ArgParserTest, OptionalOption ) {
 TEST_F( ArgParserTest, AddInvalidDefinitions ) {
    ArgParser arg_parser;
 
-   EXPECT_EQ( false, arg_parser.addArg("") );
-   EXPECT_EQ( false, arg_parser.addArg(
+   EXPECT_FALSE( arg_parser.addArg("") );
+   EXPECT_FALSE( arg_parser.addArg(
       "primary: p, alt: port, type: opt, \
        vtype: string, required, desc: Set port number"));
-   EXPECT_EQ( false, arg_parser.addArg(
+   EXPECT_FALSE( arg_parser.addArg(
       "name: Port, alt: port, type: opt, \
        vtype: string, required, desc: Set port number"));
 
@@ -86,7 +86,7 @@ TEST_F( ArgParserTest, AddInvalidDefinitions ) {
    EXPECT_EQ( true, arg_parser.addArg(
       "name: Port, primary: p, alt: port, type: opt, \
       vtype: string, desc: Set port number" ));
-   EXPECT_EQ( false, arg_parser.addArg(
+   EXPECT_FALSE( arg_parser.addArg(
       "name: Port, primary: p, alt: port, type: opt, \
       vtype: string, desc: Set port number" ));
 }
@@ -104,15 +104,15 @@ TEST_F( ArgParserTest, ParseOptionalArg ) {
    std::string port_string;
    int port_int = 0;
    EXPECT_EQ( true, arg_parser.parse( argv_1, argc_1 ) );
-   EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
+   EXPECT_FALSE( arg_parser.isSet( Argument::ArgName, "Port" ) );
+   EXPECT_FALSE( arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    // Test "-p" option expects a value (it is not just a flag).
    const char* argv_2[] = { "test_program", "-p" };
    int argc_2 = 2;
-   EXPECT_EQ( false, arg_parser.parse( argv_2, argc_2 ) );
-   EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
+   EXPECT_FALSE( arg_parser.parse( argv_2, argc_2 ) );
+   EXPECT_FALSE( arg_parser.isSet( Argument::ArgName, "Port" ) );
+   EXPECT_FALSE( arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    const char* argv_3[] = { "test_program", "-p", "4567"  };
    int argc_3 = 3;
@@ -136,16 +136,16 @@ TEST_F( ArgParserTest, ParseRequiredArg ) {
 
    std::string port_string;
    int port_int = 0;
-   EXPECT_EQ( false, arg_parser.parse( argv_1, argc_1 ) );
-   EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
+   EXPECT_FALSE( arg_parser.parse( argv_1, argc_1 ) );
+   EXPECT_FALSE( arg_parser.isSet( Argument::ArgName, "Port" ) );
+   EXPECT_FALSE( arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    // Test "-p" option expects a value (it is not just a flag).
    const char* argv_2[] = { "test_program", "-p" };
    int argc_2 = 2;
-   EXPECT_EQ( false, arg_parser.parse( argv_2, argc_2 ) );
-   EXPECT_EQ( false, arg_parser.isSet( Argument::ArgName, "Port" ) );
-   EXPECT_EQ( false, arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
+   EXPECT_FALSE( arg_parser.parse( argv_2, argc_2 ) );
+   EXPECT_FALSE( arg_parser.isSet( Argument::ArgName, "Port" ) );
+   EXPECT_FALSE( arg_parser.getArgVal( Argument::ArgName, "Port", port_string ) );
 
    const char* argv_3[] = { "test_program", "-p", "4567" };
    int argc_3 = 3;

@@ -157,8 +157,8 @@ TEST_F( RelayTest, PublishPacket ) {
    EXPECT_EQ( -1, router.count( kSecondChannel ) );
 
    // Test registeration
-   EXPECT_EQ( false, subscriber_1.isSubscribed() );
-   EXPECT_EQ( false, subscriber_2.isSubscribed() );
+   EXPECT_FALSE( subscriber_1.isSubscribed() );
+   EXPECT_FALSE( subscriber_2.isSubscribed() );
 
    EXPECT_EQ( true, router.subscribe( RELAY_PIPE, &relay, kSubscriberModeReadWrite ) );
    EXPECT_EQ( true, relay.subscribe( kFirstChannel, &subscriber_1, kSubscriberModeReadWrite ) );
@@ -193,8 +193,8 @@ TEST_F( RelayTest, PublishPacket ) {
    EXPECT_EQ( true, relay.unsubscribe( kFirstChannel, &subscriber_1 ) );
    EXPECT_EQ( true, relay.unsubscribe( kSecondChannel, &subscriber_2 ) );
    EXPECT_EQ( true, router.unsubscribe( RELAY_PIPE, &relay ) );
-   EXPECT_EQ( false, subscriber_1.isSubscribed() );
-   EXPECT_EQ( false, subscriber_2.isSubscribed() );
+   EXPECT_FALSE( subscriber_1.isSubscribed() );
+   EXPECT_FALSE( subscriber_2.isSubscribed() );
    EXPECT_EQ( 0, relay.count( kFirstChannel ) );
    EXPECT_EQ( 0, relay.count( kSecondChannel ) );
    EXPECT_EQ( 0, router.count( RELAY_PIPE ) );
@@ -212,8 +212,8 @@ TEST_F( RelayTest, CollectPacket ) {
    EXPECT_EQ( -1, router.count( kSecondChannel ) );
 
    // Test registeration
-   EXPECT_EQ( false, subscriber_1.isSubscribed() );
-   EXPECT_EQ( false, subscriber_2.isSubscribed() );
+   EXPECT_FALSE( subscriber_1.isSubscribed() );
+   EXPECT_FALSE( subscriber_2.isSubscribed() );
 
    EXPECT_EQ( true, router.subscribe( RELAY_PIPE, &relay, kSubscriberModeReadWrite ) );
    EXPECT_EQ( true, relay.subscribe( kFirstChannel, &subscriber_1, kSubscriberModeReadWrite ) );
@@ -243,8 +243,8 @@ TEST_F( RelayTest, CollectPacket ) {
    EXPECT_EQ( true, relay.unsubscribe( kFirstChannel, &subscriber_1 ) );
    EXPECT_EQ( true, relay.unsubscribe( kSecondChannel, &subscriber_2 ) );
    EXPECT_EQ( true, router.unsubscribe( RELAY_PIPE, &relay ) );
-   EXPECT_EQ( false, subscriber_1.isSubscribed() );
-   EXPECT_EQ( false, subscriber_2.isSubscribed() );
+   EXPECT_FALSE( subscriber_1.isSubscribed() );
+   EXPECT_FALSE( subscriber_2.isSubscribed() );
    EXPECT_EQ( 0, relay.count( kFirstChannel ) );
    EXPECT_EQ( 0, relay.count( kSecondChannel ) );
    EXPECT_EQ( 0, router.count( RELAY_PIPE ) );

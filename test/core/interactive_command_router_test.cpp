@@ -56,7 +56,7 @@ TEST_F( InteractiveCommandRouterTest, InteractiveCommandWithoutAlias ) {
    TestCommandWithoutAlias command;
    EXPECT_EQ( "test", command.command() );
    EXPECT_EQ( "This is a test command", command.brief() );
-   EXPECT_EQ( false, command.hasAlias() );
+   EXPECT_FALSE( command.hasAlias() );
    EXPECT_EQ( "", command.alias() );
 }
 
@@ -81,13 +81,13 @@ TEST_F( InteractiveCommandRouterTest, CommandParsing ) {
 
    EXPECT_EQ( true, router.add( &first_command ) );
    EXPECT_EQ( true, router.add( &second_command ) );
-   EXPECT_EQ( false, router.add( &third_command ) );
+   EXPECT_FALSE( router.add( &third_command ) );
 
    std::stringstream stream;
    stream << "second arg1 arg2 arg3\n";
    router.processLine( stream );
    EXPECT_EQ( true, first_command.received_args_.empty() );
-   EXPECT_EQ( false, second_command.received_args_.empty() );
+   EXPECT_FALSE( second_command.received_args_.empty() );
    EXPECT_EQ( 3, second_command.received_args_.size() );
    EXPECT_EQ( "arg1", second_command.received_args_[ 0 ] );
    EXPECT_EQ( "arg2", second_command.received_args_[ 1 ] );

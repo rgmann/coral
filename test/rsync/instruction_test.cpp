@@ -54,7 +54,7 @@ TEST_F( InstructionTest, TestBeginInstruction ) {
    // Decouple the original BeginInstruction and its raw instruction.
    // send_instruction.release();
    // EXPECT_EQ( NULL, send_instruction.instruction() );
-   // EXPECT_EQ( false, send_instruction.valid() );
+   // EXPECT_FALSE( send_instruction.valid() );
 
    EXPECT_EQ( true, send_instruction_ptr->valid() );
    EXPECT_EQ( BeginInstruction::Type, send_instruction_ptr->type() );
@@ -83,7 +83,7 @@ TEST_F( InstructionTest, TestSegmentInstruction )
    // Decouple the original BeginInstruction and its raw instruction.
    // send_instruction.release();
    // EXPECT_EQ( NULL, send_instruction.instruction() );
-   // EXPECT_EQ( false, send_instruction.valid() );
+   // EXPECT_FALSE( send_instruction.valid() );
 
    EXPECT_EQ( true, send_instruction_ptr->valid() );
    EXPECT_EQ( SegmentInstruction::Type, send_instruction_ptr->type() );
@@ -108,7 +108,7 @@ TEST_F( InstructionTest, TestChunkInstruction ) {
    // Decouple the original BeginInstruction and its raw instruction.
    // send_instruction.release();
    // EXPECT_EQ( NULL, send_instruction.instruction() );
-   // EXPECT_EQ( false, send_instruction.valid() );
+   // EXPECT_FALSE( send_instruction.valid() );
 
    EXPECT_EQ( true, send_instruction_ptr->valid() );
    EXPECT_EQ( ChunkInstruction::Type, send_instruction_ptr->type() );
@@ -129,7 +129,7 @@ TEST_F( InstructionTest, TestEndInstructionSuccess ) {
    // Decouple the original BeginInstruction and its raw instruction.
    // send_instruction.release();
    // EXPECT_EQ( NULL, send_instruction.instruction() );
-   // EXPECT_EQ( false, send_instruction.valid() );
+   // EXPECT_FALSE( send_instruction.valid() );
 
    EXPECT_EQ( true, send_instruction_ptr->valid() );
    EXPECT_EQ( EndInstruction::Type, send_instruction_ptr->type() );
@@ -153,7 +153,7 @@ TEST_F( InstructionTest, TestEndInstructionCancel ) {
    // Decouple the original BeginInstruction and its raw instruction.
    // send_instruction.release();
    // EXPECT_EQ( NULL, send_instruction.instruction() );
-   // EXPECT_EQ( false, send_instruction.valid() );
+   // EXPECT_FALSE( send_instruction.valid() );
 
    EXPECT_EQ( true, send_instruction_ptr->valid() );
    EXPECT_EQ( EndInstruction::Type, send_instruction_ptr->type() );

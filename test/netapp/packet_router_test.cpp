@@ -50,14 +50,14 @@ TEST_F( PacketTest, RegisterUnregister ) {
    EXPECT_EQ( -1, router.count( kTestChannel ) );
 
    // Test registeration
-   EXPECT_EQ( false, subscriber.isSubscribed() );
+   EXPECT_FALSE( subscriber.isSubscribed() );
    EXPECT_EQ( true, router.subscribe( kTestChannel, &subscriber, kSubscriberModeReadWrite ) );
    EXPECT_EQ( true, subscriber.isSubscribed() );
    EXPECT_EQ( 1, router.count( kTestChannel ) );
 
    // Test unregisteration
    EXPECT_EQ( true, router.unsubscribe( kTestChannel, &subscriber ) );
-   EXPECT_EQ( false, subscriber.isSubscribed() );
+   EXPECT_FALSE( subscriber.isSubscribed() );
    EXPECT_EQ( 0, router.count( kTestChannel ) );
 }
 
@@ -110,8 +110,8 @@ TEST_F( PacketTest, ReceivePacket ) {
    EXPECT_EQ( -1, router.count( kSecondChannel ) );
 
    // Test registeration
-   EXPECT_EQ( false, subscriber_1.isSubscribed() );
-   EXPECT_EQ( false, subscriber_2.isSubscribed() );
+   EXPECT_FALSE( subscriber_1.isSubscribed() );
+   EXPECT_FALSE( subscriber_2.isSubscribed() );
 
    EXPECT_EQ( true, router.subscribe( kFirstChannel, &subscriber_1, kSubscriberModeReadWrite ) );
    EXPECT_EQ( true, router.subscribe( kFirstChannel, &subscriber_2, kSubscriberModeReadWrite ) );
@@ -134,8 +134,8 @@ TEST_F( PacketTest, ReceivePacket ) {
    EXPECT_EQ( true, router.unsubscribe( kFirstChannel, &subscriber_1 ) );
    EXPECT_EQ( true, router.unsubscribe( kFirstChannel, &subscriber_2 ) );
    EXPECT_EQ( true, router.unsubscribe( kSecondChannel, &subscriber_2 ) );
-   EXPECT_EQ( false, subscriber_1.isSubscribed() );
-   EXPECT_EQ( false, subscriber_2.isSubscribed() );
+   EXPECT_FALSE( subscriber_1.isSubscribed() );
+   EXPECT_FALSE( subscriber_2.isSubscribed() );
    EXPECT_EQ( 0, router.count( kFirstChannel ) );
    EXPECT_EQ( 0, router.count( kSecondChannel ) );
 }
@@ -172,7 +172,7 @@ TEST_F( PacketTest, SendPacket ) {
    EXPECT_EQ( -1, router.count( kSecondChannel ) );
 
    // Test registeration
-   EXPECT_EQ( false, subscriber.isSubscribed() );
+   EXPECT_FALSE( subscriber.isSubscribed() );
    EXPECT_EQ( true, router.subscribe( kFirstChannel, &subscriber, kSubscriberModeReadWrite ) );
    EXPECT_EQ( true, router.subscribe( kSecondChannel, &subscriber, kSubscriberModeReadOnly ) );
    EXPECT_EQ( true, subscriber.isSubscribed() );
@@ -192,7 +192,7 @@ TEST_F( PacketTest, SendPacket ) {
    // Test unregisteration
    EXPECT_EQ( true, router.unsubscribe( kFirstChannel, &subscriber ) );
    EXPECT_EQ( true, router.unsubscribe( kSecondChannel, &subscriber ) );
-   EXPECT_EQ( false, subscriber.isSubscribed() );
+   EXPECT_FALSE( subscriber.isSubscribed() );
 
    EXPECT_EQ( 0, router.count( kFirstChannel ) );
    EXPECT_EQ( 0, router.count( kSecondChannel ) );

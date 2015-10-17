@@ -176,11 +176,11 @@ TEST_F( HashTableTest, AddFindRemoveTest ) {
 
    Thingy* temp = NULL;
    ThingyComparator no_item_comparator_1( "llama" );
-   EXPECT_EQ( false, table.find( Thingy::SpittyThingy, temp, no_item_comparator_1 ) );
+   EXPECT_FALSE( table.find( Thingy::SpittyThingy, temp, no_item_comparator_1 ) );
    EXPECT_TRUE( NULL == temp );
 
    ThingyComparator no_item_comparator_2( "boat" );
-   EXPECT_EQ( false, table.find( Thingy::BigThingy, temp, no_item_comparator_2 ) );
+   EXPECT_FALSE( table.find( Thingy::BigThingy, temp, no_item_comparator_2 ) );
    EXPECT_TRUE( NULL == temp );
 
    ThingyComparator comparator( "car" );
@@ -207,7 +207,7 @@ TEST_F( HashTableTest, AddFindRemoveTest ) {
       temp = NULL;
    }
 
-   EXPECT_EQ( false, table.remove( Thingy::BigThingy, temp, comparator ) );
+   EXPECT_FALSE( table.remove( Thingy::BigThingy, temp, comparator ) );
    EXPECT_TRUE( NULL == temp );
 
    delete thing1;
