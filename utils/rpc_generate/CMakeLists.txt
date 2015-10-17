@@ -8,7 +8,7 @@ cmake_policy( SET CMP0015 NEW )
 add_definitions( "-Wall -g" )
 add_definitions( "-Wno-unused-local-typedefs" )
 
-find_package( Boost 1.46 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
+find_package( Boost 1.47 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 include_directories( ${Boost_INCLUDE_DIRS} )
 
 find_package( Protobuf REQUIRED )

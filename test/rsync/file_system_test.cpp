@@ -76,17 +76,17 @@ TEST_F( FileSystemInterfaceTest, ExistTouchDelete ) {
 
    FileSystemInterface file_sys;
 
-   EXPECT_EQ( false, file_sys.exists( TEST_FILE ) );
-   EXPECT_EQ( false, file_sys.setRoot( NON_EXISTENT_TEST_ROOT ) );
+   EXPECT_FALSE( file_sys.exists( TEST_FILE ) );
+   EXPECT_FALSE( file_sys.setRoot( NON_EXISTENT_TEST_ROOT ) );
 
    EXPECT_EQ( true, file_sys.setRoot( TEST_ROOT ) );
-   EXPECT_EQ( false, file_sys.exists( TEST_FILE ) );
+   EXPECT_FALSE( file_sys.exists( TEST_FILE ) );
 
    EXPECT_EQ( true, file_sys.touch( TEST_FILE ) );
    EXPECT_EQ( true, file_sys.exists( TEST_FILE ) );
 
    EXPECT_EQ( true, file_sys.remove( TEST_FILE ) );
-   EXPECT_EQ( false, file_sys.exists( TEST_FILE ) );
+   EXPECT_FALSE( file_sys.exists( TEST_FILE ) );
 }
 
 TEST_F( FileSystemInterfaceTest, OpenWriteReadDelete ) {
@@ -97,7 +97,7 @@ TEST_F( FileSystemInterfaceTest, OpenWriteReadDelete ) {
    FileSystemInterface file_sys;
 
    EXPECT_EQ( true, file_sys.setRoot( TEST_ROOT ) );
-   EXPECT_EQ( false, file_sys.exists( TEST_FILE ) );
+   EXPECT_FALSE( file_sys.exists( TEST_FILE ) );
 
    std::ofstream out_stream;
    EXPECT_EQ( true, file_sys.open( TEST_FILE, out_stream ) );
@@ -113,13 +113,13 @@ TEST_F( FileSystemInterfaceTest, OpenWriteReadDelete ) {
    EXPECT_EQ( true, file_sys.open( TEST_FILE, in_stream ) );
 
    char read_buffer[ 80 ] = {0};
-   EXPECT_EQ( false, in_stream.eof() );
+   EXPECT_FALSE( in_stream.eof() );
    in_stream.getline( read_buffer, sizeof( read_buffer ) );
    EXPECT_STREQ( TEST_STRING.c_str(), read_buffer );
    in_stream.close();
 
    EXPECT_EQ( true, file_sys.remove( TEST_FILE ) );
-   EXPECT_EQ( false, file_sys.exists( TEST_FILE ) );
+   EXPECT_FALSE( file_sys.exists( TEST_FILE ) );
 }
 
 TEST_F( FileSystemInterfaceTest, StageFile ) {
@@ -129,7 +129,7 @@ TEST_F( FileSystemInterfaceTest, StageFile ) {
    FileSystemInterface file_sys;
 
    EXPECT_EQ( true, file_sys.setRoot( TEST_ROOT ) );
-   EXPECT_EQ( false, file_sys.exists( TEST_FILE ) );
+   EXPECT_FALSE( file_sys.exists( TEST_FILE ) );
 
    std::ofstream out_stream;
    boost::filesystem::path stage_filename;
@@ -139,7 +139,7 @@ TEST_F( FileSystemInterfaceTest, StageFile ) {
    out_stream.close();
 
    EXPECT_EQ( true, file_sys.remove( stage_filename ) );
-   EXPECT_EQ( false, file_sys.exists( stage_filename ) );
+   EXPECT_FALSE( file_sys.exists( stage_filename ) );
 }
 
 TEST_F( FileSystemInterfaceTest, SwapFiles ) {

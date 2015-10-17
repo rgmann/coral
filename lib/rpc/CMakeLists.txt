@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project( libcoral_rpc )
 
-find_package( Boost 1.46 REQUIRED )
+find_package( Boost 1.47 REQUIRED )
 
 set( LIBNAME rpc )
 add_definitions ("-Wall -g")

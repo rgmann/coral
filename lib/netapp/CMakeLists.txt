@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project( libnetapp )
 
-find_package( Boost 1.46 REQUIRED )
+find_package( Boost 1.47 REQUIRED )
 add_definitions ("-Wall -g")
 add_definitions ("-Wno-unused-local-typedefs")
 

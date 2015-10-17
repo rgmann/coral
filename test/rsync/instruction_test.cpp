@@ -138,7 +138,7 @@ TEST_F( InstructionTest, TestEndInstructionSuccess ) {
    // EXPECT_NE( NULL, recv_instruction.instruction() );
    EXPECT_EQ( true, recv_instruction.valid() );
    EXPECT_EQ( EndInstruction::Type, recv_instruction.type() );
-   EXPECT_EQ( false, recv_instruction.canceled() );
+   EXPECT_FALSE( recv_instruction.canceled() );
    EXPECT_EQ( kRsyncSuccess, recv_instruction.error() );
 }
 

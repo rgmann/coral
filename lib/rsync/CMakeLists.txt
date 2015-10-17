@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 set( LIBNAME coral_rsync )
 project( lib${LIBNAME} )
 
-find_package( Boost 1.46 REQUIRED )
+find_package( Boost 1.47 REQUIRED )
 
 set( LIB_SRC_DIR rsync )
 

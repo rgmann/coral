@@ -7,7 +7,7 @@ cmake_policy(SET CMP0015 NEW)
 add_definitions( "-Wall" )
 add_definitions( "-Wno-unused-local-typedefs" )
 
-find_package( Boost 1.46 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
+find_package( Boost 1.47 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 
 enable_testing()
 find_package(GTest REQUIRED)

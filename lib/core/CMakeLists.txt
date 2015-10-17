@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project( libcoral_core )
 
-find_package( Boost 1.46 REQUIRED )
+find_package( Boost 1.47 REQUIRED )
 
 include_directories( ${Boost_INCLUDE_DIRS} )
 
