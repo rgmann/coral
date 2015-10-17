@@ -30,8 +30,8 @@ link_directories( ${BASE_DIR}/lib/rsync )
 
 add_executable( rsync_client rsync_client.cpp )
 
-target_link_libraries( rsync_client ${Boost_LIBRARIES})
-target_link_libraries( rsync_client coral_core )
-target_link_libraries( rsync_client netapp_common )
-target_link_libraries( rsync_client netapp_client )
 target_link_libraries( rsync_client coral_rsync )
+target_link_libraries( rsync_client netapp_client )
+target_link_libraries( rsync_client netapp_common )
+target_link_libraries( rsync_client coral_core )
+target_link_libraries( rsync_client ${Boost_LIBRARIES})

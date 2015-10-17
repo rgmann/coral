@@ -122,7 +122,7 @@ Instruction::~Instruction()
 bool Instruction::valid() const
 {
    return (
-      ( instruction_ptr_ != nullptr ) &&
+      instruction_ptr_ &&
       instruction_ptr_->valid() &&
       ( instruction_ptr_->type() == type_ )
    );

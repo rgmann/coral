@@ -34,7 +34,7 @@
 #include <vector>
 #include <utility>
 #include <sstream>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include <google/protobuf/io/printer.h>
 #include "StringHelper.h"
 #include "RpcServiceGenerator.h"
@@ -123,7 +123,7 @@ bool RpcServiceGenerator::generate_client_resource_stub_header(
    std::string filename = service_ptr->name() + "ClientStub.h";
 
    // Open a stream to the output file.
-   std::unique_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
+   boost::scoped_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
 
    if ( stream )
    {
@@ -205,7 +205,7 @@ bool RpcServiceGenerator::generate_client_resource_stub_imp(
    std::string filename = service_ptr->name() + "ClientStub.cpp";
 
    // Open a stream to the output file.
-   std::unique_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
+   boost::scoped_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
 
    if ( stream )
    {
@@ -286,7 +286,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_header(
    std::string filename = service_ptr->name() + "ServerStub.h";
 
    // Open a stream to the output file.
-   std::unique_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
+   boost::scoped_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
 
    if ( stream )
    {
@@ -386,7 +386,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_imp(
    std::string filename = service_ptr->name() + "ServerStub.cpp";
 
    // Open a stream to the output file.
-   std::unique_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
+   boost::scoped_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
 
    if ( stream )
    {
@@ -466,7 +466,7 @@ bool RpcServiceGenerator::generate_server_action_headers(
                              method_ptr->name()  + "Action.h";
 
       // Open a stream to the output file.
-      std::unique_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
+      boost::scoped_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
 
       if ( stream )
       {
@@ -541,7 +541,7 @@ bool RpcServiceGenerator::generate_server_action_imp(
                              method_ptr->name()  + "Action.cpp";
 
       // Open a stream to the output file.
-      std::unique_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
+      boost::scoped_ptr<ZeroCopyOutputStream> stream( context_->Open( filename ) );
 
       if ( stream )
       {

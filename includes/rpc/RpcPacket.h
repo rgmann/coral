@@ -46,7 +46,7 @@ public:
 
    static const ui32 kRpcMarkerSize = 7;
    
-   struct __attribute ((__packed__)) Data
+   struct Data
    {
       char marker[ kRpcMarkerSize ];
       ui32 rpcId;

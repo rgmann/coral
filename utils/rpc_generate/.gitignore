@@ -7,5 +7,5 @@ CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 Makefile
-protoc-gen-libergen
+protoc-gen-coralrpc
 

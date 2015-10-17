@@ -37,7 +37,7 @@
 
 #include <fstream>
 #include <string.h>
-#include <memory>
+#include <boost/shared_ptr.hpp>
 #include "Log.h"
 #include "JobDescriptor.h"
 #include "Segment.h"
@@ -139,7 +139,7 @@ private:
 };
 
 
-typedef  std::shared_ptr<RawInstruction> RawInstructionPtr;
+typedef  boost::shared_ptr<RawInstruction> RawInstructionPtr;
 class Instruction {
 public:
 
