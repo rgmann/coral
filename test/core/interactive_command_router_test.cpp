@@ -88,7 +88,7 @@ TEST_F( InteractiveCommandRouterTest, CommandParsing ) {
    router.processLine( stream );
    EXPECT_EQ( true, first_command.received_args_.empty() );
    EXPECT_FALSE( second_command.received_args_.empty() );
-   EXPECT_EQ( 3, second_command.received_args_.size() );
+   EXPECT_EQ( 3u, second_command.received_args_.size() );
    EXPECT_EQ( "arg1", second_command.received_args_[ 0 ] );
    EXPECT_EQ( "arg2", second_command.received_args_[ 1 ] );
    EXPECT_EQ( "arg3", second_command.received_args_[ 2 ] );

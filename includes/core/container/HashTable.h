@@ -46,20 +46,20 @@
 
 namespace coral {
 
-template<int KeySize, typename Type>
+template<size_t KeySize, typename Type>
 class HashTable {
 public:
 
   HashTable();
   ~HashTable();
 
-  void insert(int key, Type value);
+  void insert(size_t key, Type value);
 
   template<typename Comparator>
-  bool remove(int key, Type& value, Comparator& comp);
+  bool remove(size_t key, Type& value, Comparator& comp);
 
   template<typename Comparator>
-  bool find(int key, Type& item, Comparator& comp);
+  bool find(size_t key, Type& item, Comparator& comp);
 
 
   void clear();
@@ -78,7 +78,7 @@ public:
 
 private:
 
-  typedef std::pair<int, Type> Item;
+  typedef std::pair<size_t, Type> Item;
   typedef std::list<Item> Bucket;
 
   ///
@@ -87,12 +87,12 @@ private:
   /// TODO: Consider a more sophisticated hash function to more
   /// evenly distribute elements to buckets.
   ///
-  size_t hash(int key) { return (size_t)( key % bucket_count_ ); };
+  size_t hash(size_t key) { return (size_t)( key % bucket_count_ ); };
 
   /**
    * Access an item by item by key and comparison functor.
    *
-   * @param key[int]    - Hash table key
+   * @param key[size_t]    - Hash table key
    * @param value[Type] - If an item is found, it returned in value. The value
    *                      reference is not modified unless an item is found.
    * @param compare[Comparator] - Item comparison functor
@@ -103,7 +103,7 @@ private:
    *                      by "first".
    */
   template<typename Comparator>
-  std::pair<size_t, typename Bucket::iterator> get(int, Type& value, Comparator&);
+  std::pair<size_t, typename Bucket::iterator> get(size_t, Type& value, Comparator&);
 
 
 private:
@@ -119,35 +119,35 @@ private:
 };
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type>
+template<size_t KeySize, typename Type>
 HashTable<KeySize, Type>::HashTable()
 : item_count_(0)
 {
-  bucket_count_ = (int)std::pow(2, KeySize);
+  bucket_count_ = (size_t)std::pow(2, KeySize);
 
-  for (int nBucket = 0; nBucket < bucket_count_; nBucket++)
+  for (size_t nBucket = 0; nBucket < bucket_count_; nBucket++)
   {
     buckets_.push_back(Bucket());
   }
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type>
+template<size_t KeySize, typename Type>
 HashTable<KeySize, Type>::~HashTable()
 {
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type>
-void HashTable<KeySize, Type>::insert(int key, Type value)
+template<size_t KeySize, typename Type>
+void HashTable<KeySize, Type>::insert(size_t key, Type value)
 {
   buckets_.at( hash( key ) ).push_back( std::make_pair( key, value ) );
   item_count_++;
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type> template<typename Comparator>
-bool HashTable<KeySize, Type>::remove(int key, Type& value, Comparator& comp)
+template<size_t KeySize, typename Type> template<typename Comparator>
+bool HashTable<KeySize, Type>::remove(size_t key, Type& value, Comparator& comp)
 {
   std::pair<size_t, typename HashTable<KeySize, Type>::Bucket::iterator> location;
 
@@ -163,8 +163,8 @@ bool HashTable<KeySize, Type>::remove(int key, Type& value, Comparator& comp)
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type> template<typename Comparator>
-bool HashTable<KeySize, Type>::find(int key, Type& item, Comparator& comp)
+template<size_t KeySize, typename Type> template<typename Comparator>
+bool HashTable<KeySize, Type>::find(size_t key, Type& item, Comparator& comp)
 {
   std::pair<size_t, typename HashTable<KeySize, Type>::Bucket::iterator> location;
 
@@ -174,7 +174,7 @@ bool HashTable<KeySize, Type>::find(int key, Type& item, Comparator& comp)
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type>
+template<size_t KeySize, typename Type>
 void HashTable<KeySize, Type>::clear()
 {
   for (size_t bucket_index = 0; bucket_index < bucket_count_; bucket_index++)
@@ -186,7 +186,7 @@ void HashTable<KeySize, Type>::clear()
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type> template<typename Destroyer>
+template<size_t KeySize, typename Type> template<typename Destroyer>
 void HashTable<KeySize, Type>::clear(Destroyer& destroy)
 {
   for (size_t bucket_index = 0; bucket_index < bucket_count_; bucket_index++)
@@ -206,9 +206,9 @@ void HashTable<KeySize, Type>::clear(Destroyer& destroy)
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type> template<typename Comparator>
+template<size_t KeySize, typename Type> template<typename Comparator>
 std::pair<size_t, typename HashTable<KeySize, Type>::Bucket::iterator>
-HashTable<KeySize, Type>::get(int key, Type& value, Comparator& comp)
+HashTable<KeySize, Type>::get(size_t key, Type& value, Comparator& comp)
 {
   size_t hashed_key   = hash(key);
   size_t bucket_index = std::string::npos;
@@ -232,7 +232,7 @@ HashTable<KeySize, Type>::get(int key, Type& value, Comparator& comp)
 }
 
 //----------------------------------------------------------------------------
-template<int KeySize, typename Type>
+template<size_t KeySize, typename Type>
 void HashTable<KeySize, Type>::histogram( std::ostream& stream )
 {
   typename std::vector<Bucket>::iterator bucket_iterator = buckets_.begin();

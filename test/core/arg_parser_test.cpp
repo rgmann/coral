@@ -27,8 +27,6 @@ protected:
 };
 
 TEST_F( ArgParserTest, InvalidDefinitions ) {
-   // "name: Port, primary: p, alt: port, type: opt, \
-   //    vtype: string, required, desc: Set port number"
    EXPECT_EQ( NULL, Argument::Create("") );
    EXPECT_EQ( NULL, Argument::Create(
       "primary: p, alt: port, type: opt, \
