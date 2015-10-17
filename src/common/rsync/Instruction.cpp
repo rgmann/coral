@@ -41,10 +41,10 @@
 using namespace coral::rsync;
 using namespace coral::netapp;
 
-const ui32 BeginInstruction::Type;
-const ui32 SegmentInstruction::Type;
-const ui32 ChunkInstruction::Type;
-const ui32 EndInstruction::Type;
+const i32 BeginInstruction::Type;
+const i32 SegmentInstruction::Type;
+const i32 ChunkInstruction::Type;
+const i32 EndInstruction::Type;
 
 //-----------------------------------------------------------------------------
 AssemblerState::AssemblerState( SegmentAccessor& accessor )
@@ -159,7 +159,7 @@ RawInstruction::RawInstruction( const void* data_ptr, ui32 length )
    memcpy( data_ptr_, data_ptr, length_ );
 }
 //-----------------------------------------------------------------------------
-RawInstruction::RawInstruction( ui32 type, ui32 length )
+RawInstruction::RawInstruction( i32 type, ui32 length )
 :  data_ptr_ ( NULL )
 ,  length_ ( 0 )
 {

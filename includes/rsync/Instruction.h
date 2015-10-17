@@ -107,7 +107,7 @@ public:
 
 
    RawInstruction( const void* data_ptr, ui32 length );
-   RawInstruction( ui32 type, ui32 length );
+   RawInstruction( i32 type, ui32 length );
    ~RawInstruction();
 
    //
@@ -176,7 +176,7 @@ protected:
 class BeginInstruction : public Instruction {
 public:
 
-   static const ui32 Type = 0;
+   static const i32 Type = 0;
 
    //
    //
@@ -199,7 +199,7 @@ public:
 class SegmentInstruction : public Instruction {
 public:
 
-   static const ui32 Type = 1;
+   static const i32 Type = 1;
 
    //
    //
@@ -222,7 +222,7 @@ public:
 class ChunkInstruction : public Instruction {
 public:
 
-   static const ui32 Type = 2;
+   static const i32 Type = 2;
 
    //
    //
@@ -250,7 +250,7 @@ public:
 class EndInstruction : public Instruction {
 public:
 
-   static const ui32 Type = 3;
+   static const i32 Type = 3;
 
    struct __attribute__((packed)) data {
       bool canceled;
