@@ -7,6 +7,9 @@ find_package( Boost 1.47 REQUIRED )
 
 set( LIB_SRC_DIR rsync )
 
+#
+# Export an include path
+#
 set( CORAL_RSYNC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../includes )
 
 get_directory_property(has_parent PARENT_DIRECTORY)

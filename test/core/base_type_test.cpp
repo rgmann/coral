@@ -60,16 +60,16 @@ protected:
 };
 
 TEST_F( BaseTypeTest, BaseTypeSizes ) {
-   EXPECT_EQ( 1, sizeof( i8 ) );
-   EXPECT_EQ( 1, sizeof( ui8 ) );
-   EXPECT_EQ( 2, sizeof( i16 ) );
-   EXPECT_EQ( 2, sizeof( ui16 ) );
-   EXPECT_EQ( 4, sizeof( i32 ) );
-   EXPECT_EQ( 4, sizeof( ui32 ) );
-   EXPECT_EQ( 8, sizeof( i64 ) );
-   EXPECT_EQ( 8, sizeof( ui64 ) );
-   EXPECT_EQ( 4, sizeof( f32 ) );
-   EXPECT_EQ( 8, sizeof( f64 ) );
+   EXPECT_EQ( 1u, sizeof( i8 ) );
+   EXPECT_EQ( 1u, sizeof( ui8 ) );
+   EXPECT_EQ( 2u, sizeof( i16 ) );
+   EXPECT_EQ( 2u, sizeof( ui16 ) );
+   EXPECT_EQ( 4u, sizeof( i32 ) );
+   EXPECT_EQ( 4u, sizeof( ui32 ) );
+   EXPECT_EQ( 8u, sizeof( i64 ) );
+   EXPECT_EQ( 8u, sizeof( ui64 ) );
+   EXPECT_EQ( 4u, sizeof( f32 ) );
+   EXPECT_EQ( 8u, sizeof( f64 ) );
 }
 
 #endif // BASE_TYPE_TEST_CPP

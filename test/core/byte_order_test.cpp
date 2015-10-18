@@ -70,13 +70,12 @@ TEST_F( ByteSwapTest, SwapTypes ) {
    i64  tempS64 = 0x0123456789ABCDEF;
    ui64 tempU64 = 0x0123456789ABCDEF;
 
-   EXPECT_EQ( 0x2301, ByteOrder::NetSwap( tempS16 ) );
-   EXPECT_EQ( 0x2301, ByteOrder::NetSwap( tempU16 ) );
-   EXPECT_EQ( 0x67452301, ByteOrder::NetSwap( tempS32 ) );
-   EXPECT_EQ( 0x67452301, ByteOrder::NetSwap( tempU32 ) );
-   EXPECT_EQ( 0xEFCDAB8967452301, ByteOrder::NetSwap( tempS64 ) );
-   EXPECT_EQ( 0xEFCDAB8967452301, ByteOrder::NetSwap( tempU64 ) );
-   
+   EXPECT_EQ( (i16)0x2301, ByteOrder::NetSwap( tempS16 ) );
+   EXPECT_EQ( 0x2301u, ByteOrder::NetSwap( tempU16 ) );
+   EXPECT_EQ( (i32)0x67452301, ByteOrder::NetSwap( tempS32 ) );
+   EXPECT_EQ( 0x67452301u, ByteOrder::NetSwap( tempU32 ) );
+   EXPECT_EQ( (i64)0xEFCDAB8967452301, ByteOrder::NetSwap( tempS64 ) );
+   EXPECT_EQ( 0xEFCDAB8967452301u, ByteOrder::NetSwap( tempU64 ) );
 }
 
 

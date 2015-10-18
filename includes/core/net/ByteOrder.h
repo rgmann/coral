@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef BYTE_ORDER_H
 #define BYTE_ORDER_H
 
