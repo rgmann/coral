@@ -1,18 +1,43 @@
-## Welcome to TODO
+## Welcome to CORAL
 
-TODO is a collection of libraries
+Coral is a small collection of C++ libraries. The libraries include:
+
+    libcoral_core:
+
+        A collection of basic containers, utilities, and wrappers.
+
+
+    libcoral_netapp:
+
+        A packet-routing framework for building networked applications.
+
+
+    libcoral_rpc:
+
+        A Remote Procedure Call (RPC) framework built on coral_netapp and
+        Google Protocol Buffers <sup>1</sup>.  A _protoc_ plugin is provided
+        to generate services directly from your _.protoc_ service definitions.
+
+
+    libcoral_rsync:
+
+        An RSYNC file-synchronization implementation built on coral_netapp. The
+        library can be used to synchronize local files and/or remote files.
+        File synchronization jobs are queued, pipelined, and completed
+        asynchronous of the caller.
 
 
 ## Supported Platforms
 
-
+    * OSX
+    * Linux (tested on Ubuntu)
 
 
 ## Dependencies
 
-TODO depends on:
+Coral depends on:
 
-1. [CMake](https://cmake.org/)
+1. [CMake](https://cmake.org/)(>= 2.8)
 
     On OSX with Macports:
 
@@ -23,7 +48,7 @@ TODO depends on:
         `sudo apt-get install cmake`
 
 
-2. [Boost](http://www.boost.org/)
+2. [Boost](http://www.boost.org/)(>= 1.47)
 
     On OSX with Macports:
 
@@ -33,22 +58,59 @@ TODO depends on:
 
         `sudo apt-get install boost`
 
+    Or, on either platform, install manually, which is just as [easy](http://www.boost.org/doc/libs/1_59_0/more/getting_started/unix-variants.html).
 
-3. [GTest](https://code.google.com/p/googletest/)
+    In all cases, multi-threading support should be enabled and tagged.
+
+
+3. [GTest](https://code.google.com/p/googletest/)<sup>2</sup>
 
     1. [Download](https://code.google.com/p/googletest/downloads/list) and unzip GTest
     2. `cd gtest-x.x.x/`
     3. `cmake .`
     4. `make`
-    5. Create the environment variable GTEST_ROOT to point to the root directory of the gtest install.
+    5. Create the environment variable _GTEST_ROOT_ to point to the root directory from step #2.
+
 
 For RPC:
 
-4. [Protocol Buffers](https://developers.google.com/protocol-buffers/)
+4. [Protocol Buffers](https://developers.google.com/protocol-buffers/)<sup>1</sup>
 
     See https://github.com/google/protobuf for installation instructions.
 
 
+5.  Ruby and the Rake gem [OPTIONAL]
+
+    A simple Rakefile with two tasks, _generate_ and _situate_, is provided
+    with the RPC service generator utility. This Rakefile is a convenience,
+    but is by no means necessary. If you do want to use the Rakefile, simply
+    duplicate it to the root of your project and adjust paths as necessary.
+    See utils/rpc_generate for more details.
+
+
+## Getting Started
+
+Once the dependencies have been installed, you can build all Coral libraries,
+utilities, examples, and tests by issuing the following commands from the Coral
+root directory.
+
+    1. `cmake .`
+    2. `make all`
+    3. Create an environment variable called CORALRPC_GEN_ROOT whose value is
+       the full path to utils/rpc_generate.
+
+
 ## Examples
 
+*  An example coral::rpc project can be found in examples/rpc/search_service.
 
+*  An example coral::rsync client/server application can be found in
+   examples/rsync/cli_utility. This example also demonstrates how to use the
+   coral::netapp boost::asio-based packet router, the coral::cli command-line
+   argument parser, and the coral::cli interactive command router.
+
+
+
+
+1. Copyright 2008, Google Inc.
+2. Copyright 2007, Google Inc.

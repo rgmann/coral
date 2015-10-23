@@ -1,11 +1,21 @@
 cmake_minimum_required(VERSION 2.8)
-project( libcoral_rpc )
+
+set( LIBNAME coral_rpc )
+project( lib${LIBNAME} )
 
 find_package( Boost 1.47 REQUIRED )
 
-set( LIBNAME rpc )
+
+if ( TARGET ${LIBNAME} )
+
+  message("${LIBNAME} is already defined")
+
+else()
+
 add_definitions ("-Wall -g")
 add_definitions ("-Wno-unused-local-typedefs")
+
+set( LIB_SRC_DIR rpc )
 
 #
 # Third party includes
@@ -32,17 +42,19 @@ include_directories( "${INCLUDE_ROOT}/${LIBNAME}" )
 set( SOURCE_ROOT "../.." )
 set( COMMON_SOURCE "${SOURCE_ROOT}/src/common" )
 set( SOURCES
-"${COMMON_SOURCE}/${LIBNAME}/AsyncRpcSupervisor.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcPacket.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/BlockingRpcSupervisor.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcClient.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcClientResource.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcException.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcMarshalledCall.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcObject.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcServer.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcServerResource.cpp"
-"${COMMON_SOURCE}/${LIBNAME}/RpcSupervisor.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/AsyncRpcSupervisor.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcPacket.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/BlockingRpcSupervisor.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcClient.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcClientResource.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcException.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcMarshalledCall.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcObject.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcServer.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcServerResource.cpp"
+"${COMMON_SOURCE}/${LIB_SRC_DIR}/RpcSupervisor.cpp"
 )
 
-add_library( coral_rpc STATIC ${SOURCES} )
+add_library( ${LIBNAME} STATIC ${SOURCES} )
+
+endif()

@@ -1,22 +1,173 @@
-#require 'FileUtils'
+#
+# Copyright (c) 2015, Robert Glissmann
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
 require 'open3'
 
-liberrpc_path = '/Users/vaughanbiker/Development/liber/utils/rpc_generate/source/liber_gen/protoc-gen-libergen'
+
+#
+# Set the following constant to your temporary staging path.
+#
+SERVICE_GEN_HEADER_ROOT = 'rpc_gen_temp'
+SERVICE_GEN_SOURCE_ROOT = 'rpc_include'
+
+
+#
+# Update the following constant to point to the directory where your .proto
+# files are located.
+#
+
+
+
+RPC_GENERATOR_NAME = 'protoc-gen-coralrpc'
+RPC_GEN_ENV_VAR    = 'CORALRPC_GEN_ROOT'
+
+# Build the full path to the generator plugin.
+def get_protoc_plugin_path()
+  if ENV::has_key?( RPC_GEN_ENV_VAR )
+    rpc_generator_path = File.join( ENV[ RPC_GEN_ENV_VAR ], RPC_GENERATOR_NAME )
+
+    # Check that the plugin executable exists.
+    unless File.exist?( rpc_generator_path ) && File.executable?( rpc_generator_path )
+      raise "ERROR: Coral RPC service generator plugin not built"
+    end
+  else
+    raise "ERROR: CORALRPC_GEN_ROOT environment variable not set"
+  end
+
+  rpc_generator_path
+end
+
+class RpcGenConfigs
+  RPC_PROJECT_CONFIG_FILE = 'rpc_gen_project_settings.txt'
+  @@instance = nil
+  def initialize
+    restore_defaults
+  end
+  def restore_defaults
+    @attrs[ :proto_root_path ] = 'proto'
+    @attrs[ :service_gen_root_path ] = 'rpc_gen_temp'
+    @attrs[ :smessage_gen_root_path ] = 'rpc_gen_temp'
+  end
+  def self.instance
+    @@instance = RpcGenConfigs.new unless @@instance
+    @@instance
+  end
+  def self.[]=(key,value)
+    if instance.keys.include? key
+      instance.attrs[key] = value
+    end
+  end
+  def self.[](key)
+    instance.attrs[key]
+  end
+  def self.load
+    if File.exist? RPC_PROJECT_CONFIG_FILE
+      File.open( RPC_PROJECT_CONFIG_FILE, 'r' ) do |io|
+        io.readlines.each do |line|
+          key_value_pair = line.scan(/(\w+/)\s*=\s*([^\n]*)/).first
+          next unless key_value_pair
+          
+          [key,value] = key_value_pair
+
+          key = key.downcase.to_sym
+          if instance.attrs.keys.include? key
+            instance.attrs[ key ] = value
+          end
+        end
+      end
+    else
+      instance.restore_defaults
+    end
+  end
+  def self.save
+    File.open( RPC_PROJECT_CONFIG_FILE, 'w+' ) do |io|
+      instance.attrs.each do |key,value|
+        io.puts "#{key.to_s.upcase}=#{value}"
+      end
+    end
+  end
+end
+
+
 proto_dir = 'proto/'
 gen_stage = 'rpc_gen_temp/'
 
+task :set_proto_root, :proto_root_path do |t, args|
+  RpcGenConfigs::load
+
+  if args[ :proto_root_path ].nil?
+    raise "ERROR: #{}"
+  end
+
+  RpcGenConfigs[ :proto_root_path ] = args[ :proto_root_path ]
+
+  if File.exist?( RpcGenConfigs[ :proto_root_path ] ) == false
+    raise "ERROR: Proto path #{RpcGenConfigs[ :proto_root_path ]} does not exist."
+  elsif File.directory?( RpcGenConfigs[ :proto_root_path ] ) == false
+    raise "ERROR: Proto path #{RpcGenConfigs[ :proto_root_path ]} must specify a directory."
+  end
+
+  RpcGenConfigs::save
+end
+
+task :set_service_gen_root_path, :service_gen_root_path do |t, args|
+  RpcGenConfigs::load
+
+  if args[ :service_gen_root_path ].nil?
+    raise "ERROR: #{}"
+  end
+
+  RpcGenConfigs[ :service_gen_root_path ] = args[ :service_gen_root_path ]
+  root_path = RpcGenConfigs[ :service_gen_root_path ]
+
+  if File.exist?( root_path ) == false
+    raise "ERROR: Proto path #{root_path} does not exist."
+  elsif File.directory?( root_path ) == false
+    raise "ERROR: Proto path #{root_path} must specify a directory."
+  end
+
+  RpcGenConfigs::save
+end
+
+
 task :generate do
+  rpc_generator_path = get_protoc_plugin_path
+  
   command = "protoc "
-  command << "--plugin=protoc-gen-libergen=#{liberrpc_path} "
+  command << "--plugin=#{RPC_GENERATOR_NAME}=#{rpc_generator_path} "
   command << "--proto_path=#{proto_dir} "
   command << "--cpp_out=#{gen_stage} "
-  command << "--libergen_out=#{gen_stage} "
+  command << "--coralrpc_out=#{gen_stage} "
   command << "#{proto_dir}*.proto"
   stdout_str, status = Open3.capture2(command)
   puts stdout_str
 end
 
 task :situate do
+
   Dir.glob(File.join(gen_stage, '*.{h,cpp,cc}')) do |filename|
 
     filename = File.basename(filename)
@@ -34,7 +185,7 @@ task :situate do
     destination = ''
     if filename.include? 'ClientStub'
       destination << File.join('client', file_type)
-    elsif filename.include? 'ServerStub' or filename.include? 'Action'
+    elsif filename.include? 'ServerStub' or filename.include? 'Wrapper'
       destination << File.join('server', file_type)
     elsif filename.include? '.pb.h'
       destination << File.join('common', file_type)
@@ -44,8 +195,6 @@ task :situate do
 
     unless destination.empty?
       source = File.join(gen_stage, filename)
-#      destination = File.join(destination, filename)
-#      puts "Moving #{source} to #{destination}"
       FileUtils.mv(source, destination)
     end
   end

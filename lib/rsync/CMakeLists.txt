@@ -7,20 +7,10 @@ find_package( Boost 1.47 REQUIRED )
 
 set( LIB_SRC_DIR rsync )
 
-#
-# Export an include path
-#
-set( CORAL_RSYNC_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../includes )
-
-get_directory_property(has_parent PARENT_DIRECTORY)
-if (has_parent)
-set( CORAL_RSYNC_INCLUDE_DIR ${CORAL_RSYNC_INCLUDE_DIR} PARENT_SCOPE )
-endif()
-
 
 if ( TARGET ${LIBNAME} )
 
-message("${LIBNAME} is already defined")
+  message("${LIBNAME} is already defined")
 
 else()
 
