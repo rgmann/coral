@@ -1,3 +1,4 @@
+*.dylib
 *.o
 *.a
 CMakeCache.txt

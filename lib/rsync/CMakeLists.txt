@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy( SET CMP0042 NEW )
 
 set( LIBNAME coral_rsync )
 project( lib${LIBNAME} )
 
-find_package( Boost 1.47 REQUIRED )
+find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
 
 set( LIB_SRC_DIR rsync )
 
@@ -22,9 +23,9 @@ add_definitions ("-Wno-unused-local-typedefs")
 #
 include_directories( ${Boost_INCLUDE_DIRS} )
 
-set( INCLUDE_ROOT "../../includes" )
-set( CORE_INCLUDE "${INCLUDE_ROOT}/core" )
-set( NETAPP_INCLUDE "${INCLUDE_ROOT}/netapp" )
+set( INCLUDE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../includes )
+set( CORE_INCLUDE ${INCLUDE_ROOT}/core )
+set( NETAPP_INCLUDE ${INCLUDE_ROOT}/netapp )
 include_directories( "${CORE_INCLUDE}" )
 include_directories( "${CORE_INCLUDE}/crypto" )
 include_directories( "${CORE_INCLUDE}/file_system" )
@@ -38,8 +39,8 @@ include_directories( "${CORE_INCLUDE}/net" )
 include_directories( "${NETAPP_INCLUDE}/common" )
 include_directories( "${INCLUDE_ROOT}/rsync" )
 
-set( SOURCE_ROOT "../../src" )
-set( COMMON_SOURCE "${SOURCE_ROOT}/common")
+set( SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../src )
+set( COMMON_SOURCE ${SOURCE_ROOT}/common )
 set( SOURCES
 "${COMMON_SOURCE}/${LIB_SRC_DIR}/ResourcePath.cpp"
 "${COMMON_SOURCE}/${LIB_SRC_DIR}/JobDescriptor.cpp"
@@ -80,7 +81,15 @@ set( SOURCES
 "${COMMON_SOURCE}/${LIB_SRC_DIR}/JobRequestCallback.cpp"
 )
 
-add_library( coral_rsync STATIC ${SOURCES} )
-#add_library( coral_rsync SHARED ${SOURCES} )
+link_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../core )
+link_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../netapp )
+
+add_library( ${LIBNAME} STATIC ${SOURCES} )
+
+add_library( ${LIBNAME}_shared SHARED ${SOURCES} )
+target_link_libraries(
+  ${LIBNAME}_shared ${Boost_LIBRARIES}
+  coral_core
+  coral_netapp_common_shared )
 
 endif()

@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy( SET CMP0042 NEW )
 
 set( LIBNAME coral_rpc )
 project( lib${LIBNAME} )
 
-find_package( Boost 1.47 REQUIRED )
-
+find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
+find_package( Protobuf REQUIRED )
 
 if ( TARGET ${LIBNAME} )
 
@@ -12,8 +13,8 @@ if ( TARGET ${LIBNAME} )
 
 else()
 
-add_definitions ("-Wall -g")
-add_definitions ("-Wno-unused-local-typedefs")
+add_definitions( "-Wall -g" )
+add_definitions( "-Wno-unused-local-typedefs" )
 
 set( LIB_SRC_DIR rpc )
 
@@ -21,9 +22,10 @@ set( LIB_SRC_DIR rpc )
 # Third party includes
 #
 include_directories( ${Boost_INCLUDE_DIRS} )
+include_directories( ${PROTOBUF_INCLUDE_DIRS} )
 
 
-set( INCLUDE_ROOT "../../includes" )
+set( INCLUDE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../includes )
 set( CORE_INCLUDE "${INCLUDE_ROOT}/core" )
 set( NETAPP_INCLUDE "${INCLUDE_ROOT}/netapp" )
 include_directories( "${CORE_INCLUDE}" )
@@ -37,9 +39,9 @@ include_directories( "${CORE_INCLUDE}/time" )
 include_directories( "${CORE_INCLUDE}/logging" )
 include_directories( "${CORE_INCLUDE}/net" )
 include_directories( "${NETAPP_INCLUDE}/common" )
-include_directories( "${INCLUDE_ROOT}/${LIBNAME}" )
+include_directories( "${INCLUDE_ROOT}/${LIB_SRC_DIR}" )
 
-set( SOURCE_ROOT "../.." )
+set( SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../.. )
 set( COMMON_SOURCE "${SOURCE_ROOT}/src/common" )
 set( SOURCES
 "${COMMON_SOURCE}/${LIB_SRC_DIR}/AsyncRpcSupervisor.cpp"
@@ -56,5 +58,12 @@ set( SOURCES
 )
 
 add_library( ${LIBNAME} STATIC ${SOURCES} )
+
+add_library( ${LIBNAME}_shared SHARED ${SOURCES} )
+target_link_libraries( ${LIBNAME}_shared
+  ${Boost_LIBRARIES}
+  coral_core_shared
+  coral_netapp_common_shared
+  ${PROTOBUF_LIBRARIES} )
 
 endif()

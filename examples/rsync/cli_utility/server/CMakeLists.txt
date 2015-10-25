@@ -6,7 +6,7 @@ cmake_policy(SET CMP0015 NEW)
 find_package( Boost 1.47 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 include_directories( ${Boost_INCLUDE_DIRS} )
 
-set( BASE_DIR ../../../.. )
+set( BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../.. )
 set( INCLUDE_ROOT "${BASE_DIR}/includes" )
 set( CORE_INCLUDE ${INCLUDE_ROOT}/core )
 set( NETAPP_INCLUDE ${INCLUDE_ROOT}/netapp )
@@ -31,10 +31,10 @@ link_directories( ${BASE_DIR}/lib/rsync )
 add_executable( rsync_server rsync_server.cpp )
 
 
-target_link_libraries( rsync_server coral_rsync )
-target_link_libraries( rsync_server netapp_server )
-target_link_libraries( rsync_server netapp_common )
-target_link_libraries( rsync_server coral_core )
+target_link_libraries( rsync_server coral_rsync_shared )
+target_link_libraries( rsync_server coral_netapp_server_shared )
+target_link_libraries( rsync_server coral_netapp_common_shared )
+target_link_libraries( rsync_server coral_core_shared )
 target_link_libraries( rsync_server ${Boost_LIBRARIES})
 target_link_libraries( rsync_server pthread )
 

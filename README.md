@@ -2,24 +2,26 @@
 
 Coral is a small collection of C++ libraries. The libraries include:
 
-    libcoral_core:
+    coral::core:
 
         A collection of basic containers, utilities, and wrappers.
 
 
-    libcoral_netapp:
+    coral::netapp:
 
         A packet-routing framework for building networked applications.
+        This framework allows you to decouple application logic from
+        from networking logic.
 
 
-    libcoral_rpc:
+    coral::rpc:
 
         A Remote Procedure Call (RPC) framework built on coral_netapp and
         Google Protocol Buffers <sup>1</sup>.  A _protoc_ plugin is provided
         to generate services directly from your _.protoc_ service definitions.
 
 
-    libcoral_rsync:
+    coral::rsync:
 
         An RSYNC file-synchronization implementation built on coral_netapp. The
         library can be used to synchronize local files and/or remote files.
@@ -58,7 +60,7 @@ Coral depends on:
 
         `sudo apt-get install boost`
 
-    Or, on either platform, install manually, which is just as [easy](http://www.boost.org/doc/libs/1_59_0/more/getting_started/unix-variants.html).
+    Or, on either platform, install manually, which is nearly as [easy](http://www.boost.org/doc/libs/1_59_0/more/getting_started/unix-variants.html).
 
     In all cases, multi-threading support should be enabled and tagged.
 
@@ -81,11 +83,12 @@ For RPC:
 
 5.  Ruby and the Rake gem [OPTIONAL]
 
-    A simple Rakefile with two tasks, _generate_ and _situate_, is provided
-    with the RPC service generator utility. This Rakefile is a convenience,
-    but is by no means necessary. If you do want to use the Rakefile, simply
-    duplicate it to the root of your project and adjust paths as necessary.
-    See utils/rpc_generate for more details.
+    A Rakefile is provided with the RPC service generator utility (in
+    utils/rpc_generate). The Rakefile includes tasks to simplify coral::rpc
+    service generation (type "rake help" for more information). This Rakefile
+    is a convenience, but is by no means necessary. If you do want to use the
+    Rakefile, simply duplicate it to the root of your project and adjust paths
+    as necessary using the helper tasks (again, type "rake help" for details).
 
 
 ## Getting Started
@@ -94,8 +97,8 @@ Once the dependencies have been installed, you can build all Coral libraries,
 utilities, examples, and tests by issuing the following commands from the Coral
 root directory.
 
-    1. `cmake .`
-    2. `make all`
+    1. `cmake .` to configure the project
+    2. `make all` to build the project
     3. Create an environment variable called CORALRPC_GEN_ROOT whose value is
        the full path to utils/rpc_generate.
 

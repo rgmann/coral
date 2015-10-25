@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
-project( libnetapp )
+project( libcoral_netapp )
+cmake_policy( SET CMP0042 NEW )
 
-find_package( Boost 1.47 REQUIRED )
-add_definitions ("-Wall -g")
-add_definitions ("-Wno-unused-local-typedefs")
+find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
+add_definitions( "-Wall -g" )
+add_definitions( "-Wno-unused-local-typedefs" )
 
 #
 # Third party includes
@@ -13,7 +14,7 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 #
 # Common include paths
 #
-set( INCLUDE_ROOT "../../includes" )
+set( INCLUDE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../includes )
 set( CORE_INCLUDE "${INCLUDE_ROOT}/core" )
 set( NETAPP_INCLUDE "${INCLUDE_ROOT}/netapp" )
 include_directories( "${CORE_INCLUDE}" )
@@ -27,9 +28,11 @@ include_directories( "${CORE_INCLUDE}/time" )
 include_directories( "${CORE_INCLUDE}/logging" )
 include_directories( "${CORE_INCLUDE}/net" )
 include_directories( "${NETAPP_INCLUDE}/common" )
+include_directories( "${NETAPP_INCLUDE}/client" )
+include_directories( "${NETAPP_INCLUDE}/server" )
 
 
-set( SOURCE_ROOT "../../src" )
+set( SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../src )
 file( GLOB COMMON_SOURCE
 "${SOURCE_ROOT}/common/netapp/common/*.cpp"
 )
@@ -42,9 +45,28 @@ file( GLOB CLIENT_SOURCE
 "${SOURCE_ROOT}/common/netapp/client/*.cpp"
 )
 
-add_library( netapp_common STATIC ${COMMON_SOURCE} )
-add_library( netapp_server STATIC ${SERVER_SOURCE} )
-add_library( netapp_client STATIC ${CLIENT_SOURCE} )
+add_library( coral_netapp_common STATIC ${COMMON_SOURCE} )
+add_library( coral_netapp_server STATIC ${SERVER_SOURCE} )
+add_library( coral_netapp_client STATIC ${CLIENT_SOURCE} )
 
-target_include_directories( netapp_server PUBLIC "${NETAPP_INCLUDE}/server" )
-target_include_directories( netapp_client PUBLIC "${NETAPP_INCLUDE}/client" )
+target_include_directories( coral_netapp_server PUBLIC "${NETAPP_INCLUDE}/server" )
+target_include_directories( coral_netapp_client PUBLIC "${NETAPP_INCLUDE}/client" )
+
+add_library( coral_netapp_common_shared SHARED ${COMMON_SOURCE} )
+target_link_libraries(
+  coral_netapp_common_shared
+  ${Boost_LIBRARIES}
+  coral_core )
+
+add_library( coral_netapp_server_shared SHARED ${SERVER_SOURCE} )
+target_link_libraries(
+  coral_netapp_server_shared
+  ${Boost_LIBRARIES}
+  coral_core )
+
+add_library( coral_netapp_client_shared SHARED ${CLIENT_SOURCE} )
+target_link_libraries(
+  coral_netapp_client_shared
+  ${Boost_LIBRARIES}
+  coral_core )
+

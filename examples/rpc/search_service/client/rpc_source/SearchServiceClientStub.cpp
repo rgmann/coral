@@ -26,7 +26,7 @@ SearchServiceClientStub::~SearchServiceClientStub()
 void SearchServiceClientStub::Search(
    const Person&    request,
    Person_PhoneNumber&         response,
-   AsyncRpcSupervisor* supervisor )
+   AsyncRpcSupervisor* supervisor ) throw(coral::rpc::RpcException)
 {
    if ( call( "Search", request, response, supervisor ) == false )
    {

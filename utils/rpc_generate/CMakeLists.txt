@@ -13,7 +13,7 @@ include_directories( ${Boost_INCLUDE_DIRS} )
 
 find_package( Protobuf REQUIRED )
 
-set( INCLUDE_ROOT "../../includes" )
+set( INCLUDE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../includes )
 set( CORE_INCLUDE "${INCLUDE_ROOT}/core")
 include_directories( ${PROTOBUF_INCLUDE_DIRS} )
 
@@ -24,7 +24,7 @@ include_directories( "${CORE_INCLUDE}/helpers" )
 include_directories( "${CORE_INCLUDE}/container" )
 
 
-link_directories( "../../lib/core" )
+link_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../../lib/core )
 
 add_executable(
   ${TARGET_NAME}
@@ -32,7 +32,7 @@ add_executable(
   rpc_generator.cpp
 )
 
-target_link_libraries( ${TARGET_NAME} coral_core )
+target_link_libraries( ${TARGET_NAME} coral_core_shared )
 target_link_libraries( ${TARGET_NAME} ${PROTOBUF_LIBRARIES} )
 target_link_libraries( ${TARGET_NAME} protoc )
 target_link_libraries( ${TARGET_NAME} pthread )

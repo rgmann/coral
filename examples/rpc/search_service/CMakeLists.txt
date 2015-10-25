@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 2.8)
+cmake_policy( SET CMP0015 NEW )
+cmake_policy( SET CMP0042 NEW )
 
 set( TARGET search_service )
 project( ${TARGET} )
 
-cmake_policy(SET CMP0015 NEW)
-add_definitions ("-Wall -g")
-add_definitions ("-Wno-unused-local-typedefs")
+add_definitions( "-Wall -g" )
+add_definitions( "-Wno-unused-local-typedefs" )
 
 find_package( Boost 1.47 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 find_package( Protobuf REQUIRED )
 
-set( INCLUDE_BASE "../../../includes" )
 include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories( ${PROTOBUF_INCLUDE_DIRS} )
 
-set( INCLUDE_ROOT ../../../includes )
+set( INCLUDE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../includes )
 set( CORE_INCLUDE ${INCLUDE_ROOT}/core )
 set( NETAPP_INCLUDE ${INCLUDE_ROOT}/netapp )
 include_directories( "${CORE_INCLUDE}" )
@@ -34,7 +34,7 @@ include_directories( "common/rpc_include" )
 include_directories( "client/rpc_include" )
 include_directories( "server/rpc_include" )
 
-set( LIB_ROOT ../../../lib )
+set( LIB_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../lib )
 link_directories( ${LIB_ROOT}/core )
 link_directories( ${LIB_ROOT}/netapp )
 link_directories( ${LIB_ROOT}/rpc )

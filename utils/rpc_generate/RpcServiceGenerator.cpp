@@ -259,7 +259,7 @@ bool RpcServiceGenerator::generate_client_resource_stub_imp(
             "void $service$ClientStub::$method$(\n"
             "   const $request$&    request,\n"
             "   $response$&         response,\n"
-            "   AsyncRpcSupervisor* supervisor )\n"
+            "   AsyncRpcSupervisor* supervisor ) throw(coral::rpc::RpcException)\n"
             "{\n"
             "   if ( call( \"$method$\", request, response, supervisor ) == false )\n"
             "   {\n"
@@ -430,12 +430,12 @@ bool RpcServiceGenerator::generate_server_resource_stub_imp(
          const MethodDescriptor* method_ptr = service_ptr->method( method_index );
 
          std::map<std::string,std::string> local_variables( variables );
-         local_variables[ "action" ] = method_ptr->name();
+         local_variables[ "action_downcase" ] = StringHelper::ToLower( method_ptr->name() );
          local_variables[ "service" ] = service_ptr->name();
 
          printer.Print(
             local_variables,
-            "   addAction( &default_$action$_action_ );\n" );
+            "   addAction( &default_$action_downcase$_action_ );\n" );
       }
 
       printer.Print(

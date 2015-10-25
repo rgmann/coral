@@ -25,6 +25,6 @@ SearchServiceServerStub::~SearchServiceServerStub()
 //-----------------------------------------------------------------------------
 void SearchServiceServerStub::registerActions()
 {
-   addAction( &default_Search_action_ );
+   addAction( &default_search_action_ );
 }
 

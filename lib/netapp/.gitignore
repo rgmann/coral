@@ -1,4 +1,5 @@
 *.dSYM
+*.dylib
 *.o
 *.a
 CMakeCache.txt
