@@ -2,26 +2,26 @@
 
 Coral is a small collection of C++ libraries. The libraries include:
 
-    coral::core:
+    coral``::``core
 
         A collection of basic containers, utilities, and wrappers.
 
 
-    coral::netapp:
+    coral``::``netapp
 
         A packet-routing framework for building networked applications.
         This framework allows you to decouple application logic from
         from networking logic.
 
 
-    coral::rpc:
+    coral``::``rpc
 
         A Remote Procedure Call (RPC) framework built on coral_netapp and
-        Google Protocol Buffers <sup>1</sup>.  A _protoc_ plugin is provided
-        to generate services directly from your _.protoc_ service definitions.
+        Google Protocol Buffers <sup>1</sup>.  A *protoc* plugin is provided
+        to generate services directly from your *.protoc* service definitions.
 
 
-    coral::rsync:
+    coral``::``rsync
 
         An RSYNC file-synchronization implementation built on coral_netapp. The
         library can be used to synchronize local files and/or remote files.
@@ -31,15 +31,15 @@ Coral is a small collection of C++ libraries. The libraries include:
 
 ## Supported Platforms
 
-    * OSX
-    * Linux (tested on Ubuntu)
+    - OSX
+    - Linux (tested on Ubuntu)
 
 
 ## Dependencies
 
 Coral depends on:
 
-1. [CMake](https://cmake.org/)(>= 2.8)
+1. [CMake](https://cmake.org/) (>= 2.8)
 
     On OSX with Macports:
 
@@ -50,7 +50,7 @@ Coral depends on:
         `sudo apt-get install cmake`
 
 
-2. [Boost](http://www.boost.org/)(>= 1.47)
+2. [Boost](http://www.boost.org/) (>= 1.47)
 
     On OSX with Macports:
 
@@ -71,7 +71,7 @@ Coral depends on:
     2. `cd gtest-x.x.x/`
     3. `cmake .`
     4. `make`
-    5. Create the environment variable _GTEST_ROOT_ to point to the root directory from step #2.
+    5. Create the environment variable *GTEST_ROOT* to point to the root directory from step #2.
 
 
 For RPC:
