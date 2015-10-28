@@ -2,37 +2,32 @@
 
 Coral is a small collection of C++ libraries. The libraries include:
 
-    coral``::``core
+ - coral::core
 
-        A collection of basic containers, utilities, and wrappers.
-
-
-    coral``::``netapp
-
-        A packet-routing framework for building networked applications.
-        This framework allows you to decouple application logic from
-        from networking logic.
+   A collection of basic containers, utilities, and wrappers.
 
 
-    coral``::``rpc
+ - coral::netapp
 
-        A Remote Procedure Call (RPC) framework built on coral_netapp and
-        Google Protocol Buffers <sup>1</sup>.  A *protoc* plugin is provided
-        to generate services directly from your *.protoc* service definitions.
+   A packet-routing framework for building networked applications.
+   This framework allows you to decouple application logic from
+   from networking logic.
 
 
-    coral``::``rsync
+ - coral::rpc
 
-        An RSYNC file-synchronization implementation built on coral_netapp. The
-        library can be used to synchronize local files and/or remote files.
-        File synchronization jobs are queued, pipelined, and completed
-        asynchronous of the caller.
+   A Remote Procedure Call (RPC) framework built on coral::netapp and Google Protocol Buffers<sup>1</sup>.  A *protoc* plugin is provided to generate services directly from your *.protoc* service definitions.
+
+
+ - coral::rsync
+
+   An RSYNC file-synchronization implementation built on coral::netapp. The library can be used to synchronize local files and/or remote files.  File synchronization jobs are queued, pipelined, and completed asynchronous of the caller.
 
 
 ## Supported Platforms
 
-    - OSX
-    - Linux (tested on Ubuntu)
+   - OSX
+   - Linux (tested on Ubuntu)
 
 
 ## Dependencies
@@ -54,11 +49,11 @@ Coral depends on:
 
     On OSX with Macports:
 
-        `port install boost`
+        port install boost
 
     On Ubuntu:
 
-        `sudo apt-get install boost`
+        sudo apt-get install boost
 
     Or, on either platform, install manually, which is nearly as [easy](http://www.boost.org/doc/libs/1_59_0/more/getting_started/unix-variants.html).
 
@@ -97,9 +92,15 @@ Once the dependencies have been installed, you can build all Coral libraries,
 utilities, examples, and tests by issuing the following commands from the Coral
 root directory.
 
-    1. `cmake .` to configure the project
-    2. `make all` to build the project
-    3. Create an environment variable called CORALRPC_GEN_ROOT whose value is
+ 1. Configure the project
+
+        cmake .
+
+ 2.  Build the project
+
+        make all
+
+ 3. Create an environment variable called CORALRPC_GEN_ROOT whose value is
        the full path to utils/rpc_generate.
 
 
@@ -114,6 +115,5 @@ root directory.
 
 
 
-
-1. Copyright 2008, Google Inc.
-2. Copyright 2007, Google Inc.
+ 1. Copyright 2008, Google Inc.
+ 2. Copyright 2007, Google Inc.
