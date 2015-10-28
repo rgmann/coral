@@ -9,9 +9,7 @@ Coral is a small collection of C++ libraries. The libraries include:
 
  - coral::netapp
 
-   A packet-routing framework for building networked applications.
-   This framework allows you to decouple application logic from
-   from networking logic.
+   A packet-routing framework for building networked applications. This framework allows you to decouple application logic from networking logic.
 
 
  - coral::rpc
@@ -38,11 +36,11 @@ Coral depends on:
 
     On OSX with Macports:
 
-        `port install cmake`
+        port install cmake
 
     On Ubuntu:
 
-        `sudo apt-get install cmake`
+        sudo apt-get install cmake
 
 
 2. [Boost](http://www.boost.org/) (>= 1.47)
