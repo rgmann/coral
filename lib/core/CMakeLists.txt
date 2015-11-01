@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
-cmake_policy( SET CMP0042 NEW )
+
+if (POLICY CMP0042)
+  cmake_policy( SET CMP0042 NEW )
+endif (POLICY CMP0042)
 
 project( libcoral_core )
 

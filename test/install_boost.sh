@@ -21,7 +21,7 @@ BOOST_INSTALL_LIBS=
 BOOST_URL_BASE=http://sourceforge.net/projects/boost/files/boost
 DOWNLOADS_DIR=`pwd`/third_party
 BOOST_VERSION_URL="boost_$(urlize_boost_version $BOOST_VERSION)"
-BOOST_PACKAGE="$BOOST_VERSION_URL.tar.gz"
+BOOST_PACKAGE="$BOOST_VERSION_URL.tar.bz2"
 
 
 download_boost()

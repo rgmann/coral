@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project( libcoral_netapp )
-cmake_policy( SET CMP0042 NEW )
+
+if (POLICY CMP0042)
+  cmake_policy( SET CMP0042 NEW )
+endif (POLICY CMP0042)
+
 
 find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
 add_definitions( "-Wall -g" )
