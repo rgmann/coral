@@ -35,8 +35,6 @@ add_executable( rsync_server rsync_server.cpp )
 
 target_link_libraries( rsync_server coral_rsync_shared )
 target_link_libraries( rsync_server coral_netapp_server_shared )
-target_link_libraries( rsync_server coral_netapp_common_shared )
-target_link_libraries( rsync_server coral_core_shared )
 target_link_libraries( rsync_server ${Boost_LIBRARIES})
 target_link_libraries( rsync_server pthread )
 

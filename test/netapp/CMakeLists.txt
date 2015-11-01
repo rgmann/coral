@@ -35,8 +35,8 @@ link_directories( ../../lib/netapp )
 
 add_executable( ${TEST_TARGET} ${TEST_TARGET}.cpp )
 
-target_link_libraries( ${TEST_TARGET} netapp_common )
-target_link_libraries( ${TEST_TARGET} coral_core )
+target_link_libraries( ${TEST_TARGET} coral_netapp_common_shared )
+target_link_libraries( ${TEST_TARGET} coral_core_shared )
 target_link_libraries( ${TEST_TARGET} ${GTEST_BOTH_LIBRARIES})
 target_link_libraries( ${TEST_TARGET} ${Boost_LIBRARIES} )
 target_link_libraries( ${TEST_TARGET} pthread )
