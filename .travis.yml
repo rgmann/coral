@@ -11,4 +11,6 @@ install:
  - "cmake . && make all"
 script:
  - "cd test/core && ./core_test_suite && cd -"
+ - "cd test/netapp && ./netapp_test_suite && cd -"
+ - "cd test/rsync && ./rsync_test_suite && cd -"
 
