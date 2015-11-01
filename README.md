@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/rgmann/coral.svg?branch=add_travisci_support)](https://travis-ci.org/rgmann/coral)
+[![Build Status](https://travis-ci.org/rgmann/coral.svg?branch=master)](https://travis-ci.org/rgmann/coral)
 
 ## Welcome to CORAL
 
