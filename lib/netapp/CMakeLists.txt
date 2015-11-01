@@ -59,17 +59,17 @@ add_library( coral_netapp_common_shared SHARED ${COMMON_SOURCE} )
 target_link_libraries(
   coral_netapp_common_shared
   ${Boost_LIBRARIES}
-  coral_core )
+  coral_core_shared )
 
 add_library( coral_netapp_server_shared SHARED ${SERVER_SOURCE} )
 target_link_libraries(
   coral_netapp_server_shared
   ${Boost_LIBRARIES}
-  coral_core )
+  coral_core_shared )
 
 add_library( coral_netapp_client_shared SHARED ${CLIENT_SOURCE} )
 target_link_libraries(
   coral_netapp_client_shared
   ${Boost_LIBRARIES}
-  coral_core )
+  coral_core_shared )
 

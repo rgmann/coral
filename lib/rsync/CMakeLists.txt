@@ -92,7 +92,7 @@ add_library( ${LIBNAME} STATIC ${SOURCES} )
 add_library( ${LIBNAME}_shared SHARED ${SOURCES} )
 target_link_libraries(
   ${LIBNAME}_shared ${Boost_LIBRARIES}
-  coral_core
+  coral_core_shared
   coral_netapp_common_shared )
 
 endif()

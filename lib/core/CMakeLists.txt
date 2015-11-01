@@ -5,6 +5,7 @@ if (POLICY CMP0042)
 endif (POLICY CMP0042)
 
 project( libcoral_core )
+add_definitions( "-Wall -g -fPIC" )
 
 find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
 
