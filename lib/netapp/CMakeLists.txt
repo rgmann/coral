@@ -36,6 +36,7 @@ include_directories( "${NETAPP_INCLUDE}/client" )
 include_directories( "${NETAPP_INCLUDE}/server" )
 
 
+
 set( SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../src )
 file( GLOB COMMON_SOURCE
 "${SOURCE_ROOT}/common/netapp/common/*.cpp"
@@ -53,8 +54,6 @@ add_library( coral_netapp_common STATIC ${COMMON_SOURCE} )
 add_library( coral_netapp_server STATIC ${SERVER_SOURCE} )
 add_library( coral_netapp_client STATIC ${CLIENT_SOURCE} )
 
-target_include_directories( coral_netapp_server PUBLIC "${NETAPP_INCLUDE}/server" )
-target_include_directories( coral_netapp_client PUBLIC "${NETAPP_INCLUDE}/client" )
 
 add_library( coral_netapp_common_shared SHARED ${COMMON_SOURCE} )
 target_link_libraries(
