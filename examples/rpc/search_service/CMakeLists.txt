@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
-cmake_policy( SET CMP0015 NEW )
-cmake_policy( SET CMP0042 NEW )
+
+if (POLICY CMP0042)
+  cmake_policy( SET CMP0015 NEW )
+endif (POLICY CMP0015)
+
+if (POLICY CMP0042)
+  cmake_policy( SET CMP0042 NEW )
+endif (POLICY CMP0042)
 
 set( TARGET search_service )
 project( ${TARGET} )

@@ -3,7 +3,10 @@ cmake_minimum_required(VERSION 2.8)
 set( TEST_TARGET rsync_test_suite )
 project( ${TEST_TARGET} )
 
-cmake_policy(SET CMP0015 NEW)
+if (POLICY CMP0015)
+  cmake_policy(SET CMP0015 NEW)
+endif (POLICY CMP0015)
+
 add_definitions ("-Wall -g")
 add_definitions ("-Wno-unused-local-typedefs")
 
