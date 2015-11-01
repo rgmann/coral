@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
-cmake_policy( SET CMP0042 NEW )
+
+if (POLICY CMP0042)
+  cmake_policy( SET CMP0042 NEW )
+endif (POLICY CMP0042)
 
 project( libcoral_core )
+add_definitions( "-Wall -g -fPIC" )
 
 find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
 

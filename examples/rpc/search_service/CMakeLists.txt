@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
-cmake_policy( SET CMP0015 NEW )
-cmake_policy( SET CMP0042 NEW )
+
+if (POLICY CMP0015)
+  cmake_policy( SET CMP0015 NEW )
+endif (POLICY CMP0015)
+
+if (POLICY CMP0042)
+  cmake_policy( SET CMP0042 NEW )
+endif (POLICY CMP0042)
 
 set( TARGET search_service )
 project( ${TARGET} )
@@ -46,9 +52,9 @@ add_executable( ${TARGET}
 "server/rpc_source/SearchServiceSearchAction.cpp"
 ${TARGET}.cpp )
 
-target_link_libraries( ${TARGET} coral_rpc )
-target_link_libraries( ${TARGET} coral_core )
-target_link_libraries( ${TARGET} netapp_common )
+target_link_libraries( ${TARGET} coral_rpc_shared )
+# target_link_libraries( ${TARGET} coral_core )
+# target_link_libraries( ${TARGET} netapp_common )
 target_link_libraries( ${TARGET} ${Boost_LIBRARIES} )
 target_link_libraries( ${TARGET} ${PROTOBUF_LIBRARIES} )
 target_link_libraries( ${TARGET} pthread )

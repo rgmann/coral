@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project( libcoral_netapp )
-cmake_policy( SET CMP0042 NEW )
+
+if (POLICY CMP0042)
+  cmake_policy( SET CMP0042 NEW )
+endif (POLICY CMP0042)
+
 
 find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
 add_definitions( "-Wall -g" )
@@ -32,6 +36,7 @@ include_directories( "${NETAPP_INCLUDE}/client" )
 include_directories( "${NETAPP_INCLUDE}/server" )
 
 
+
 set( SOURCE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../src )
 file( GLOB COMMON_SOURCE
 "${SOURCE_ROOT}/common/netapp/common/*.cpp"
@@ -49,24 +54,22 @@ add_library( coral_netapp_common STATIC ${COMMON_SOURCE} )
 add_library( coral_netapp_server STATIC ${SERVER_SOURCE} )
 add_library( coral_netapp_client STATIC ${CLIENT_SOURCE} )
 
-target_include_directories( coral_netapp_server PUBLIC "${NETAPP_INCLUDE}/server" )
-target_include_directories( coral_netapp_client PUBLIC "${NETAPP_INCLUDE}/client" )
 
 add_library( coral_netapp_common_shared SHARED ${COMMON_SOURCE} )
 target_link_libraries(
   coral_netapp_common_shared
   ${Boost_LIBRARIES}
-  coral_core )
+  coral_core_shared )
 
 add_library( coral_netapp_server_shared SHARED ${SERVER_SOURCE} )
 target_link_libraries(
   coral_netapp_server_shared
   ${Boost_LIBRARIES}
-  coral_core )
+  coral_core_shared )
 
 add_library( coral_netapp_client_shared SHARED ${CLIENT_SOURCE} )
 target_link_libraries(
   coral_netapp_client_shared
   ${Boost_LIBRARIES}
-  coral_core )
+  coral_core_shared )
 

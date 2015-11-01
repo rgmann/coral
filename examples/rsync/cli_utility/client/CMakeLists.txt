@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 project( rsync_client )
 
-cmake_policy(SET CMP0015 NEW)
+if (POLICY CMP0015)
+  cmake_policy(SET CMP0015 NEW)
+endif (POLICY CMP0015)
 
 find_package( Boost 1.47 REQUIRED COMPONENTS system-mt filesystem-mt thread-mt )
 include_directories( ${Boost_INCLUDE_DIRS} )
@@ -32,6 +34,4 @@ add_executable( rsync_client rsync_client.cpp )
 
 target_link_libraries( rsync_client coral_rsync_shared )
 target_link_libraries( rsync_client coral_netapp_client_shared )
-target_link_libraries( rsync_client coral_netapp_common_shared )
-target_link_libraries( rsync_client coral_core_shared )
 target_link_libraries( rsync_client ${Boost_LIBRARIES})

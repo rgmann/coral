@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rgmann/coral.svg?branch=master)](https://travis-ci.org/rgmann/coral)
+
 ## Welcome to CORAL
 
 Coral is a small collection of C++ libraries. The libraries include:
