@@ -1,0 +1,14 @@
+language: cpp
+compiler:
+  - clang
+before_install:
+ - sudo apt-get update
+ - sudo apt-get install libgtest-dev
+ - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
+ - "sudo ./install_boost.sh --boost-version 1.59.0 --prefix /tmp/boost --libs system,filesystem,thread"
+ - sudo ./install_protobuf.sh
+install:
+ - "cmake . && make all"
+script:
+ - "cd test/core && ./core_test_suite && cd -"
+
