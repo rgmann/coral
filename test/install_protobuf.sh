@@ -6,7 +6,7 @@ if [[ $(uname) == 'Darwin' ]]; then
    PROTOBUF_INSTALL_PREFIX=/opt/local
 fi
 
-PACKAGE_NAME=protobuf-2.4.1
+PACKAGE_NAME=protobuf-2.5.0
 PACKAGE_ARCHIVE_NAME=$PACKAGE_NAME.tar.gz
 
 CURRENT_DIR=$(pwd)
