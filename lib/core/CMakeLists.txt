@@ -8,6 +8,7 @@ project( libcoral_core )
 add_definitions( "-Wall -g -fPIC" )
 
 find_package( Boost 1.47 REQUIRED system-mt filesystem-mt thread-mt )
+add_definitions( "-Wno-unused-local-typedefs" )
 
 include_directories( ${Boost_INCLUDE_DIRS} )
 

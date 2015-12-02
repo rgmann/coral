@@ -231,9 +231,6 @@ void AsioTcpPacketRouter::doWrite( NetAppPacket* packet_ptr )
    write_packets_.push_back( packet_ptr );
    if ( !write_in_progress )
    {
-      // coral::log::status("do_write:\n  header.length = %d\n  header.type = %d\n",
-      //     write_packets_.front()->data()->length,
-      //     write_packets_.front()->data()->type );
       boost::asio::async_write( socket_,
          boost::asio::buffer(
             write_packets_.front()->basePtr(),

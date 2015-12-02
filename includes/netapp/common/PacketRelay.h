@@ -64,7 +64,6 @@ protected:
 
 private:
 
-  // PacketReceiver* receiver_ptr_;
   RegisteredRouterList routers_;
 };
 

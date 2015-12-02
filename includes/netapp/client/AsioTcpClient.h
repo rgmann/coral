@@ -41,20 +41,7 @@
 namespace coral {
 namespace netapp {
 
-// class AsioTcpClient {
-// public:
 
-//    AsioTcpClient( boost::asio::io_service& io_service );
-
-//    ~AsioTcpClient();
-
-//    void connect( AsioTcpPacketRouterPtr router, const std::string& host, const std::string& port );
-
-// private:
-
-//    boost::asio::ip::tcp::resolver resolver_;
-    
-// };
 class AsioTcpClientRouter : public AsioTcpPacketRouter {
 public:
 
@@ -65,6 +52,8 @@ public:
    static const int kWaitForever = -1;
    void connect( const std::string& host, const std::string& port, int timeout_secs = kWaitForever );
 
+   using enable_shared_from_this<AsioTcpPacketRouter>::shared_from_this;
+   boost::shared_ptr<AsioTcpClientRouter> shared_from_this();
 
 protected:
 

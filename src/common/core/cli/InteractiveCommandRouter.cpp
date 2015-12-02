@@ -41,6 +41,7 @@
 
 using namespace coral::cli;
 using namespace coral::log;
+using namespace coral::helpers;
 
 //-----------------------------------------------------------------------------
 class QuitCommand : public InteractiveCommand {
@@ -245,7 +246,7 @@ void InteractiveCommandRouter::processLine( std::istream& stream )
    {
       // Split the command string on spaces.
       std::vector<std::string> command_arguments =
-         StringHelper::Split( command, ' ' );
+         string_helper::split( command, ' ' );
 
       // The command name is always the first token.
       // The remaining tokens are arguments to the command.

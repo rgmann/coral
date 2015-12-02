@@ -58,7 +58,7 @@ public PacketReceiverHook,
 public boost::enable_shared_from_this<AsioTcpPacketRouter>  {
 public:
 
-   AsioTcpPacketRouter( boost::asio::io_service&  io_service );
+   AsioTcpPacketRouter( boost::asio::io_service& io_service );
 
    virtual ~AsioTcpPacketRouter();
 

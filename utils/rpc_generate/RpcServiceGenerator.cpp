@@ -36,7 +36,7 @@
 #include <sstream>
 #include <boost/scoped_ptr.hpp>
 #include <google/protobuf/io/printer.h>
-#include "StringHelper.h"
+#include <StringHelper.h>
 #include "RpcServiceGenerator.h"
 
 #define PRINTER_DELIMETER        ('$')
@@ -44,6 +44,7 @@
 using namespace google::protobuf;
 using namespace google::protobuf::io;
 using namespace google::protobuf::compiler;
+using namespace coral::helpers;
 
 //-----------------------------------------------------------------------------
 RpcServiceGenerator::RpcServiceGenerator(
@@ -133,7 +134,7 @@ bool RpcServiceGenerator::generate_client_resource_stub_header(
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
-      variables[ "service_upper" ] = StringHelper::ToUpper( service_ptr->name() );
+      variables[ "service_upper" ] = string_helper::to_upper( service_ptr->name() );
       variables[ "service" ]       = service_ptr->name();
 
       printer.Print(
@@ -216,7 +217,7 @@ bool RpcServiceGenerator::generate_client_resource_stub_imp(
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
-      variables[ "service_upper" ] = StringHelper::ToUpper( service_ptr->name() );
+      variables[ "service_upper" ] = string_helper::to_upper( service_ptr->name() );
       variables[ "service" ]       = service_ptr->name();
 
       printer.Print(
@@ -295,7 +296,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_header(
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
-      variables[ "service_upper" ] = StringHelper::ToUpper( service_ptr->name() );
+      variables[ "service_upper" ] = string_helper::to_upper( service_ptr->name() );
       variables[ "service" ]       = service_ptr->name();
 
       printer.Print(
@@ -319,7 +320,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_header(
 
          std::map<std::string,std::string> local_variables( variables );
          local_variables[ "action" ] = method_ptr->name();
-         local_variables[ "action_downcase" ] = StringHelper::ToLower(method_ptr->name());
+         local_variables[ "action_downcase" ] = string_helper::to_lower(method_ptr->name());
          local_variables[ "service" ] = service_ptr->name();
 
          printer.Print( local_variables, "#include \"$service$$action$Action.h\"\n" );
@@ -350,7 +351,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_header(
 
          std::map<std::string,std::string> local_variables( variables );
          local_variables[ "action" ] = method_ptr->name();
-         local_variables[ "action_downcase" ] = StringHelper::ToLower(method_ptr->name());
+         local_variables[ "action_downcase" ] = string_helper::to_lower(method_ptr->name());
          local_variables[ "service" ] = service_ptr->name();
 
          printer.Print(
@@ -395,7 +396,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_imp(
 
       std::map<std::string,std::string> variables( common_variables_ );
       variables[ "package" ]       = service_ptr->file()->package();
-      variables[ "service_upper" ] = StringHelper::ToUpper( service_ptr->name() );
+      variables[ "service_upper" ] = string_helper::to_upper( service_ptr->name() );
       variables[ "service" ]       = service_ptr->name();
 
       printer.Print(
@@ -430,7 +431,7 @@ bool RpcServiceGenerator::generate_server_resource_stub_imp(
          const MethodDescriptor* method_ptr = service_ptr->method( method_index );
 
          std::map<std::string,std::string> local_variables( variables );
-         local_variables[ "action_downcase" ] = StringHelper::ToLower( method_ptr->name() );
+         local_variables[ "action_downcase" ] = string_helper::to_lower( method_ptr->name() );
          local_variables[ "service" ] = service_ptr->name();
 
          printer.Print(
@@ -474,8 +475,8 @@ bool RpcServiceGenerator::generate_server_action_headers(
 
          std::map<std::string,std::string> variables( common_variables_ );
          variables[ "package" ]       = service_ptr->file()->package();
-         variables[ "service_upper" ] = StringHelper::ToUpper( service_ptr->name() );
-         variables[ "action_upper" ]  = StringHelper::ToUpper( method_ptr->name() );
+         variables[ "service_upper" ] = string_helper::to_upper( service_ptr->name() );
+         variables[ "action_upper" ]  = string_helper::to_upper( method_ptr->name() );
          variables[ "service" ]       = service_ptr->name();
          variables[ "action" ]        = method_ptr->name();
          variables[ "request_type" ]  = GetFullyQualifiedName( method_ptr->input_type() );

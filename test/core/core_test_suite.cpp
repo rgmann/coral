@@ -38,6 +38,7 @@
 #include "hash_table_test.cpp"
 #include "base_type_test.cpp"
 #include "byte_order_test.cpp"
+#include "string_helper_test.cpp"
 
 int main( int argc, char **argv ) {
   ::testing::InitGoogleTest(&argc, argv);

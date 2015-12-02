@@ -40,6 +40,7 @@
 
 using namespace coral;
 using namespace coral::cli;
+using namespace coral::helpers;
 
 //------------------------------------------------------------------------------
 Argument::Argument()
@@ -88,7 +89,7 @@ bool Argument::parse( const std::string& definition )
    std::vector<std::string>            attribute_list;
    std::vector<std::string>::iterator  attribute_iterator;
    
-   attribute_list = StringHelper::Split( definition, ',' );
+   attribute_list = string_helper::split( definition, ',' );
    
    if ( attribute_list.size() > 0 )
    {
@@ -99,7 +100,7 @@ bool Argument::parse( const std::string& definition )
       {
          // Split the substring at the ':'
          std::vector<std::string> attributes_tokens =
-            StringHelper::Split( *attribute_iterator, ':' );
+            string_helper::split( *attribute_iterator, ':' );
                   
          if ( attributes_tokens.size() == 0 )
          {
@@ -111,7 +112,7 @@ bool Argument::parse( const std::string& definition )
          {
             std::string attribute_key = attributes_tokens[ ARG_NAME_INDEX ];
             
-            if ( setAttribute( StringHelper::Trim( attribute_key ) ) == false )
+            if ( setAttribute( string_helper::trim( attribute_key ) ) == false )
             {
                parse_success = false;
                break;
@@ -124,8 +125,8 @@ bool Argument::parse( const std::string& definition )
             std::string attribute_key   = attributes_tokens[ ARG_NAME_INDEX ];
             std::string attribute_value = attributes_tokens[ ARG_VALUE_INDEX ];
             
-            if ( setAttribute( StringHelper::Trim( attribute_key ), 
-                           StringHelper::Trim( attribute_value ) ) == false )
+            if ( setAttribute( string_helper::trim( attribute_key ), 
+                           string_helper::trim( attribute_value ) ) == false )
             {
                parse_success = false;
                break;

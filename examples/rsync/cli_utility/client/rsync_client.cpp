@@ -189,11 +189,9 @@ int main(int argc, char* argv[])
       try
       {
          boost::asio::io_service io_service;
-         // AsioTcpPacketRouterPtr router( new AsioTcpPacketRouter( io_service ) );
-         // AsioTcpClient client( io_service );
+
          AsioTcpClientRouterPtr client_router( new AsioTcpClientRouter( io_service ) );
 
-         // client.connect( router, host_name, host_port );
          client_router->connect( host_name, host_port, AsioTcpClientRouter::kWaitForever );
 
          boost::thread t(boost::bind( &boost::asio::io_service::run, &io_service));

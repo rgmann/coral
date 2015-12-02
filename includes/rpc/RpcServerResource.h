@@ -41,7 +41,6 @@
 #include "Queue.h"
 #include <boost/thread/mutex.hpp>
 #include "RpcObject.h"
-#include "InstanceWrapper.h"
 #include "Md5Hash.h"
 
 namespace coral {
