@@ -158,7 +158,7 @@ protected:
       if ( database_.get_by_name( request.name(), phone_number ) )
       {
          response.set_number( phone_number );
-         e.id = NoException;
+         e.id = kNoException;
       }
    }
 

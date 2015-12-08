@@ -41,7 +41,7 @@ void SearchServiceSearchAction::operator() (
    }
    else
    {
-      e.id = MissingParameters;
+      e.id = kMissingParameters;
       e.message = "Parameters not initialized";
    }
 }
@@ -52,6 +52,6 @@ void SearchServiceSearchAction::Search(
    Person_PhoneNumber& response,
    coral::rpc::RpcException& e )
 {
-   e.id = UnimplementedAction;
+   e.id = kUnimplementedAction;
    e.message = "SearchServiceSearchAction has not been implemented.";
 }

@@ -42,47 +42,107 @@
 namespace coral {
 namespace rpc {
 
+///
+/// The AsyncRpcSupervisor waits for a remote procedure call to complete or
+/// timeout asynchronous of the thread that invoked the call. An AsyncRpcSupervisor
+/// cannot be directly instantiated. Rather, it should be derived and the 
+/// "callback" method should be implemented by the inheriting class.
+///
 class AsyncRpcSupervisor : public RpcSupervisor, public coral::thread::IThread {
 public:
 
-  AsyncRpcSupervisor();
-  virtual ~AsyncRpcSupervisor();
+   AsyncRpcSupervisor();
+   virtual ~AsyncRpcSupervisor();
 
-  void cancel();
-  bool cancelled() const;
+   ///
+   /// Callback method invoked on completion, timeout, or if any other error
+   /// occurs. Derived classes can obtain call completion status via the
+   /// RpcSupervisor accessors and via the accessors below.
+   ///
+   /// @return void
+   ///
+   virtual void callback() = 0;
 
-  bool isBusy();
+   ///
+   /// Cancel an active request.
+   ///
+   /// @return void
+   ///
+   void cancel();
 
-  bool reset();
+   ///
+   /// Get status indicating whether the call completed because it was canceled.
+   /// A valid response is not available.
+   ///
+   /// @return bool  True if the call completed due to cancellation;
+   ///               false otherwise.
+   ///
+   bool cancelled() const;
 
-  bool failed() const;
+   ///
+   /// Get status indicating whether a call is active.
+   ///
+   /// @return bool  A remote procedure call is currently active;
+   ///               false otherwise.
+   ///
+   bool isBusy() const;
 
-  /**
-   * Callback invoked when the RPC has completed.
-   */
-  virtual void callback() = 0;
+   ///
+   /// Reset the supervisor that it may used for a new call. In order to be
+   /// reset, the supervisor must not be busy.
+   ///
+   /// @return bool  True if the supervisor was reset; false if it could not be
+   ///               reset because it is bsuy.
+   ///
+   bool reset();
 
+   ///
+   /// Get status indicating whether the remote procedure call completed
+   /// successfully or failed. Failure details is accessible via the base class
+   /// exception accessor.
+   ///
+   /// @return bool  True if the call completed due a failure; false otherwise.
+   ///
+   bool failed() const;
 
-  bool invoke(RpcClient&       rClient,
-              const RpcObject& rMarshalledCall,
-              PbMessage*       pResponse,
-              int              nTimeoutMs);
+   ///
+   /// Invoke the remote procedure call.
+   ///
+   /// @param  client  RpcClient through which the request should be sent
+   /// @param  request Request object
+   /// @param  response_message_ptr Deserialized response message buffer
+   /// @param  timeout_ms  Call timeout in milliseconds
+   /// return  bool    True on success; false on failure
+   ///
+   bool invoke( RpcClient&      client,
+                const RpcObject& request,
+                PbMessage*       response_message_ptr,
+                int              timeout_ms );
 
 private:
 
-  AsyncRpcSupervisor(const AsyncRpcSupervisor&);
+   ///
+   /// Copies are not permitted.
+   ///
+   AsyncRpcSupervisor( const AsyncRpcSupervisor& );
+   AsyncRpcSupervisor& operator= ( const AsyncRpcSupervisor& );
 
-  AsyncRpcSupervisor& operator= (const AsyncRpcSupervisor&);
-
-  void run(const bool& bShutdown);
+   ///
+   /// Thread loop
+   ///
+   /// @param  shutdown  Thread shutdown is being requested
+   ///
+   void run( const bool& shutdown );
 
 private:
 
-  bool               cancelled_;
-  RpcMarshalledCall* marshalled_call_;
-  boost::mutex       call_lock_;
-  PbMessage*         response_message_ptr_;
-  int                timeout_ms_;
+   mutable boost::mutex call_lock_;
+
+   bool               cancelled_;
+   RpcMarshalledCall* marshalled_call_;
+   PbMessage*         response_message_ptr_;
+   int                timeout_ms_;
+
 }; // End class AsyncRpcSupervisor
 
 } // End namespace rpc

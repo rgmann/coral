@@ -44,31 +44,85 @@
 namespace coral {
 namespace rpc {
 
+///
+/// RPC server hub:
+/// The server maintains a collection of registered resources/services.
+///
 class RpcServer : public coral::netapp::PacketSubscriber {
 public:
 
-  RpcServer( coral::netapp::DestinationID client_destination_id );
+   ///
+   /// Construct an RpcServer instance with the destination ID of
+   /// of the corresponding RpcClient.
+   ///
+   /// @param  client_destination_id  Destination ID of RpcClient
+   ///
+   RpcServer( coral::netapp::DestinationID client_destination_id );
 
-  bool registerResource( RpcServerResource* resource_ptr );
+   ///
+   /// Register a resource/service
+   ///
+   bool registerResource( RpcServerResource* resource_ptr );
 
-  bool processPacket(const RpcPacket* packet_ptr );
-  bool put( coral::netapp::DestinationID, const void* data_ptr, ui32 length );
+   ///
+   /// Route a packet to the server for routing to the associated resource.
+   /// This method implements the PacketSubscriber interface.
+   ///
+   /// @param  destination_id  ID of packet sender
+   /// @param  data_ptr        Pointer to packet buffer
+   /// @param  length          Size of packet buffer in bytes
+   /// @return bool            True on success; false on failure
+   ///
+   bool put( coral::netapp::DestinationID, const void* data_ptr, ui32 length );
+
 
 private:
 
-  RpcServerResource* getResource(const RpcObject &object);
+   ///
+   /// Process a request packet.
+   ///
+   /// @param  packet_ptr  Pointer to request packet
+   /// @return bool        True if the packet was successfully processed;
+   ///                     false otherwise
+   ///
+   bool processRequest( const RpcPacket* packet_ptr );
 
-  void sendObject(const RpcObject &object);
+   ///
+   /// Find the resource / service associated with a request.
+   ///
+   /// @param  object  Request object
+   /// @return RpcServerResource*  RPC server resource or NULL
+   ///
+   RpcServerResource* getResource( const RpcObject& object );
+
+   ///
+   /// Send a response object
+   ///
+   /// @param  object  Response object
+   /// @return void
+   ///
+   void sendObject( const RpcObject& object );
+
 
 private:
 
-  typedef  std::map<std::string, RpcServerResource*>  ResourceMap;
+   ///
+   /// Copies are not permitted.
+   ///
+   RpcServer( const RpcServer& );
+   RpcServer& operator= ( const RpcServer& );
 
-  ResourceMap resources_;
 
-  coral::netapp::DestinationID client_destination_id_;
+private:
+
+   typedef  std::map<std::string, RpcServerResource*>  ResourceMap;
+
+   ResourceMap resources_;
+
+   coral::netapp::DestinationID client_destination_id_;
 };
 
-}}
+} // end namespace rpc
+} // end namesapce coral
 
 #endif // RPC_SERVER_H

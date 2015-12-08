@@ -42,9 +42,9 @@ using namespace coral::netapp;
 
 //-----------------------------------------------------------------------------
 IntraRouter::IntraRouter()
-: PacketRouter(&mReceiver)
-, IThread("IntraRouter")
-, mpCounterpart(NULL)
+   : PacketRouter(&mReceiver)
+   , IThread("IntraRouter")
+   , mpCounterpart(NULL)
 {
 }
 
@@ -54,9 +54,9 @@ IntraRouter::~IntraRouter()
 }
 
 //-----------------------------------------------------------------------------
-void IntraRouter::setCounterpart(IntraRouter* pCounterpart)
+void IntraRouter::setCounterpart( IntraRouter* pCounterpart )
 {
-  mpCounterpart = pCounterpart;
+   mpCounterpart = pCounterpart;
 }
 
 //-----------------------------------------------------------------------------

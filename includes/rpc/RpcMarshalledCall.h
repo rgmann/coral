@@ -42,43 +42,106 @@
 namespace coral {
 namespace rpc {
 
+///
+/// The RpcMarshalledCall class maintains the state of an active remote
+/// procedure call.
+///
 class RpcMarshalledCall {
 public:
 
-   RpcMarshalledCall();
+   // RpcMarshalledCall();
    
-   RpcMarshalledCall(const RpcObject &object);
-   
-   RpcPacket* getRpcPacket() const;
+   RpcMarshalledCall( const RpcObject &object );
 
-   void getResult(RpcObject &result);
+   const RpcObject& getRequest() const;
 
-   const RpcObject& input() const;
+   ///
+   /// Allocate an RpcPacket to encapsulate the request.
+   ///
+   /// @return RpcPacket*  New RpcPacket object
+   ///
+   RpcPacket* toRequestPacket() const;
 
-   void notify(const RpcObject &object);
+   ///
+   /// Get the response to this call.
+   ///
+   /// @return RpcObject&  Call response object
+   ///
+   const RpcObject& getResponse() const;
+
+   ///
+   /// Notify the thread waiting on call completion that a response has been
+   /// received.
+   ///
+   /// @param  response  Call response object
+   /// @return void
+   ///
+   void notify( const RpcObject& response );
+
+   ///
+   /// Cancel the call.
+   ///
+   /// @return void
+   ///
    void cancel();
-   bool cancelled() const;
 
+   ///
+   /// Query whether the call has been canceled.
+   ///
+   /// @return bool  True if the call has been canceled 
+   ///
+   bool canceled() const;
+
+   ///
+   /// Wait for a response to the remote procedure call or for the timeout to
+   /// expire.
+   ///
+   /// @param  timeout_ms  Call timeout period in milliseconds
+   /// @param  cancel_on_timeout  True if the call should be disposed on a
+   ///               timeout
+   /// @return bool  True if a response was received before the timeout;
+   ///               false otherwise
+   ///
    bool wait( ui32 timeout_ms, bool cancel_on_timeout = true );
    
-   // Indicates that the caller is no longer waiting.  This call can be
-   // garbage collected.
+   ///
+   /// Indicate that the caller is no longer waiting on this call. This call
+   /// can be removed from the active call table.
+   ///
+   /// @return void
+   ///
    void dispose();
+
+   ///
+   /// Query whether this call has been disposed.  A disposed call may be
+   /// removed from the active call table.
+   ///
+   /// @return bool  True if this call is disposed; false otherwise
+   ///
    bool isDisposed() const;
-   
-   RpcObject& getResultObject();
+
+
+private:
+
+   ///
+   /// Copying is not permitted
+   ///
+   RpcMarshalledCall( const RpcMarshalledCall& );
+   RpcMarshalledCall& operator= ( const RpcMarshalledCall& );
+
 
 private:
    
-   thread::BinarySem mSem;
+   thread::BinarySem response_sem_;
 
-   RpcObject param_object_;
-   RpcObject result_object_;
+   RpcObject request_object_;
+   RpcObject response_object_;
  
    bool is_disposed_;
-   bool cancelled_;
+   bool canceled_;
 };
 
-}}
+} // end namespace rpc
+} // end namespace coral
 
 #endif // RPC_MARSHALLED_CALL_H

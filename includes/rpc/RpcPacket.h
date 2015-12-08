@@ -41,27 +41,54 @@
 namespace coral {
 namespace rpc {
 
+///
+/// The RpcPacket is the netapp transport container for RpcObject requests and
+/// responses.
+///
 class RpcPacket : public coral::netapp::GenericPacket {
 public:
-
-   static const ui32 kRpcMarkerSize = 7;
    
-   struct Data
-   {
-      char marker[ kRpcMarkerSize ];
-      ui32 rpcId;
+   struct Data {
+      // Payload length in bytes
       ui32 length;
       ui32 format;
       ui32 encoding;
    };
 
+   ///
+   /// Construct an empty packet. The packet will be allocated to the size of
+   /// the Data structure.
+   ///
    RpcPacket();
-   
-   RpcPacket( const RpcObject &object ); 
-   
-   bool getObject(RpcObject &object) const;
 
-   bool allocate( const void* pPkt, ui32 nSizeBytes );
+   ///
+   /// Construct a packet to transport the specified object.
+   ///
+   /// @param  object  Request or response object
+   ///
+   RpcPacket( const RpcObject& object ); 
+
+   ///
+   /// Retrieve a deserialized request or response object from the payload of
+   /// the packet.
+   ///
+   /// @param  object  RpcObject to deserialize from the payload of this
+   ///                 packet.
+   /// @return bool    True if the object was successfully deserialized; false
+   ///                 otherwise
+   ///
+   bool getObject( RpcObject& object ) const;
+
+   ///
+   /// Allocate the packet from the specified byte buffer. This method
+   /// implements the GenericPacket interface.
+   ///
+   /// @param  data_ptr   Pointer to data buffer
+   /// @param  size_bytes Size of buffer in bytes
+   /// @return bool       True if the packet is successfully allocated from the
+   ///                    buffer; false otherwise
+   ///
+   bool allocate( const void* data_ptr, ui32 size_bytes );
    
    ///
    /// Get a pointer to the packet header. If the packet has not been
@@ -74,7 +101,10 @@ public:
 
 protected:
 
-   void swap( void* pData, ui32 nSizeBytes );
+   ///
+   /// Swap endianness of packet fields
+   ///
+   void swap( void* data_ptr, ui32 size_bytes );
 
 
 private:

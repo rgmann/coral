@@ -56,7 +56,7 @@ AsyncRpcSupervisor::~AsyncRpcSupervisor()
 }
 
 //----------------------------------------------------------------------------
-bool AsyncRpcSupervisor::isBusy()
+bool AsyncRpcSupervisor::isBusy() const
 {
   boost::mutex::scoped_lock guard( call_lock_ );
   return ( marshalled_call_ != NULL );
@@ -101,7 +101,7 @@ bool AsyncRpcSupervisor::reset()
 //----------------------------------------------------------------------------
 bool AsyncRpcSupervisor::failed() const
 {
-  return ( exception_.id != NoException );
+  return ( exception_.id != kNoException );
 }
 
 //----------------------------------------------------------------------------
@@ -151,17 +151,17 @@ void AsyncRpcSupervisor::run( const bool& bShutdown )
 
    if ( marshalled_call_->wait( timeout_ms_ ) )
    {
-      if ( marshalled_call_->cancelled() )
+      if ( marshalled_call_->canceled() )
       {
-         exception_.reporter = RpcException::Client;
-         exception_.id       = RpcCallTimeout;
+         exception_.reporter = RpcException::kClient;
+         exception_.id       = kRpcCallTimeout;
          exception_.message  = "Call was cancelled before a response was received.";
       }
       else
       {
-         marshalled_call_->getResult( response_object_ );
+         response_object_ = marshalled_call_->getResponse();
 
-         if ( response_object_.exception().id == NoException )
+         if ( response_object_.exception().id == kNoException )
          {
             if (response_message_ptr_)
             {
@@ -176,8 +176,8 @@ void AsyncRpcSupervisor::run( const bool& bShutdown )
    }
    else
    {
-      exception_.reporter = RpcException::Client;
-      exception_.id       = RpcCallTimeout;
+      exception_.reporter = RpcException::kClient;
+      exception_.id       = kRpcCallTimeout;
       exception_.message  = "Time out elapsed waiting for resource response.";
    }
 
@@ -186,7 +186,7 @@ void AsyncRpcSupervisor::run( const bool& bShutdown )
    {
       boost::mutex::scoped_lock guard( call_lock_ );
 
-      cancelled_       = marshalled_call_->cancelled();
+      cancelled_       = marshalled_call_->canceled();
       marshalled_call_ = NULL;
    }
 

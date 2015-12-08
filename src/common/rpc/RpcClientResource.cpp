@@ -43,11 +43,11 @@ using namespace coral::rpc;
 //-----------------------------------------------------------------------------
 RpcClientResource::RpcClientResource(
    RpcClient&         client,
-   const std::string& classname
+   const std::string& resource_name
 )
-   : mrClient(client)
-   , mClassname(classname)
-   , mnTimeoutMs(3000)
+   : rpc_client_( client )
+   , resource_name_( resource_name )
+   , timeout_ms_( 3000 )
 {
 }
 
@@ -59,13 +59,13 @@ RpcClientResource::~RpcClientResource()
 //-----------------------------------------------------------------------------
 void RpcClientResource::setTimeout(int nTimeoutMs)
 {
-  mnTimeoutMs = nTimeoutMs;
+  timeout_ms_ = nTimeoutMs;
 }
 
 //-----------------------------------------------------------------------------
 RpcException RpcClientResource::getLastError()
 {
-   return mLastError;
+   return last_error_;
 }
 
 //-----------------------------------------------------------------------------
@@ -80,8 +80,8 @@ bool RpcClientResource::call(const std::string&  action,
    BlockingRpcSupervisor blocking_supervisor;
    RpcSupervisor* supervisor_ptr = &blocking_supervisor;
 
-   mLastError.reset();
-   mLastError.pushFrame( TraceFrame(
+   last_error_.reset();
+   last_error_.pushFrame( TraceFrame(
       "RpcClientResource", "call",
       __FILE__, __LINE__
    ));
@@ -94,55 +94,34 @@ bool RpcClientResource::call(const std::string&  action,
    marshallRequest( request_object, action, &request );
    
    call_success = supervisor_ptr->invoke(
-      mrClient, 
+      rpc_client_, 
       request_object,
       &response,
-      mnTimeoutMs
+      timeout_ms_
    );
 
    if ( call_success == false )
    {
-      mLastError.pushTrace( supervisor_ptr->exception() );
+      last_error_.pushTrace( supervisor_ptr->exception() );
    }
 
-   mLastError.popFrame();
+   last_error_.popFrame();
    
    return call_success;
 }
 
 //-----------------------------------------------------------------------------
 void RpcClientResource::marshallRequest(
-   RpcObject&         requestObject,
-   const std::string& methodName,
-   const PbMessage*   pRequestParameters)
+   RpcObject&         request_object,
+   const std::string& method_name,
+   const PbMessage*   request_params )
 {
-   requestObject.callInfo().resource = mClassname;
-   // requestObject.callInfo().uuid = mUuid;
-   requestObject.callInfo().action   = methodName;
-   if ( pRequestParameters )
+   request_object.callInfo().resource = resource_name_;
+   request_object.callInfo().action   = method_name;
+
+   if ( request_params )
    {
-      requestObject.setParams( *pRequestParameters );
+      request_object.setParams( *request_params );
    }
-}
-
-//-----------------------------------------------------------------------------
-bool RpcClientResource::invoke(
-   const RpcObject& object,
-   RpcObject&       result,
-   ui32             nTimeoutMs)
-{
-   bool success = false;
-
-   // Send the marshalled RPC to the RpcClient.
-   RpcMarshalledCall* marshalled_call = mrClient.invokeRpc( object );
-
-   if ( ( success = marshalled_call->wait( nTimeoutMs ) ) == true )
-   {
-      marshalled_call->getResult( result );
-   }
-
-   marshalled_call->dispose();
-
-   return success;
 }
 

@@ -592,7 +592,7 @@ bool RpcServiceGenerator::generate_server_action_imp(
             "   }\n"
             "   else\n"
             "   {\n"
-            "      e.id = MissingParameters;\n"
+            "      e.id = kMissingParameters;\n"
             "      e.message = \"Parameters not initialized\";\n"
             "   }\n"
             "}\n\n"
@@ -602,7 +602,7 @@ bool RpcServiceGenerator::generate_server_action_imp(
             "   $response_type$& response,\n"
             "   coral::rpc::RpcException& e )\n"
             "{\n"
-            "   e.id = UnimplementedAction;\n"
+            "   e.id = kUnimplementedAction;\n"
             "   e.message = \"$service$$action$Action has not been implemented.\";\n"
             "}\n"
          );

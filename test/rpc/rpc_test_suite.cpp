@@ -30,52 +30,13 @@
 // 
 // 
 
+#include <string>
+#include "gtest/gtest.h"
+#include "rpc_exception_test.cpp"
+#include "rpc_packet_test.cpp"
 
+int main( int argc, char **argv ) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
 
-#ifndef BLOCKING_RPC_SUPERVISOR_H
-#define BLOCKING_RPC_SUPERVISOR_H
-
-#include "RpcSupervisor.h"
-
-namespace coral {
-namespace rpc {
-
-///
-/// The BlockingRpcSupervisor blocks the caller until the remote procedure call
-/// has completed or timed out.
-///
-class BlockingRpcSupervisor : public RpcSupervisor {
-public:
-
-   BlockingRpcSupervisor();
-   ~BlockingRpcSupervisor();
-
-   ///
-   /// Invoke the remote procedure call.
-   ///
-   /// @param  client  RpcClient through which the request should be sent
-   /// @param  request Request object
-   /// @param  response_message_ptr Deserialized response message buffer
-   /// @param  timeout_ms  Call timeout in milliseconds
-   /// return  bool    True on success; false on failure
-   ///
-   bool invoke( RpcClient&       client,
-                const RpcObject& request,
-                PbMessage*       response_message_ptr,
-                int              timeout_ms );
-
-
-private:
-
-   ///
-   /// Copies are not permitted.
-   ///
-   BlockingRpcSupervisor( const BlockingRpcSupervisor& );
-   BlockingRpcSupervisor& operator= ( const BlockingRpcSupervisor& );
-
-}; // End class BlockingRpcSupervisor
-
-} // End namespace rpc
-} // End namespace coral
-
-#endif // BLOCKING_RPC_SUPERVISOR_H

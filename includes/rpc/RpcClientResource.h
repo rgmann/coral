@@ -40,60 +40,103 @@
 #include "RpcException.h"
 #include "RpcClient.h"
 #include "AsyncRpcSupervisor.h"
-#include <boost/uuid/uuid.hpp>
 
 
 namespace coral {
 namespace rpc {
 
+///
+/// Abstract base class for all client-side service stubs, or client-side
+/// resources.
+///
+/// The RpcClientResource is not thread safe.
+///
 class RpcClientResource {
 public:
 
-   RpcClientResource(RpcClient &client, const std::string &classname);
    virtual ~RpcClientResource();
    
-   enum { InvalidInstance = -1 };
+   ///
+   /// Set call timeout in milliseconds.
+   ///
+   /// @param  timeout_ms  Timeout in milliseconds
+   /// @return void
+   ///
+   void setTimeout( int timeout_ms );
 
-   void setTimeout(int nTimeoutMs);
- 
+   ///
+   /// Get the last error encountered by this client resource.
+   ///
+   /// @return RpcException  Last error
+   ///
    RpcException getLastError();
 
+
 protected:
-   
-   void setCallTimeout(ui32 nTimeoutMs);
-   
-   bool construct();
-   
-   bool destroy();
-   
+
+   ///
+   /// Construct a client resource
+   ///
+   /// @param  client  RpcClient through which all remote procedure calls are issued
+   /// @param  resource_name  Name of resource
+   ///
+   RpcClientResource( RpcClient& client, const std::string& resource_name );
+
+
+   ///
+   /// Call the named remote method.  If an AsyncRpcSupervisor is passed,
+   /// then the request will be transmitted and call() will return immediately.
+   /// Otherwise, call() blocks until a response is received, the call times
+   /// out, or until some other error occurs.
+   ///
+   /// @param  method_name  Remote procedure name
+   /// @param  request      Remote procedure parameter message
+   /// @param  response     Remote procedure response message
+   /// @param  supervisor   Optional asynchronous call supervisor
+   /// @return bool         True on success; false on failure. On failure,
+   ///                      GetLastError() should be uses to get more
+   ///                      information about the error condition.
+   ///   
    bool call(const std::string&  methodName,
              const PbMessage&    request,
              PbMessage&          response,
-             AsyncRpcSupervisor* pSupervisor = NULL);
+             AsyncRpcSupervisor* supervisor = NULL);
 
-   void marshallRequest(RpcObject&         requestObject,
-                        const std::string& methodName,
-                        const PbMessage*   pReqeustParameters = NULL);
-   
+   ///
+   /// Given a method name and request-parameter message, build a request
+   /// object.
+   ///
+   /// @param  request_object Marshalled request object
+   /// @param  method_name    Remote procedure name
+   /// @param  request_params Remote procedure parameter message
+   /// @return void
+   ///
+   void marshallRequest(RpcObject&         request_object,
+                        const std::string& method_name,
+                        const PbMessage*   request_params = NULL);
+
+
 private:
-   
-   bool invoke(const RpcObject& object,
-               RpcObject&       result,
-               ui32             nTimeoutMs);
+
+   ///
+   /// Copies are not permitted
+   ///
+   RpcClientResource( const RpcClientResource& );
+   RpcClientResource& operator= ( const RpcClientResource& );
+
 
 protected:
 
-   RpcClient &mrClient;
+   RpcClient& rpc_client_;
    
-   std::string mClassname;
+   std::string resource_name_;
    
-   boost::uuids::uuid mUuid;
+   RpcException last_error_;
 
-   RpcException mLastError;
-
-   int mnTimeoutMs;
+   int timeout_ms_;
 };
 
-}}
+} // end namespace rpc
+} // end namespace coral
 
 #endif // RPC_CLIENT_RESOURCE_H

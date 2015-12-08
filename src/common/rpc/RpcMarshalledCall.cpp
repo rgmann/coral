@@ -43,27 +43,27 @@ using namespace coral::thread;
 //-----------------------------------------------------------------------------
 RpcMarshalledCall::RpcMarshalledCall( const RpcObject &object )
    : is_disposed_( false )
-   , cancelled_( false )
+   , canceled_( false )
 {
-   param_object_ = object;
+   request_object_ = object;
 }
 
 //-----------------------------------------------------------------------------
-RpcPacket* RpcMarshalledCall::getRpcPacket() const
+RpcPacket* RpcMarshalledCall::toRequestPacket() const
 {
-   return new (std::nothrow) RpcPacket(param_object_);
+   return new (std::nothrow) RpcPacket( request_object_ );
 }
 
 //-----------------------------------------------------------------------------
-void RpcMarshalledCall::getResult(RpcObject &result)
+const RpcObject& RpcMarshalledCall::getResponse() const
 {
-   result = result_object_;
+   return response_object_;
 }
 
 //-----------------------------------------------------------------------------
-const RpcObject& RpcMarshalledCall::input() const
+const RpcObject& RpcMarshalledCall::getRequest() const
 {
-   return param_object_;
+   return request_object_;
 }
 
 //-----------------------------------------------------------------------------
@@ -81,31 +81,31 @@ bool RpcMarshalledCall::isDisposed() const
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::notify(const RpcObject &object)
 {
-   result_object_ = object;
-   mSem.give();
+   response_object_ = object;
+   response_sem_.give();
 }
 
 //-----------------------------------------------------------------------------
 void RpcMarshalledCall::cancel()
 {
-   cancelled_ = true;
-   mSem.give();
+   canceled_ = true;
+   response_sem_.give();
 }
 
 //-----------------------------------------------------------------------------
-bool RpcMarshalledCall::cancelled() const
+bool RpcMarshalledCall::canceled() const
 {
-  return cancelled_;
+  return canceled_;
 }
 
 //-----------------------------------------------------------------------------
 bool RpcMarshalledCall::wait( ui32 timeout_ms, bool cancel_on_timeout )
 {
-   bool success = ( mSem.take( timeout_ms ) == Semaphore::SemAcquired );
+   bool success = ( response_sem_.take( timeout_ms ) == Semaphore::SemAcquired );
 
    if ( success && cancel_on_timeout )
    {
-     is_disposed_ = true;
+      is_disposed_ = true;
    }
 
    return success;

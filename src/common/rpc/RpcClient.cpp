@@ -31,7 +31,6 @@
 // 
 
 
-
 #include "Log.h"
 #include "RpcClient.h"
 
@@ -48,38 +47,38 @@ RpcClient::RpcClient( DestinationID server_destination_id )
 //-----------------------------------------------------------------------------
 RpcClient::~RpcClient()
 {
-   boost::mutex::scoped_lock guard( mRpcMutex );
+   boost::mutex::scoped_lock guard( active_call_table_lock_ );
 
-   CallMap::iterator rpc_iterator = mRpcMap.begin();
-   while ( rpc_iterator != mRpcMap.end() )
+   CallTable::iterator rpc_iterator = active_calls_.begin();
+   while ( rpc_iterator != active_calls_.end() )
    {
       if ( rpc_iterator->second )
       {
          delete rpc_iterator->second;
       }
 
-      mRpcMap.erase( rpc_iterator++ );
+      active_calls_.erase( rpc_iterator++ );
    }
 }
 
 //-----------------------------------------------------------------------------
-RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
+RpcMarshalledCall* RpcClient::invokeRpc( const RpcObject& object )
 {
    RpcMarshalledCall* call_ptr = new (std::nothrow) RpcMarshalledCall(object);
 
    if ( call_ptr )
    {
-      const boost::uuids::uuid& call_id = call_ptr->input().callInfo().uuid;
+      const boost::uuids::uuid& call_id = call_ptr->getRequest().callInfo().uuid;
 
-      if ( mRpcMap.count( call_id ) == 0 )
+      if ( active_calls_.count( call_id ) == 0 )
       {
          {
-            boost::mutex::scoped_lock guard( mRpcMutex );
+            boost::mutex::scoped_lock guard( active_call_table_lock_ );
 
-            mRpcMap.insert( std::make_pair( call_id, call_ptr ) );
+            active_calls_.insert( std::make_pair( call_id, call_ptr ) );
          }
 
-         RpcPacket* packet_ptr = call_ptr->getRpcPacket();
+         RpcPacket* packet_ptr = call_ptr->toRequestPacket();
 
          if ( packet_ptr )
          {
@@ -114,7 +113,10 @@ RpcMarshalledCall* RpcClient::invokeRpc(const RpcObject &object)
 }
 
 //-----------------------------------------------------------------------------
-bool RpcClient::put( DestinationID destination_id, const void* data_ptr, ui32 length )
+bool RpcClient::put(
+   DestinationID  destination_id,
+   const void*    data_ptr,
+   ui32           length )
 {
    bool success = false;
 
@@ -129,8 +131,8 @@ bool RpcClient::put( DestinationID destination_id, const void* data_ptr, ui32 le
 
          const boost::uuids::uuid& call_id = receive_object.callInfo().uuid;
 
-         CallMap::iterator call_iterator = mRpcMap.find( call_id );
-         if ( call_iterator != mRpcMap.end() )
+         CallTable::iterator call_iterator = active_calls_.find( call_id );
+         if ( call_iterator != active_calls_.end() )
          {
             call_ptr = call_iterator->second;
          }
@@ -163,10 +165,10 @@ bool RpcClient::put( DestinationID destination_id, const void* data_ptr, ui32 le
 //-----------------------------------------------------------------------------
 void RpcClient::processCancellations()
 {
-   boost::mutex::scoped_lock guard( mRpcMutex );
+   boost::mutex::scoped_lock guard( active_call_table_lock_ );
 
-   CallMap::iterator rpc_iterator = mRpcMap.begin();
-   while ( rpc_iterator != mRpcMap.end() )
+   CallTable::iterator rpc_iterator = active_calls_.begin();
+   while ( rpc_iterator != active_calls_.end() )
    {
       if ( rpc_iterator->second->isDisposed() )
       {
@@ -175,7 +177,7 @@ void RpcClient::processCancellations()
             delete rpc_iterator->second;
          }
 
-         mRpcMap.erase(rpc_iterator++);
+         active_calls_.erase(rpc_iterator++);
       }
       else
       {
