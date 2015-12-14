@@ -37,17 +37,22 @@
 
 #include "CryptoHashTypes.h"
 
+///
+/// Abstract base class for various hash implementations. Currently, the only
+/// implementation is MD5. In the future, all hashing code will likely be
+/// removed in favor of a peer-reviewed external library.
+///
 class CryptoHash {
 public:
    
    CryptoHash(){ m_bValid = false; };
    virtual ~CryptoHash() {};
    
-   virtual bool get(Hash128* pHash) = 0;
+   virtual bool get(Hash128* pHash) const = 0;
 
    virtual bool hashify(unsigned char *pData, unsigned int nBlockSizeBytes) = 0;
    
-   bool  isValid() { return m_bValid; };
+   bool  isValid() const { return m_bValid; };
 
    virtual void invalidate() { m_bValid = false; };
    

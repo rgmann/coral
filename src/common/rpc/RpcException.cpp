@@ -44,7 +44,7 @@
 #define  DS_STRING_FIELD(field) \
 if ( success ) \
 { \
-   success = ( stream.readCString( field ) != coral::netapp::SerialStream::ReadFail ); \
+   success = ( stream.read_string( field ) != coral::netapp::SerialStream::ReadFail ); \
    if ( success == false ) \
    { \
       log::error("%s::deserialize: Failure at line %d\n",class_name,__LINE__); \
@@ -102,16 +102,10 @@ std::string TraceFrame::toString() const
 //-----------------------------------------------------------------------------
 void TraceFrame::pack(coral::netapp::SerialStream& stream) const
 {
-   stream.writeCString( resource_name_ );
-   stream.writeCString( method_name_ );
-   stream.writeCString( filename_ );
+   stream.write_string( resource_name_ );
+   stream.write_string( method_name_ );
+   stream.write_string( filename_ );
    stream.write( (ui32)line_number_ );
-}
-
-//-----------------------------------------------------------------------------
-void TraceFrame::pack(coral::netapp::SerialStream& stream)
-{
-  const_cast<const TraceFrame*>(this)->pack(stream);
 }
 
 //-----------------------------------------------------------------------------
@@ -184,7 +178,7 @@ void RpcException::pack(coral::netapp::SerialStream& stream) const
 {
    stream.write( (ui32)reporter );
    stream.write( (ui32)id );
-   stream.writeCString( message );
+   stream.write_string( message );
 
    // Serialize the frame trace only if an exception occurred.
    if (id != kNoException)
@@ -201,12 +195,6 @@ void RpcException::pack(coral::netapp::SerialStream& stream) const
    {
       stream.write( (ui8)0 );
    }
-}
-
-//-----------------------------------------------------------------------------
-void RpcException::pack(coral::netapp::SerialStream& stream)
-{
-  const_cast<const RpcException*>(this)->pack(stream);
 }
 
 //-----------------------------------------------------------------------------

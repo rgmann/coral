@@ -159,8 +159,8 @@ bool RpcObject::getResponse(
 //-----------------------------------------------------------------------------
 void RpcObject::pack(coral::netapp::SerialStream& stream) const
 {
-   stream.writeCString(callInfo().resource);
-   stream.writeCString(callInfo().action);
+   stream.write_string(callInfo().resource);
+   stream.write_string(callInfo().action);
 
    stream.write((const char*)callInfo().uuid.data, callInfo().uuid.size());
    exception_.serialize(stream);
@@ -168,23 +168,17 @@ void RpcObject::pack(coral::netapp::SerialStream& stream) const
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::pack(coral::netapp::SerialStream& stream)
-{
-  const_cast<const RpcObject*>(this)->pack(stream);
-}
-
-//-----------------------------------------------------------------------------
 bool RpcObject::unpack(coral::netapp::SerialStream &stream)
 {
    // Read the resource name
-   if ( stream.readCString( callInfo().resource ) == SerialStream::ReadFail )
+   if ( stream.read_string( callInfo().resource ) == SerialStream::ReadFail )
    {
       log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;
    }
 
    // Read the action name.
-   if ( stream.readCString( callInfo().action ) == SerialStream::ReadFail )
+   if ( stream.read_string( callInfo().action ) == SerialStream::ReadFail )
    {
       log::error("RpcObject::deserialize failure at %d\n", __LINE__);
       return false;

@@ -79,16 +79,9 @@ void ResourcePath::setRemote( bool remote )
 }
 
 //-----------------------------------------------------------------------------
-void ResourcePath::pack(coral::netapp::SerialStream& rCtor)
-{
-  rCtor.writeCString( path_.string() );
-  rCtor.write( remote_ );
-}
-
-//-----------------------------------------------------------------------------
 void ResourcePath::pack(coral::netapp::SerialStream& rCtor) const
 {
-  rCtor.writeCString( path_.string() );
+  rCtor.write_string( path_.string() );
   rCtor.write( remote_ );
 }
 
@@ -96,7 +89,7 @@ void ResourcePath::pack(coral::netapp::SerialStream& rCtor) const
 bool ResourcePath::unpack(coral::netapp::SerialStream& rDtor)
 {
   std::string path_string;
-  if (rDtor.readCString(path_string) != SerialStream::ReadOk)
+  if (rDtor.read_string(path_string) != SerialStream::ReadOk)
   {
     log::error("ResourcePath::unpack - Failed to read 'path'\n");
     return false;

@@ -62,7 +62,6 @@ public:
 
 protected:
 
-  void pack(coral::netapp::SerialStream&);
   void pack(coral::netapp::SerialStream&) const;
   bool unpack(coral::netapp::SerialStream&);
 };
@@ -84,7 +83,6 @@ public:
 
 protected:
 
-  void pack(coral::netapp::SerialStream&);
   void pack(coral::netapp::SerialStream&) const;
   bool unpack(coral::netapp::SerialStream&);
 };
@@ -111,7 +109,6 @@ public:
 
 protected:
 
-  void pack(coral::netapp::SerialStream& ctor);
   void pack(coral::netapp::SerialStream& ctor) const;
   bool unpack(coral::netapp::SerialStream& dtor);
 };
@@ -124,7 +121,6 @@ public:
 
 protected:
 
-  void pack(coral::netapp::SerialStream& ctor);
   void pack(coral::netapp::SerialStream& ctor) const;
   bool unpack(coral::netapp::SerialStream& dtor);
 };
@@ -137,7 +133,6 @@ public:
 
 protected:
 
-  void pack(coral::netapp::SerialStream& ctor);
   void pack(coral::netapp::SerialStream& ctor) const;
   bool unpack(coral::netapp::SerialStream& dtor);
 };
@@ -163,7 +158,6 @@ public:
 
 protected:
 
-  void pack(coral::netapp::SerialStream&);
   void pack(coral::netapp::SerialStream&) const;
   bool unpack(coral::netapp::SerialStream&);
 };

@@ -71,12 +71,12 @@ bool deserialize_ts( SerialStream& dtor, Timestamp& ts )
 
 //----------------------------------------------------------------------------
 SegmentationReport::SegmentationReport()
-:  Serializable()
-,  status(kRsyncSuccess)
-,  complete( false )
-,  segmentSizeBytes(0)
-,  strideSizeBytes(0)
-,  segmentCount(0)
+   :  Serializable()
+   ,  status(kRsyncSuccess)
+   ,  complete( false )
+   ,  segmentSizeBytes(0)
+   ,  strideSizeBytes(0)
+   ,  segmentCount(0)
 {
 }
 
@@ -92,12 +92,6 @@ void SegmentationReport::print(std::ostream& stream, ui8 tab_size ) const
    stream << spaces << "start time: " << std::fixed << begin.fseconds() << "\n"; 
    stream << spaces << "end time: " << std::fixed << end.fseconds() << "\n"; 
    delete[] spaces;
-}
-
-//----------------------------------------------------------------------------
-void SegmentationReport::pack(coral::netapp::SerialStream& ctor)
-{
-   const_cast<const SegmentationReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
@@ -164,11 +158,11 @@ bool SegmentationReport::unpack( SerialStream& dtor )
 }
 //----------------------------------------------------------------------------
 AssemblyReport::AssemblyReport()
-:  Serializable()
-,  status(kRsyncSuccess)
-,  complete( false )
-,  segmentCount(0)
-,  chunkCount(0)
+   :  Serializable()
+   ,  status(kRsyncSuccess)
+   ,  complete( false )
+   ,  segmentCount(0)
+   ,  chunkCount(0)
 {
 }
 
@@ -183,12 +177,6 @@ void AssemblyReport::print( std::ostream& stream, ui8 tab_size ) const
    stream << spaces << "start time: " << std::fixed << begin.fseconds() << "\n"; 
    stream << spaces << "end time: " << std::fixed << end.fseconds() << "\n";
    delete[] spaces;
-}
-
-//----------------------------------------------------------------------------
-void AssemblyReport::pack(SerialStream& ctor)
-{
-   const_cast<const AssemblyReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
@@ -249,12 +237,12 @@ bool AssemblyReport::unpack(SerialStream& dtor)
 
 //----------------------------------------------------------------------------
 AuthorityReport::AuthorityReport()
-:  Serializable()
-,  status(kRsyncSuccess)
-,  complete( false )
-,  receivedSegmentCount(0)
-,  matchedSegmentCount(0)
-,  chunkCount(0)
+   :  Serializable()
+   ,  status(kRsyncSuccess)
+   ,  complete( false )
+   ,  receivedSegmentCount(0)
+   ,  matchedSegmentCount(0)
+   ,  chunkCount(0)
 {
 }
 
@@ -273,12 +261,6 @@ void AuthorityReport::print(std::ostream& stream, ui8 tab_size) const
    stream << spaces << "auth end time: " << std::fixed << authEnd.fseconds() << "\n";
    
    delete[] spaces;
-}
-
-//----------------------------------------------------------------------------
-void AuthorityReport::pack(SerialStream& ctor)
-{
-  const_cast<const AuthorityReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
@@ -361,12 +343,6 @@ bool AuthorityReport::unpack( SerialStream& dtor )
 }
 
 //----------------------------------------------------------------------------
-void DestinationReport::pack( SerialStream& ctor )
-{
-   const_cast<const DestinationReport*>(this)->pack(ctor);
-}
-
-//----------------------------------------------------------------------------
 void DestinationReport::pack( SerialStream& ctor ) const
 {
    segmentation.serialize(ctor);
@@ -391,12 +367,6 @@ bool DestinationReport::unpack(coral::netapp::SerialStream& dtor)
    }
 
    return true;
-}
-
-//----------------------------------------------------------------------------
-void SourceReport::pack(SerialStream& ctor)
-{
-   const_cast<const SourceReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------
@@ -428,7 +398,7 @@ bool SourceReport::unpack(coral::netapp::SerialStream& dtor)
 
 //----------------------------------------------------------------------------
 JobReport::JobReport()
-:  Serializable()
+   :  Serializable()
 {
 }
 
@@ -457,12 +427,6 @@ std::string JobReport::toString() const
    print( stream );
 
    return stream.str();
-}
-
-//----------------------------------------------------------------------------
-void JobReport::pack(SerialStream& ctor)
-{
-   const_cast<const JobReport*>(this)->pack(ctor);
 }
 
 //----------------------------------------------------------------------------

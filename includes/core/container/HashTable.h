@@ -53,14 +53,34 @@ public:
   HashTable();
   ~HashTable();
 
-  void insert(size_t key, Type value);
+  ///
+  /// Insert an item.
+  ///
+  /// @param  key  Item key
+  /// @param  value Item value
+  /// @return void
+  ///
+  void insert( size_t key, Type value);
 
+  ///
+  /// Remove an item by key and comparator.
+  ///
+  /// @param  key  Item key
+  /// @param  value  Item (if found)
+  /// @param  comp  Comparator functor
+  ///
   template<typename Comparator>
   bool remove(size_t key, Type& value, Comparator& comp);
 
+  ///
+  /// Retrieve an item by key and comparator.
+  ///
+  /// @param  key  Item key
+  /// @param  item Item (if found)
+  /// @param  comp Comparator functor
+  ///
   template<typename Comparator>
   bool find(size_t key, Type& item, Comparator& comp);
-
 
   void clear();
 
@@ -70,10 +90,26 @@ public:
   ///
   /// Get the number of items stored in the HashTable.
   ///
+  /// @return  size_t  Number of items stored
+  ///
   inline size_t size() const { return item_count_; };
 
+  ///
+  /// Number of "buckets" in the HashTable. The number of buckets, B, is determined
+  /// by the keysize, K, as B = 2^K.
+  ///
+  /// @return size_t Number of buckets
+  ///
   inline size_t buckets() const { return bucket_count_; };
 
+  ///
+  /// Dump a comma-delimited histogram of this HashTable's utility to the
+  /// specified output stream. Each line specifies the bucket index in the
+  /// first column and the number of items in the bucket in the second column.
+  ///
+  /// @param  stream  Output stream
+  /// @return void
+  ///
   void histogram( std::ostream& stream );
 
 private:

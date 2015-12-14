@@ -318,8 +318,6 @@ coral::rsync::Segment::ID SegmentInstruction::segmentId() const
 
    if ( instruction_ptr_ )
    {
-      // Segment::ID* segment_id_ptr = (Segment::ID*)instruction_ptr_->payload_ptr();
-      // segment_id = *segment_id_ptr;
       segment_id = *( (Segment::ID*)instruction_ptr_->payload_ptr() );
    }
 

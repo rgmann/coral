@@ -127,7 +127,7 @@ void AssemblerThread::run( const bool& shutdown )
             job_ptr->signalAssemblyDone();
 
             job_ptr->waitDone();
-            // agent_ptr->releaseJob( job_ptr );
+
             agent_ptr->releaseJobIfReleasable( job_ptr );
          }
          else

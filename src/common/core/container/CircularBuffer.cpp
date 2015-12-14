@@ -41,10 +41,10 @@ using namespace coral;
 
 //------------------------------------------------------------------------------
 CircularBuffer::CircularBuffer()
-: buffer_ptr_   ( NULL )
-, head_position_( 1 )
-, tail_position_( head_position_ )
-, capacity_     ( 0 )
+   : buffer_ptr_   ( NULL )
+   , head_position_( 1 )
+   , tail_position_( head_position_ )
+   , capacity_     ( 0 )
 {
 }
 
@@ -62,12 +62,9 @@ CircularBuffer::~CircularBuffer()
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::write(
-   const void* void_data_ptr,
-   unsigned int byte_count
-)
+size_t CircularBuffer::write( const void* void_data_ptr, size_t byte_count )
 {
-   unsigned int total_bytes_written = 0;
+   size_t total_bytes_written = 0;
 
    const char* data_ptr = reinterpret_cast<const char*>( void_data_ptr );
 
@@ -75,7 +72,7 @@ unsigned int CircularBuffer::write(
    {
       while ( !isFull() && ( total_bytes_written < byte_count ) )
       {
-         unsigned int bytes_to_write = linearFreeSize();
+         size_t bytes_to_write = linearFreeSize();
 
          if ( bytes_to_write > ( byte_count - total_bytes_written ) )
          {
@@ -98,18 +95,15 @@ unsigned int CircularBuffer::write(
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::write(
-   std::istream&  stream,
-   unsigned int   byte_count
-)
+size_t CircularBuffer::write( std::istream& stream, size_t byte_count )
 {
-  unsigned int total_bytes_written = 0;
+  size_t total_bytes_written = 0;
 
   if ( buffer_ptr_ != NULL )
   {
     while ( !isFull() && ( total_bytes_written < byte_count ) )
     {
-      unsigned int bytes_to_write = linearFreeSize();
+      size_t bytes_to_write = linearFreeSize();
 
       if ( bytes_to_write > ( byte_count - total_bytes_written ) )
       {
@@ -138,12 +132,9 @@ unsigned int CircularBuffer::write(
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::read(
-   void*        void_data_ptr,
-   unsigned int byte_count_limit
-)
+size_t CircularBuffer::read( void* void_data_ptr, size_t byte_count_limit )
 {
-   unsigned int total_bytes_read = 0;
+   size_t total_bytes_read = 0;
 
    char* data_ptr = reinterpret_cast<char*>( void_data_ptr );
 
@@ -151,7 +142,7 @@ unsigned int CircularBuffer::read(
    {
       while ( !isEmpty() && ( total_bytes_read < byte_count_limit ) )
       {
-         unsigned int bytes_to_read = linearUsedSize( tail_position_ );
+         size_t bytes_to_read = linearUsedSize( tail_position_ );
 
          if ( bytes_to_read == 0 ) break;
 
@@ -176,22 +167,19 @@ unsigned int CircularBuffer::read(
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::peek(
-   void*         void_data_ptr,
-   unsigned int  byte_count_limit
-) const
+size_t CircularBuffer::peek( void* void_data_ptr, size_t byte_count_limit ) const
 {
-   unsigned int total_bytes_read = 0;
+   size_t total_bytes_read = 0;
 
    char* data_ptr = reinterpret_cast<char*>( void_data_ptr );
 
    if ( buffer_ptr_ != NULL )
    {
-      unsigned int peek_position = tail_position_;
+      size_t peek_position = tail_position_;
 
       while ( total_bytes_read < byte_count_limit )
       {
-         unsigned int bytes_to_read = linearUsedSize( peek_position );
+         size_t bytes_to_read = linearUsedSize( peek_position );
 
          if ( bytes_to_read == 0 ) break;
 
@@ -216,7 +204,7 @@ unsigned int CircularBuffer::peek(
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::capacity() const
+size_t CircularBuffer::capacity() const
 {
    return capacity_;
 }
@@ -244,7 +232,7 @@ CircularBuffer& CircularBuffer::operator=( const CircularBuffer& other )
 }
 
 //------------------------------------------------------------------------------
-bool CircularBuffer::allocate( unsigned int capacity )
+bool CircularBuffer::allocate( size_t capacity )
 {
    if ( buffer_ptr_ != NULL )
    {
@@ -265,9 +253,9 @@ bool CircularBuffer::allocate( unsigned int capacity )
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::size() const
+size_t CircularBuffer::size() const
 {
-   unsigned int bytes_used = head_position_;
+   size_t bytes_used = head_position_;
 
    if ( head_position_ < tail_position_ )
    {
@@ -280,21 +268,21 @@ unsigned int CircularBuffer::size() const
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::allocatedSize() const
+size_t CircularBuffer::allocatedSize() const
 {
    return capacity_ + 1;
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::freeSize() const
+size_t CircularBuffer::freeSize() const
 {
    return capacity() - size();
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::linearFreeSize() const
+size_t CircularBuffer::linearFreeSize() const
 {
-   unsigned int writable_bytes = 0;
+   size_t writable_bytes = 0;
 
    if ( tail_position_ <= head_position_ )
    {
@@ -314,9 +302,7 @@ unsigned int CircularBuffer::linearFreeSize() const
 }
 
 //------------------------------------------------------------------------------
-unsigned int CircularBuffer::linearUsedSize(
-   unsigned int read_position
-) const
+size_t CircularBuffer::linearUsedSize( size_t read_position ) const
 {
    int readable_bytes = (int)head_position_ - (int)read_position;
 
@@ -329,10 +315,7 @@ unsigned int CircularBuffer::linearUsedSize(
 }
 
 //----------------------------------------------------------------------------
-void CircularBuffer::add(
-   unsigned int& position,
-   unsigned int  move_count
-) const
+void CircularBuffer::add( size_t& position, size_t  move_count ) const
 {
    position += move_count;
    position %= allocatedSize();

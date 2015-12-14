@@ -54,7 +54,6 @@ public:
 
 private:
 
-  void pack(coral::netapp::SerialStream& rCtor );
   void pack(coral::netapp::SerialStream& rCtor ) const;
   bool unpack(coral::netapp::SerialStream& rDtor);
 

@@ -69,7 +69,6 @@ protected:
    ///
    /// Serialize the Trace Frame to a binary string.
    ///
-   void pack( coral::netapp::SerialStream& );
    void pack( coral::netapp::SerialStream& ) const;
 
    ///
@@ -174,7 +173,6 @@ public:
 
 protected:
 
-  void pack( coral::netapp::SerialStream& );
   void pack( coral::netapp::SerialStream& ) const;
   bool unpack( coral::netapp::SerialStream& );
 
