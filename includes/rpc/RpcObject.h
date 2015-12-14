@@ -45,52 +45,114 @@ namespace rpc {
 
 typedef ::google::protobuf::Message PbMessage;
 
-
+///
+/// The RpcObject encapsulates an RPC request or an RPC response. The RpcObject
+/// also maintains information about the call itself, including a descriptor
+/// and an exception. The RpcObject is responsible for serializing/deserializing
+/// requests and responses.
+///
 class RpcObject : public coral::netapp::Serializable {
 public:
 
+   ///
+   /// Construct an empty RPC object
+   ///
    RpcObject();
+
+   ///
+   /// Construct an RPC object for the specified resource/service method.
+   ///
+   /// @param  resource_name Resource/service name
+   /// @param  action_name   Name of action that this object is associated with
+   ///
    RpcObject(const std::string &resourceName, const std::string &actionName);
+
    virtual ~RpcObject();
 
-   //--------------------------------------------------------------------------
-   //                            Public Fields
-   //--------------------------------------------------------------------------
+   ///
+   /// Get information about the call that this object is associated with.
+   ///
+   /// @return RpcCallInfo&  Call descriptor
+   ///
    RpcCallInfo&  callInfo();
    const RpcCallInfo&  callInfo() const;
+
+   ///
+   /// Get the exception status associated with this object's call.
+   ///
+   /// @return RpcException& Exception information
+   ///
    RpcException& exception();
    const RpcException& exception() const;
 
 
-   //--------------------------------------------------------------------------
-   //                            Public Methods
-   //--------------------------------------------------------------------------
-   void setParams(const PbMessage& message);
-   void setParams(const std::string& message);
-   void getParams(PbMessage& message) const;
-   void getParams(std::string& message) const;
-   
+   ///
+   /// Set the request or response message. The protocol buffer is serialized
+   /// to a std::string.
+   ///
+   /// @param  message  Protocol buffer request or response message
+   /// @return void
+   ///
+   void setParams( const PbMessage& message);
+
+   ///
+   /// Set the request or response message. The protocol buffer is serialized
+   /// to a std::string.
+   ///
+   /// @param  message  Protocol buffer request or response message
+   /// @return void
+   ///
+   void setParams( const std::string& message);
+
+   ///
+   /// Get the request or response message.
+   ///
+   /// @return PbMessage&  Deserialized protocol buffer request/response message
+   ///
+   void getParams( PbMessage& message) const;
+
+   ///
+   /// Get the request or response message.
+   ///
+   void getParams( std::string& message) const;
+
+   ///
+   /// Query whether the object represents a valid request or response.
+   ///
+   /// @return bool True if the object represents a valid request or response;
+   ///              false if the object is empty.
+   ///
    virtual bool isValid() const;
       
    
-   bool getResponse(RpcObject &response) const;
-   bool getResponse(RpcObject &response, const PbMessage &value) const;
-   bool getResponse(RpcObject &response, const std::string &value) const;
+   ////////////////////////////////////////////////////////////////////////////
+   /// The following public methods are used solely by the RpcServer and
+   /// RpcServerResource to build a response RpcObject for a request RpcObject.
+   ////////////////////////////////////////////////////////////////////////////
 
-   std::string  mMessage;
+   ///
+   /// Create a response RpcObject for a request RpcObject.
+   ///
+   /// @param  response  Response RpcObject
+   /// @param  message   Message to be serialized in response
+   /// @return bool      False if the response cannot be built because this
+   ///                   (the request) is not valid; true otherwise
+   ///
+   bool getResponse( RpcObject& response) const;
+   bool getResponse( RpcObject& response, const PbMessage& message ) const;
+   bool getResponse( RpcObject& response, const std::string& messag ) const;
 
 protected:
 
-  void pack(coral::netapp::SerialStream&);
-  void pack(coral::netapp::SerialStream&) const;
-  bool unpack(coral::netapp::SerialStream&);
+   void pack(coral::netapp::SerialStream&) const;
+   bool unpack(coral::netapp::SerialStream&);
 
 private:
 
-   // Protobuf message serialized to a byte string.
-   //std::string  mMessage;
-   RpcCallInfo  mCallInfo;
-   RpcException mException;
+   RpcCallInfo  call_info_;
+   RpcException exception_;
+
+   std::string message_;
 };
 
 }}

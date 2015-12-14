@@ -40,19 +40,48 @@
 #include "Log.h"
 #include "RpcException.h"
 
+
+#define  DS_STRING_FIELD(field) \
+if ( success ) \
+{ \
+   success = ( stream.read_string( field ) != coral::netapp::SerialStream::ReadFail ); \
+   if ( success == false ) \
+   { \
+      log::error("%s::deserialize: Failure at line %d\n",class_name,__LINE__); \
+   } \
+}
+
+#define  DS_FIELD(field,code) \
+if ( success ) \
+{ \
+   success = stream.read( field ); \
+   if ( success ) \
+   { \
+      code \
+   } \
+   else \
+   { \
+      log::error("%s::deserialize: Failure at line %d\n",class_name,__LINE__); \
+   } \
+}
+
+
 using namespace coral;
 using namespace coral::rpc;
 using namespace coral::netapp;
 
+
 //-----------------------------------------------------------------------------
-TraceFrame::TraceFrame(const std::string& className,
-                       const std::string& methodName,
-                       const std::string& filename,
-                       int lineNumber)
-: mClassName(className),
-  mMethodName(methodName),
-  mFileName(filename),
-  mLineNumber(lineNumber)
+TraceFrame::TraceFrame(
+   const std::string& resource_name,
+   const std::string& method_name,
+   const std::string& filename,
+   int                line_number
+)
+   : resource_name_( resource_name )
+   , method_name_( method_name )
+   , filename_( filename )
+   , line_number_( line_number )
 {
 }
 
@@ -62,10 +91,10 @@ std::string TraceFrame::toString() const
    std::stringstream ss;
 
    ss << "from " 
-      << mFileName << ":" 
-      << mLineNumber << ":in "
-      << mClassName << "."
-      << mMethodName;
+      << filename_ << ":" 
+      << line_number_ << ":in "
+      << resource_name_ << "."
+      << method_name_;
 
    return ss.str();
 }
@@ -73,237 +102,216 @@ std::string TraceFrame::toString() const
 //-----------------------------------------------------------------------------
 void TraceFrame::pack(coral::netapp::SerialStream& stream) const
 {
-   stream.writeCString(mClassName);
-   stream.writeCString(mMethodName);
-   stream.writeCString(mFileName);
-   stream.write((ui32)mLineNumber);
-}
-
-//-----------------------------------------------------------------------------
-void TraceFrame::pack(coral::netapp::SerialStream& stream)
-{
-  const_cast<const TraceFrame*>(this)->pack(stream);
+   stream.write_string( resource_name_ );
+   stream.write_string( method_name_ );
+   stream.write_string( filename_ );
+   stream.write( (ui32)line_number_ );
 }
 
 //-----------------------------------------------------------------------------
 bool TraceFrame::unpack(coral::netapp::SerialStream& stream)
 {
-   if (stream.readCString(mClassName) == coral::netapp::SerialStream::ReadFail)
-   {
-      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   if (stream.readCString(mMethodName) == coral::netapp::SerialStream::ReadFail)
-   {
-      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   if (stream.readCString(mFileName) == coral::netapp::SerialStream::ReadFail)
-   {
-      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   if (stream.read(mLineNumber) == false)
-   {
-      log::error("TraceFrame::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   return true;
+   const char* class_name = "TraceFrame";
+   bool success = true;
+
+   DS_STRING_FIELD( resource_name_ );
+   DS_STRING_FIELD( method_name_ );
+   DS_STRING_FIELD( filename_ );
+   DS_FIELD( line_number_, do {} while(0); );
+
+   return success;
 }
 
 //-----------------------------------------------------------------------------
 RpcException::RpcException()
-: id(NoException),
-  reporter(RpcException::Unknown)
+   : id( kNoException )
+   , reporter(RpcException::kUnknown)
 {
 }
 
 //-----------------------------------------------------------------------------
 const RpcCallInfo& RpcException::callInfo() const
 {
-   return mCallInfo;
+   return call_info_;
 }
 
 //-----------------------------------------------------------------------------
 std::string RpcException::toString() const
 {
-   std::string lErrorString = "";
+   std::string error_message;
 
-   lErrorString += callInfo().resource + "(";
+   error_message += callInfo().resource + "(";
+
    switch (reporter)
    {
-   case Server: lErrorString += "Server)"; break;
-   case Client: lErrorString += "Client)"; break;
-   default: lErrorString += "Unknown)"; break;
+      case kServer: error_message += "Server)"; break;
+      case kClient: error_message += "Client)"; break;
+      default:     error_message += "Unknown)"; break;
    }
 
-   lErrorString += "::" + callInfo().action + ": ";
-   lErrorString += ToRpcErrorString(id);
+   error_message += "::" + callInfo().action + ": ";
+   error_message += ToRpcErrorString(id);
 
-   if (message.length() > 0)
+   if ( message.length() > 0 )
    {
-      lErrorString += " > " + message;
+      error_message += " > " + message;
    }
 
-   return lErrorString;
+   return error_message;
 }
 
 //-----------------------------------------------------------------------------
 void RpcException::reset()
 {
-  id = NoException;
+  id = kNoException;
   message = "";
 
-  mCallInfo.resource = "";
-  mCallInfo.action = "";
-  mCallInfo.uuid = boost::uuids::nil_generator()();
-  // mCallInfo.rpcId = 0;
+  call_info_.resource = "";
+  call_info_.action   = "";
+  call_info_.uuid     = boost::uuids::nil_generator()();
 
-  mTrace.clear();
+  trace_.clear();
 }
 
 //-----------------------------------------------------------------------------
 void RpcException::pack(coral::netapp::SerialStream& stream) const
 {
-   stream.write((ui32)reporter);
-   stream.write((ui32)id);
-   stream.writeCString(message);
+   stream.write( (ui32)reporter );
+   stream.write( (ui32)id );
+   stream.write_string( message );
 
    // Serialize the frame trace only if an exception occurred.
-   if (id != NoException)
+   if (id != kNoException)
    {
-      stream.write((ui8)mTrace.size());
+      stream.write( (ui8)trace_.size() );
 
-      std::vector<TraceFrame>::const_iterator lIt = mTrace.begin();
-      for (; lIt != mTrace.end(); lIt++)
+      std::vector<TraceFrame>::const_iterator frame_iterator = trace_.begin();
+      for (; frame_iterator != trace_.end(); ++frame_iterator )
       {
-         lIt->serialize(stream);
+         frame_iterator->serialize( stream );
       }
    }
    else
    {
-      stream.write((ui8)0);
+      stream.write( (ui8)0 );
    }
-}
-
-//-----------------------------------------------------------------------------
-void RpcException::pack(coral::netapp::SerialStream& stream)
-{
-  const_cast<const RpcException*>(this)->pack(stream);
 }
 
 //-----------------------------------------------------------------------------
 bool RpcException::unpack(coral::netapp::SerialStream& stream)
 {
+   const char* class_name = "RpcException";
+   bool success = true;
+
    i32 tI32Field = -1;
-   if (stream.read(tI32Field) == false)
-   {
-      log::error("RpcException::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   reporter = (Reporter)tI32Field;
+   DS_FIELD( tI32Field, { reporter = (Reporter)tI32Field; } );
+   DS_FIELD( tI32Field, { id = (RpcErrorId)tI32Field; } );
+   DS_STRING_FIELD( message );
 
-   if (stream.read(tI32Field) == false)
-   {
-      log::error("RpcException::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   id = (RpcErrorId)tI32Field;
-
-   if (stream.readCString(message) == coral::netapp::SerialStream::ReadFail)
-   {
-      log::error("RpcException::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-
-   ui8 lnFrameCount = 0;
-   if (stream.read(lnFrameCount) == false)
-   {
-      log::error("RpcException::deserialize failure at %d\n", __LINE__);
-      return false;
-   }
-   for (ui8 lnFrameInd = 0; lnFrameInd < lnFrameCount; lnFrameInd++)
-   {
-      TraceFrame lFrame;
-      if (lFrame.deserialize(stream) == false)
+   ui8 frame_count = 0;
+   DS_FIELD( frame_count, do {} while(0); );
+   if ( success )
+   {      
+      for ( ui8 frame_index = 0;
+           ( frame_index < frame_count ) && success;
+           ++frame_index )
       {
-         log::error("RpcException::deserialize failure at %d\n", __LINE__);
-         return false;
+         TraceFrame trace_frame;
+
+         if ( trace_frame.deserialize( stream ) == false )
+         {
+            log::error("RpcException::deserialize failure at %d\n", __LINE__);
+            success = false;
+         }
+         else
+         {
+            trace_.push_back( trace_frame );
+         }
       }
+   }
 
-      mTrace.push_back(lFrame);
-   } 
-
-   return true;
+   return success;
 }
 
 //-----------------------------------------------------------------------------
-void RpcException::pushFrame(const TraceFrame& frame)
+void RpcException::pushFrame( const TraceFrame& frame )
 {
-   mTrace.push_back(frame);
+   trace_.push_back( frame );
 }
 
 //-----------------------------------------------------------------------------
-bool RpcException::pushTrace(const RpcException& other)
+void RpcException::pushTrace( const RpcException& other )
 {
-  bool lbSuccess = false;
+   if ( id == kNoException )
+   {
+      id = other.id;
+      message = other.message;
+      call_info_ = other.call_info_;
 
-  if (id == NoException)
-  {
-    id = other.id;
-    message = other.message;
-    mCallInfo = other.mCallInfo;
-
-    std::vector<TraceFrame>::const_iterator lIt = other.frameTrace().begin();
-    for (; lIt != other.frameTrace().end(); lIt++) pushFrame(*lIt);
-  }
-
-  return lbSuccess;
+      std::vector<TraceFrame>::const_iterator trace_iterator =
+         other.frameTrace().begin();
+      for (; trace_iterator != other.frameTrace().end(); ++trace_iterator )
+      {
+         pushFrame( *trace_iterator );
+      }
+   }
 }
 
 //-----------------------------------------------------------------------------
 void RpcException::popFrame() 
 {
-   if (id == NoException)
+   if ( id == kNoException )
    {
-     mTrace.pop_back();
+      trace_.pop_back();
    }
 }
 
 //-----------------------------------------------------------------------------
 const std::vector<TraceFrame>& RpcException::frameTrace() const
 {
-   return mTrace;
+   return trace_;
 }
 
 //-----------------------------------------------------------------------------
 std::vector<std::string> RpcException::textTrace() const 
 {
-   std::vector<std::string> lTraceVec;
-   if (id != NoException)
+   std::vector<std::string> text_trace;
+
+   if ( id != kNoException )
    {
-      std::vector<TraceFrame>::const_reverse_iterator lIt = mTrace.rbegin();
-      for (; lIt != mTrace.rend(); lIt++) lTraceVec.push_back(lIt->toString());
+      std::vector<TraceFrame>::const_reverse_iterator text_trace_iterator =
+         trace_.rbegin();
+
+      for (; text_trace_iterator != trace_.rend(); ++text_trace_iterator )
+      {
+         text_trace.push_back( text_trace_iterator->toString() );
+      }
    }
 
-   return lTraceVec;
+   return text_trace;
 }
 
 //-----------------------------------------------------------------------------
 std::string RpcException::trace() const
 {
-   std::stringstream lStream;
-   if (id == NoException) return "";
+   std::stringstream trace_stream;
 
-   std::vector<std::string> lvTrace = textTrace();
-   std::vector<std::string>::iterator lIt = lvTrace.begin();
-
-   lStream << "RpcException::" + ToRpcErrorString(id) + ": " + message + " from:" << std::endl;
-   for (; lIt != lvTrace.end(); lIt++)
+   if ( id != kNoException )
    {
-      lStream << "  " << *lIt << std::endl;
+      std::vector<std::string>           text_trace = textTrace();
+      std::vector<std::string>::iterator text_trace_iterator = text_trace.begin();
+
+      trace_stream << "RpcException::"
+                   << ToRpcErrorString( id )
+                   << ": " << message
+                   << " from:" << "\n";
+
+      for (; text_trace_iterator != text_trace.end(); ++text_trace_iterator )
+      {
+         trace_stream << "  " << *text_trace_iterator << "\n";
+      }
    }
 
-   return lStream.str();
+   return trace_stream.str();
 }
 

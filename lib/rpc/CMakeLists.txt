@@ -26,6 +26,7 @@ set( LIB_SRC_DIR rpc )
 #
 include_directories( ${Boost_INCLUDE_DIRS} )
 include_directories( ${PROTOBUF_INCLUDE_DIRS} )
+message(STATUS "protobuf=${PROTOBUF_INCLUDE_DIRS}")
 
 
 set( INCLUDE_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../includes )

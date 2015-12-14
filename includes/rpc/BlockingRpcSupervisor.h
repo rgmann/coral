@@ -40,23 +40,38 @@
 namespace coral {
 namespace rpc {
 
+///
+/// The BlockingRpcSupervisor blocks the caller until the remote procedure call
+/// has completed or timed out.
+///
 class BlockingRpcSupervisor : public RpcSupervisor {
 public:
 
-  BlockingRpcSupervisor();
-  ~BlockingRpcSupervisor();
+   BlockingRpcSupervisor();
+   ~BlockingRpcSupervisor();
 
-  bool invoke(RpcClient&       rClient,
-              const RpcObject& rMarshalledCall,
-              PbMessage*       pResponse,
-              int              nTimeoutMs);
+   ///
+   /// Invoke the remote procedure call.
+   ///
+   /// @param  client  RpcClient through which the request should be sent
+   /// @param  request Request object
+   /// @param  response_message_ptr Deserialized response message buffer
+   /// @param  timeout_ms  Call timeout in milliseconds
+   /// return  bool    True on success; false on failure
+   ///
+   bool invoke( RpcClient&       client,
+                const RpcObject& request,
+                PbMessage*       response_message_ptr,
+                int              timeout_ms );
 
 
 private:
 
-  BlockingRpcSupervisor(const BlockingRpcSupervisor&);
-
-  BlockingRpcSupervisor& operator= (const BlockingRpcSupervisor&);
+   ///
+   /// Copies are not permitted.
+   ///
+   BlockingRpcSupervisor( const BlockingRpcSupervisor& );
+   BlockingRpcSupervisor& operator= ( const BlockingRpcSupervisor& );
 
 }; // End class BlockingRpcSupervisor
 

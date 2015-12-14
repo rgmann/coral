@@ -56,99 +56,123 @@ public:
   //
   ~CircularBuffer();
 
-  //
-  // Allocate the buffer to the specified size in bytes.
-  //
-  // Preconditions:
-  // None
-  //
-  // Postconditions:
-  // 
-  //
-  bool allocate( unsigned int capacity_bytes );
+  ///
+  /// Allocate the buffer to the specified size in bytes.
+  ///
+  /// @param capacity_bytes  Capacity in bytes
+  /// @return bool  True if buffer was successfully allocated; false otherwise
+  ///
+  bool allocate( size_t capacity_bytes );
 
-  //
-  // Write a specified number of bytes from the specified memory location into
-  // the end of the circular buffer. Returns the actual number of bytes that
-  // were copied. The actual number of bytes copied may be less the specified
-  // number of bytes if there is insufficient space in the circular buffer.
-  //
-  unsigned int write( const void* data_ptr, unsigned int byte_count );
+  ///
+  /// Write a specified number of bytes from the specified memory location into
+  /// the end of the circular buffer. Returns the actual number of bytes that
+  /// were copied. The actual number of bytes copied may be less the specified
+  /// number of bytes if there is insufficient space in the circular buffer.
+  ///
+  /// @param  data_ptr  Data block pointer
+  /// @param  byte_count Number of bytes to write into the circular buffer
+  /// @return size_t  Number of bytes successfully written
+  ///
+  size_t write( const void* data_ptr, size_t byte_count );
 
-  //
-  // Write a specified number of bytes from the stream into the end of the
-  // circular buffer. Returns the actual number of bytes that were copied.
-  // The actual number of bytes copied may be less the specified number of
-  // bytes if there is insufficient space in the circular buffer or if the
-  // stream EOF condition becomes true before the specified number of bytes
-  // are copied.
-  //
-  unsigned int write( std::istream& stream, unsigned int byte_count );
+  ///
+  /// Write a specified number of bytes from the stream into the end of the
+  /// circular buffer. Returns the actual number of bytes that were copied.
+  /// The actual number of bytes copied may be less the specified number of
+  /// bytes if there is insufficient space in the circular buffer or if the
+  /// stream EOF condition becomes true before the specified number of bytes
+  /// are copied.
+  ///
+  /// @param  stream  Input stream
+  /// @param  byte_count  Number of bytes to write into the circular buffer
+  /// @return size_t  Number of bytes successfully written
+  ///
+  size_t write( std::istream& stream, size_t byte_count );
 
-  //
-  // Read a specified number of bytes out of the head of the circular buffer to
-  // the specified memory location. Returns the actual number of bytes that
-  // were read out of the circular buffer. The number of bytes read out of the
-  // circular buffer may be less than the specified number of bytes if there
-  // fewer bytes available.
-  //
-  unsigned int read( void* data_ptr, unsigned int byte_count_limit );
+  ///
+  /// Read a specified number of bytes out of the head of the circular buffer to
+  /// the specified memory location. Returns the actual number of bytes that
+  /// were read out of the circular buffer. The number of bytes read out of the
+  /// circular buffer may be less than the specified number of bytes if there
+  /// fewer bytes available.
+  ///
+  /// @param  data_ptr  Pointer to destination buffer
+  /// @param  max_bytes Maximum number of bytes to read into the destination
+  ///                   buffer
+  /// @return size_t    Number of bytes read into the destination buffer
+  ///
+  size_t read( void* data_ptr, size_t max_bytes );
 
-  //
-  // Copy a specified number of bytes from the head of the circular buffer to
-  // the specified memory location without modifying the state of the buffer
-  // itself. Returns the actual number of bytes that copied. The number of
-  // bytes read out of the circular buffer may be less than the specified
-  // number of bytes if there fewer bytes available.
-  //
-  unsigned int peek( void* data_ptr, unsigned int byte_count_limit ) const;
+  ///
+  /// Copy a specified number of bytes from the head of the circular buffer to
+  /// the specified memory location without modifying the state of the buffer
+  /// itself. Returns the actual number of bytes that copied. The number of
+  /// bytes read out of the circular buffer may be less than the specified
+  /// number of bytes if there fewer bytes available.
+  ///
+  /// @param  data_ptr  Pointer to destination buffer
+  /// @param  max_bytes Maximum number of bytes to read into the destination
+  ///                   buffer
+  /// @return size_t    Number of bytes read into the destination buffer
+  ///
+  size_t peek( void* data_ptr, size_t max_bytes ) const;
 
-  //
-  // Test whether the buffer currently contains any data. The method returns
-  // true if the buffer contains no data or is unallocated. Otherwise, it
-  // returns false.
-  //
+  ///
+  /// Test whether the buffer currently contains any data. The method returns
+  /// true if the buffer contains no data or is unallocated. Otherwise, it
+  /// returns false.
+  ///
+  /// @return bool  True if the buffer is empty; false otherwise
+  ///
   bool isEmpty() const;
 
-  //
-  // Test whether the buffer is currently full (i.e. no more data may be
-  // written to the buffer). The method returns false if more data may be
-  // written to the buffer or if the buffer is unallocated. Otherwise, it
-  // returns true.
-  //
-  bool  isFull() const;
+  ///
+  /// Test whether the buffer is currently full (i.e. no more data may be
+  /// written to the buffer). The method returns false if more data may be
+  /// written to the buffer or if the buffer is unallocated. Otherwise, it
+  /// returns true.
+  ///
+  /// @return bool  True if the buffer is full
+  ///
+  bool isFull() const;
 
-  //
-  // Get the number of bytes currently available in the buffer.
-  //
-  unsigned int size() const;
+  ///
+  /// Get the number of bytes currently available in the buffer.
+  ///
+  /// @return size_t  Number of bytes currently stored in the buffer
+  ///
+  size_t size() const;
 
-  //
-  // Get the capacity of the buffer in bytes.
-  //
-  unsigned int capacity() const;
+  ///
+  /// Get the capacity of the buffer in bytes.
+  ///
+  /// @return size_t  Number of bytes in the buffer
+  ///
+  size_t capacity() const;
 
-  //
-  // Clear the buffer. This is an O(1) operation as the head and tail are
-  // simply set equal to each other.
-  //
+  ///
+  /// Clear the buffer. This is an O(1) operation as the head and tail are
+  /// simply set equal to each other.
+  ///
+  /// @return void
+  ///
   void clear();
 
-  //
   CircularBuffer& operator= ( const CircularBuffer& );
 
 
 private:
    
-  void add( unsigned int& position, unsigned int move_count ) const;
+  void add( size_t& position, size_t move_count ) const;
 
-  unsigned int freeSize() const;
+  size_t freeSize() const;
 
-  unsigned int linearFreeSize() const;
+  size_t linearFreeSize() const;
 
-  unsigned int linearUsedSize(unsigned int read_position ) const;
+  size_t linearUsedSize(size_t read_position ) const;
 
-  unsigned int allocatedSize() const;
+  size_t allocatedSize() const;
 
 
 private:
@@ -159,13 +183,13 @@ private:
   char* buffer_ptr_;
 
   // Current head position
-  unsigned int head_position_;
+  size_t head_position_;
 
   // Current tail position
-  unsigned int tail_position_;
+  size_t tail_position_;
 
   // Number of bytes that may be stored in this CircularBuffer instance
-  unsigned int capacity_;
+  size_t capacity_;
 };
 
 } // namespace coral

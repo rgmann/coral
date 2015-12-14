@@ -31,7 +31,6 @@
 // 
 
 
-
 #ifndef RPC_SUPERVISOR_H
 #define RPC_SUPERVISOR_H
 
@@ -40,29 +39,60 @@
 namespace coral {
 namespace rpc {
 
+///
+/// A supervisor waits for a remote procedure call to complete or timeout.
+/// The RpcSupervisor is an abstract base class that provides a common
+/// interface for the BlockingRpcSupervisor and the AsyncRpcSupervisor.
+///
 class RpcSupervisor {
 public:
 
-  RpcSupervisor() {};
-  virtual ~RpcSupervisor() {};
+   RpcSupervisor() {};
+   virtual ~RpcSupervisor() {};
 
-  virtual bool invoke(RpcClient&       rClient,
-                      const RpcObject& rMarshalledCall,
-                      PbMessage*       pResponse,
-                      int              nTimeoutMs) = 0;
+   ///
+   /// Invoke the remote procedure call. This method must be implemented by
+   /// derived supervisors.
+   ///
+   /// @param  client  RpcClient through which the request should be sent
+   /// @param  request Request object
+   /// @param  response_message_ptr Deserialized response message buffer
+   /// @param  timeout_ms  Call timeout in milliseconds
+   /// return  bool    True on success; false on failure
+   ///
+   virtual bool invoke( RpcClient&       client,
+                        const RpcObject& request,
+                        PbMessage*       response_message_ptr,
+                        int              timeout_ms ) = 0;
 
-  RpcException& exception();
-  RpcObject&    response();
+   ///
+   /// Get the exception associated with this request.
+   ///
+   /// @return RpcException  RPC exception
+   ///
+   RpcException& exception();
+
+   ///
+   /// Get the remote procedure call response.
+   ///
+   /// @return RpcObject  Response object
+   ///
+   RpcObject& response();
+
 
 private:
   
-  RpcSupervisor(const RpcSupervisor&);
+   ///
+   /// Copies are not permitted.
+   ///
+   RpcSupervisor( const RpcSupervisor& );
+   RpcSupervisor& operator= (const RpcSupervisor&);
 
-  RpcSupervisor& operator= (const RpcSupervisor&);
 
 protected:
 
   RpcObject    response_object_;
+
   RpcException exception_;
 
 }; // End class RpcSupervisor

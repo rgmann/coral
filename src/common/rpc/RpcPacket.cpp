@@ -44,9 +44,6 @@ using namespace coral::rpc;
 using namespace coral::netapp;
 using namespace coral::net;
 
-static const char MarkerData[ RpcPacket::kRpcMarkerSize ] =
-   { 'r', 'p', 'c', 'm', 's', 'g', '\0' };
-
 //------------------------------------------------------------------------------
 RpcPacket::RpcPacket()
    : GenericPacket( sizeof(RpcPacket::Data), 0 )
@@ -67,9 +64,7 @@ RpcPacket::RpcPacket(const RpcObject &object)
    {
       if ( GenericPacket::allocate( serialized_object.size() ) )
       {
-         memcpy( data()->marker, MarkerData, kRpcMarkerSize );
          data()->length = serialized_object.size();
-
          memcpy( dataPtr(), serialized_object.data(), serialized_object.size() );
       }
       else
@@ -82,20 +77,19 @@ RpcPacket::RpcPacket(const RpcObject &object)
 //------------------------------------------------------------------------------
 bool RpcPacket::getObject( RpcObject &object ) const
 {
-   bool deserialize_success = false;
+   bool success = false;
    
    if ( isAllocated() )
    {
-      deserialize_success =
-         object.deserialize( (char*)dataPtr(), data()->length );
+      success = object.deserialize( (char*)dataPtr(), data()->length );
 
-      if ( deserialize_success == false )
+      if ( success == false )
       {
          log::error("RpcPacket::getObject: Failed to deserialize.\n");
       }
    }
    
-   return deserialize_success;
+   return success;
 }
 
 //------------------------------------------------------------------------------
@@ -109,25 +103,21 @@ bool RpcPacket::allocate( const void* data_ptr, ui32 size_bytes )
 {
    bool success = false;
 
-   if ( inherited::allocate( data_ptr, size_bytes ) )
+   // Validate the header before allocating.
+   if ( size_bytes >= sizeof( Data ) )
    {
-      if ( strncmp( data()->marker, MarkerData, kRpcMarkerSize ) == 0)
+      const Data* header = reinterpret_cast<const Data*>(data_ptr);
+
+      // Validate the size of the packet against the indicated payload size.
+      if ( ( size_bytes - sizeof( Data ) ) == header->length )
       {
-         // Validate the size of the packet against the indicated payload size.
-         if ( ( size_bytes - sizeof( Data ) ) == data()->length )
-         {
-            success = true;
-         }
-         else
-         {
-            log::error(
-               "RpcPacket::unpack: size mismatch - size = %u, exp = %u\n",
-               ( size_bytes - sizeof( Data ) ), data()->length);
-         }
+         success = inherited::allocate( data_ptr, size_bytes );
       }
       else
       {
-         log::error("RpcPacket::unpack: Invalid marker\n");
+         log::error(
+            "RpcPacket::unpack: size mismatch - size = %u, exp = %u\n",
+            ( size_bytes - sizeof( Data ) ), data()->length);
       }
    }
 
@@ -135,15 +125,14 @@ bool RpcPacket::allocate( const void* data_ptr, ui32 size_bytes )
 }
 
 //------------------------------------------------------------------------------
-void RpcPacket::swap(void* pData, ui32 nSizeBytes)
+void RpcPacket::swap( void* data_ptr, ui32 size_bytes )
 {
-  if (pData && (nSizeBytes >=  sizeof(RpcPacket::Data)))
-  {
-    RpcPacket::Data* lpData = reinterpret_cast<RpcPacket::Data*>(pData);
+   if ( data_ptr && ( size_bytes >= sizeof( RpcPacket::Data ) ) )
+   {
+      RpcPacket::Data* header = reinterpret_cast<RpcPacket::Data*>(data_ptr);
 
-    coral::netapp::swapInPlace(lpData->rpcId);
-    coral::netapp::swapInPlace(lpData->length);
-    coral::netapp::swapInPlace(lpData->format);
-    coral::netapp::swapInPlace(lpData->encoding);
-  }
+      coral::netapp::swapInPlace(header->length);
+      coral::netapp::swapInPlace(header->format);
+      coral::netapp::swapInPlace(header->encoding);
+   }
 }

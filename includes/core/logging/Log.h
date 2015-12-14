@@ -295,7 +295,7 @@ namespace log    {
    void error(const char* format, ...);
    void warn(const char* format, ...);
    void debug(const char* format, ...);
-   void mem_dump(const char* header, const char* pData, ui32 length, ui32 max_line_length = 16);
+   void mem_dump(const char* header, const void* data_ptr, ui32 length, ui32 max_line_length = 16);
 
 } // End of namespace log
 } // End of namespace coral

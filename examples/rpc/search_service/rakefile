@@ -192,18 +192,21 @@ task :generate do
 
   stdout_stderr, status = Open3.capture2e( command )
   if stdout_stderr && !stdout_stderr.empty?
-    puts stdout_str
+    puts stdout_stderr
   end
 end
 
 
 task :situate do
 
+  RpcGenConfigs::load
+
   Dir.glob( File.join( RpcGenConfigs[ :message_gen_root_path ], '*.pb.h' )) do |source_filename|
     dest_filename = File.join(
       RpcGenConfigs[ :message_header_out_path ],
       File.basename( source_filename )
     )
+    puts "Moving #{source_filename} to #{dest_filename}..."
     FileUtils.mv( source_filename, dest_filename )
   end
   Dir.glob( File.join( RpcGenConfigs[ :message_gen_root_path ], '*.pb.cc' )) do |source_filename|
@@ -211,6 +214,7 @@ task :situate do
       RpcGenConfigs[ :message_source_out_path ],
       File.basename( source_filename )
     )
+    puts "Moving #{source_filename} to #{dest_filename}..."
     FileUtils.mv( source_filename, dest_filename )
   end
 
@@ -226,6 +230,7 @@ task :situate do
         File.basename( source_filename )
       )
     end
+    puts "Moving #{source_filename} to #{dest_filename}..."
     FileUtils.mv( source_filename, dest_filename )
   end
 
@@ -241,7 +246,7 @@ task :situate do
         File.basename( source_filename )
       )
     end
-    puts "Moving #{source_filename} to #{dest_filename}"
+    puts "Moving #{source_filename} to #{dest_filename}..."
     FileUtils.mv( source_filename, dest_filename )
   end
 
@@ -257,6 +262,7 @@ task :situate do
         File.basename( source_filename )
       )
     end
+    puts "Moving #{source_filename} to #{dest_filename}..."
     FileUtils.mv( source_filename, dest_filename )
   end
 end

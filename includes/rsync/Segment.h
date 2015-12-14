@@ -88,8 +88,10 @@ public:
 
   const Adler32Checksum& getWeak();
 
-  Md5Hash& getStrong();
-  Md5Hash& getStrong(std::ifstream&);
+
+  bool computeStrong();
+  const Md5Hash& getStrong() const;
+  const Md5Hash& getStrong(std::ifstream&);
 
   ui8* const data();
   ui8* const data(std::ifstream&);
@@ -123,7 +125,6 @@ protected:
   bool resize( ui32 virtual_segment_size );
 
   void pack(coral::netapp::SerialStream&) const;
-  void pack(coral::netapp::SerialStream&);
   bool unpack(coral::netapp::SerialStream& dtor);
 
 private:

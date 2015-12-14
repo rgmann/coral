@@ -38,30 +38,34 @@
 #include <string>
 #include <vector>
 
-class StringHelper
-{
-public:
-   
-   static std::vector<std::string> Split(const std::string &s, 
-                                         char delim,
-                                         std::vector<std::string> &elems);
-   
-   static std::vector<std::string> Split(const std::string &s, char delim);
-   
-   static std::string& LTrim(std::string &s);
-   
-   static std::string& RTrim(std::string &s);
-   
-   static std::string& Trim(std::string &s);
+namespace coral {
+namespace helpers {
 
-   static std::string ToUpper(const std::string& s);
+///
+/// Collection of useful string parsing and manipulation functions.
+///
+namespace string_helper {
 
-   static std::string ToLower(const std::string& s);
+   std::vector<std::string> split(
+      const std::string&       s, 
+      char                     delim,
+      std::vector<std::string> &elems);
+
+   std::vector<std::string> split( const std::string& s, char delim );
+
+   std::string& left_trim( std::string& s );
    
-private:
+   std::string& right_trim( std::string& s );
    
-   StringHelper();
-   StringHelper(const StringHelper& other);
-};
+   std::string& trim( std::string& s );
+
+   std::string to_upper( const std::string& s );
+
+   std::string to_lower( const std::string& s );
+
+} // end namespace string_helper
+
+} // end namespace helpers
+} // end namespace coral
 
 #endif // STRING_HELPER_H

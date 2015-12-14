@@ -66,12 +66,6 @@ RsyncError RsyncQueryResponse::status() const
 }
 
 //-----------------------------------------------------------------------------
-void RsyncQueryResponse::pack(coral::netapp::SerialStream& ctor)
-{
-  const_cast<const RsyncQueryResponse*>(this)->pack(ctor);
-}
-
-//-----------------------------------------------------------------------------
 void RsyncQueryResponse::pack(coral::netapp::SerialStream& ctor) const
 {
   ctor.write( (ui32)status_ );

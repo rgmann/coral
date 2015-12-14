@@ -37,32 +37,6 @@
 using boost::asio::ip::tcp;
 using namespace coral::netapp;
 
-// //-----------------------------------------------------------------------------
-// AsioTcpClient::AsioTcpClient( boost::asio::io_service& io_service )
-// :  resolver_( io_service ) {}
-
-// //-----------------------------------------------------------------------------
-// AsioTcpClient::~AsioTcpClient() {}
-
-// //-----------------------------------------------------------------------------
-// void AsioTcpClient::connect(
-//    AsioTcpPacketRouterPtr  router,
-//    const std::string&      host,
-//    const std::string&      port )
-// {
-//    boost::asio::ip::tcp::resolver::query    query( host.c_str(), port );
-//    boost::asio::ip::tcp::resolver::iterator iterator = resolver_.resolve( query );
-
-//    boost::asio::async_connect(
-//       router->socket(),
-//       iterator,
-//       boost::bind(
-//         &AsioTcpPacketRouter::handleConnect,
-//         router,
-//         boost::asio::placeholders::error
-//       )
-//    );
-// }
 
 //-----------------------------------------------------------------------------
 AsioTcpClientRouter::AsioTcpClientRouter( boost::asio::io_service& io_service )
@@ -102,6 +76,12 @@ void AsioTcpClientRouter::connect(
          shared_from_this(),
          boost::asio::placeholders::error ));
    }
+}
+
+//-----------------------------------------------------------------------------
+boost::shared_ptr<AsioTcpClientRouter> AsioTcpClientRouter::shared_from_this()
+{
+   return boost::static_pointer_cast<AsioTcpClientRouter>(AsioTcpPacketRouter::shared_from_this());
 }
 
 //-----------------------------------------------------------------------------

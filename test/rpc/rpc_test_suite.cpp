@@ -30,47 +30,13 @@
 // 
 // 
 
+#include <string>
+#include "gtest/gtest.h"
+#include "rpc_exception_test.cpp"
+#include "rpc_packet_test.cpp"
 
+int main( int argc, char **argv ) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
 
-#ifndef INSTANCE_WRAPPER_H
-#define INSTANCE_WRAPPER_H
-
-#include "RpcCommon.h"
-#include "RpcException.h"
-
-#define DELEGATE(action_delegate)                        \
-  action_delegate(                                       \
-              const std::string& request,                \
-              std::string& response,                     \
-              coral::rpc::RpcException& e)
-
-#define ACTION(action_name, request_type, response_type) \
-  action_name(const request_type& request,               \
-              response_type& response,                   \
-              coral::rpc::RpcException& e)
-
-
-namespace coral {
-namespace rpc {
-
-class InstanceWrapper {
-public:
-
-  typedef void (*Method)( const std::string&, std::string&, RpcException& );
-   
-  InstanceWrapper(){};
-  virtual ~InstanceWrapper(){};
-   
-  // virtual bool initialize(const std::string &params) = 0;
-  // virtual bool destroy(const std::string &params) = 0;
-
-  const boost::uuids::uuid& uuid();
-
-private:
-
-  boost::uuids::uuid mUUID;
-};
-
-}}
-
-#endif // INSTANCE_WRAPPER_H

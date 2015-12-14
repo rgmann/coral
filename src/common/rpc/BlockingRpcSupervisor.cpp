@@ -39,7 +39,8 @@ using namespace coral;
 using namespace coral::rpc;
 
 //----------------------------------------------------------------------------
-BlockingRpcSupervisor::BlockingRpcSupervisor() : RpcSupervisor()
+BlockingRpcSupervisor::BlockingRpcSupervisor()
+   : RpcSupervisor()
 {
 }
 
@@ -67,9 +68,9 @@ bool BlockingRpcSupervisor::invoke(
 
    if ( call_ptr->wait( timeout_ms ) )
    {
-      call_ptr->getResult( response_object_ );
+      response_object_ = call_ptr->getResponse();
 
-      if ( response_object_.exception().id == NoException )
+      if ( response_object_.exception().id == kNoException )
       {
          if ( response_message_ptr )
          {
@@ -83,15 +84,15 @@ bool BlockingRpcSupervisor::invoke(
    }
    else
    {
-      exception_.reporter = RpcException::Client;
-      exception_.id       = RpcCallTimeout;
+      exception_.reporter = RpcException::kClient;
+      exception_.id       = kRpcCallTimeout;
       exception_.message  = "Time out elapsed waiting for resource response.";
    }
 
    call_ptr->dispose();
    exception_.popFrame();
 
-   return ( exception_.id == NoException );
+   return ( exception_.id == kNoException );
 }
 
 

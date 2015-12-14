@@ -46,15 +46,15 @@ using namespace coral::netapp;
 //-----------------------------------------------------------------------------
 RpcObject::RpcObject()
 {
-  mCallInfo.uuid = boost::uuids::random_generator()();
+  call_info_.uuid = boost::uuids::random_generator()();
 }
 
 //-----------------------------------------------------------------------------
 RpcObject::RpcObject(const std::string &resourceName, 
                      const std::string &actionName)
 {
-   mCallInfo.resource = resourceName;
-   mCallInfo.action = actionName;
+   call_info_.resource = resourceName;
+   call_info_.action   = actionName;
 }
 
 //-----------------------------------------------------------------------------
@@ -65,141 +65,145 @@ RpcObject::~RpcObject()
 //-----------------------------------------------------------------------------
 bool RpcObject::isValid() const
 {
-   return !mCallInfo.resource.empty() && !mCallInfo.action.empty();
+   return ( call_info_.resource.empty() == false ) &&
+          ( call_info_.action.empty() == false );
 }
 
 //-----------------------------------------------------------------------------
 RpcCallInfo& RpcObject::callInfo()
 {
-   return mCallInfo;
+   return call_info_;
 }
 
 //-----------------------------------------------------------------------------
 const RpcCallInfo& RpcObject::callInfo() const
 {
-   return mCallInfo;
+   return call_info_;
 }
 
 //-----------------------------------------------------------------------------
 RpcException& RpcObject::exception()
 {
-   mException.mCallInfo = callInfo();
-   return mException;
+   exception_.call_info_ = callInfo();
+   return exception_;
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::setParams(const PbMessage& message)
+void RpcObject::setParams( const PbMessage& message )
 {
-   message.SerializeToString(&mMessage);
+   message.SerializeToString( &message_ );
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::setParams(const std::string& message)
+void RpcObject::setParams( const std::string& message )
 {
-   mMessage.assign(message.data(), message.size());
+   message_.assign( message.data(), message.size() );
 }
 
 //-----------------------------------------------------------------------------
-void RpcObject::getParams(PbMessage& message) const
+void RpcObject::getParams( PbMessage& message ) const
 {
-   message.ParseFromString(mMessage);
+   message.ParseFromString( message_ );
 }
 
 //-----------------------------------------------------------------------------
 void RpcObject::getParams(std::string& message) const
 {
-   message.assign(mMessage.data(), mMessage.size());
+   message.assign( message_.data(), message_.size() );
 }
 
 //-----------------------------------------------------------------------------
-bool RpcObject::getResponse(RpcObject &response) const
+bool RpcObject::getResponse( RpcObject& response ) const
 {
-   if (!isValid()) return false;
-   
-   response.mCallInfo = mCallInfo;
-   response.mException = mException;
-   return true;
+   bool success = isValid();
+
+   if ( success )
+   {
+      response.call_info_ = call_info_;
+      response.exception_ = exception_;
+   }
+
+   return success;
 }
 
 //-----------------------------------------------------------------------------
-bool RpcObject::getResponse(RpcObject &response,
-                            const PbMessage& message) const
+bool RpcObject::getResponse(
+   RpcObject&       response,
+   const PbMessage& message ) const
 {
-   if (!getResponse(response)) return false;
-   response.setParams(message);
-   return true;
+   bool success = getResponse( response );
+
+   if ( success )
+   {
+      response.setParams( message );
+   }
+
+   return success;
 }
 
 //-----------------------------------------------------------------------------
-bool RpcObject::getResponse(RpcObject &response,
-                            const std::string& message) const
+bool RpcObject::getResponse(
+   RpcObject&         response,
+   const std::string& message ) const
 {
-   if (!getResponse(response)) return false;
-   response.setParams(message);
-   return true;
+   bool success = getResponse( response );
+
+   if ( success )
+   {
+      response.setParams( message );
+   }
+
+   return success;
 }
 
 //-----------------------------------------------------------------------------
 void RpcObject::pack(coral::netapp::SerialStream& stream) const
 {
-   stream.writeCString(callInfo().resource);
-   stream.writeCString(callInfo().action);
+   stream.write_string(callInfo().resource);
+   stream.write_string(callInfo().action);
 
    stream.write((const char*)callInfo().uuid.data, callInfo().uuid.size());
-   // stream.write((ui64)callInfo().rpcId);
-   mException.serialize(stream);
-   stream.write(mMessage);
-}
-
-//-----------------------------------------------------------------------------
-void RpcObject::pack(coral::netapp::SerialStream& stream)
-{
-  const_cast<const RpcObject*>(this)->pack(stream);
+   exception_.serialize(stream);
+   stream.write(message_);
 }
 
 //-----------------------------------------------------------------------------
 bool RpcObject::unpack(coral::netapp::SerialStream &stream)
 {
-  // Read the resource name
-  if (stream.readCString(callInfo().resource) == SerialStream::ReadFail)
-  {
-    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-    return false;
-  }
+   // Read the resource name
+   if ( stream.read_string( callInfo().resource ) == SerialStream::ReadFail )
+   {
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+      return false;
+   }
 
-  // Read the action name.
-  if (stream.readCString(callInfo().action) == SerialStream::ReadFail)
-  {
-    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-    return false;
-  }
+   // Read the action name.
+   if ( stream.read_string( callInfo().action ) == SerialStream::ReadFail )
+   {
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+      return false;
+   }
 
-  if (stream.read((char*)callInfo().uuid.data, callInfo().uuid.size()) != SerialStream::ReadOk)
-  {
-    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-    return false;
-  }
+   if (stream.read((char*)callInfo().uuid.data, callInfo().uuid.size()) != SerialStream::ReadOk )
+   {
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+      return false;
+   }
 
-  // if (stream.read(callInfo().rpcId) == false)
-  // {
-  //   log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-  //   return false;
-  // }
+   // Read the exception.
+   if ( exception_.deserialize( stream ) == false )
+   {
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+      return false;
+   }
 
-  // Read the exception.
-  if (exception().deserialize(stream) == false)
-  {
-    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-    return false;
-  }
+   // Read the protobuf message.
+   if ( stream.read( message_ ) == SerialStream::ReadFail )
+   {
+      log::error("RpcObject::deserialize failure at %d\n", __LINE__);
+      return false;
+   }
 
-  // Read the protobuf message.
-  if (stream.read(mMessage) == SerialStream::ReadFail)
-  {
-    log::error("RpcObject::deserialize failure at %d\n", __LINE__);
-    return false;
-  }
-
-  return true;
+   return true;
 }
 

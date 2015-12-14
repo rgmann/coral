@@ -46,35 +46,73 @@
 namespace coral {
 namespace rpc {
 
+
+///
+/// RPC client hub:
+/// The RpcClient manages active RPC invocations, multiplexes requests to the
+/// server-side services, and de-multiplexes server-side service responses.
+/// Multiple RPC services/resources may be register with a single client.
+///
 class RpcClient : public coral::netapp::PacketSubscriber {
 public:
 
+   ///
+   /// Construct an RpcClient instance with the destination ID of
+   /// of the corresponding RpcServer.
+   ///
    RpcClient( coral::netapp::DestinationID server_destination_id );
    
    ~RpcClient();
 
-   RpcMarshalledCall* invokeRpc(const RpcObject &object);
+   ///
+   /// Initiate the remote procedure call with the specified request object.
+   /// On success, an RpcMarshalledCall is created and registered to maintain
+   /// status while the call is active
+   ///
+   /// @param  object  RPC request object
+   /// @return RpcMarshalledCall*  Pointer to RPC context
+   ///
+   RpcMarshalledCall* invokeRpc( const RpcObject& object );
 
+   ///
+   /// Route a packet to the RpcClient.  This method implements the
+   /// PacketSubscriber interface and is only intended to be invoked by a
+   /// PacketRouter.
+   ///
+   /// @param  destination_id  Packet destination ID
+   /// @param  data_ptr        Packet data buffer
+   /// @param  length          Packet data buffer length in bytes
+   /// @return bool            Packet processing status
+   ///
    bool put( coral::netapp::DestinationID destination_id, const void* data_ptr, ui32 length );
+
 
 private:
 
-   RpcMarshalledCall* getMarshalledRpc( const RpcObject &object );
+   ///
+   /// An RpcClient cannot be copied
+   ///
+   RpcClient( const RpcClient& );
+   RpcClient& operator= ( const RpcClient& );
 
+   ///
+   /// Remove completed or canceled RPC calls from the call table.
+   ///
    void processCancellations();
 
 private:
 
-   boost::mutex mRpcMutex;
+   boost::mutex active_call_table_lock_;
    
    // Map each call to a unique identifier so that we can look up the
    // call when a response is received.
-   typedef std::map<boost::uuids::uuid, RpcMarshalledCall*> CallMap;
-   CallMap mRpcMap;
+   typedef std::map<boost::uuids::uuid, RpcMarshalledCall*> CallTable;
+   CallTable active_calls_;
 
    coral::netapp::DestinationID server_destination_id_;
 };
 
-}}
+} // end namespace rpc
+} // end namespace coral
 
 #endif // RPC_CLIENT_H

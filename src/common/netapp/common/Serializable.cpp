@@ -73,7 +73,7 @@ void coral::netapp::swapInPlace(ui64& val)
 #define SSTREAM_WRITE(type) \
 void SerialStream::write(type val) \
 { \
-  if ((mByteOrder == NetworkByteOrder) && (sizeof(type) > 1)) \
+  if ((byte_order_ == NetworkByteOrder) && (sizeof(type) > 1)) \
   { \
     swapInPlace(val); \
   } \
@@ -94,14 +94,25 @@ bool SerialStream::read(type& val) \
 bool SerialStream::read(type& val) \
 { \
    stream.read((char*)&val, sizeof(type)); \
-   if ((mByteOrder == NetworkByteOrder) && (sizeof(type) > 1)) swapInPlace(val); \
+   if ((byte_order_ == NetworkByteOrder) && (sizeof(type) > 1)) swapInPlace(val); \
    return (stream.fail() == false); \
 } \
 
 //-----------------------------------------------------------------------------
-SerialStream::SerialStream(ByteOrder end)
-: mByteOrder(end)
+SerialStream::SerialStream( ByteOrder byte_order )
+   : byte_order_( byte_order )
 {
+}
+
+//-----------------------------------------------------------------------------
+SerialStream::SerialStream(
+   const void* data,
+   ui32        size_bytes,
+   ByteOrder   byte_order
+)
+   : byte_order_( byte_order )
+{
+   assign( data, size_bytes );
 }
 
 //-----------------------------------------------------------------------------
@@ -117,24 +128,24 @@ void SerialStream::write(bool val)
 }
 
 //-----------------------------------------------------------------------------
-void SerialStream::writeCString(const std::string& val)
+void SerialStream::write_string(const std::string& val)
 {
    SerialStream::write((ui32)(val.size() + 1));
    stream << val << '\0';
 }
 
 //-----------------------------------------------------------------------------
-void SerialStream::write(const std::string& val)
+void SerialStream::write( const std::string& val)
 {
-   SerialStream::write((ui32)val.size());
+   SerialStream::write((ui32)val.size() );
    stream.write(val.data(), val.size());
 }
 
 //-----------------------------------------------------------------------------
-void SerialStream::write(const char* pData, ui32 nBytes)
+void SerialStream::write( const void* data_ptr, ui32 size_bytes )
 {
-  SerialStream::write(nBytes);
-  stream.write(pData, nBytes);
+   SerialStream::write( size_bytes );
+   stream.write( (const char*)data_ptr, size_bytes );
 }
 
 //-----------------------------------------------------------------------------
@@ -144,9 +155,10 @@ void SerialStream::assign(const std::string& data)
 }
 
 //-----------------------------------------------------------------------------
-void SerialStream::assign(const void* data, ui32 nSizeBytes)
+void SerialStream::assign( const void* data, ui32 size_bytes )
 {
-   stream.write((const char*)data, nSizeBytes);
+   stream.write( (const char*)data, size_bytes );
+   if ( stream.bad() || stream.fail() ) log::error("SerialStream::assign failed\n");
 }
 
 //-----------------------------------------------------------------------------
@@ -167,106 +179,190 @@ bool SerialStream::read(bool& val)
 }
 
 //-----------------------------------------------------------------------------
-SerialStream::ReadStatus SerialStream::readCString(std::string& val)
+SerialStream::ReadStatus SerialStream::read_string( std::string& val )
 {
-   ui32 lnLength = 0;
+   ReadStatus status = ReadFail;
+   ui32 string_length = 0;
 
-   if (SerialStream::read(lnLength) == false)
+   if ( SerialStream::read( string_length ) )
    {
-     log::error("SerialStream::readCString - Failed to read string length\n");
-     return ReadFail;
-   }
+      if ( string_length > 0 )
+      {
+         char* string_buffer = new char[ string_length ];
 
-   if (lnLength == 0)
-   {
-     log::error("SerialStream::readCString - Empty string\n");
-     return ReadEmpty;
-   }
+         stream.read( string_buffer, string_length );
 
+         if ( stream.fail() )
+         {
+            log::error("SerialStream::read_string - stream.fail=true\n");
+            status = ReadFail;
+         }
+         else
+         {
+            // Make sure the string if NULL terminated.
+            string_buffer[ string_length - 1 ] = 0;
 
-   char* lpBuffer = new char[lnLength];
-   stream.read(lpBuffer, lnLength);
-   if (stream.fail())
-   {
-     log::error("SerialStream::readCString - stream.fail=true\n");
+            val.assign( string_buffer );
+            status = ReadOk;
+         }
+
+         delete[] string_buffer;
+      }
+      else
+      {
+         log::error("SerialStream::read_string - Empty string\n");
+         status = ReadEmpty;
+      }
    }
    else
    {
-      val.assign(lpBuffer);
+      log::error("SerialStream::read_string - Failed to read string length\n");
+      status = ReadFail;
    }
 
-   delete[] lpBuffer;
-   return stream.fail() ? ReadFail : ReadOk;
+   return status;
 }
 
 //-----------------------------------------------------------------------------
-SerialStream::ReadStatus SerialStream::read(std::string& val)
+SerialStream::ReadStatus SerialStream::read( std::string& val )
 {
-   ui32 lnLength = 0;
+   ReadStatus status = ReadFail;
+   ui32 data_length = 0;
 
-   if (!SerialStream::read(lnLength)) return ReadFail;
-   if (lnLength == 0) return ReadEmpty;
-
-   char* lpBuffer = new char[lnLength];
-   stream.read(lpBuffer, lnLength);
-   if (!stream.fail())
+   if ( SerialStream::read( data_length ) )
    {
-      val.assign(lpBuffer, lnLength);
+      if ( data_length > 0 )
+      {
+         char* data_buffer = new char[ data_length ];
+
+         stream.read( data_buffer, data_length );
+
+         if ( stream.fail() )
+         {
+            status = ReadFail;
+         }
+         else
+         {
+            val.assign( data_buffer, data_length );
+            status = ReadOk;
+         }
+
+         delete[] data_buffer;
+      }
+      else
+      {
+         log::error("SerialStream::read - Empty string\n");
+         status = ReadEmpty;
+      }
    }
-   delete[] lpBuffer;
-   //std::cout << "SerialStream::read(std::string& val): "
-   //          << lnLength << std::endl;
-   return stream.fail() ? ReadFail : ReadOk;
+   else
+   {
+      log::error("SerialStream::read - Failed to read data length\n");
+      status = ReadFail;
+   }
+
+   return status;
 }
 
 //-----------------------------------------------------------------------------
-SerialStream::ReadStatus SerialStream::read(char** ppData, ui32& nBytes)
+SerialStream::ReadStatus SerialStream::read_alloc( char** data, ui32& size_bytes )
 {
-   if (!SerialStream::read(nBytes)) return ReadFail;
-   if (nBytes == 0) return ReadEmpty;
+   ReadStatus status = ReadFail;
 
-   *ppData = new char[nBytes];
-   stream.read(*ppData, nBytes);
+   if ( ( *data == NULL ) && SerialStream::read( size_bytes ) )
+   {
+      if ( size_bytes > 0 )
+      {
+         *data = new char[ size_bytes ];
 
-   return stream.fail() ? ReadFail : ReadOk;
+         stream.read( *data, size_bytes );
+
+         if ( stream.fail() )
+         {
+            log::error("SerialStream::read: Failed to buffer block from stream.\n");
+
+            size_bytes = 0;
+            delete[] *data;
+            *data = NULL;
+         }
+         else
+         {
+            status = ReadOk;
+         }
+      }
+      else
+      {
+         log::error("SerialStream::read: Empty block.\n");
+         status = ReadEmpty;
+      }
+   }
+   else
+   {
+      log::error("SerialStream::read: Failed to read data length\n");
+      status = ReadFail;
+   }
+
+   return status;
 }
 
 //-----------------------------------------------------------------------------
-SerialStream::ReadStatus SerialStream::read(char* pData, ui32 nMaxBytes)
+SerialStream::ReadStatus SerialStream::read( void* data, ui32 max_bytes )
 {
-   ui32 lnLength = 0;
+   ReadStatus status = ReadFail;
+   ui32 size_bytes = 0;
 
-   if (SerialStream::read(lnLength) == false)
+   if ( data )
    {
-     log::error("SerialStream::read(char* pData, ui32 nBytes) - "
-                "Failed to read data length\n");
-     return ReadFail;
+      if ( SerialStream::read( size_bytes ) )
+      {
+         if ( size_bytes )
+         {
+            ui32 bytes_to_read = size_bytes;
+
+            if ( bytes_to_read > max_bytes )
+            {
+               bytes_to_read = max_bytes;
+            }
+
+            ui32 bytes_remaining = size_bytes - bytes_to_read;
+
+            stream.read( reinterpret_cast<char*>( data ), bytes_to_read );
+
+            if ( stream.fail() )
+            {
+               log::error("SerialStream::read: Stream read failure.\n");
+               status = ReadFail;
+            }
+            else
+            {
+               if ( bytes_remaining > 0 )
+               {
+                  char* remainder_buffer = new char[ bytes_remaining ];
+                  stream.read( remainder_buffer, bytes_remaining );
+                  delete[] remainder_buffer;
+               }
+
+               status = ReadOk;
+            }
+         }
+         else
+         {
+            status = ReadEmpty;
+         }
+      }
+      else
+      {
+         log::error("SerialStream::read(char* pData, ui32 nBytes) - "
+                   "Failed to read data length\n");
+         status = ReadFail;
+      }
+   }
+   else
+   {
+      status = ReadFail;
    }
 
-   if (lnLength == 0)
-   {
-     log::debug("SerialStream::read(char* pData, ui32 nBytes) - "
-                "Empty data field\n");
-     return ReadEmpty;
-   }
-
-   ui32 lnReadLength = (nMaxBytes < lnLength) ? nMaxBytes : lnLength;
-   ui32 lnRemainder   = (lnReadLength < lnLength) ? (lnLength - lnReadLength) : 0;
-
-   // Read as much as possible into the user supplied buffer.
-   stream.read(pData, lnReadLength);
-
-   // Read and throw away whatever is left over.
-   if (lnRemainder > 0)
-   {
-      char* lpBuffer = new char[lnRemainder];
-      stream.read(lpBuffer, lnRemainder);
-      delete[] lpBuffer;
-   }
-
-   if (stream.fail()) log::error("SerialStream::read(char* pData, ui32 nBytes) - stream fail read_len=%u, rem=%u, len=%u\n", lnReadLength, lnRemainder, lnLength);
-
-   return stream.fail() ? ReadFail : ReadOk;
+   return status;
 }
 
 //-----------------------------------------------------------------------------
@@ -284,33 +380,19 @@ void Serializable::serialize(SerialStream& ctor) const
 }
 
 //-----------------------------------------------------------------------------
-std::string Serializable::serialize()
+bool Serializable::deserialize( const char* data, ui32 size_bytes )
 {
-  SerialStream ctor;
-  pack(ctor);
-  return ctor.stream.str();
-}
-
-//-----------------------------------------------------------------------------
-void Serializable::serialize(SerialStream& ctor)
-{
-  pack(ctor);
-}
-
-//-----------------------------------------------------------------------------
-bool Serializable::deserialize(const char* pData, ui32 nSizeBytes)
-{
-  SerialStream dtor;
-  dtor.assign(pData, nSizeBytes);
+  SerialStream dtor( data, size_bytes );
+  // dtor.assign( data, size_bytes );
   return unpack(dtor);
 }
 
 //-----------------------------------------------------------------------------
 bool Serializable::deserialize(const std::string& data)
 {
-  SerialStream dtor;
-  dtor.assign(data.data(), data.size());
-  return unpack(dtor);
+  SerialStream dtor( data.data(), data.size() );
+  // dtor.assign(data.data(), data.size());
+  return unpack( dtor );
 }
 
 //-----------------------------------------------------------------------------

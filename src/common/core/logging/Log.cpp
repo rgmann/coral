@@ -463,7 +463,7 @@ void coral::log::debug( const char* format, ... )
 //-----------------------------------------------------------------------------
 void coral::log::mem_dump(
    const char* header,
-   const char* data_ptr,
+   const void* data_ptr,
    ui32        length,
    ui32        max_line_length )
 {
@@ -474,7 +474,7 @@ void coral::log::mem_dump(
          LogMessagePtr log_message_ptr( new LogMessage(
             MemDump,
             header,
-            data_ptr,
+            (const char*)data_ptr,
             length,
             max_line_length
          ));

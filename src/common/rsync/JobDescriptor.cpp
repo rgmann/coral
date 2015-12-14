@@ -182,12 +182,6 @@ ui32 JobDescriptor::getMaximumChunkSize() const
 }
 
 //-----------------------------------------------------------------------------
-void JobDescriptor::pack(coral::netapp::SerialStream& ctor)
-{
-   const_cast<const JobDescriptor*>(this)->pack(ctor);
-}
-
-//-----------------------------------------------------------------------------
 void JobDescriptor::pack(coral::netapp::SerialStream& ctor) const
 {
    if ( isValid() )

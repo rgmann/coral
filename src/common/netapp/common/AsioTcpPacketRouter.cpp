@@ -212,10 +212,6 @@ void AsioTcpPacketRouter::writePacket( const PacketContainer* container_ptr )
          container_ptr->packet_ptr_->basePtr(),
          container_ptr->packet_ptr_->allocatedSize() );
 
-   // coral::log::status("write_packet:\n  header.length = %d\n  header.type = %d\n",
-   //       packet_ptr->data()->length,
-   //       packet_ptr->data()->type );
-
    io_service_.post( boost::bind(
       &AsioTcpPacketRouter::doWrite,
       shared_from_this(),
@@ -231,9 +227,6 @@ void AsioTcpPacketRouter::doWrite( NetAppPacket* packet_ptr )
    write_packets_.push_back( packet_ptr );
    if ( !write_in_progress )
    {
-      // coral::log::status("do_write:\n  header.length = %d\n  header.type = %d\n",
-      //     write_packets_.front()->data()->length,
-      //     write_packets_.front()->data()->type );
       boost::asio::async_write( socket_,
          boost::asio::buffer(
             write_packets_.front()->basePtr(),

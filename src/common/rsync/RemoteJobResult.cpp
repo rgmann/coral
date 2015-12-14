@@ -67,12 +67,6 @@ JobReport& RemoteJobResult::report()
 }
 
 //----------------------------------------------------------------------------
-void RemoteJobResult::pack(SerialStream& ctor)
-{
-  const_cast<const RemoteJobResult*>(this)->pack(ctor);
-}
-
-//----------------------------------------------------------------------------
 void RemoteJobResult::pack(SerialStream& ctor) const
 {
   ctor.write((const char*)mUUID.data, mUUID.size());

@@ -42,24 +42,58 @@
 namespace coral {
 namespace netapp {
 
+///
+/// The IntraRouter is useful for testing netapp-based applications without
+/// having to setting up the rest of network infrastructure (e.g. loop-back
+/// network interface).
+///
 class IntraRouter : public PacketRouter, public coral::thread::IThread {
 public:
 
-  IntraRouter();
-  ~IntraRouter();
+   IntraRouter();
+   ~IntraRouter();
 
-  void setCounterpart(IntraRouter* pCounterpart);
+   ///
+   /// Set the IntraRouter's counterpart instance.
+   ///
+   /// @param  counterpart_ptr  Pointer to counterpart IntraRouter instance.
+   /// @return void
+   ///
+   void setCounterpart( IntraRouter* counterpart_ptr );
+
 
 protected:
 
-  void routePacket(PacketContainer* pContainer);
+   ///
+   /// Publish a packet to all subscribers.
+   ///
+   /// @param  container_ptr  Packet container to route
+   /// @return void
+   ///
+   void routePacket( PacketContainer* container_ptr );
 
-  void run(const bool& bShutdown);
+   ///
+   /// Routing thread loop
+   ///
+   /// @param  shutdown  Thread loop shutdown flag
+   /// @return void
+   ///
+   void run( const bool& shutdown );
+
 
 private:
 
-  IntraRouter* mpCounterpart;
-  PacketQueue mReceiver;
+   ///
+   /// IntraRouter cannot be copied
+   ///
+   IntraRouter( const IntraRouter& );
+   IntraRouter& operator= ( const IntraRouter& );
+
+private:
+
+   IntraRouter* mpCounterpart;
+
+   PacketQueue mReceiver;
 };
 
 } // End namespace netapp

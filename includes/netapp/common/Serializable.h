@@ -57,83 +57,192 @@ void swapInPlace(ui32& val);
 void swapInPlace(i64& val);
 void swapInPlace(ui64& val);
 
+///
+/// SerialStream is used to serialize or de-serialize an object to or from a
+/// stringstream object.
+///
 class SerialStream {
 public:
 
-  SerialStream(ByteOrder endianness = HostByteOrder);
+   ///
+   /// Set the serialization/de-serialization byte order
+   ///
+   /// @param  endianness  Endiannes of stream
+   ///
+   SerialStream( ByteOrder endianness = HostByteOrder );
 
-  void assign(const std::string&);
-  void assign(const void* data, ui32 nBytes);
+   ///
+   /// Set the serialization/de-serialization byte order
+   ///
+   /// @param  data  Buffer to allocate the data from
+   /// @param  size_bytes  Size of buffer in bytes
+   /// @param  endianness  Endiannes of stream
+   ///
+   SerialStream( const void* data, ui32 size_bytes, ByteOrder endianness = HostByteOrder );
 
-  /**
-   * Serialization Methods
-   */
-  void write(ui8 val);
-  void write(ui16 val);
-  void write(ui32 val);
-  void write(ui64 val);
-  //  Appends a null character.
-  void writeCString(const std::string& val);
-  void write(const std::string& val);
-  void write(const char* pData, ui32 nBytes);
-  void write(bool val);
+   ///
+   /// Assign contents of string stream. Any current contents are overwritten.
+   ///
+   /// @param  data  Data string
+   /// @return void
+   ///
+   void assign( const std::string& data );
 
-  /**
-   * Deserialization Methods
-   */
-  enum ReadStatus {
-    ReadOk,
-    ReadFail,
-    ReadEmpty
-  };
+   ///
+   /// Assign contents of string stream. Any current contents are overwritten.
+   ///
+   /// @param  data  Data string
+   /// @return void
+   ///
+   void assign( const void* data, ui32 size_bytes );
 
-  bool read(ui8& val);
-  bool read(i8& val);
-  bool read(ui16& val);
-  bool read(i16& val);
-  bool read(ui32& val);
-  bool read(i32& val);
-  bool read(ui64& val);
-  bool read(i64& val);
-  bool read(bool& val);
+   ///
+   /// Serialization Methods
+   ///
+   void write( ui8 val );
+   void write( ui16 val );
+   void write( ui32 val );
+   void write( ui64 val );
+   void write( bool val );
 
-  // Assumes a null termination character.
-  ReadStatus readCString(std::string& val);
+   ///
+   /// Serialize a c-style string.
+   ///
+   /// @param  val  C-style string
+   /// @return void
+   ///
+   void write_string( const std::string& val );
 
-  // Does not assume a null terminating character.
-  ReadStatus read(std::string& val);
-  ReadStatus read(char** ppData, ui32& nBytes);
-  ReadStatus read(char* pData, ui32 nMaxBytes);
+   ///
+   /// Serialize a generic block of data. The std::string object is treated
+   /// as a convenient byte buffer container rather than a valid c-style string.
+   ///
+   /// @param  val  Data block
+   /// @return void
+   ///
+   void write( const std::string& val );
 
-  std::stringstream stream;
+   ///
+   /// Serialize a generic block of data.
+   ///
+   /// @param  data  Pointer to data block
+   /// @param  size_bytes  Size of block in bytes
+   /// @return void
+   ///
+   void write( const void* data, ui32 size_bytes );
+
+
+   ///
+   /// Deserialization Methods
+   ///
+   bool read( ui8& val );
+   bool read( i8& val );
+   bool read( ui16& val );
+   bool read( i16& val );
+   bool read( ui32& val );
+   bool read( i32& val );
+   bool read( ui64& val );
+   bool read( i64& val );
+   bool read( bool& val );
+
+   enum ReadStatus {
+      ReadOk,
+      ReadFail,
+      ReadEmpty
+   };
+
+   ///
+   /// Deserialize a string field from the stream into a std::string.
+   ///
+   /// @param  val  Deserialized string field
+   /// @return ReadStatus  ReadOk - Buffer was successfully read
+   ///                     ReadEmpty - Buffer field was found but size=0
+   ///                     ReadFail - Read failed
+   ///
+   ReadStatus read_string( std::string& val );
+
+   ///
+   /// Deserialize a buffer from the stream into a std::string. The string is
+   /// used as a convenient container, but the instance should not be treated
+   /// as a valid c-style string, but rather as byte array.
+   ///
+   /// @param  val  Deserialized buffer field
+   /// @return ReadStatus  ReadOk - Buffer was successfully read
+   ///                     ReadEmpty - Buffer field was found but size=0
+   ///                     ReadFail - Read failed
+   ///
+   ReadStatus read( std::string& val );
+
+   ///
+   /// Deserialize a buffer from the stream. At most, max_bytes are read into
+   /// the preallocated destination buffer. If the serialized field exists,
+   /// and max_bytes is less than the size of the serialize field, the
+   /// remaining bytes are read and discarded.
+   ///
+   /// @param  data  Non-NULL pointer to destination buffer
+   /// @param  max_bytes  Maximum number of bytes read
+   /// @return ReadStatus  ReadOk - Buffer was successfully read
+   ///                     ReadEmpty - Buffer field was found but size=0
+   ///                     ReadFail - Read failed
+   ///
+   ReadStatus read( void* data, ui32 max_bytes );
+
+   ///
+   /// Deserialize a buffer from the stream and store it into a dynamically
+   /// allocated buffer.
+   ///
+   /// @param  data  Address of buffer to allocate
+   /// @param  size_bytes  Size of allocated buffer
+   /// @return ReadStatus  ReadOk - Buffer was successfully read
+   ///                     ReadEmpty - Buffer field was found but size=0
+   ///                     ReadFail - Read failed
+   ///
+   ReadStatus read_alloc( char** data, ui32& size_bytes );
+
+   std::stringstream stream;
 
 private:
 
-  ByteOrder mByteOrder;
+   // @future
+   // Byte order of fields in stream
+   ByteOrder byte_order_;
 };
 
-
+///
+/// Interface for all serializable classes. A serializable class must
+/// implement the "pack" method to serialize an object to a byte stream. It
+/// must also implement the "unpack" method to attempt to deserialize an
+/// object from a byte stream.
+///
 class Serializable {
 public:
 
-  Serializable() {};
-  virtual ~Serializable() {};
+   Serializable() {};
+   virtual ~Serializable() {};
 
-  std::string serialize() const;
-  void serialize(SerialStream& ctor) const;
+   ///
+   /// Serialize the object to a string (not a valid c-style string)
+   ///
+   /// @return std::string  Serialized object
+   ///
+   // std::string serialize();
+   std::string serialize() const;
 
-  std::string serialize();
-  void serialize(SerialStream& ctor);
+   ///
+   /// Append the serialized object to an existing SerialStream
+   ///
+   // void serialize( SerialStream& ctor );
+   void serialize( SerialStream& ctor ) const;
 
-  bool deserialize(const char* pData, ui32 nSizeBytes);
-  bool deserialize(const std::string& data);
-  bool deserialize(SerialStream& dtor);
+   bool deserialize( const char* data, ui32 size_bytes );
+   bool deserialize( const std::string& data );
+   bool deserialize( SerialStream& dtor );
 
 protected:
 
-  virtual void pack(SerialStream& rCtor) {};
-  virtual void pack(SerialStream& rCtor) const = 0;
-  virtual bool unpack(SerialStream& rDtor) = 0;
+   virtual void pack(SerialStream& rCtor) {};
+   virtual void pack(SerialStream& rCtor) const = 0;
+   virtual bool unpack(SerialStream& rDtor) = 0;
 
 };
 

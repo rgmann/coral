@@ -37,8 +37,7 @@
 
 #include "CryptoHash.h"
 
-class Md5Hash : public CryptoHash
-{
+class Md5Hash : public CryptoHash {
 public:
 
    Md5Hash();
@@ -46,7 +45,7 @@ public:
    
    bool  hashify(unsigned char *pData, unsigned int nBlockSizeBytes);
    
-   bool  get(Hash128* pHash);
+   bool  get(Hash128* pHash) const;
    
    Md5Hash & operator=(const Md5Hash &rhs);
 

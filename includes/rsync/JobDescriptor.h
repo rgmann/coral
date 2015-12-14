@@ -95,7 +95,7 @@ public:
 
 protected:
 
-   void  pack( coral::netapp::SerialStream& ctor );
+   // void  pack( coral::netapp::SerialStream& ctor );
    void  pack( coral::netapp::SerialStream& ctor ) const;
    bool  unpack( coral::netapp::SerialStream& dtor );
 

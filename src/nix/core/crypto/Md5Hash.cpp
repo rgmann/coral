@@ -90,7 +90,7 @@ bool Md5Hash::hashify(unsigned char *pData, unsigned int nBlockSizeBytes)
 }
 
 //------------------------------------------------------------------------------
-bool Md5Hash::get(Hash128* pHash)
+bool Md5Hash::get(Hash128* pHash) const
 {
    if (isValid())
    {

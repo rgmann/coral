@@ -75,7 +75,7 @@ typedef DestinationTable::iterator  DestinationIterator;
 class PacketRouter {
 public:
 
-   PacketRouter(PacketReceiver* pReceiver);
+   PacketRouter( PacketReceiver* receiver_ptr );
    virtual ~PacketRouter();
 
    bool subscribe(

@@ -182,20 +182,39 @@ const Adler32Checksum& Segment::getWeak()
 }
 
 //------------------------------------------------------------------------------
-Md5Hash& Segment::getStrong()
+bool Segment::computeStrong()
+{
+   bool success = false;
+
+   if ( data_ptr_ )
+   {
+      success = true;
+
+      // Only compute the checksum if it has not already been computed.
+      if ( strong_checksum_.isValid() == false )
+      {
+         strong_checksum_.hashify( data_ptr_, segment_size_ );
+      }
+   }
+
+   return success;
+}
+
+//------------------------------------------------------------------------------
+const Md5Hash& Segment::getStrong() const
 {
    // If the strong checksum has not been computed, and the data is set,
    // compute it now.
-   if ( data_ptr_ && !strong_checksum_.isValid() )
-   {
-      strong_checksum_.hashify( data_ptr_, segment_size_ );
-   }
+   // if ( data_ptr_ && !strong_checksum_.isValid() )
+   // {
+   //    strong_checksum_.hashify( data_ptr_, segment_size_ );
+   // }
 
    return strong_checksum_;
 }
 
 //------------------------------------------------------------------------------
-Md5Hash& Segment::getStrong( std::ifstream& istream )
+const Md5Hash& Segment::getStrong( std::ifstream& istream )
 {
    Segment::data( istream );
    return Segment::getStrong();
@@ -327,11 +346,6 @@ bool Segment::isValid() const
 //------------------------------------------------------------------------------
 void Segment::pack( SerialStream& ctor ) const
 {
-}
-
-//------------------------------------------------------------------------------
-void Segment::pack(SerialStream& ctor)
-{
    ctor.write( (ui32)segment_id_ );
    ctor.write( size() );
    ctor.write( offset_ );
@@ -341,6 +355,19 @@ void Segment::pack(SerialStream& ctor)
    getStrong().get( &strong );
    ctor.write( (char*)&strong, sizeof( strong ) );
 }
+
+//------------------------------------------------------------------------------
+// void Segment::pack(SerialStream& ctor)
+// {
+//    ctor.write( (ui32)segment_id_ );
+//    ctor.write( size() );
+//    ctor.write( offset_ );
+//    ctor.write( (ui32)weak_checksum_.checksum() );
+
+//    Hash128 strong;
+//    getStrong().get( &strong );
+//    ctor.write( (char*)&strong, sizeof( strong ) );
+// }
 
 //------------------------------------------------------------------------------
 bool Segment::unpack( SerialStream& dtor )
@@ -504,6 +531,8 @@ bool SegmentComparator::operator() ( Segment* segment_ptr )
 
    if ( segment_ptr_->getWeak().checksum() == segment_ptr->getWeak().checksum() )
    {
+      segment_ptr->computeStrong();
+      
       if ( segment_ptr_->getStrong() == segment_ptr->getStrong() )
       {
          segments_equal = true;

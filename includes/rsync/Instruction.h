@@ -42,7 +42,6 @@
 #include "JobDescriptor.h"
 #include "Segment.h"
 #include "SegmentAccessor.h"
-#include "Serializable.h"
 #include "RsyncError.h"
 
 namespace coral {

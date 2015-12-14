@@ -45,58 +45,66 @@ namespace rpc {
 
 enum RpcErrorId
 {
-   NoException = 0,
+   kNoException = 0,
    
    // Client exceptions
-   RpcCallTimeout,
-   RpcCallCancelled,
+   kRpcCallTimeout,
+   kRpcCallCancelled,
 
    // Server Exceptions
-   UnknownResource,
-   MissingUIID,
-   UIIDAssignmentErr,
-   InvalidUIID,
-   MissingParameters,
+   kUnknownResource,
+   kMissingUIID,
+   kUIIDAssignmentErr,
+   kInvalidUIID,
+   kMissingParameters,
 
    // Instance ID was found byte the pointer is NULL
-   NullAction,
-   UnknownMethod,
+   kNullAction,
+   kUnknownMethod,
 
    // Developer has not filled in an action's implementation.
-   UnimplementedAction
+   kUnimplementedAction
 };
 
-inline std::string ToRpcErrorString(RpcErrorId error)
+inline std::string ToRpcErrorString( RpcErrorId error )
 {
-   std::string lsException;
+   std::string error_message( "Unknown" );
    
    switch (error) {
-      case NoException: lsException = "NoException"; break;
-
-      case RpcCallTimeout:   return "RpcCallTimeout";
-      case RpcCallCancelled: return "RpcCallCancelled";
-
-      case UnknownResource: lsException = "UnknownResource"; break;
-      case MissingUIID: lsException = "MissingUIID"; break;
-      case UIIDAssignmentErr: lsException = "UIIDAssignmentErr"; break;
-      case InvalidUIID: lsException = "InvalidUIID"; break;
-      case MissingParameters: lsException = "MissingParameters"; break;
-      case NullAction: lsException = "NullAction"; break;
-      case UnknownMethod: lsException = "UnknownMethod"; break;
-      case UnimplementedAction: lsException = "UnimplementedAction"; break;
-      default: lsException = "Unknown"; break;
+      case kNoException:       error_message = "NoException"; break;
+      case kRpcCallTimeout:    error_message = "RpcCallTimeout"; break;
+      case kRpcCallCancelled:  error_message = "RpcCallCancelled"; break;
+      case kUnknownResource:   error_message = "UnknownResource"; break;
+      case kMissingUIID:       error_message = "MissingUIID"; break;
+      case kUIIDAssignmentErr: error_message = "UIIDAssignmentErr"; break;
+      case kInvalidUIID:       error_message = "InvalidUIID"; break;
+      case kMissingParameters: error_message = "MissingParameters"; break;
+      case kNullAction:        error_message = "NullAction"; break;
+      case kUnknownMethod:     error_message = "UnknownMethod"; break;
+      case kUnimplementedAction: error_message = "UnimplementedAction"; break;
+      default: break;
    }
    
-   return lsException;
+   return error_message;
 };
 
 
+///
+/// Call descriptor
+///
 struct RpcCallInfo {
+
+   // Resource name
    std::string resource;
+
+   // Procedure name
    std::string action;
-   boost::uuids::uuid uuid; // Unique Instance ID
+
+   // Unique invocation ID
+   boost::uuids::uuid uuid;
 };
 
-}}
+} // end namespace rpc
+} // end namespace coral
 
 #endif // RPC_COMMON_H

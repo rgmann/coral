@@ -75,7 +75,7 @@ bool RpcServer::registerResource( RpcServerResource* resource_ptr )
 }
 
 //------------------------------------------------------------------------------
-bool RpcServer::processPacket( const RpcPacket* packet_ptr )
+bool RpcServer::processRequest( const RpcPacket* packet_ptr )
 {
    bool process_success = false;
 
@@ -101,8 +101,8 @@ bool RpcServer::processPacket( const RpcPacket* packet_ptr )
       }
       else
       {
-         input_object.exception().reporter = RpcException::Server;
-         input_object.exception().id       = UnknownResource;
+         input_object.exception().reporter = RpcException::kServer;
+         input_object.exception().id       = kUnknownResource;
 
          input_object.getResponse( output_object );
       }
@@ -131,7 +131,7 @@ bool RpcServer::put( DestinationID destination, const void* data_ptr, ui32 lengt
    {
       if ( packet.allocate( data_ptr, length ) )
       {
-         route_success = processPacket( &packet );
+         route_success = processRequest( &packet );
       }
       else
       {
@@ -172,5 +172,3 @@ void RpcServer::sendObject( const RpcObject &object )
       delete packet_ptr;
    }
 }
-
-

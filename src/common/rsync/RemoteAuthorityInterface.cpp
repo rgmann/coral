@@ -395,6 +395,8 @@ bool RemoteAuthorityInterface::flushSegments(
          {
             if ( flush_success )
             {
+               segment_ptr->computeStrong();
+               
                std::string packet_data = segment_ptr->serialize();
 
                flush_success = sendTo(
