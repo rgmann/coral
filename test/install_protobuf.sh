@@ -26,3 +26,6 @@ else
    echo "Failed to download $PACKAGE_NAME"
 fi
 cd $CURRENT_DIR
+
+export LD_LIBRARY_PATH=/usr/local/lib
+echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH"
