@@ -1,7 +1,6 @@
 language: cpp
 env:
- - CORALRPC_GEN_ROOT="$(pwd)/utils/rpc_generate"
- - LD_LIBRARY_PATH="/usr/local/lib"
+ - CORALRPC_GEN_ROOT="$(pwd)/utils/rpc_generate" LD_LIBRARY_PATH="/usr/local/lib"
 compiler:
   # - clang
   - gcc
