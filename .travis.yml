@@ -1,4 +1,6 @@
 language: cpp
+env:
+ - CORALRPC_GEN_ROOT=$(pwd)/utils/rpc_generate
 compiler:
   # - clang
   - gcc
