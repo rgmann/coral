@@ -46,15 +46,59 @@ link_directories( ${LIB_ROOT}/netapp )
 link_directories( ${LIB_ROOT}/rpc )
 
 add_executable( ${TARGET}
-"common/rpc_source/tutorial.pb.cc"
-"client/rpc_source/SearchServiceClientStub.cpp"
-"server/rpc_source/SearchServiceServerStub.cpp"
-"server/rpc_source/SearchServiceSearchAction.cpp"
+${CMAKE_CURRENT_SOURCE_DIR}/common/rpc_source/tutorial.pb.cc
+${CMAKE_CURRENT_SOURCE_DIR}/client/rpc_source/SearchServiceClientStub.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/server/rpc_source/SearchServiceServerStub.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/server/rpc_source/SearchServiceSearchAction.cpp
 ${TARGET}.cpp )
 
+# Pre-build step: generate all RPC headers and source base on the
+# service definition.
+add_custom_command(
+   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/rpc_gen_temp/tutorial.pb.cc
+          ${CMAKE_CURRENT_SOURCE_DIR}/rpc_gen_temp/SearchServiceClientStub.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/rpc_gen_temp/SearchServiceServerStub.cpp
+          ${CMAKE_CURRENT_SOURCE_DIR}/rpc_gen_temp/SearchServiceSearchAction.cpp
+   COMMAND rake generate
+   DEPENDS Rakefile
+)
+add_custom_command(
+   OUTPUT   ${CMAKE_CURRENT_SOURCE_DIR}/common/rpc_source/tutorial.pb.cc
+            ${CMAKE_CURRENT_SOURCE_DIR}/client/rpc_source/SearchServiceClientStub.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/server/rpc_source/SearchServiceServerStub.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/server/rpc_source/SearchServiceSearchAction.cpp
+   COMMAND  rake situate
+   DEPENDS  rpc_gen_temp/tutorial.pb.cc
+            rpc_gen_temp/SearchServiceClientStub.cpp
+            rpc_gen_temp/SearchServiceServerStub.cpp
+            rpc_gen_temp/SearchServiceSearchAction.cpp
+            Rakefile
+)
+add_custom_target(
+   RunGenerator
+   DEPENDS  rpc_gen_temp/tutorial.pb.cc
+            rpc_gen_temp/SearchServiceClientStub.cpp
+            rpc_gen_temp/SearchServiceServerStub.cpp
+            rpc_gen_temp/SearchServiceSearchAction.cpp 
+   COMMENT "Checking if re-generation is required"
+)
+
+add_dependencies( ${TARGET} RunGenerator )
+
+
+# Remove all auto-generated RPC files
+add_custom_target(
+   distclean
+   COMMAND rm  client/rpc_include/*.h
+               client/rpc_source/*.cpp
+               server/rpc_include/*.h
+               server/rpc_source/*.cpp
+               common/rpc_include/*.h
+               common/rpc_source/*.cc
+)
+
+
 target_link_libraries( ${TARGET} coral_rpc_shared )
-# target_link_libraries( ${TARGET} coral_core )
-# target_link_libraries( ${TARGET} netapp_common )
 target_link_libraries( ${TARGET} ${Boost_LIBRARIES} )
 target_link_libraries( ${TARGET} ${PROTOBUF_LIBRARIES} )
 target_link_libraries( ${TARGET} pthread )

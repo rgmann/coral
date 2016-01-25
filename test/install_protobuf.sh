@@ -26,3 +26,4 @@ else
    echo "Failed to download $PACKAGE_NAME"
 fi
 cd $CURRENT_DIR
+

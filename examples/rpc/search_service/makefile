@@ -111,6 +111,36 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+examples/rpc/search_service/CMakeFiles/RunGenerator.dir/rule:
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/CMakeFiles/RunGenerator.dir/rule
+.PHONY : examples/rpc/search_service/CMakeFiles/RunGenerator.dir/rule
+
+# Convenience name for target.
+RunGenerator: examples/rpc/search_service/CMakeFiles/RunGenerator.dir/rule
+
+.PHONY : RunGenerator
+
+# fast build rule for target.
+RunGenerator/fast:
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/RunGenerator.dir/build.make examples/rpc/search_service/CMakeFiles/RunGenerator.dir/build
+.PHONY : RunGenerator/fast
+
+# Convenience name for target.
+examples/rpc/search_service/CMakeFiles/distclean.dir/rule:
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/CMakeFiles/distclean.dir/rule
+.PHONY : examples/rpc/search_service/CMakeFiles/distclean.dir/rule
+
+# Convenience name for target.
+distclean: examples/rpc/search_service/CMakeFiles/distclean.dir/rule
+
+.PHONY : distclean
+
+# fast build rule for target.
+distclean/fast:
+	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f examples/rpc/search_service/CMakeFiles/distclean.dir/build.make examples/rpc/search_service/CMakeFiles/distclean.dir/build
+.PHONY : distclean/fast
+
+# Convenience name for target.
 examples/rpc/search_service/CMakeFiles/search_service.dir/rule:
 	cd /Users/vaughanbiker/Development/coral && $(MAKE) -f CMakeFiles/Makefile2 examples/rpc/search_service/CMakeFiles/search_service.dir/rule
 .PHONY : examples/rpc/search_service/CMakeFiles/search_service.dir/rule
@@ -268,6 +298,8 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... distclean"
+	@echo "... RunGenerator"
 	@echo "... search_service"
 	@echo "... client/rpc_source/SearchServiceClientStub.o"
 	@echo "... client/rpc_source/SearchServiceClientStub.i"

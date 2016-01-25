@@ -1,10 +1,14 @@
 language: cpp
+env:
+ - CORALRPC_GEN_ROOT="$(pwd)/utils/rpc_generate" LD_LIBRARY_PATH="/usr/local/lib"
 compiler:
-  - clang
+  # - clang
+  - gcc
 before_install:
+ - echo "CORALRPC_GEN_ROOT = $CORALRPC_GEN_ROOT"
  - sudo apt-get update
  - sudo apt-get install libgtest-dev
- - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ ; cd -"
+ - "cd /usr/src/gtest && sudo cmake . && sudo cmake --build . && sudo mv libg* /usr/local/lib/ && cd -"
  - "cd test/ && sudo ./install_boost.sh --boost-version 1.59.0 --libs system,filesystem,thread && cd .."
  - "cd test/ && sudo ./install_protobuf.sh && cd .."
 install:
@@ -13,4 +17,5 @@ script:
  - "cd test/core && ./core_test_suite && cd -"
  - "cd test/netapp && ./netapp_test_suite && cd -"
  - "cd test/rsync && ./rsync_test_suite && cd -"
-
+after_failure:
+ - "cd test/third_party/protobuf-*/ && cat config.log && cd -"
