@@ -1,8 +1,0 @@
-*.dylib
-*.o
-*.a
-*.dSYM
-CMakeCache.txt
-CMakeFiles/
-*.cmake
-Makefile
