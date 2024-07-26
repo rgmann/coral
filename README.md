@@ -19,11 +19,6 @@ Coral is a small collection of C++ libraries. The libraries include:
    A Remote Procedure Call (RPC) framework built on coral::netapp and Google Protocol Buffers<sup>1</sup>.  A *protoc* plugin is provided to generate services directly from your *.protoc* service definitions.
 
 
- - coral::rsync
-
-   An RSYNC file-synchronization implementation built on coral::netapp. The library can be used to synchronize local files and/or remote files.  File synchronization jobs are queued, pipelined, and completed asynchronous of the caller.
-
-
 ## Supported Platforms
 
    - OSX
@@ -107,11 +102,6 @@ root directory.
 ## Examples
 
 *  An example coral::rpc project can be found in examples/rpc/search_service.
-
-*  An example coral::rsync client/server application can be found in
-   examples/rsync/cli_utility. This example also demonstrates how to use the
-   coral::netapp boost::asio-based packet router, the coral::cli command-line
-   argument parser, and the coral::cli interactive command router.
 
 
 
