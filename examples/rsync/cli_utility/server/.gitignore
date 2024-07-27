@@ -1,7 +1,0 @@
-*.o
-*.dSYM
-CMakeCache.txt
-*.cmake
-CMakeFiles/
-Makefile
-rsync_server

@@ -35,6 +35,7 @@
 #ifndef PACKET_SUBSCRIBER_H
 #define PACKET_SUBSCRIBER_H
 
+#include <map>
 #include <list>
 #include <boost/thread/mutex.hpp>
 #include "PacketReceiver.h"

@@ -1,4 +1,5 @@
-cmake_minimum_required( VERSION 2.8 )
+cmake_minimum_required( VERSION 3.13 )
+project(coral VERSION 1.1.0)
 
 #
 # Build all libraries
@@ -17,7 +18,7 @@ add_subdirectory( test/netapp )
 #
 # Build the RPC code generator
 #
-add_subdirectory( utils/rpc_generate )
+#add_subdirectory( utils/rpc_generate )
 
 #
 # Examples

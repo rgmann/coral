@@ -29,6 +29,10 @@ Coral is a small collection of C++ libraries. The libraries include:
 
 Coral depends on:
 
+On Mac
+`brew install boost`
+`brew install protobuf`
+
 1. [CMake](https://cmake.org/) (>= 2.8)
 
     On OSX with Macports:

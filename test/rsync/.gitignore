@@ -1,7 +1,0 @@
-*.o
-*.dSYM
-*.cmake
-CMakeCache.txt
-CMakeFiles/
-Makefile
-rsync_test_suite
