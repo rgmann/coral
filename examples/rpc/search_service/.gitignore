@@ -1,8 +1,0 @@
-*.o
-*.dSYM
-*.cmake
-CMakeCache.txt
-CMakeFiles/
-Makefile
-cmake_install.cmake
-search_service

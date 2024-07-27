@@ -1,1 +1,0 @@
-protoc --plugin=protoc-gen-libergen=./protoc-gen-libergen --proto_path=test_out/ --cpp_out=test_out/ --libergen_out=test_out/ test_out/tutorial.proto
