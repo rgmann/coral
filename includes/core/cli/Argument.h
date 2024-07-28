@@ -148,7 +148,7 @@ public:
    
    void        alt( const std::string& val){ alternate_id_ = val; };
    std::string alt() const { return alternate_id_; };
-   bool        hasAlt() const { return ( alternate_id_.empty() == false ); }
+   bool        has_alt() const { return ( alternate_id_.empty() == false ); }
    
    void        description(const std::string& val ){ description_ = val; };
    std::string description() const { return description_; };
@@ -161,10 +161,10 @@ public:
    
    void        value( const std::string& val ){ value_ = val; };
    std::string value() const;
-   void        clearValue() { value_.erase(); };
+   void        clear_value() { value_.erase(); };
    
-   void        valueType( ArgValType value_type ){ value_type_ = value_type; };
-   ArgValType  valueType() const { return value_type_; };
+   void        value_type( ArgValType value_type ){ value_type_ = value_type; };
+   ArgValType  value_type() const { return value_type_; };
 
 
 private:
@@ -219,7 +219,7 @@ private:
    /// @return bool            True if a valid key-value pair was specified;
    ///                         false otherwise.
    ///
-   bool setAttribute( const std::string& attribute_name, 
+   bool set_attribute( const std::string& attribute_name, 
                       const std::string& attribute_value = "");
    
 private:

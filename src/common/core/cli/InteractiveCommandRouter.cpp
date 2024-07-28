@@ -35,6 +35,7 @@
 #include <utility>
 #include <iostream>
 #include <iomanip>
+#include <memory>
 #include "Log.h"
 #include "InteractiveCommandRouter.h"
 #include "StringHelper.h"
@@ -69,7 +70,7 @@ private:
 class ListCommand : public InteractiveCommand {
 public:
 
-   ListCommand( const std::map<std::string, InteractiveCommand*>& command_map )
+   ListCommand( const std::map<std::string, std::shared_ptr<InteractiveCommand>>& command_map )
    : coral::cli::InteractiveCommand( "list", "List supported commands" )
    , command_map_( command_map )
    {
@@ -79,7 +80,7 @@ public:
 
    void process(const coral::cli::ArgumentList& args)
    {
-      std::map<std::string, InteractiveCommand*>::const_iterator
+      std::map<std::string, std::shared_ptr<InteractiveCommand>>::const_iterator
       command_iterator = command_map_.begin();
 
       raw("Command List:\n");
@@ -90,7 +91,7 @@ public:
          {
             char command_name_buffer[21];
 
-            if ( command_iterator->second->hasAlias() )
+            if ( command_iterator->second->has_alias() )
             {
                snprintf(
                   command_name_buffer, sizeof(command_name_buffer), "%s[%s]",
@@ -116,7 +117,7 @@ public:
 
 private:
 
-   const std::map<std::string, InteractiveCommand*>& command_map_;
+   const std::map<std::string, std::shared_ptr<InteractiveCommand>>& command_map_;
 };
 
 //-----------------------------------------------------------------------------
@@ -125,32 +126,19 @@ InteractiveCommandRouter::InteractiveCommandRouter( const std::string& prompt )
    , shutdown_message_( "bye" )
    , quit_signalled_  ( false )
 {
-   add( new ListCommand( commands_ ) );
-   add( new QuitCommand( quit_signalled_ ) );
+   add( std::make_shared<ListCommand>( commands_ ) );
+   add( std::make_shared<QuitCommand>( quit_signalled_ ) );
 }
 
 //-----------------------------------------------------------------------------
 InteractiveCommandRouter::~InteractiveCommandRouter()
 {
-   InteractiveCommand* command_ptr = NULL;
-
-   command_ptr = remove("list");
-   if ( command_ptr != NULL )
-   {
-      delete command_ptr;
-      command_ptr = NULL;
-   }
-
-   command_ptr = remove("quit");
-   if ( command_ptr != NULL )
-   {
-      delete command_ptr;
-      command_ptr = NULL;
-   }
+   remove("list");
+   remove("quit");
 }
 
 //-----------------------------------------------------------------------------
-bool InteractiveCommandRouter::add( InteractiveCommand* command_ptr )
+bool InteractiveCommandRouter::add( std::shared_ptr<InteractiveCommand> command_ptr )
 {
    bool add_success = false;
 
@@ -158,7 +146,7 @@ bool InteractiveCommandRouter::add( InteractiveCommand* command_ptr )
    {
       add_success = ( commands_.count( command_ptr->command() ) == 0 );
 
-      if ( command_ptr->hasAlias() )
+      if ( command_ptr->has_alias() )
       {
          add_success &= ( commands_.count( command_ptr->alias() ) == 0) ;
       }
@@ -174,9 +162,9 @@ bool InteractiveCommandRouter::add( InteractiveCommand* command_ptr )
 }
 
 //-----------------------------------------------------------------------------
-InteractiveCommand* InteractiveCommandRouter::remove( const std::string& command )
+std::shared_ptr<InteractiveCommand> InteractiveCommandRouter::remove( const std::string& command )
 {
-   InteractiveCommand* command_ptr = NULL;
+   std::shared_ptr<InteractiveCommand> command_ptr;
 
    if ( commands_.count( command ) > 0 )
    {
@@ -186,7 +174,7 @@ InteractiveCommand* InteractiveCommandRouter::remove( const std::string& command
       commands_.erase( command_ptr->command() );
 
       // If the command has an alias, remove the alias.
-      if ( command_ptr->hasAlias() )
+      if ( command_ptr->has_alias() )
       {
          commands_.erase( command_ptr->alias() );
       }
@@ -196,13 +184,13 @@ InteractiveCommand* InteractiveCommandRouter::remove( const std::string& command
 }
 
 //-----------------------------------------------------------------------------
-void InteractiveCommandRouter::setStartupMessage( const std::string& message )
+void InteractiveCommandRouter::set_startup_message( const std::string& message )
 {
    startup_message_ = message;
 }
 
 //-----------------------------------------------------------------------------
-void InteractiveCommandRouter::setShutdownMessage( const std::string& message )
+void InteractiveCommandRouter::set_shutdown_message( const std::string& message )
 {
    shutdown_message_ = message;
 }
@@ -225,7 +213,7 @@ void InteractiveCommandRouter::run()
 
       coral::log::flush();
 
-      processLine( std::cin );
+      process_line( std::cin );
    }
 
    if ( shutdown_message_.empty() == false )
@@ -237,7 +225,7 @@ void InteractiveCommandRouter::run()
 }
 
 //-----------------------------------------------------------------------------
-void InteractiveCommandRouter::processLine( std::istream& stream )
+void InteractiveCommandRouter::process_line( std::istream& stream )
 {
    std::string command;
 
@@ -257,7 +245,7 @@ void InteractiveCommandRouter::processLine( std::istream& stream )
          commands_.find( command_name );
       if ( command_iterator != commands_.end() )
       {
-         InteractiveCommand* command_ptr = command_iterator->second;
+         std::shared_ptr<InteractiveCommand> command_ptr = command_iterator->second;
 
          if ( command_ptr )
          {

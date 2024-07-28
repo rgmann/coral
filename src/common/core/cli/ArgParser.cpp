@@ -72,7 +72,7 @@ ArgParser::~ArgParser()
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::addArg(const std::string &arg)
+bool ArgParser::add_arg(const std::string &arg)
 {
    Argument* argument_ptr = NULL;
    
@@ -84,7 +84,7 @@ bool ArgParser::addArg(const std::string &arg)
       valid_argument &= ( name_table_.count( argument_ptr->name() ) == 0 );
       valid_argument &= ( primary_table_.count( argument_ptr->primary() ) == 0 );
 
-      if ( argument_ptr->hasAlt() )
+      if ( argument_ptr->has_alt() )
       {
          valid_argument &= ( alt_table_.count( argument_ptr->alt() ) == 0 );
       }
@@ -131,10 +131,10 @@ bool ArgParser::parse( const char* arguments[], int argument_count )
    help_requested_ = false;
 
    // Reset the error log
-   resetErrorLog();
+   reset_error_log();
    
    // Reset the arguments
-   resetArgs();
+   reset_args();
    
    // Start at one to skip over program name
    for ( int argument_index = 1;
@@ -146,7 +146,7 @@ bool ArgParser::parse( const char* arguments[], int argument_count )
       std::string argument_str( arguments[ argument_index ] );
       
 
-      Argument* argument_ptr = findArgument( argument_str );
+      Argument* argument_ptr = find_argument( argument_str );
       
       if ( argument_ptr != NULL )
       {
@@ -160,7 +160,7 @@ bool ArgParser::parse( const char* arguments[], int argument_count )
                // This argument requires a value, but there are no more
                // argument tokens available.  Therefore, log error and
                // continue.
-               logError( argument_str, "No value provided for option." );
+               log_error( argument_str, "No value provided for option." );
                
                argument_ptr->status(Argument::ArgMissingParam);
                argument_valid = false;
@@ -171,12 +171,12 @@ bool ArgParser::parse( const char* arguments[], int argument_count )
                argument_ptr->value( std::string( arguments[ ++argument_index ] ) );
                
                // Validate the parameter value type.
-               if (!ValidType(argument_ptr->valueType(), argument_ptr->value()))
+               if (!valid_type(argument_ptr->value_type(), argument_ptr->value()))
                {
                   // This argument requires a value, but there are no more
                   // argument tokens available.  Therefore, log error and
                   // continue.
-                  logError(
+                  log_error(
                      argument_str, 
                      "Value specified for option does not have expected type."
                   );
@@ -194,25 +194,25 @@ bool ArgParser::parse( const char* arguments[], int argument_count )
       }
    }
 
-   bool parse_success = ( errorCount() == 0 )  &&
-                        allRequiredArgsFound() &&
+   bool parse_success = ( error_count() == 0 )  &&
+                        all_required_args_found() &&
                         ( help_requested_ == false );
 
    return parse_success;
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::helpRequested() const
+bool ArgParser::help_requested() const
 {
    return help_requested_;
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::isSet( Argument::ArgField field, const std::string &fieldStr )
+bool ArgParser::is_set( Argument::ArgField field, const std::string &fieldStr )
 {
    bool success = false;
 
-   Argument* argument_ptr = getArgByField( field, fieldStr );
+   Argument* argument_ptr = get_arg_by_field( field, fieldStr );
 
    if ( argument_ptr != NULL )
    {
@@ -226,19 +226,19 @@ bool ArgParser::isSet( Argument::ArgField field, const std::string &fieldStr )
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::getArgVal(
+bool ArgParser::get_arg_val(
    Argument::ArgField arg_attr,
    const std::string& arg_attr_val,
    int&               field_val )
 {
    bool      success      = false;
-   Argument* argument_ptr = getArgByField( arg_attr, arg_attr_val );
+   Argument* argument_ptr = get_arg_by_field( arg_attr, arg_attr_val );
 
    if ( argument_ptr != NULL )
    {
       if ( argument_ptr->status() == Argument::ArgFound )
       {
-         if ( ValidType( Argument::ArgInt, argument_ptr->value() ) )
+         if ( valid_type( Argument::ArgInt, argument_ptr->value() ) )
          {
             std::stringstream stream( argument_ptr->value() );
    
@@ -247,36 +247,36 @@ bool ArgParser::getArgVal(
          }
          else
          {
-            log::error("ArgParser::getArgVal(int): Arg value does not match arg type.\n");
+            log::error("ArgParser::get_arg_val(int): Arg value does not match arg type.\n");
          }
       }
       else
       {
-         log::error("ArgParser::getArgVal(int): Arg was not specified at the CL.\n");
+         log::error("ArgParser::get_arg_val(int): Arg was not specified at the CL.\n");
       }
    }
    else
    {
-      log::error("ArgParser::getArgVal(int): Failed to get arg by field.\n");
+      log::error("ArgParser::get_arg_val(int): Failed to get arg by field.\n");
    }
    
    return success;
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::getArgVal(
+bool ArgParser::get_arg_val(
    Argument::ArgField arg_attr,
    const std::string& arg_attr_val,
    f32&               field_val )
 {
    bool      success      = false;
-   Argument* argument_ptr = getArgByField( arg_attr, arg_attr_val );
+   Argument* argument_ptr = get_arg_by_field( arg_attr, arg_attr_val );
    
    if ( argument_ptr != NULL )
    {
       if ( argument_ptr->status() == Argument::ArgFound )
       {
-         if ( ValidType( Argument::ArgFloat, argument_ptr->value() ) )
+         if ( valid_type( Argument::ArgFloat, argument_ptr->value() ) )
          {
             std::stringstream stream(argument_ptr->value());
    
@@ -285,36 +285,36 @@ bool ArgParser::getArgVal(
          }
          else
          {
-            log::error("ArgParser::getArgVal(float): Arg value does not match arg type.\n");
+            log::error("ArgParser::get_arg_val(float): Arg value does not match arg type.\n");
          }
       }
       else
       {
-         log::error("ArgParser::getArgVal(float): Arg was not specified at the CL.\n");
+         log::error("ArgParser::get_arg_val(float): Arg was not specified at the CL.\n");
       }
    }
    else
    {
-      log::error("ArgParser::getArgVal(float): Failed to get arg by field.\n");
+      log::error("ArgParser::get_arg_val(float): Failed to get arg by field.\n");
    }
    
    return success;
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::getArgVal(
+bool ArgParser::get_arg_val(
    Argument::ArgField arg_attr,
    const std::string& arg_attr_val,
    std::string&       field_val )
 {
    bool      success      = false;
-   Argument* argument_ptr = getArgByField( arg_attr, arg_attr_val );
+   Argument* argument_ptr = get_arg_by_field( arg_attr, arg_attr_val );
    
    if ( argument_ptr != NULL )
    {
       if ( argument_ptr->status() == Argument::ArgFound )
       {
-         if ( ValidType( Argument::ArgString, argument_ptr->value() ) )
+         if ( valid_type( Argument::ArgString, argument_ptr->value() ) )
          {
             // Don't need a string stream since the value is already a string.
             field_val = argument_ptr->value();
@@ -322,24 +322,24 @@ bool ArgParser::getArgVal(
          }
          else
          {
-            log::error("ArgParser::getArgVal(string): Arg value does not match arg type.\n");
+            log::error("ArgParser::get_arg_val(string): Arg value does not match arg type.\n");
          }
       }
       else
       {
-         log::error("ArgParser::getArgVal(string): Arg was not specified at the CL.\n");
+         log::error("ArgParser::get_arg_val(string): Arg was not specified at the CL.\n");
       }
    }
    else
    {
-      log::error("ArgParser::getArgVal(string): Failed to get arg by field.\n");
+      log::error("ArgParser::get_arg_val(string): Failed to get arg by field.\n");
    }
    
    return success;
 }
 
 //------------------------------------------------------------------------------
-Argument* ArgParser::getArgByField(
+Argument* ArgParser::get_arg_by_field(
    Argument::ArgField arg_attr, 
    const std::string& arg_attr_val )
 {
@@ -378,7 +378,7 @@ Argument* ArgParser::getArgByField(
 }
 
 //------------------------------------------------------------------------------
-std::string ArgParser::printArgErrors( bool print_help_text )
+std::string ArgParser::print_arg_errors( bool print_help_text )
 {
    std::stringstream error_message;
 
@@ -402,7 +402,7 @@ std::string ArgParser::printArgErrors( bool print_help_text )
       }
       else
       {
-         error_message << printHelp();
+         error_message << print_help();
       }
    }
 
@@ -410,7 +410,7 @@ std::string ArgParser::printArgErrors( bool print_help_text )
 }
 
 //------------------------------------------------------------------------------
-std::string ArgParser::printHelp()
+std::string ArgParser::print_help()
 {
    std::stringstream help_message;
 
@@ -440,7 +440,7 @@ std::string ArgParser::printHelp()
 }
 
 //------------------------------------------------------------------------------
-Argument* ArgParser::findArgument( const std::string& argument_str )
+Argument* ArgParser::find_argument( const std::string& argument_str )
 {
    Argument* argument_ptr = NULL;
 
@@ -465,7 +465,7 @@ Argument* ArgParser::findArgument( const std::string& argument_str )
          else
          {
             // Unrecognized arg.  Log error and continue.
-            logError( argument_str, "Unrecognized option." );
+            log_error( argument_str, "Unrecognized option." );
          }
       }
    }
@@ -482,21 +482,21 @@ Argument* ArgParser::findArgument( const std::string& argument_str )
       else
       {
          // Unrecognized arg.  Log error and continue.
-         logError( argument_str, "Unrecognized option." );
+         log_error( argument_str, "Unrecognized option." );
       }
    }
    else
    {
       // All arg IDs should start with "-" or "--".
       // Therefore log an error.
-      logError(argument_str, "Option flags must contain \"-\" or\"--\".");
+      log_error(argument_str, "Option flags must contain \"-\" or\"--\".");
    }
 
    return argument_ptr;
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::allRequiredArgsFound()
+bool ArgParser::all_required_args_found()
 {
    bool all_required_params_available = true;
 
@@ -515,7 +515,7 @@ bool ArgParser::allRequiredArgsFound()
             all_required_params_available = false;
          }
          
-         logError( argument_ptr->primary(), "Required parameter missing." );
+         log_error( argument_ptr->primary(), "Required parameter missing." );
       }
    }
 
@@ -523,25 +523,25 @@ bool ArgParser::allRequiredArgsFound()
 }
 
 //------------------------------------------------------------------------------
-void ArgParser::logError(const std::string &optId, const std::string &msg)
+void ArgParser::log_error(const std::string &optId, const std::string &msg)
 {
    argument_errors_.push_back( optId + " : " + msg );
 }
 
 //------------------------------------------------------------------------------
-void ArgParser::resetErrorLog()
+void ArgParser::reset_error_log()
 {
    argument_errors_.clear();
 }
 
 //------------------------------------------------------------------------------
-int ArgParser::errorCount()
+int ArgParser::error_count()
 {
    return argument_errors_.size();
 }
 
 //------------------------------------------------------------------------------
-void ArgParser::resetArgs()
+void ArgParser::reset_args()
 {
    ArgumentList::iterator argument_iterator = arguments_.begin();
    
@@ -549,13 +549,13 @@ void ArgParser::resetArgs()
    {
       Argument* argument_ptr = *argument_iterator;
       
-      argument_ptr->clearValue();
+      argument_ptr->clear_value();
       argument_ptr->status(Argument::ArgOmitted);
    }
 }
 
 //------------------------------------------------------------------------------
-bool ArgParser::ValidType(Argument::ArgValType type, const std::string &value)
+bool ArgParser::valid_type(Argument::ArgValType type, const std::string &value)
 {
    bool valid_type = false;
 

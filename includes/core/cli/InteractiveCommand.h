@@ -72,7 +72,7 @@ public:
    ///
    /// Check whether this command has an alias.
    ///
-   bool hasAlias() const;
+   bool has_alias() const;
 
    ///
    /// Command description accessor.

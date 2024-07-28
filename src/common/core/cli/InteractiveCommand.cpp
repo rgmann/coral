@@ -64,7 +64,7 @@ const std::string& InteractiveCommand::alias() const
 }
 
 //-----------------------------------------------------------------------------
-bool InteractiveCommand::hasAlias() const
+bool InteractiveCommand::has_alias() const
 {
   return ( alias_.empty() == false );
 }

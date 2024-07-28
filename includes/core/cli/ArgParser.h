@@ -120,11 +120,11 @@ public:
    ///                     not be parsed, or if a command with the same name,
    ///                     primary, or alternate IDs.
    ///
-   bool  addArg( const std::string& definition );
+   bool  add_arg( const std::string& definition );
    
    ///
    /// Parse the command line arguments. If "--help" at any point in "argv",
-   /// then parse() returns false and helpRequested() returns true.
+   /// then parse() returns false and help_requested() returns true.
    ///
    /// @param  argv  Array of command line argument tokens
    /// @param  argc  Number of tokens in argv
@@ -137,12 +137,12 @@ public:
    ///
    /// Check whether "--help" was specified at the command line. Due to varying
    /// use cases, it is the caller's responsibility to get and print the help
-   /// message (see printHelp()).
+   /// message (see print_help()).
    ///
    /// @return bool  True if the help message was requested at the command
    ///               line; false otherwise.
    ///
-   bool helpRequested() const;
+   bool help_requested() const;
    
    ///
    /// Retrieve a string containing all argument parsing errors. If there are
@@ -152,7 +152,7 @@ public:
    ///                     should be appended to the error message string.
    /// @return std::string Error message string
    ///
-   std::string printArgErrors( bool print_help = false );
+   std::string print_arg_errors( bool print_help = false );
    
    ///
    /// Retrieve a string containing the a description of all defined
@@ -160,7 +160,7 @@ public:
    ///
    /// @return std::string  Help message string
    ///
-   std::string printHelp();
+   std::string print_help();
    
    ///
    /// Query whether a specified argument was specified at the command line.
@@ -172,7 +172,7 @@ public:
    ///                   line; false if it was not specified or the specified
    ///                   argument cannot be found.
    ///
-   bool isSet( Argument::ArgField arg_attr, const std::string &arg_attr_val );
+   bool is_set( Argument::ArgField arg_attr, const std::string &arg_attr_val );
 
    ///
    /// Get the value of the specified argument as a 32-bit integer.
@@ -184,7 +184,7 @@ public:
    /// @return bool      True if the option-type argument exists and a 32-bit
    ///                   integer can parsed from its value; false otherwise.
    ///
-   bool getArgVal( Argument::ArgField arg_attr, 
+   bool get_arg_val( Argument::ArgField arg_attr, 
                    const std::string& arg_attr_val,
                    i32&               field_val );
 
@@ -199,7 +199,7 @@ public:
    /// @return bool      True if the option-type argument exists and a 32-bit
    ///                   float can parsed from its value; false otherwise.
    ///
-   bool getArgVal( Argument::ArgField arg_attr, 
+   bool get_arg_val( Argument::ArgField arg_attr, 
                    const std::string& arg_attr_val,
                    f32&               field_val );
 
@@ -213,7 +213,7 @@ public:
    /// @return bool      True if the option-type argument exists and a 32-bit
    ///                   float can parsed from its value; false otherwise.
    ///
-   bool getArgVal( Argument::ArgField arg_attr, 
+   bool get_arg_val( Argument::ArgField arg_attr, 
                    const std::string& arg_attr_val,
                    std::string&       field_val );
 
@@ -233,7 +233,7 @@ private:
    /// @param  argument_str  Command-line argument token
    /// @return Argument*     True if an Argument was found; NULL otherwise.
    ///
-   Argument* findArgument( const std::string& argument_str );
+   Argument* find_argument( const std::string& argument_str );
 
    ///
    /// Check whether all Arguments flagged as required were found at the
@@ -242,7 +242,7 @@ private:
    /// @return  bool  True if all required arguments were found;
    ///                false otherwise.
    ///
-   bool allRequiredArgsFound();
+   bool all_required_args_found();
    
    ///
    /// Retrieve a defined argument based its primary ID, alternate ID, or
@@ -253,7 +253,7 @@ private:
    /// @return Argument* Pointer to argument or NULL if the requested argument
    ///                   was not found.
    ///
-   Argument* getArgByField( Argument::ArgField arg_attr, 
+   Argument* get_arg_by_field( Argument::ArgField arg_attr, 
                             const std::string& arg_attr_val );
 
    ///
@@ -263,22 +263,22 @@ private:
    ///                 command line
    /// @param  error   Error message
    ///
-   void logError( const std::string& arg_id, const std::string& error );
+   void log_error( const std::string& arg_id, const std::string& error );
 
    ///
    /// Clear the error log.
    ///
-   void resetErrorLog();
+   void reset_error_log();
 
    ///
    /// Retrieve the number of logged errors.
    ///
-   int errorCount();
+   int error_count();
    
    ///
    /// Reset the state of all arguments to the unparsed state.
    ///
-   void resetArgs();
+   void reset_args();
 
    ///
    /// Check whether the specified value type can be parsed from the specified
@@ -287,7 +287,7 @@ private:
    /// @param  type  Value type
    /// @param  value Value string
    ///
-   static bool ValidType(Argument::ArgValType type, const std::string& value );
+   static bool valid_type(Argument::ArgValType type, const std::string& value );
    
    
 private:

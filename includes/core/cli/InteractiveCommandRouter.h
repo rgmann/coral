@@ -36,6 +36,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 #include "BaseTypes.h"
 #include "InteractiveCommand.h"
 
@@ -60,25 +61,25 @@ public:
    // Register a command with the router. The command name cannot be among the
    // the protected, including 'list', 'guit', and 'exit'.
    //
-   bool add( InteractiveCommand* command_ptr );
+   bool add( std::shared_ptr<InteractiveCommand> command_ptr );
 
    //
    // Remove a command by name.
    //
-   InteractiveCommand* remove( const std::string& command );
+   std::shared_ptr<InteractiveCommand> remove( const std::string& command );
 
    //
    // Set the message printed at startup.
    //
-   void setStartupMessage( const std::string& message );
+   void set_startup_message( const std::string& message );
 
    //
    // Set the message printed on shutdown (defaults to "bye")
    //
-   void setShutdownMessage( const std::string& message );
+   void set_shutdown_message( const std::string& message );
 
 
-   void processLine( std::istream& stream );
+   void process_line( std::istream& stream );
 
 
 private:
@@ -91,7 +92,7 @@ private:
    std::string shutdown_message_;
 
    // Map from command/alias name to command object
-   typedef std::map<std::string,InteractiveCommand*> CommandTable;
+   typedef std::map<std::string,std::shared_ptr<InteractiveCommand>> CommandTable;
    CommandTable commands_;
 
    // Quit signal

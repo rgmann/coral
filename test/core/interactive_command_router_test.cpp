@@ -71,7 +71,7 @@ TEST_F( InteractiveCommandRouterTest, InteractiveCommandWithAlias ) {
    TestCommandWithAlias command;
    EXPECT_EQ( "test", command.command() );
    EXPECT_EQ( "This is a test command", command.brief() );
-   EXPECT_EQ( true, command.hasAlias() );
+   EXPECT_EQ( true, command.has_alias() );
    EXPECT_EQ( "test_command", command.alias() );
 }
 
@@ -88,7 +88,7 @@ TEST_F( InteractiveCommandRouterTest, InteractiveCommandWithoutAlias ) {
    TestCommandWithoutAlias command;
    EXPECT_EQ( "test", command.command() );
    EXPECT_EQ( "This is a test command", command.brief() );
-   EXPECT_FALSE( command.hasAlias() );
+   EXPECT_FALSE( command.has_alias() );
    EXPECT_EQ( "", command.alias() );
 }
 
@@ -106,23 +106,23 @@ TEST_F( InteractiveCommandRouterTest, CommandParsing ) {
       ArgumentList received_args_;
    };
 
-   TestCommand        first_command( "first", "This is test command");
-   TestCommand        second_command( "second", "This is another test command");
-   TestCommand        third_command( "first", "This is yet another test command");
+   std::shared_ptr<TestCommand> first_command = std::make_shared<TestCommand>("first", "This is test command");
+   std::shared_ptr<TestCommand> second_command = std::make_shared<TestCommand>( "second", "This is another test command");
+   std::shared_ptr<TestCommand> third_command = std::make_shared<TestCommand>( "first", "This is yet another test command");
    InteractiveCommandRouter router;
 
-   EXPECT_EQ( true, router.add( &first_command ) );
-   EXPECT_EQ( true, router.add( &second_command ) );
-   EXPECT_FALSE( router.add( &third_command ) );
+   EXPECT_EQ( true, router.add( first_command ) );
+   EXPECT_EQ( true, router.add( second_command ) );
+   EXPECT_FALSE( router.add( third_command ) );
 
    std::stringstream stream;
    stream << "second arg1 arg2 arg3\n";
-   router.processLine( stream );
-   EXPECT_EQ( true, first_command.received_args_.empty() );
-   EXPECT_FALSE( second_command.received_args_.empty() );
-   EXPECT_EQ( 3u, second_command.received_args_.size() );
-   EXPECT_EQ( "arg1", second_command.received_args_[ 0 ] );
-   EXPECT_EQ( "arg2", second_command.received_args_[ 1 ] );
-   EXPECT_EQ( "arg3", second_command.received_args_[ 2 ] );
-   EXPECT_EQ( true, third_command.received_args_.empty() );
+   router.process_line( stream );
+   EXPECT_EQ( true, first_command->received_args_.empty() );
+   EXPECT_FALSE( second_command->received_args_.empty() );
+   EXPECT_EQ( 3u, second_command->received_args_.size() );
+   EXPECT_EQ( "arg1", second_command->received_args_[ 0 ] );
+   EXPECT_EQ( "arg2", second_command->received_args_[ 1 ] );
+   EXPECT_EQ( "arg3", second_command->received_args_[ 2 ] );
+   EXPECT_EQ( true, third_command->received_args_.empty() );
 }

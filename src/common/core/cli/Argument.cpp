@@ -112,7 +112,7 @@ bool Argument::parse( const std::string& definition )
          {
             std::string attribute_key = attributes_tokens[ ARG_NAME_INDEX ];
             
-            if ( setAttribute( string_helper::trim( attribute_key ) ) == false )
+            if ( set_attribute( string_helper::trim( attribute_key ) ) == false )
             {
                parse_success = false;
                break;
@@ -125,7 +125,7 @@ bool Argument::parse( const std::string& definition )
             std::string attribute_key   = attributes_tokens[ ARG_NAME_INDEX ];
             std::string attribute_value = attributes_tokens[ ARG_VALUE_INDEX ];
             
-            if ( setAttribute( string_helper::trim( attribute_key ), 
+            if ( set_attribute( string_helper::trim( attribute_key ), 
                            string_helper::trim( attribute_value ) ) == false )
             {
                parse_success = false;
@@ -153,7 +153,7 @@ bool Argument::parse( const std::string& definition )
 }
 
 //------------------------------------------------------------------------------
-bool Argument::setAttribute(const std::string &attribute_name, 
+bool Argument::set_attribute(const std::string &attribute_name, 
                             const std::string &attribute_value )
 {
    bool success = true;
@@ -278,7 +278,7 @@ bool Argument::setAttribute(const std::string &attribute_name,
    else
    {
       log::debug(
-         "Argument::setAttribute: Ignoring invalid attribute '%d'\n",
+         "Argument::set_attribute: Ignoring invalid attribute '%d'\n",
          attribute_name.c_str() );
    }
    
