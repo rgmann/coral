@@ -209,6 +209,8 @@ namespace log    {
       ///
       void setConsoleDisplayOptions( ui32 display_format );
 
+      static Logger& instance();
+
    private:
 
       ///
@@ -248,9 +250,6 @@ namespace log    {
       // 
       ui32 current_log_file_size_;
    };
-
-   // Global Logger instance
-   extern Logger glog;
 
    ///
    /// Configure the log directory. By default, the directory is the current

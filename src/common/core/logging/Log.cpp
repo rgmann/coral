@@ -99,7 +99,7 @@ LogMessage::LogMessage(
    , timestamp_( Timestamp::Now() )
    , is_flush_marker_( false )
 {
-   char row_prefix[7];
+   char row_prefix[11];
    std::stringstream stream;
 
    if ( strlen( header ) > 0 )
@@ -112,7 +112,7 @@ LogMessage::LogMessage(
    {
       if ( ( offset % max_line_length ) == 0)
       {
-         snprintf(row_prefix, sizeof( row_prefix ), "%4X: ", offset);
+         snprintf(row_prefix, sizeof( row_prefix ), "%8X: ", offset);
          stream << row_prefix;
       }
 
@@ -336,42 +336,47 @@ std::string Logger::generateLogName(
    return log_path.string();
 }
 
-Logger coral::log::glog;
+//-----------------------------------------------------------------------------
+Logger& Logger::instance()
+{
+   static Logger our_instance;
+   return our_instance;
+}
 
 //-----------------------------------------------------------------------------
 void coral::log::set_path( const std::string& path )
 {
-   coral::log::glog.setPath( path );
+   coral::log::Logger::instance().setPath( path );
 }
 
 //-----------------------------------------------------------------------------
 void coral::log::set_suffix(const std::string& suffix)
 {
-   coral::log::glog.setSuffix( suffix );
+   coral::log::Logger::instance().setSuffix( suffix );
 }
 
 //-----------------------------------------------------------------------------
 void coral::log::enable()
 {
-   coral::log::glog.setLogFileEnabled(true);
+   coral::log::Logger::instance().setLogFileEnabled(true);
 }
 
 //-----------------------------------------------------------------------------
 void coral::log::disable()
 {
-   coral::log::glog.setLogFileEnabled(false);
+   coral::log::Logger::instance().setLogFileEnabled(false);
 }
 
 //-----------------------------------------------------------------------------
 void coral::log::options(ui32 opts)
 {
-   coral::log::glog.setConsoleDisplayOptions(opts);
+   coral::log::Logger::instance().setConsoleDisplayOptions(opts);
 }
 
 //-----------------------------------------------------------------------------
 void coral::log::level(LogLevel level)
 {
-   coral::log::glog.setFilterLevel(level);
+   coral::log::Logger::instance().setFilterLevel(level);
 }
 
 //-----------------------------------------------------------------------------
@@ -379,7 +384,7 @@ void coral::log::flush( i32 timeout_ms )
 {
    LogMessagePtr flush_message_ptr = std::make_shared<LogMessage>();
 
-   coral::log::glog.send( flush_message_ptr );
+   coral::log::Logger::instance().send( flush_message_ptr );
    flush_message_ptr->waitFlush( timeout_ms );
 }
 
@@ -410,7 +415,7 @@ void coral::log::print(LogLevel level, const char* format, va_list args)
          std::string( message_buffer.buffer_ )
       );
 
-      coral::log::glog.send( log_message_ptr );
+      coral::log::Logger::instance().send( log_message_ptr );
    }
 }
 
@@ -493,7 +498,7 @@ void coral::log::mem_dump(
             max_line_length
          );
 
-         coral::log::glog.send( log_message_ptr );
+         coral::log::Logger::instance().send( log_message_ptr );
       }
       catch ( ... )
       {
