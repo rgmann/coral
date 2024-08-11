@@ -38,8 +38,8 @@
 #include <stdarg.h>
 #include <string>
 #include <fstream>
+#include <memory>
 #include <boost/thread/mutex.hpp>
-#include <boost/shared_ptr.hpp>
 #include "Queue.h"
 #include "BinarySem.h"
 #include "IThread.h"
@@ -140,7 +140,7 @@ namespace log    {
       thread::BinarySem flush_signal_;
    };
 
-   typedef  boost::shared_ptr<LogMessage> LogMessagePtr;
+   typedef  std::shared_ptr<LogMessage> LogMessagePtr;
 
 
    class Logger : public coral::thread::IThread {

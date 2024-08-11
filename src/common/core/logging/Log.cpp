@@ -377,24 +377,38 @@ void coral::log::level(LogLevel level)
 //-----------------------------------------------------------------------------
 void coral::log::flush( i32 timeout_ms )
 {
-   LogMessagePtr flush_message_ptr( new LogMessage() );
+   LogMessagePtr flush_message_ptr = std::make_shared<LogMessage>();
 
    coral::log::glog.send( flush_message_ptr );
    flush_message_ptr->waitFlush( timeout_ms );
 }
 
 //-----------------------------------------------------------------------------
+class SafeBuffer {
+public:
+   static constexpr size_t kMaxSize = 512;
+   SafeBuffer() : buffer_( new char[kMaxSize]{0} ) {};
+   ~SafeBuffer()
+   {
+      if (buffer_)
+      {
+         delete[] buffer_;
+      }
+   }
+   char* buffer_;
+};
 void coral::log::print(LogLevel level, const char* format, va_list args)
 {
-   static char message_buffer[ MAX_MESSAGE_LEN_BYTES ];
-
    if ( format )
    {
-      vsnprintf( message_buffer, sizeof( message_buffer ), format, args );
+      SafeBuffer message_buffer;
 
-      LogMessagePtr log_message_ptr( new LogMessage(
-         level, std::string( message_buffer )
-      ));
+      vsnprintf( message_buffer.buffer_, message_buffer.kMaxSize, format, args );
+
+      LogMessagePtr log_message_ptr = std::make_shared<LogMessage>(
+         level,
+         std::string( message_buffer.buffer_ )
+      );
 
       coral::log::glog.send( log_message_ptr );
    }
@@ -471,13 +485,13 @@ void coral::log::mem_dump(
    {
       try
       {
-         LogMessagePtr log_message_ptr( new LogMessage(
+         LogMessagePtr log_message_ptr = std::make_shared<LogMessage>(
             MemDump,
             header,
             (const char*)data_ptr,
             length,
             max_line_length
-         ));
+         );
 
          coral::log::glog.send( log_message_ptr );
       }
